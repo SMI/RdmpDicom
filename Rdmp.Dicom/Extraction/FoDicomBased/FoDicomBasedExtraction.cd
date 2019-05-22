@@ -1,0 +1,58 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="SMIPlugin.Extraction.FoDicomBased.FoDicomAnonymiser">
+    <Position X="0.5" Y="2.75" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAQQgAwAAiAAACAAAAAAAAQAAAEAAAAAAgIAABAABAA=</HashCode>
+      <FileName>Extraction\FoDicomBased\FoDicomAnonymiser.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="_putter" />
+      <Property Name="UIDMappingServer" />
+    </ShowAsAssociation>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="SMIPlugin.Extraction.FoDicomBased.DirectoryDecisions.PutDicomFilesInExtractionDirectories" Collapsed="true">
+    <Position X="5.5" Y="6.5" Width="3" />
+    <TypeIdentifier>
+      <HashCode>ABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGEAAAA=</HashCode>
+      <FileName>Extraction\FoDicomBased\DirectoryDecisions\PutDicomFilesInExtractionDirectories.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="SMIPlugin.Extraction.FoDicomBased.DirectoryDecisions.PutInRoot" Collapsed="true">
+    <Position X="5" Y="7.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAA=</HashCode>
+      <FileName>Extraction\FoDicomBased\DirectoryDecisions\PutInRoot.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SMIPlugin.Extraction.FoDicomBased.DirectoryDecisions.PutInReleaseIdentifierSubfolders" Collapsed="true">
+    <Position X="7.25" Y="7.75" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAA=</HashCode>
+      <FileName>Extraction\FoDicomBased\DirectoryDecisions\PutInReleaseIdentifierSubfolders.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SMIPlugin.Extraction.MappingRepository" Collapsed="true">
+    <Position X="5.5" Y="3.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAQAAgAAAAAAAAAAQUAAAAAAACAAAAQgEAABABAAAIE=</HashCode>
+      <FileName>Extraction\MappingRepository.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="CatalogueLibrary.Data.ExternalDatabaseServer" Collapsed="true">
+    <Position X="5.5" Y="2.5" Width="2" />
+    <TypeIdentifier />
+    <Lollipop Position="0.2" />
+  </Class>
+  <Interface Name="SMIPlugin.Extraction.FoDicomBased.DirectoryDecisions.IPutDicomFilesInExtractionDirectories">
+    <Position X="5.25" Y="5" Width="3.5" />
+    <TypeIdentifier>
+      <HashCode>ABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Extraction\FoDicomBased\DirectoryDecisions\IPutDicomFilesInExtractionDirectories.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

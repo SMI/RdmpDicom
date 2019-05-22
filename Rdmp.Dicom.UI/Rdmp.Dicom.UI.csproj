@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>Rdmp.Dicom.UI</RootNamespace>
+    <AssemblyName>Rdmp.Dicom.UI</AssemblyName>
+    <TargetFramework>net461</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Rdmp.Dicom\Rdmp.Dicom.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="HIC.RDMP.Plugin.UI" Version="3.0.5-rc" />
+    <PackageReference Include="System.Drawing.Common" Version="4.5.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="CreateNewImagingDatasetUI.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CreateNewImagingDatasetUI.Designer.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="TagColumnAdderUI.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="TagColumnAdderUI.Designer.cs">
+      <SubType>Form</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+</Project>

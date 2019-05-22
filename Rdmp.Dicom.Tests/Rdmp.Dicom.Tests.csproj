@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>Rdmp.Dicom.Tests</RootNamespace>
+    <AssemblyName>Rdmp.Dicom.Tests</AssemblyName>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Rdmp.Dicom\Rdmp.Dicom.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="HIC.RDMP.Plugin.Test" Version="3.0.5-rc" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.0.1" />
+    <PackageReference Include="NUnit" Version="3.11.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.13.0" />
+    <PackageReference Include="NunitXml.TestLogger" Version="2.1.36" />
+  </ItemGroup>
+</Project>

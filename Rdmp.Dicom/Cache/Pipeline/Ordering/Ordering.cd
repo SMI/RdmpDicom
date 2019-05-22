@@ -1,0 +1,108 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="SMIPlugin.Cache.Pipeline.Ordering.HierarchyBasedOrder" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="1.5" Y="3.75" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>IAAIAAAFRFAAAABAAIggBAAAAAhQSBjQgEBACAARIAA=</HashCode>
+      <FileName>Cache\Pipeline\Ordering\HierarchyBasedOrder.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="SMIPlugin.Cache.Pipeline.Ordering.HierarchyBasedPicker" BaseTypeListCollapsed="true">
+    <Position X="0.5" Y="0.5" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAGBAAAAAAEAQAAAAAAABAACAAAAAAACAAAAAA=</HashCode>
+      <FileName>Cache\Pipeline\Ordering\HierarchyBasedPicker.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="_order" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Field Name="_items" />
+    </ShowAsCollectionAssociation>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="SMIPlugin.Cache.Pipeline.Ordering.Image" Collapsed="true">
+    <Position X="11.5" Y="0.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAEABAAAAAAAAAAAAAAIAgAiAAAgAAAAAAAAAA=</HashCode>
+      <FileName>Cache\Pipeline\Ordering\Image.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SMIPlugin.Cache.Pipeline.Ordering.Item">
+    <Position X="4.75" Y="0.5" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AgAAAAAEAQAAAAAAAAAAAAAAMBAgiAAAgABAAAAAAAA=</HashCode>
+      <FileName>Cache\Pipeline\Ordering\Item.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SMIPlugin.Cache.Pipeline.Ordering.ItemsBasedOrder" BaseTypeListCollapsed="true">
+    <Position X="7.5" Y="1" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAAIAAAFRFAAAAAAAIggBAAAABgQSBjQgEAACAAQIAI=</HashCode>
+      <FileName>Cache\Pipeline\Ordering\ItemsBasedOrder.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="SMIPlugin.Cache.Pipeline.Ordering.Patient">
+    <Position X="9.25" Y="5.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAIAAAAEARAAAAACAAAAAAAAACgAiECAgAAAAAAAAAA=</HashCode>
+      <FileName>Cache\Pipeline\Ordering\Patient.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SMIPlugin.Cache.Pipeline.Ordering.Series">
+    <Position X="9.5" Y="0.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AgIAAAAEABAAAAAAAAAAAAAAACgAiFCAgAAAAAAAAAA=</HashCode>
+      <FileName>Cache\Pipeline\Ordering\Series.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SMIPlugin.Cache.Pipeline.Ordering.Study">
+    <Position X="11.25" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAIAAAAEABAAAAAAAAAAAAAAADgAiECAgAAAAAAAAAE=</HashCode>
+      <FileName>Cache\Pipeline\Ordering\Study.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SMIPlugin.Cache.Pipeline.Ordering.ItemsBasedPicker" BaseTypeListCollapsed="true">
+    <Position X="0.5" Y="5.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAGBAAAAAAEAAAAAAAAAAAACAAAAAAACAAAAAA=</HashCode>
+      <FileName>Cache\Pipeline\Ordering\ItemsBasedPicker.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="_order" />
+    </ShowAsAssociation>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Interface Name="SMIPlugin.Cache.Pipeline.Ordering.IOrder">
+    <Position X="3.25" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAAAAAAFRAAAAAAAAAgABAAAAAAQSAAAgEAACAAAAAA=</HashCode>
+      <FileName>Cache\Pipeline\Ordering\IOrder.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="SMIPlugin.Cache.Pipeline.Ordering.IPicker">
+    <Position X="5" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAEBAAAAAAAAAAAAAAAAAAACAAAAAAACAAAAAA=</HashCode>
+      <FileName>Cache\Pipeline\Ordering\IPicker.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Enum Name="SMIPlugin.Cache.Pipeline.Ordering.PlacementMode">
+    <Position X="13.25" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAQAAA=</HashCode>
+      <FileName>Cache\Pipeline\Ordering\HierarchyBasedOrder.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="SMIPlugin.Cache.Pipeline.Ordering.OrderLevel">
+    <Position X="13.25" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAABAAAAAAAABAAAAAAAAAACAE=</HashCode>
+      <FileName>Cache\Pipeline\Ordering\HierarchyBasedOrder.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>
