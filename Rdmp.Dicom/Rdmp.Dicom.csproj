@@ -6,10 +6,28 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="db\runAfterCreateDatabase\CreateSMIPluginDatabase.sql" />
+    <None Remove="db\up\001_AddIsExternalReferenceFlag.sql" />
+    <None Remove="db\up\002_ImagesToLoadList.sql" />
+    <None Remove="db\up\003_Quarantine.sql" />
+    <None Remove="db\up\004_TagPromotionConfiguration.sql" />
+    <None Remove="db\up\005_EnsureUIDMapUnique.sql" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="..\SharedAssemblyInfo.cs" Link="SharedAssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="HIC.DicomTypeTranslation" Version="1.0.0.1" />
-    <PackageReference Include="HIC.RDMP.Plugin" Version="3.0.4-rc" />
+    <EmbeddedResource Include="db\runAfterCreateDatabase\CreateSMIPluginDatabase.sql" />
+    <EmbeddedResource Include="db\up\001_AddIsExternalReferenceFlag.sql" />
+    <EmbeddedResource Include="db\up\002_ImagesToLoadList.sql" />
+    <EmbeddedResource Include="db\up\003_Quarantine.sql" />
+    <EmbeddedResource Include="db\up\004_TagPromotionConfiguration.sql" />
+    <EmbeddedResource Include="db\up\005_EnsureUIDMapUnique.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="fo-dicom" Version="4.0.1" />
+    <PackageReference Include="HIC.DicomTypeTranslation" Version="1.0.0.3" />
+    <PackageReference Include="HIC.FAnsiSql" Version="0.9.1.8" />
+    <PackageReference Include="HIC.RDMP.Plugin" Version="3.0.10" />
   </ItemGroup>
 </Project>

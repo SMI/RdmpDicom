@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ProjectGuid>{07F9F874-1306-4FE6-A03F-A483592BBC7F}</ProjectGuid>
+    <TargetFramework>net461</TargetFramework>
+    <AssemblyTitle>Rdmp.Dicom.Plugin</AssemblyTitle>
+    <Product>Rdmp.Dicom.Plugin</Product>
+    <Copyright>Copyright ©  2019</Copyright>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="fo-dicom.Desktop" Version="4.0.1" />
+    <PackageReference Include="HIC.DicomTypeTranslation" Version="1.0.0.3" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Rdmp.Dicom.UI\Rdmp.Dicom.UI.csproj" />
+    <ProjectReference Include="..\..\Rdmp.Dicom\Rdmp.Dicom.csproj" />
+  </ItemGroup>
+</Project>

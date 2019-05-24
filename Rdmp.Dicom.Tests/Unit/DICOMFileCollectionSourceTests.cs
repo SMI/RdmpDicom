@@ -37,10 +37,13 @@ namespace Rdmp.Dicom.Tests.Unit
         {
             var zip = Path.Combine(TestContext.CurrentContext.TestDirectory, "TestData.zip");
             var dir = Path.Combine(TestContext.CurrentContext.TestDirectory,"TestData");
-            if (!File.Exists(zip))
-                ZipFile.CreateFromDirectory(dir,zip); //2 files
+          
+            if(File.Exists(zip))
+                File.Delete(zip);
+            
+            ZipFile.CreateFromDirectory(dir,zip);
 
-            var fileCount = Directory.GetFiles(dir).Count();
+            var fileCount = Directory.GetFiles(dir,"*.dcm").Count();
 
             var source = new DicomFileCollectionSource();
             source.FilenameField = "RelativeFileArchiveURI";

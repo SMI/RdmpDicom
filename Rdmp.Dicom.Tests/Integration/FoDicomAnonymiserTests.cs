@@ -1,4 +1,8 @@
 ﻿using Dicom;
+using FAnsi.Implementation;
+using FAnsi.Implementations.MicrosoftSQL;
+using FAnsi.Implementations.MySql;
+using FAnsi.Implementations.Oracle;
 using MapsDirectlyToDatabaseTable;
 using MapsDirectlyToDatabaseTable.Versioning;
 using Moq;
@@ -23,11 +27,9 @@ using DatabaseType = FAnsi.DatabaseType;
 
 namespace Rdmp.Dicom.Tests.Integration
 {
-
-
     public class FoDicomAnonymiserTests:DatabaseTests
     {
-        [SetUp]
+        [OneTimeSetUp]
         public void Init()
         {
             TidyUpImages();

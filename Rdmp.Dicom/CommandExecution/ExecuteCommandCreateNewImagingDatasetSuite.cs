@@ -236,7 +236,7 @@ namespace Rdmp.Dicom.CommandExecution
             var arg = args.Single(a => a.Name.Equals(property));
 
             var mef = ((CatalogueRepository) arg.Repository).MEF;
-            var found = mef.GetTypeByNameFromAnyLoadedAssembly(value.GetType().FullName);
+            var found = mef.GetType(value.GetType().FullName);
 
             //if this fails, look to see if found is null (indicates that your Type is not loaded by MEF).  Look at mef.DescribeBadAssembliesIfAny() to investigate this issue
             arg.SetValue(value);
