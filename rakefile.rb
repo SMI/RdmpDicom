@@ -86,8 +86,14 @@ task :deployplugins, [:config] do |t, args|
 	
 	Dir.chdir('Plugins/netcoreapp2.2/') do
 		sh "dotnet publish --runtime win-x64"
-		
+	
+	#Packages the plugin which will be loaded into RDMP
 	sh "nuget pack Rdmp.Dicom.nuspec -Properties Configuration=#{args.config} -IncludeReferencedProjects -Symbols -Version #{version}"
 		
+	#Packages the Rdmp.Dicom library which will be consumed by downstream projects (e.g. microservices)
+	sh "nuget pack Rdmp.Dicom/Rdmp.Dicom.Library.nuspec -Properties Configuration=#{args.config} -IncludeReferencedProjects -Symbols -Version #{version}"
+		
+    sh "nuget push HIC.RDMP.Dicom.#{version}.nupkg -Source https://api.nuget.org/v3/index.json -ApiKey #{NUGETKEY}"
+	
     end
 end

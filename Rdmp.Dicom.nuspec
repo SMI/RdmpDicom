@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
     <metadata>
         <id>Rdmp.Dicom</id>
-        <version>0.0.1</version>
+        <version>$version$</version>
 		<authors>Health Informatics Service, University of Dundee</authors>
 		<description>Imaging plugin for Research Data Management Platform </description>
 		<dependencies>
@@ -10,7 +10,7 @@
 		</dependencies>
     </metadata>
   <files>
-    <file src="Plugin\net461\bin\Debug\net461\*" exclude="**/net461.dll" target="lib\net461" />
-	<file src="Plugin\netcoreapp2.2\bin\Debug\netcoreapp2.2\win-x64\publish\*" exclude="**/netcoreapp2.2.dll" target="lib\netcoreapp2.2\win\" />
+    <file src="Plugin\net461\bin\$configuration$\net461\*" exclude="**/net461.dll" target="lib\net461" />
+	<file src="Plugin\netcoreapp2.2\bin\$configuration$\netcoreapp2.2\win-x64\publish\*" exclude="**/netcoreapp2.2.dll" target="lib\netcoreapp2.2\win\" />
   </files>
 </package>
