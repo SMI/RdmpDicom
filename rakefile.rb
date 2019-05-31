@@ -99,11 +99,11 @@ task :deployplugins, [:config] do |t, args|
 			
 	#Packages the Rdmp.Dicom library which will be consumed by downstream projects (e.g. microservices)	
 	sh "nuget pack Rdmp.Dicom.Library.nuspec -Properties Configuration=#{args.config} -IncludeReferencedProjects -Symbols -Version #{version}"
-    #sh "nuget push HIC.RDMP.Dicom.#{version}.nupkg -Source https://api.nuget.org/v3/index.json -ApiKey #{NUGETKEY}"
+    sh "nuget push HIC.RDMP.Dicom.#{version}.nupkg -Source https://api.nuget.org/v3/index.json -ApiKey #{NUGETKEY}"
 end
 
 def getrdmpversion()
-	document = REXML::Document.new File.new("HICPlugin/HICPlugin.csproj")
+	document = REXML::Document.new File.new("Rdmp.Dicom/Rdmp.Dicom.csproj")
 	document.elements.each("*/ItemGroup/PackageReference") do |element|
 		if element.attributes.get_attribute("Include").value == "HIC.RDMP.Plugin"
 			return element.attributes.get_attribute("Version").value
