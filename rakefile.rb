@@ -99,7 +99,7 @@ task :deployplugins, [:config] do |t, args|
 			
 	#Packages the Rdmp.Dicom library which will be consumed by downstream projects (e.g. microservices)	
 	sh "nuget pack Rdmp.Dicom.Library.nuspec -Properties Configuration=#{args.config} -IncludeReferencedProjects -Symbols -Version #{version}"
-    #sh "nuget push HIC.RDMP.Dicom.#{version}.nupkg -Source https://api.nuget.org/v3/index.json -ApiKey #{NUGETKEY}"
+    sh "nuget push HIC.RDMP.Dicom.#{version}.nupkg -Source https://api.nuget.org/v3/index.json -ApiKey #{NUGETKEY}"
 end
 
 def getrdmpversion()
