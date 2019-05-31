@@ -8,6 +8,7 @@
     <ProjectReference Include="..\Rdmp.Dicom\Rdmp.Dicom.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="HIC.FAnsiSql" Version="0.9.1.10" />
     <PackageReference Include="HIC.RDMP.Plugin.Test" Version="3.0.12-rc" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.0.1" />
     <PackageReference Include="NUnit" Version="3.11.0" />
