@@ -1,6 +1,7 @@
 require "net/http"
 require 'uri'
 require 'json'
+require 'rexml/document'
 
 load 'rakeconfig.rb'
 $MSBUILD15CMD = MSBUILD15CMD.gsub(/\\/,"/")
@@ -11,7 +12,7 @@ task :ci_continuous, [:config] => [:setup_connection, :assemblyinfo, :build, :te
 
 task :ci_integration, [:config] => [:setup_connection, :assemblyinfo, :build, :all_tests]
 
-task :plugins, [:config] => [:assemblyinfo, :build, :deployplugins]
+task :plugins, [:config] => [:assemblyinfo, :build_release, :deployplugins]
 
 task :release => [:assemblyinfo, :build_release]
 
@@ -20,7 +21,7 @@ task :tests, [:config] => [:run_unit_tests]
 task :all_tests, [:config] => [:createtestdb, :run_all_tests]
 
 task :restorepackages do
-    sh "nuget restore Rdmp.Dicom.sln"
+    sh "nuget restore #{SOLUTION}"
 end
 
 task :setup_connection do 
@@ -45,6 +46,10 @@ task :build_low_warning, [:config,:level] => :restorepackages do |msb, args|
 end
 
 task :createtestdb, [:config] do |t, args|
+	userProf = ENV['USERPROFILE'].gsub(/\\/,"/")	
+	rdmpversion = getrdmpversion()
+		
+	RDMP_TOOLS = "#{userProf}/.nuget/packages/hic.rdmp.plugin/#{rdmpversion}/tools/netcoreapp2.2/publish/"
 	Dir.chdir("#{RDMP_TOOLS}") do
         sh "dotnet ./rdmp.dll install #{DBSERVER} #{DBPREFIX} -D"
     end
@@ -84,16 +89,24 @@ task :deployplugins, [:config] do |t, args|
 	version = File.open('version') {|f| f.readline}
     puts "version: #{version}"
 	
-	Dir.chdir('Plugins/netcoreapp2.2/') do
-		sh "dotnet publish --runtime win-x64"
+	
+	Dir.chdir('Plugin/netcoreapp2.2/') do
+		sh "dotnet publish --runtime win-x64 -c #{args.config}"
+	end
 	
 	#Packages the plugin which will be loaded into RDMP
-	sh "nuget pack Rdmp.Dicom.nuspec -Properties Configuration=#{args.config} -IncludeReferencedProjects -Symbols -Version #{version}"
-		
-	#Packages the Rdmp.Dicom library which will be consumed by downstream projects (e.g. microservices)
-	sh "nuget pack Rdmp.Dicom/Rdmp.Dicom.Library.nuspec -Properties Configuration=#{args.config} -IncludeReferencedProjects -Symbols -Version #{version}"
-		
-    sh "nuget push HIC.RDMP.Dicom.#{version}.nupkg -Source https://api.nuget.org/v3/index.json -ApiKey #{NUGETKEY}"
-	
-    end
+	sh "nuget pack Rdmp.Dicom.nuspec -Properties Configuration=#{args.config} -IncludeReferencedProjects -Symbols -Version #{version}"	
+			
+	#Packages the Rdmp.Dicom library which will be consumed by downstream projects (e.g. microservices)	
+	sh "nuget pack Rdmp.Dicom.Library.nuspec -Properties Configuration=#{args.config} -IncludeReferencedProjects -Symbols -Version #{version}"
+    #sh "nuget push HIC.RDMP.Dicom.#{version}.nupkg -Source https://api.nuget.org/v3/index.json -ApiKey #{NUGETKEY}"
+end
+
+def getrdmpversion()
+	document = REXML::Document.new File.new("HICPlugin/HICPlugin.csproj")
+	document.elements.each("*/ItemGroup/PackageReference") do |element|
+		if element.attributes.get_attribute("Include").value == "HIC.RDMP.Plugin"
+			return element.attributes.get_attribute("Version").value
+		end
+	end
 end
