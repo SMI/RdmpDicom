@@ -13,9 +13,10 @@
         <description>Rdmp library containing Dicom attachers, Dicom server cache sources etc.</description>
         <copyright>Copyright 2018-2019</copyright>
         <dependencies>
-            <dependency id="HIC.DicomTypeTranslation" version="1.0.0.3" />
-			<dependency id="HIC.FAnsiSql" version="0.9.1.8" />
-			<dependency id="HIC.RDMP.Plugin" version="3.0.10" />
+          <dependency id="HIC.DicomTypeTranslation" version="1.0.0.3" />
+          <dependency id="HIC.FAnsiSql" version="0.9.1.8" />
+          <dependency id="HIC.RDMP.Plugin" version="3.0.15" />
+          <dependency id="fo-dicom" version="4.0.1" />
         </dependencies>
     </metadata>
   <files>

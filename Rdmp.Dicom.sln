@@ -1,15 +1,21 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.28902.138
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.572
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{75983551-C46D-4645-8B06-F03ACA315A9D}"
+	ProjectSection(SolutionItems) = preProject
+		Packages.md = Packages.md
+		Rdmp.Dicom.Library.nuspec = Rdmp.Dicom.Library.nuspec
+		Rdmp.Dicom.nuspec = Rdmp.Dicom.nuspec
+		README.md = README.md
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rdmp.Dicom", "Rdmp.Dicom\Rdmp.Dicom.csproj", "{498080F7-72CF-4327-AA54-D9FD67DF3905}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rdmp.Dicom.Tests", "Rdmp.Dicom.Tests\Rdmp.Dicom.Tests.csproj", "{B89EE5ED-060E-4361-BDD8-E2CA15D9FE88}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rdmp.Dicom.UI", "Rdmp.Dicom.UI\Rdmp.Dicom.UI.csproj", "{C8101247-E78E-42AD-A695-BBA9230E1587}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rdmp.Dicom.UI", "Rdmp.Dicom.UI\Rdmp.Dicom.UI.csproj", "{C8101247-E78E-42AD-A695-BBA9230E1587}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plugin", "Plugin", "{4471D4D6-D04B-4C4F-B37D-AAD5216644E1}"
 EndProject
