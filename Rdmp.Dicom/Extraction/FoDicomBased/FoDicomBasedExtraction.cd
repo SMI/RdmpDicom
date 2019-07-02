@@ -1,18 +1,32 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ClassDiagram MajorVersion="1" MinorVersion="1">
-  <Class Name="SMIPlugin.Extraction.FoDicomBased.FoDicomAnonymiser">
-    <Position X="0.5" Y="2.75" Width="2.75" />
+  <Comment CommentText="Handles random access to images in many zip archives without continually opening/closing them.">
+    <Position X="6.521" Y="3.375" Height="0.75" Width="2.565" />
+  </Comment>
+  <Comment CommentText="Handles specifying file locations which: May be absolute; May be relative; May be to a file within a zip archive">
+    <Position X="6.458" Y="1.865" Height="0.521" Width="5.263" />
+  </Comment>
+  <Comment CommentText="Substitutes UIDs (e.g. SOPInstanceUID for anonymous UIDs ).  Mapping is persisted for reproducible anonymous extracts">
+    <Position X="3.75" Y="4.427" Height="0.75" Width="2.627" />
+  </Comment>
+  <Comment CommentText="Extraction component which handles anonymising and copying images to procect extraction directory">
+    <Position X="0.5" Y="4.792" Height="0.688" Width="2.627" />
+  </Comment>
+  <Comment CommentText="Determines which folder to put dicom images in at extraction time.">
+    <Position X="2.26" Y="8.542" Height="0.344" Width="9.325" />
+  </Comment>
+  <Class Name="Rdmp.Dicom.Extraction.FoDicomBased.FoDicomAnonymiser">
+    <Position X="0.5" Y="0.75" Width="2.75" />
     <TypeIdentifier>
       <HashCode>AAQQgAwAAiAAACAAAAAAAAQAAAEAAAAAAgIAABAABAA=</HashCode>
       <FileName>Extraction\FoDicomBased\FoDicomAnonymiser.cs</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
       <Field Name="_putter" />
-      <Property Name="UIDMappingServer" />
     </ShowAsAssociation>
     <Lollipop Position="0.2" />
   </Class>
-  <Class Name="SMIPlugin.Extraction.FoDicomBased.DirectoryDecisions.PutDicomFilesInExtractionDirectories" Collapsed="true">
+  <Class Name="Rdmp.Dicom.Extraction.FoDicomBased.DirectoryDecisions.PutDicomFilesInExtractionDirectories" Collapsed="true">
     <Position X="5.5" Y="6.5" Width="3" />
     <TypeIdentifier>
       <HashCode>ABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGEAAAA=</HashCode>
@@ -20,35 +34,66 @@
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
-  <Class Name="SMIPlugin.Extraction.FoDicomBased.DirectoryDecisions.PutInRoot" Collapsed="true">
-    <Position X="5" Y="7.75" Width="1.5" />
+  <Class Name="Rdmp.Dicom.Extraction.FoDicomBased.DirectoryDecisions.PutInRoot" Collapsed="true">
+    <Position X="4.75" Y="7.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAA=</HashCode>
       <FileName>Extraction\FoDicomBased\DirectoryDecisions\PutInRoot.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="SMIPlugin.Extraction.FoDicomBased.DirectoryDecisions.PutInReleaseIdentifierSubfolders" Collapsed="true">
-    <Position X="7.25" Y="7.75" Width="2.5" />
+  <Class Name="Rdmp.Dicom.Extraction.FoDicomBased.DirectoryDecisions.PutInReleaseIdentifierSubfolders" Collapsed="true">
+    <Position X="6.5" Y="7.75" Width="2.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAA=</HashCode>
       <FileName>Extraction\FoDicomBased\DirectoryDecisions\PutInReleaseIdentifierSubfolders.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="SMIPlugin.Extraction.MappingRepository" Collapsed="true">
-    <Position X="5.5" Y="3.5" Width="2" />
+  <Class Name="Rdmp.Dicom.Extraction.MappingRepository">
+    <Position X="3.75" Y="0.5" Width="2" />
     <TypeIdentifier>
       <HashCode>AAQAAgAAAAAAAAAAQUAAAAAAACAAAAQgEAABABAAAIE=</HashCode>
       <FileName>Extraction\MappingRepository.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
-  <Class Name="CatalogueLibrary.Data.ExternalDatabaseServer" Collapsed="true">
-    <Position X="5.5" Y="2.5" Width="2" />
-    <TypeIdentifier />
+  <Class Name="Rdmp.Dicom.Extraction.FoDicomBased.ZipPool" Collapsed="true">
+    <Position X="6.5" Y="2.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAgAAASAAAAAAAAAAABAAAAAAABAAAAAAAAAAAAI=</HashCode>
+      <FileName>Extraction\FoDicomBased\ZipPool.cs</FileName>
+    </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
-  <Interface Name="SMIPlugin.Extraction.FoDicomBased.DirectoryDecisions.IPutDicomFilesInExtractionDirectories">
-    <Position X="5.25" Y="5" Width="3.5" />
+  <Class Name="Rdmp.Dicom.Extraction.FoDicomBased.AmbiguousFilePath" Collapsed="true">
+    <Position X="6.5" Y="1" Width="2" />
+    <TypeIdentifier>
+      <HashCode>CAAAAAAAAgAAgEAAAAAIAAAAAAAAAAAAAAIBAAAAAAA=</HashCode>
+      <FileName>Extraction\FoDicomBased\AmbiguousFilePath.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Rdmp.Dicom.Extraction.FoDicomBased.AmbiguousFilePathResolutionException" Collapsed="true">
+    <Position X="8.75" Y="1" Width="3" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Extraction\FoDicomBased\AmbiguousFilePathResolutionException.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Rdmp.Dicom.Extraction.FoDicomBased.DirectoryDecisions.PutInUidSeriesFolders" Collapsed="true">
+    <Position X="2.25" Y="7.75" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAA=</HashCode>
+      <FileName>Extraction\FoDicomBased\DirectoryDecisions\PutInUidSeriesFolders.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Rdmp.Dicom.Extraction.FoDicomBased.DirectoryDecisions.PutInUidStudySeriesFolders" Collapsed="true">
+    <Position X="9.25" Y="7.75" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAA=</HashCode>
+      <FileName>Extraction\FoDicomBased\DirectoryDecisions\PutInUidStudySeriesFolders.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Interface Name="Rdmp.Dicom.Extraction.FoDicomBased.DirectoryDecisions.IPutDicomFilesInExtractionDirectories">
+    <Position X="2.25" Y="6" Width="3" />
     <TypeIdentifier>
       <HashCode>ABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Extraction\FoDicomBased\DirectoryDecisions\IPutDicomFilesInExtractionDirectories.cs</FileName>

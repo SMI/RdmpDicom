@@ -1,29 +1,164 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ClassDiagram MajorVersion="1" MinorVersion="1">
   <Comment CommentText="Asks remote server how many images there are in each series and tracks progress downloading them">
-    <Position X="3.552" Y="3.417" Height="0.948" Width="2.096" />
+    <Position X="0.625" Y="8.323" Height="0.948" Width="2.096" />
   </Comment>
-  <Class Name="SMIPlugin.Cache.Pipeline.CachingSCP">
-    <Position X="3.5" Y="7.25" Width="2.5" />
+  <Comment CommentText="Handles communicating with a Dicom Server">
+    <Position X="3.49" Y="9.386" Height="0.375" Width="3.023" />
+  </Comment>
+  <Comment CommentText="Handles storing dicom files retrieved into zip files on disk">
+    <Position X="3.562" Y="2.99" Height="0.458" Width="2.721" />
+  </Comment>
+  <Comment CommentText="Worker classes for tracking which images have been found following a CFind and generating each CMove request">
+    <Position X="6.969" Y="8.188" Height="0.792" Width="3.023" />
+  </Comment>
+  <Class Name="Rdmp.Dicom.Cache.Pipeline.CachingSCP">
+    <Position X="3.5" Y="4.25" Width="2.5" />
     <TypeIdentifier>
       <HashCode>AIAQAAIAAAAAAJAiEACAAAgAAAIAAQCAAAAAAIAgAAA=</HashCode>
       <FileName>Cache\Pipeline\CachingSCP.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
-  <Class Name="SMIPlugin.Cache.Pipeline.PACSSource">
-    <Position X="0.5" Y="0.75" Width="2.5" />
+  <Class Name="Rdmp.Dicom.Cache.Pipeline.PACSSource">
+    <Position X="0.5" Y="0.5" Width="2.5" />
     <TypeIdentifier>
       <HashCode>LAEUAAoA4CACgCAFgEAAAAAAEBgAACBggAAQAAAIQgA=</HashCode>
       <FileName>Cache\Pipeline\PACSSource.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="SMIPlugin.Cache.SMICacheLayout">
-    <Position X="8.25" Y="1" Width="2.75" />
+  <Class Name="Rdmp.Dicom.Cache.SMICacheLayout">
+    <Position X="3.5" Y="0.5" Width="2.75" />
     <TypeIdentifier>
       <HashCode>BAAAAAAAAAAAAAAAAAAAAAAQACAAAAAAAAAAAEAABAA=</HashCode>
       <FileName>Cache\SMICacheLayout.cs</FileName>
     </TypeIdentifier>
   </Class>
+  <Class Name="Rdmp.Dicom.Cache.Pipeline.Ordering.HierarchyBasedOrder" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="10.5" Y="4.25" Width="2" />
+    <TypeIdentifier>
+      <HashCode>IAAIAAAFRFAAAABAAIggBAAAAAhQSBjQgEBACAARIAA=</HashCode>
+      <FileName>Cache\Pipeline\Ordering\HierarchyBasedOrder.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Field Name="_patients" />
+    </ShowAsCollectionAssociation>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Rdmp.Dicom.Cache.Pipeline.Ordering.HierarchyBasedPicker" BaseTypeListCollapsed="true">
+    <Position X="7.25" Y="3.25" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAGRAAAAAAEAQAAAAAAABAQSAAAAAAACAAAAAA=</HashCode>
+      <FileName>Cache\Pipeline\Ordering\HierarchyBasedPicker.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="_order" />
+    </ShowAsAssociation>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Rdmp.Dicom.Cache.Pipeline.Ordering.Image" Collapsed="true">
+    <Position X="13.5" Y="9" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAEABAAAAAAAAAAAAAAIAgAiAAAgAAAAAAAAAA=</HashCode>
+      <FileName>Cache\Pipeline\Ordering\Image.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Rdmp.Dicom.Cache.Pipeline.Ordering.Item">
+    <Position X="10.75" Y="7" Width="2" />
+    <Compartments>
+      <Compartment Name="Methods" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>AgAAAAAEAQAAAAAAAAAAAAAAMBAgiAAAgABAAAAAAAA=</HashCode>
+      <FileName>Cache\Pipeline\Ordering\Item.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Rdmp.Dicom.Cache.Pipeline.Ordering.ItemsBasedOrder" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="10.75" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAAIAAAFRFAAAAAAAIggBAAAABgQSBjQgEAACAAQIAI=</HashCode>
+      <FileName>Cache\Pipeline\Ordering\ItemsBasedOrder.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Field Name="_pickers" />
+      <Field Name="_items" />
+    </ShowAsCollectionAssociation>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Rdmp.Dicom.Cache.Pipeline.Ordering.ItemsBasedPicker" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="7.25" Y="7" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAGRAAAAAAEAAAAAAAAAAAQSAAAAAAACAAAAAA=</HashCode>
+      <FileName>Cache\Pipeline\Ordering\ItemsBasedPicker.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="_order" />
+    </ShowAsAssociation>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Rdmp.Dicom.Cache.Pipeline.Ordering.Patient">
+    <Position X="13.5" Y="4" Width="1.5" />
+    <Compartments>
+      <Compartment Name="Methods" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>AAIAAAAEARAAAAACAAAAAAAAACgAiECAgAAAAAAAAAA=</HashCode>
+      <FileName>Cache\Pipeline\Ordering\Patient.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Property Name="Studies" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="Rdmp.Dicom.Cache.Pipeline.Ordering.Series" Collapsed="true">
+    <Position X="13.5" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AgIAAAAEABAAAAAAAAAAAAAAACgAiFCAgAAAAAAAAAA=</HashCode>
+      <FileName>Cache\Pipeline\Ordering\Series.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Property Name="Images" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="Rdmp.Dicom.Cache.Pipeline.Ordering.Study" Collapsed="true">
+    <Position X="13.5" Y="7" Width="1.5" />
+    <Compartments>
+      <Compartment Name="Methods" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>AAIAAAAEABAAAAAAAAAAAAAAADgAiECAgAAAAAAAAAE=</HashCode>
+      <FileName>Cache\Pipeline\Ordering\Study.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Field Name="Series" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Interface Name="Rdmp.Dicom.Cache.Pipeline.Ordering.IOrder">
+    <Position X="10.5" Y="0.5" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>IAAAAAAFRAAAAAAAAAgABAAAAAAQSAAAgEAACAAAAAA=</HashCode>
+      <FileName>Cache\Pipeline\Ordering\IOrder.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Rdmp.Dicom.Cache.Pipeline.Ordering.IPicker">
+    <Position X="7.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAERAAAAAAAAAAAAAAAAAAQSAAAAAAACAAAAAA=</HashCode>
+      <FileName>Cache\Pipeline\Ordering\IPicker.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Enum Name="Rdmp.Dicom.Cache.Pipeline.Ordering.PlacementMode">
+    <Position X="13.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAQAAA=</HashCode>
+      <FileName>Cache\Pipeline\Ordering\HierarchyBasedOrder.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="Rdmp.Dicom.Cache.Pipeline.Ordering.OrderLevel">
+    <Position X="13.25" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAABAAAAAAAABAAAAAAAAAACAE=</HashCode>
+      <FileName>Cache\Pipeline\Ordering\HierarchyBasedOrder.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
   <Font Name="Segoe UI" Size="9" />
 </ClassDiagram>

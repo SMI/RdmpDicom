@@ -1,5 +1,17 @@
 # RdmpDicom
-Plugin for RDMP that adds support for load, linking (with EHR data in relational databases) and extracting anonymous DICOM images for researchers.
+Plugin for [RDMP](https://github.com/HicServices/RDMP) that adds support for load, linking (with EHR data in relational databases) and extracting anonymous DICOM images for researchers.
+
+
+# Using Plugin
+
+The following demo shows how RDMP dicom plugin works:
+https://www.youtube.com/watch?v=DOdU5jOtOKc
+
+Functionality is divided into the following areas:
+
+- [Data Load](./Documentation/DataLoad.md)
+- [Data Extraction](./Documentation/DataLoad.md)
+- [Caching (Fetching images from a DicomServer)](./Documentation/DataLoad.md)
 
 # Building
 

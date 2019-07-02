@@ -51,7 +51,7 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
                 listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information, "Ignoring non dataset command "));
                 return toProcess;
             }
-
+            
             //if it isn't a dicom dataset don't process it
             if (!toProcess.Columns.Contains(RelativeArchiveColumnName))
             {
