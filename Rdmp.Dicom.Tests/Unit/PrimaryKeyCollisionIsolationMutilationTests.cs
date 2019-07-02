@@ -145,7 +145,7 @@ namespace Rdmp.Dicom.Tests.Unit
             dt2.Columns.Add("PatientName");
 
             dt2.Rows.Add("1.2.3", "1.2.1", "Frank");
-                //these are not a collision because SOPInstanceUID is the pk for this table but theys hould also be isolated because thier series contains duplication
+                //these are not a collision because SOPInstanceUID is the pk for this table but they should also be isolated because their series contains duplication
             dt2.Rows.Add("1.2.3", "1.2.2", "Dave");
 
             dt2.Rows.Add("5.2.1", "1.1.1", "jjj"); //some more normal records in child

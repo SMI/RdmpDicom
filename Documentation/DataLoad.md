@@ -1,6 +1,6 @@
 # Data Load
 ## Background
-Data loading in RDMP involves loading a RAW environment (empty copy of the live database schema) with data.  The components responsible for data load are called `Attachers` and typically produce a `System.Data.DataTable` based on thier role and user configuration (e.g. reading a CSV file, Excel file, records from a remote database etc).
+Data loading in RDMP involves loading a RAW environment (empty copy of the live database schema) with data.  The components responsible for data load are called `Attachers` and typically produce a `System.Data.DataTable` based on their role and user configuration (e.g. reading a CSV file, Excel file, records from a remote database etc).
 
 All tables loaded by RDMP must have a Primary Key (which comes from the source data i.e. not an autonum).  Identical duplication is automatically handled when migrating from RAW to STAGING (prior to MERGE with LIVE).
 

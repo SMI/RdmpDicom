@@ -10,7 +10,7 @@ https://www.youtube.com/watch?v=DOdU5jOtOKc
 Functionality is divided into the following areas:
 
 - [Data Load](./Documentation/DataLoad.md)
-- [Data Extraction](./Documentation/DataLoad.md)
+- [Data Extraction](./Documentation/DataExtraction.md)
 - [Caching (Fetching images from a DicomServer)](./Documentation/DataLoad.md)
 
 # Building

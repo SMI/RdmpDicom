@@ -289,7 +289,7 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
                 if (TagBlacklist.IsMatch(tag.DictionaryEntry.Keyword)) //and the current header matches the blacklist 
                     return true; //skip it
 
-            //if thiers an explict mapping to follow
+            //if there is an explict mapping to follow
             if (FieldMapTableIfAny != null || UseAllTableInfoInLoadAsFieldMap != null)
             {
                 //if we don't have the tag in our schema ignore it

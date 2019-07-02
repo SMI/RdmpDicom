@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.572
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29006.145
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{75983551-C46D-4645-8B06-F03ACA315A9D}"
 	ProjectSection(SolutionItems) = preProject
@@ -22,6 +22,13 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "net461", "Plugin\net461\net461.csproj", "{07F9F874-1306-4FE6-A03F-A483592BBC7F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "netcoreapp2.2", "Plugin\netcoreapp2.2\netcoreapp2.2.csproj", "{2C29B565-F0B0-4E5B-B17E-106456933001}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{B720C1B0-C96C-4F44-A592-8772A2911015}"
+	ProjectSection(SolutionItems) = preProject
+		Documentation\Caching.md = Documentation\Caching.md
+		Documentation\DataExtraction.md = Documentation\DataExtraction.md
+		Documentation\DataLoad.md = Documentation\DataLoad.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -100,6 +107,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{07F9F874-1306-4FE6-A03F-A483592BBC7F} = {4471D4D6-D04B-4C4F-B37D-AAD5216644E1}
 		{2C29B565-F0B0-4E5B-B17E-106456933001} = {4471D4D6-D04B-4C4F-B37D-AAD5216644E1}
+		{B720C1B0-C96C-4F44-A592-8772A2911015} = {75983551-C46D-4645-8B06-F03ACA315A9D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F305A7B3-4FD2-4EAD-903B-76A160AAF83F}
