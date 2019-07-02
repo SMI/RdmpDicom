@@ -122,12 +122,8 @@ namespace Rdmp.Dicom.Extraction
             using (var conn = (SqlConnection) _server.GetConnection())
             {
                 conn.Open();
-                using (var bulkCopy = new SqlBulkCopy(conn.ConnectionString, SqlBulkCopyOptions.Default))
-                {
-                    bulkCopy.BulkCopyTimeout = 600;
-                    bulkCopy.DestinationTableName = table.GetFullyQualifiedName();
-                    UsefulStuff.BulkInsertWithBetterErrorMessages(bulkCopy, dt, _server);
-                }
+                using (var bulkCopy = table.BeginBulkInsert())
+                    bulkCopy.Upload(dt);                
             }
         }
 
