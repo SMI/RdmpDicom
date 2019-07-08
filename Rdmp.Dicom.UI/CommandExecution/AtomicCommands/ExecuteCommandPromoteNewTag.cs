@@ -21,7 +21,7 @@ namespace Rdmp.Dicom.UI.CommandExecution.AtomicCommands
             _includeLoadedField = includeLoadedField;
         }
 
-        public Image GetImage(IIconProvider iconProvider)
+        public override Image GetImage(IIconProvider iconProvider)
         {
             return iconProvider.GetImage(RDMPConcept.ColumnInfo,OverlayKind.Add);
         }

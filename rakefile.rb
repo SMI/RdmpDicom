@@ -12,7 +12,7 @@ task :ci_continuous, [:config] => [:setup_connection, :assemblyinfo, :build, :te
 
 task :ci_integration, [:config] => [:setup_connection, :assemblyinfo, :build, :all_tests]
 
-task :plugins, [:config] => [:assemblyinfo, :build_release, :deployplugins]
+task :plugins, [:config] => [:assemblyinfo, :build_release, :deployplugins,:github]
 
 task :release => [:assemblyinfo, :build_release]
 
@@ -109,4 +109,57 @@ def getrdmpversion()
 			return element.attributes.get_attribute("Version").value
 		end
 	end
+end
+
+task :github do
+	version = File.open('version') {|f| f.readline}
+    puts "version: #{version}"
+	branch = "master" # (ENV['BRANCH_SELECTOR'] || "origin/master").gsub(/origin\//, "")
+	puts branch
+	prerelease = false # branch.match(/master/) ? false : true	
+	
+	uri = URI.parse('https://api.github.com/repos/HicServices/RdmpDicom/releases')
+	body = { tag_name: "v#{version}", name: "RdmpDicom Plugin v#{version}", body: ENV['MESSAGE'] || "Plugin RdmpDicom v#{version}", target_commitish: branch, prerelease: prerelease }
+    header = {'Content-Type' => 'application/json',
+              'Authorization' => "token #{GITHUB}"}
+	
+	http = Net::HTTP.new(uri.host, uri.port)
+	http.use_ssl = (uri.scheme == "https")
+	request = Net::HTTP::Post.new(uri.request_uri, header)
+	request.body = body.to_json
+
+	# Send the request
+	response = http.request(request)
+    puts response.to_hash.inspect
+    githubresponse = JSON.parse(response.body)
+    puts githubresponse.inspect
+    upload_url = githubresponse["upload_url"].gsub(/\{.*\}/, "")
+    puts upload_url
+    	
+	
+	upload_to_github(upload_url, "Rdmp.Dicom.#{version}.nupkg")
+    
+end
+
+def upload_to_github(upload_url, file_path)
+    boundary = "AaB03x"
+    uri = URI.parse(upload_url + "?name=" + file_path)
+    
+    header = {'Content-Type' => 'application/octet-stream',
+              'Content-Length' => File.size(file_path).to_s,
+              'Authorization' => "token #{GITHUB}"}
+
+    http = Net::HTTP.new(uri.host, uri.port)
+    http.use_ssl = (uri.scheme == "https")
+    request = Net::HTTP::Post.new(uri.request_uri, header)
+
+    file = File.open(file_path, "rb")
+    request.body = file.read
+    
+    response = http.request(request)
+    
+    puts response.to_hash.inspect
+    puts response.body
+
+    file.close
 end

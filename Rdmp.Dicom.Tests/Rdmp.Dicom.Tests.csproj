@@ -3,15 +3,19 @@
     <RootNamespace>Rdmp.Dicom.Tests</RootNamespace>
     <AssemblyName>Rdmp.Dicom.Tests</AssemblyName>
     <TargetFramework>netcoreapp2.2</TargetFramework>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\SharedAssemblyInfo.cs" Link="SharedAssemblyInfo.cs" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Rdmp.Dicom\Rdmp.Dicom.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="HIC.FAnsiSql" Version="0.9.1.10" />
-    <PackageReference Include="HIC.RDMP.Plugin.Test" Version="3.0.15" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.0.1" />
-    <PackageReference Include="NUnit" Version="3.11.0" />
+    <PackageReference Include="HIC.FAnsiSql" Version="0.9.2" />
+    <PackageReference Include="HIC.RDMP.Plugin.Test" Version="3.0.16-rc" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.2.0" />
+    <PackageReference Include="NUnit" Version="3.12.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.13.0" />
     <PackageReference Include="NunitXml.TestLogger" Version="2.1.36" />
   </ItemGroup>

@@ -5,7 +5,11 @@
     <AssemblyTitle>Rdmp.Dicom.Plugin</AssemblyTitle>
     <Product>Rdmp.Dicom.Plugin</Product>
     <Copyright>Copyright ©  2019</Copyright>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\..\SharedAssemblyInfo.cs" Link="SharedAssemblyInfo.cs" />
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="fo-dicom.Desktop" Version="4.0.1" />
     <PackageReference Include="HIC.DicomTypeTranslation" Version="1.0.0.3" />
