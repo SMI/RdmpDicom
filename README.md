@@ -13,6 +13,8 @@ Functionality is divided into the following areas:
 - [Data Extraction](./Documentation/DataExtraction.md)
 - [Caching (Fetching images from a DicomServer)](./Documentation/DataLoad.md)
 
+The Plugin can be downloaded from the [releases section of GitHub](https://github.com/HicServices/RdmpDicom/releases) or you can build it yourself.
+
 # Building
 
 You can build Rdmp.Dicom as a plugin for RDMP by running the following:
