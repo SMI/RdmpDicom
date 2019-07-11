@@ -5,7 +5,7 @@ Plugin for [RDMP](https://github.com/HicServices/RDMP) that adds support for loa
 # Using Plugin
 
 The following demo shows how RDMP dicom plugin works:
-https://www.youtube.com/watch?v=DOdU5jOtOKc
+https://youtu.be/j42hmVZKRb4
 
 Functionality is divided into the following areas:
 
