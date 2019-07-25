@@ -375,7 +375,7 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
             row[header] = value;
         }
 
-        private TagElevationRequestCollection LoadElevationRequestsFile()
+        public virtual TagElevationRequestCollection LoadElevationRequestsFile()
         {
             //if tag elevation is specified in raw XML
             if(TagElevationConfigurationXml != null && !string.IsNullOrWhiteSpace(TagElevationConfigurationXml.xml))
