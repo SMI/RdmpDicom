@@ -28,6 +28,9 @@
     <Compile Update="TagColumnAdderUI.Designer.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Update="TagElevationXmlUI.cs">
+      <SubType>Form</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />

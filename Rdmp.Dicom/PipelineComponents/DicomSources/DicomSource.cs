@@ -14,6 +14,7 @@ using System.Text.RegularExpressions;
 using Rdmp.Core.Curation.Data;
 using Rdmp.Core.DataFlowPipeline;
 using Rdmp.Core.Curation.Data.DataLoad;
+using ReusableLibraryCode.Annotations;
 
 namespace Rdmp.Dicom.PipelineComponents.DicomSources
 {
@@ -33,6 +34,9 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
 
         [DemandsInitialization("Optional - Lets you specify deeply burried tags which should be fetched out and put into columns of the DataTable being generated")]
         public FileInfo TagElevationConfigurationFile { get; set; }
+
+        [DemandsInitialization("Optional - Alternative to TagElevationConfigurationFile property.  Use this property to store the elevation XML directly in RDMP instead of a file on disk")]
+        public TagElevationXml TagElevationConfigurationXml { get; set; }
 
         [DemandsInitialization("Optional - The root directory of the images you are trying to load.  If you set this then any image paths loaded from this directory will be expressed as relative subdirectories e.g. c:\\MyImages\\1\\image1.dcm could be expressed \\1\\image1.dcm")]
         public string ArchiveRoot
@@ -75,16 +79,15 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
         {
             if (FieldMapTableIfAny != null && TagWhitelist != null)
                 notifier.OnCheckPerformed(new CheckEventArgs("Cannot specify both a FieldMapTableIfAny and a TagWhitelist", CheckResult.Fail));
-
-            if (TagElevationConfigurationFile != null)
-                try
-                {
-                    LoadElevationRequestsFile();
-                }
-                catch (Exception e)
-                {
-                    notifier.OnCheckPerformed(new CheckEventArgs("Could not deserialize TagElevationConfigurationFile", CheckResult.Fail, e));
-                }
+                        
+            try
+            {
+                LoadElevationRequestsFile();
+            }
+            catch (Exception e)
+            {
+                notifier.OnCheckPerformed(new CheckEventArgs("Could not deserialize TagElevationConfigurationFile", CheckResult.Fail, e));
+            }
 
             if (!string.IsNullOrWhiteSpace(ArchiveRoot))
                 if (!Path.IsPathRooted(ArchiveRoot))
@@ -103,7 +106,7 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
         /// <param name="otherValuesToStoreInRow"></param>
         protected void ProcessDataset(string filename, DicomDataset ds, DataTable dt, IDataLoadEventListener listener, Dictionary<string, string> otherValuesToStoreInRow = null)
         {
-            if (_elevationRequests == null && TagElevationConfigurationFile != null)
+            if (_elevationRequests == null)
                 _elevationRequests = LoadElevationRequestsFile();
 
             filename = ApplyArchiveRootToMakeRelativePath(filename);
@@ -374,8 +377,16 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
 
         private TagElevationRequestCollection LoadElevationRequestsFile()
         {
-            var xml = File.ReadAllText(TagElevationConfigurationFile.FullName);
-            return new TagElevationRequestCollection(xml);
+            //if tag elevation is specified in raw XML
+            if(TagElevationConfigurationXml != null && !string.IsNullOrWhiteSpace(TagElevationConfigurationXml.xml))
+                return new TagElevationRequestCollection(TagElevationConfigurationXml.xml);
+
+            //if tag elevation is specified in a file
+            if (TagElevationConfigurationFile != null)
+                return new TagElevationRequestCollection(File.ReadAllText(TagElevationConfigurationFile.FullName));
+            
+            //there is no tag elevation
+            return null;
         }
 
         public abstract DataTable GetChunk(IDataLoadEventListener listener, GracefulCancellationToken cancellationToken);
@@ -428,5 +439,21 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
                 }
             }
         }
+
+        public class TagElevationXml : ICustomUIDrivenClass
+        {
+            public string xml { get; set; }
+
+            public void RestoreStateFrom([CanBeNull] string value)
+            {
+                xml = value;
+            }
+
+            public string SaveStateToString()
+            {
+                return xml;
+            }
+        }
+
     }
 }
