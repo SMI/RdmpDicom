@@ -5,6 +5,7 @@ VisualStudioVersion = 16.0.29006.145
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{75983551-C46D-4645-8B06-F03ACA315A9D}"
 	ProjectSection(SolutionItems) = preProject
+		CHANGELOG.md = CHANGELOG.md
 		Packages.md = Packages.md
 		rakeconfig.rb = rakeconfig.rb
 		rakefile.rb = rakefile.rb
