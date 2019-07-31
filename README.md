@@ -17,6 +17,8 @@ The Plugin can be downloaded from the [releases section of GitHub](https://githu
 
 # Building
 
+Building requires MSBuild 15 or later (or Visual Studio 2017 or later).  You will also need to install the DotNetCore 2.2 SDK.
+
 You can build Rdmp.Dicom as a plugin for RDMP by running the following:
 
 ```
