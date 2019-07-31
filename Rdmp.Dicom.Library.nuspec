@@ -14,8 +14,7 @@
         <copyright>Copyright 2018-2019</copyright>
         <dependencies>
           <dependency id="HIC.DicomTypeTranslation" version="1.0.0.3" />
-          <dependency id="HIC.FAnsiSql" version="0.9.2" />
-          <dependency id="HIC.RDMP.Plugin" version="3.0.16-rc" />
+          <dependency id="HIC.RDMP.Plugin" version="3.1.0" />
           <dependency id="fo-dicom" version="4.0.1" />
         </dependencies>
     </metadata>

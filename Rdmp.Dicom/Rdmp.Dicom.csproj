@@ -27,6 +27,6 @@
   <ItemGroup>
     <PackageReference Include="fo-dicom" Version="4.0.1" />
     <PackageReference Include="HIC.DicomTypeTranslation" Version="1.0.0.3" />
-    <PackageReference Include="HIC.RDMP.Plugin" Version="3.0.16-rc" />
+    <PackageReference Include="HIC.RDMP.Plugin" Version="3.1.0" />
   </ItemGroup>
 </Project>

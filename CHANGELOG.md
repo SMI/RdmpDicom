@@ -11,6 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Dicom reading pipeline components can now store [Tag Elevation] configuration using property TagElevationConfigurationXml (in the database).  Previously the only option was to use an external file referenced by TagElevationConfigurationFile (this option is still available)
 
+### Changed
+
+- Updated to latest RDMP API (3.1.0)
+
+
 ...
 
 ## [1.0.2] - 2019-07-08
