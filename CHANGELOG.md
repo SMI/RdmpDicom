@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
+## Changed
+
+- Changed default source for load pipeline to files (previously JSON)
+
+## Removed
+
+- Removed 'Create With Default' button from image table creation user interface (All imaging table creation is now done through templates, there is no default).
+
 ## [1.1.0] - 2019-07-31
 
 ### Added
