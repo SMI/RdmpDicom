@@ -37,11 +37,11 @@ namespace Rdmp.Dicom.UI
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.cbMergeNullability = new System.Windows.Forms.CheckBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.cbCreateLoad = new System.Windows.Forms.CheckBox();
             this.btnCreateSuiteWithTemplate = new System.Windows.Forms.Button();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.tbPrefix = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
-            this.cbCreateLoad = new System.Windows.Forms.CheckBox();
             this.groupBox1.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.groupBox4.SuspendLayout();
@@ -52,14 +52,14 @@ namespace Rdmp.Dicom.UI
             this.serverDatabaseTableSelector1.AllowTableValuedFunctionSelection = false;
             this.serverDatabaseTableSelector1.AutoSize = true;
             this.serverDatabaseTableSelector1.Database = "";
+            this.serverDatabaseTableSelector1.DatabaseType = FAnsi.DatabaseType.MicrosoftSQLServer;
             this.serverDatabaseTableSelector1.Dock = System.Windows.Forms.DockStyle.Top;
             this.serverDatabaseTableSelector1.Location = new System.Drawing.Point(0, 0);
             this.serverDatabaseTableSelector1.Name = "serverDatabaseTableSelector1";
             this.serverDatabaseTableSelector1.Password = "";
             this.serverDatabaseTableSelector1.Server = "";
-            this.serverDatabaseTableSelector1.Size = new System.Drawing.Size(1029, 146);
+            this.serverDatabaseTableSelector1.Size = new System.Drawing.Size(1029, 143);
             this.serverDatabaseTableSelector1.TabIndex = 0;
-            this.serverDatabaseTableSelector1.Table = "";
             this.serverDatabaseTableSelector1.Username = "";
             this.serverDatabaseTableSelector1.Load += new System.EventHandler(this.serverDatabaseTableSelector1_Load);
             // 
@@ -76,22 +76,22 @@ namespace Rdmp.Dicom.UI
             // rbJsonSources
             // 
             this.rbJsonSources.AutoSize = true;
-            this.rbJsonSources.Checked = true;
             this.rbJsonSources.Location = new System.Drawing.Point(6, 23);
             this.rbJsonSources.Name = "rbJsonSources";
             this.rbJsonSources.Size = new System.Drawing.Size(174, 17);
             this.rbJsonSources.TabIndex = 6;
-            this.rbJsonSources.TabStop = true;
             this.rbJsonSources.Text = "Json Sources For Load Pipeline";
             this.rbJsonSources.UseVisualStyleBackColor = true;
             // 
             // rbFileSources
             // 
             this.rbFileSources.AutoSize = true;
+            this.rbFileSources.Checked = true;
             this.rbFileSources.Location = new System.Drawing.Point(6, 46);
             this.rbFileSources.Name = "rbFileSources";
             this.rbFileSources.Size = new System.Drawing.Size(168, 17);
             this.rbFileSources.TabIndex = 6;
+            this.rbFileSources.TabStop = true;
             this.rbFileSources.Text = "File Sources For Load Pipeline";
             this.rbFileSources.UseVisualStyleBackColor = true;
             // 
@@ -131,6 +131,19 @@ namespace Rdmp.Dicom.UI
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Entire Suite Creation  (All tables + Load configuration)";
             // 
+            // cbCreateLoad
+            // 
+            this.cbCreateLoad.AutoSize = true;
+            this.cbCreateLoad.Checked = true;
+            this.cbCreateLoad.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.cbCreateLoad.Location = new System.Drawing.Point(3, 34);
+            this.cbCreateLoad.Name = "cbCreateLoad";
+            this.cbCreateLoad.Size = new System.Drawing.Size(110, 17);
+            this.cbCreateLoad.TabIndex = 10;
+            this.cbCreateLoad.Text = "Create Data Load";
+            this.cbCreateLoad.UseVisualStyleBackColor = true;
+            this.cbCreateLoad.CheckedChanged += new System.EventHandler(this.cbCreateLoad_CheckedChanged);
+            // 
             // btnCreateSuiteWithTemplate
             // 
             this.btnCreateSuiteWithTemplate.Location = new System.Drawing.Point(141, 150);
@@ -169,19 +182,6 @@ namespace Rdmp.Dicom.UI
             this.label3.Size = new System.Drawing.Size(119, 13);
             this.label3.TabIndex = 7;
             this.label3.Text = "Table Prefix (e.g. MR_):";
-            // 
-            // cbCreateLoad
-            // 
-            this.cbCreateLoad.AutoSize = true;
-            this.cbCreateLoad.Checked = true;
-            this.cbCreateLoad.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.cbCreateLoad.Location = new System.Drawing.Point(3, 34);
-            this.cbCreateLoad.Name = "cbCreateLoad";
-            this.cbCreateLoad.Size = new System.Drawing.Size(110, 17);
-            this.cbCreateLoad.TabIndex = 10;
-            this.cbCreateLoad.Text = "Create Data Load";
-            this.cbCreateLoad.UseVisualStyleBackColor = true;
-            this.cbCreateLoad.CheckedChanged += new System.EventHandler(this.cbCreateLoad_CheckedChanged);
             // 
             // CreateNewImagingDatasetUI
             // 
