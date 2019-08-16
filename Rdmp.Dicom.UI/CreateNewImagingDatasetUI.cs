@@ -48,13 +48,7 @@ namespace Rdmp.Dicom.UI
 
             return true;
         }
-
-
-        private void btnCreateEntireSuite_Click(object sender, EventArgs e)
-        {
-            CreateSuite(null);
-        }
-
+                
         private void btnCreateSuiteWithTemplate_Click(object sender, EventArgs e)
         {
             OpenFileDialog ofd = new OpenFileDialog();

@@ -31,7 +31,6 @@ namespace Rdmp.Dicom.UI
         private void InitializeComponent()
         {
             this.serverDatabaseTableSelector1 = new ReusableUIComponents.ServerDatabaseTableSelector();
-            this.btnCreateEntireSuite = new System.Windows.Forms.Button();
             this.rbJsonSources = new System.Windows.Forms.RadioButton();
             this.rbFileSources = new System.Windows.Forms.RadioButton();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
@@ -62,16 +61,6 @@ namespace Rdmp.Dicom.UI
             this.serverDatabaseTableSelector1.TabIndex = 0;
             this.serverDatabaseTableSelector1.Username = "";
             this.serverDatabaseTableSelector1.Load += new System.EventHandler(this.serverDatabaseTableSelector1_Load);
-            // 
-            // btnCreateEntireSuite
-            // 
-            this.btnCreateEntireSuite.Location = new System.Drawing.Point(6, 151);
-            this.btnCreateEntireSuite.Name = "btnCreateEntireSuite";
-            this.btnCreateEntireSuite.Size = new System.Drawing.Size(124, 23);
-            this.btnCreateEntireSuite.TabIndex = 5;
-            this.btnCreateEntireSuite.Text = "Create With Default";
-            this.btnCreateEntireSuite.UseVisualStyleBackColor = true;
-            this.btnCreateEntireSuite.Click += new System.EventHandler(this.btnCreateEntireSuite_Click);
             // 
             // rbJsonSources
             // 
@@ -122,7 +111,6 @@ namespace Rdmp.Dicom.UI
             this.groupBox3.Controls.Add(this.cbCreateLoad);
             this.groupBox3.Controls.Add(this.btnCreateSuiteWithTemplate);
             this.groupBox3.Controls.Add(this.groupBox4);
-            this.groupBox3.Controls.Add(this.btnCreateEntireSuite);
             this.groupBox3.Controls.Add(this.groupBox1);
             this.groupBox3.Location = new System.Drawing.Point(9, 152);
             this.groupBox3.Name = "groupBox3";
@@ -146,7 +134,7 @@ namespace Rdmp.Dicom.UI
             // 
             // btnCreateSuiteWithTemplate
             // 
-            this.btnCreateSuiteWithTemplate.Location = new System.Drawing.Point(141, 150);
+            this.btnCreateSuiteWithTemplate.Location = new System.Drawing.Point(6, 150);
             this.btnCreateSuiteWithTemplate.Name = "btnCreateSuiteWithTemplate";
             this.btnCreateSuiteWithTemplate.Size = new System.Drawing.Size(122, 23);
             this.btnCreateSuiteWithTemplate.TabIndex = 9;
@@ -206,7 +194,6 @@ namespace Rdmp.Dicom.UI
         #endregion
 
         private ServerDatabaseTableSelector serverDatabaseTableSelector1;
-        private System.Windows.Forms.Button btnCreateEntireSuite;
         private System.Windows.Forms.RadioButton rbJsonSources;
         private System.Windows.Forms.RadioButton rbFileSources;
         private System.Windows.Forms.GroupBox groupBox1;
