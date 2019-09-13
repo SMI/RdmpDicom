@@ -8,9 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
+## [1.3.0] 2019-09-13
+
 ## Changed
 
 - Changed default source for load pipeline to files (previously JSON)
+- Updated to RDMP API 3.2
 
 ## Removed
 
@@ -33,7 +36,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Initial commit from private repo
 
 
-[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v1.1.0...develop
+[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v1.3.0...develop
+[1.3.0]: https://github.com/HicServices/RdmpDicom/compare/v1.1.0...v1.3.0
 [1.1.0]: https://github.com/HicServices/RdmpDicom/compare/v1.0.2...v1.1.0
 [1.0.2]: https://github.com/HicServices/RdmpDicom/compare/1581c5ae3a12db1873f4cf1a930215750ad2ae14...v1.0.2
 [Tag Elevation]:https://github.com/HicServices/DicomTypeTranslation/tree/develop/DicomTypeTranslation/Elevation

@@ -20,10 +20,10 @@
     <PackageReference Include="DnsClient" Version="1.2.0" />
     <PackageReference Include="fo-dicom" Version="4.0.1" />
     <PackageReference Include="Google.Protobuf" Version="3.5.1" />
-    <PackageReference Include="HIC.DicomTypeTranslation" Version="1.0.0.3" />
-    <PackageReference Include="MongoDB.Bson" Version="2.8.0" />
-    <PackageReference Include="MongoDB.Driver" Version="2.8.0" />
-    <PackageReference Include="MongoDB.Driver.Core" Version="2.8.0" />
+    <PackageReference Include="HIC.DicomTypeTranslation" Version="2.1.1" />
+    <PackageReference Include="MongoDB.Bson" Version="2.8.1" />
+    <PackageReference Include="MongoDB.Driver" Version="2.8.1" />
+    <PackageReference Include="MongoDB.Driver.Core" Version="2.8.1" />
     <PackageReference Include="MySql.Data" Version="8.0.15" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
     <PackageReference Include="NLog" Version="4.6.5" />

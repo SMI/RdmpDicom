@@ -2,6 +2,7 @@
 using System.IO;
 using System.Text;
 using Dicom;
+using FAnsi.Extensions;
 using ReusableLibraryCode.Extensions;
 
 namespace Rdmp.Dicom.Extraction.FoDicomBased.DirectoryDecisions

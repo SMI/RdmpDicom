@@ -20,6 +20,7 @@ using Rdmp.Core.QueryBuilding;
 using ReusableLibraryCode.Checks;
 using ReusableLibraryCode.DataAccess;
 using ReusableLibraryCode.Progress;
+using TypeGuesser;
 
 namespace Rdmp.Dicom.PipelineComponents
 {

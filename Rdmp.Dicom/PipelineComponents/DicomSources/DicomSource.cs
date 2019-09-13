@@ -15,6 +15,7 @@ using Rdmp.Core.Curation.Data;
 using Rdmp.Core.DataFlowPipeline;
 using Rdmp.Core.Curation.Data.DataLoad;
 using ReusableLibraryCode.Annotations;
+using TypeGuesser;
 
 namespace Rdmp.Dicom.PipelineComponents.DicomSources
 {
@@ -311,7 +312,7 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
                 {
                     DatabaseTypeRequest type = DicomTypeTranslater.GetNaturalTypeForVr(
                         tag.DictionaryEntry.ValueRepresentations, tag.DictionaryEntry.ValueMultiplicity);
-                    _maxTagLengths.Add(tag, type.MaxWidthForStrings ?? -1);
+                    _maxTagLengths.Add(tag, type.Width ?? -1);
                 }
 
                 //we don't think it's a string or the string is a fine length

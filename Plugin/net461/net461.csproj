@@ -12,7 +12,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="fo-dicom.Desktop" Version="4.0.1" />
-    <PackageReference Include="HIC.DicomTypeTranslation" Version="1.0.0.3" />
+    <PackageReference Include="HIC.DicomTypeTranslation" Version="2.1.1" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Rdmp.Dicom.UI\Rdmp.Dicom.UI.csproj" />

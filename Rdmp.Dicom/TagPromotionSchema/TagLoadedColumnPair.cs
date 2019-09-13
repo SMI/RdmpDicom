@@ -1,5 +1,6 @@
 ﻿using System;
 using FAnsi.Discovery.TypeTranslation;
+using TypeGuesser;
 
 namespace Rdmp.Dicom.TagPromotionSchema
 {

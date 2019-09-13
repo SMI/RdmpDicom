@@ -13,6 +13,7 @@ using Rdmp.Core.DataFlowPipeline.Requirements;
 using Rdmp.Core.DataLoad.Engine.Pipeline.Destinations;
 using System.Xml;
 using DicomTypeTranslation.Elevation.Exceptions;
+using FAnsi;
 
 namespace Rdmp.Dicom.Tests.Unit
 {
@@ -85,6 +86,8 @@ namespace Rdmp.Dicom.Tests.Unit
         [Test]
         public void PipelineTest()
         {
+            var db = GetCleanedServer(DatabaseType.MicrosoftSQLServer);
+
             var source = new DicomFileCollectionSource();
             source.FilenameField = "RelativeFileArchiveURI";
 
@@ -95,12 +98,12 @@ namespace Rdmp.Dicom.Tests.Unit
             var tbl = source.GetChunk(new ThrowImmediatelyDataLoadEventListener(), new GracefulCancellationToken());
             var destination = new DataTableUploadDestination();
             
-            destination.PreInitialize(DiscoveredDatabaseICanCreateRandomTablesIn,new ThrowImmediatelyDataLoadEventListener());
+            destination.PreInitialize(db,new ThrowImmediatelyDataLoadEventListener());
             destination.AllowResizingColumnsAtUploadTime = true;
             destination.ProcessPipelineData(tbl, new ThrowImmediatelyDataLoadEventListener(), new GracefulCancellationToken());
             destination.Dispose(new ThrowImmediatelyDataLoadEventListener(), null);
 
-            var finalTable = DiscoveredDatabaseICanCreateRandomTablesIn.ExpectTable(destination.TargetTableName);
+            var finalTable = db.ExpectTable(destination.TargetTableName);
 
             Assert.IsTrue(finalTable.Exists());
             finalTable.Drop();

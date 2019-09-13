@@ -15,6 +15,7 @@ using System;
 using System.Data;
 using System.Linq;
 using Tests.Common;
+using TypeGuesser;
 
 namespace Rdmp.Dicom.Tests.Unit
 {

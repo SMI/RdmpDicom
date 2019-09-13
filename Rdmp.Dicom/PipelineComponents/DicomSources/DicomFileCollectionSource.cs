@@ -62,9 +62,9 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
                     return null;
 
                 if(file != null && directory == null)
-                    dt.TableName = QuerySyntaxHelper.MakeHeaderNameSane(Path.GetFileNameWithoutExtension(file.Name));
+                    dt.TableName = QuerySyntaxHelper.MakeHeaderNameSensible(Path.GetFileNameWithoutExtension(file.Name));
                 else if (directory != null)
-                    dt.TableName = QuerySyntaxHelper.MakeHeaderNameSane(Path.GetFileNameWithoutExtension(directory.Name));
+                    dt.TableName = QuerySyntaxHelper.MakeHeaderNameSensible(Path.GetFileNameWithoutExtension(directory.Name));
                 else
                     throw new Exception("Expected IDicomProcessListProvider to return either a DirectoryInfo or a FileInfo not both/neither");
                 
