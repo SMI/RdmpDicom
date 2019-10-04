@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using ReusableLibraryCode.Checks;
-using ReusableLibraryCode.CommandExecution;
 using FAnsi.Discovery;
 using Rdmp.Dicom.Attachers.Routing;
 using Rdmp.Core.Curation.Data;
@@ -19,6 +18,7 @@ using Rdmp.Core.DataLoad.Engine.DatabaseManagement.EntityNaming;
 using Rdmp.Core.DataLoad;
 using Rdmp.Core.DataLoad.Engine.LoadProcess;
 using DicomTypeTranslation.TableCreation;
+using Rdmp.Core.CommandExecution;
 
 namespace Rdmp.Dicom.CommandExecution
 {

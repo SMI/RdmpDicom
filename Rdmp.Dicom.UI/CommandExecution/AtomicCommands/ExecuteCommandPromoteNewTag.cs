@@ -1,12 +1,12 @@
 ﻿using System.Drawing;
 using System.Windows.Forms;
 using ReusableLibraryCode.Icons.IconProvision;
-using ReusableUIComponents.ChecksUI;
 using Rdmp.Dicom.TagPromotionSchema;
 using Rdmp.UI.CommandExecution.AtomicCommands;
 using Rdmp.Core.CommandExecution.AtomicCommands;
 using Rdmp.UI.ItemActivation;
 using Rdmp.Core.Curation.Data;
+using Rdmp.UI.ChecksUI;
 using Rdmp.UI.Icons.IconProvision;
 
 namespace Rdmp.Dicom.UI.CommandExecution.AtomicCommands

@@ -1,5 +1,4 @@
-﻿using ReusableUIComponents;
-using ReusableUIComponents.ChecksUI;
+﻿using Rdmp.UI.ChecksUI;
 
 namespace Rdmp.Dicom.UI
 {
@@ -38,7 +37,7 @@ namespace Rdmp.Dicom.UI
             this.btnOk = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
             this.lblMultiplicity = new System.Windows.Forms.Label();
-            this.ragSmiley1 = new ReusableUIComponents.ChecksUI.RAGSmiley();
+            this.ragSmiley1 = new RAGSmiley();
             this.SuspendLayout();
             // 
             // cbxTag

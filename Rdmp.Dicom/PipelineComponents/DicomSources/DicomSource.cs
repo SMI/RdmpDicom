@@ -3,7 +3,6 @@ using DicomTypeTranslation;
 using DicomTypeTranslation.Elevation.Exceptions;
 using DicomTypeTranslation.Elevation.Serialization;
 using ReusableLibraryCode.Checks;
-using FAnsi.Discovery.TypeTranslation;
 using ReusableLibraryCode.Progress;
 using System;
 using System.Collections.Generic;
