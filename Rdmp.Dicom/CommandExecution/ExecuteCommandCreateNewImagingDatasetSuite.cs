@@ -19,6 +19,9 @@ using Rdmp.Core.DataLoad;
 using Rdmp.Core.DataLoad.Engine.LoadProcess;
 using DicomTypeTranslation.TableCreation;
 using Rdmp.Core.CommandExecution;
+using Rdmp.Core.Repositories.Construction;
+using Rdmp.Dicom.PipelineComponents.DicomSources;
+using ReusableLibraryCode.Annotations;
 
 namespace Rdmp.Dicom.CommandExecution
 {
@@ -83,6 +86,26 @@ namespace Rdmp.Dicom.CommandExecution
                 SetImpossible("No default logging server has been configured in your Catalogue database");
             
             CreateLoad = true;
+        }
+
+        [UsedImplicitly]
+        [UseWithObjectConstructor]
+        public ExecuteCommandCreateNewImagingDatasetSuite(
+            IRDMPPlatformRepositoryServiceLocator repositoryLocator,
+            DiscoveredDatabase databaseToCreateInto,
+            DirectoryInfo projectDirectory,
+            Type dicomSourceType,
+            string tablePrefix,
+            FileInfo templateFile,
+            bool persistentRaw,
+            bool createLoad
+            ):this(repositoryLocator, databaseToCreateInto, projectDirectory)
+        {
+            DicomSourceType = dicomSourceType ?? typeof(DicomFileCollectionSource);
+            TablePrefix = tablePrefix;
+            Template = ImageTableTemplateCollection.LoadFrom(File.ReadAllText(templateFile.FullName));
+            PersistentRaw = persistentRaw;
+            CreateLoad = createLoad;
         }
 
         public override void Execute()
