@@ -10,7 +10,14 @@
 		</dependencies>
     </metadata>
   <files>
-    <file src="Plugin\net461\bin\$configuration$\net461\*" exclude="**/net461.dll" target="lib\net461" />
-	<file src="Plugin\netcoreapp2.2\bin\$configuration$\netcoreapp2.2\win-x64\publish\*" exclude="**/netcoreapp2.2.dll" target="lib\netcoreapp2.2\win\" />
+    <file src="Plugin\net461\bin\$configuration$\net461\win-x64\publish\*"
+          exclude="**/net461.dll;**\BadMedicine.Core.dll;**\FAnsi.*;**\MapsDirectlyToDatabaseTable.dll;**\MySql.Data.dll;**\Oracle.ManagedDataAccess.dll;**\Rdmp.Core.dll;**\NPOI.*;**\Renci.*;**\MathNet.Numerics.dll*;**\Rdmp.UI.dll;**\ScintillaNET.dll;**\ReusableUIComponents.dll;**\ObjectListView.dll;**\WeifenLuo.WinFormsUI.Docking*"
+          target="lib\net461" />
+	<file src="Plugin\netcoreapp2.2\bin\$configuration$\netcoreapp2.2\win-x64\publish\*" 
+        exclude="**\Plugin.dll;**\BadMedicine.Core.dll;**\FAnsi.*;**\MapsDirectlyToDatabaseTable.dll;**\MySql.Data.dll;**\Oracle.ManagedDataAccess.dll;**\Rdmp.Core.dll;**\NPOI.*;**\Renci.*;**\MathNet.Numerics.dll*"  
+        target="lib\netcoreapp2.2\win\" />
+    <file src="Plugin\netcoreapp2.2\bin\$configuration$\netcoreapp2.2\linux-x64\publish\*" 
+          exclude="**\Plugin.dll;**\BadMedicine.Core.dll;**\FAnsi.*;**\MapsDirectlyToDatabaseTable.dll;**\MySql.Data.dll;**\Oracle.ManagedDataAccess.dll;**\Rdmp.Core.dll;**\NPOI.*;**\Renci.*;**\MathNet.Numerics.dll*"  
+          target="lib\netcoreapp2.2\linux\" />
   </files>
 </package>
