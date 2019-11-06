@@ -19,7 +19,7 @@ before_script:
 script:
 - wget https://github.com/HicServices/RDMP/releases/download/v3.2.1/rdmp-cli-linux-x64.zip
 - unzip rdmp-cli-linux-x64.zip
-- ./rdmp install localhost TEST_ -D -u sa -p YourStrong!Passw0rd
+- sudo ./rdmp install localhost TEST_ -D -u sa -p YourStrong!Passw0rd
 # - dotnet test "Reusable/Tests/ReusableCodeTests/ReusableCodeTests.csproj"
 # - dotnet test "./Rdmp.Core.Tests/Rdmp.Core.Tests.csproj"
 # - dotnet build
