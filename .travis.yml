@@ -21,7 +21,7 @@ script:
 - unzip -d rdmp-cli rdmp-cli-linux-x64.zip || true # Ignore exit code since unzip returns 1 for a warning we don't care about
 - cd rdmp-cli
 - chmod +x rdmp
-- ./rdmp install localhost TEST_ -D -u sa -p 'YourStrong!Passw0rd'
+- ./rdmp install localhost TEST_ -u sa -p 'YourStrong!Passw0rd'
 # - dotnet test "Reusable/Tests/ReusableCodeTests/ReusableCodeTests.csproj"
 # - dotnet test "./Rdmp.Core.Tests/Rdmp.Core.Tests.csproj"
 # - dotnet build
