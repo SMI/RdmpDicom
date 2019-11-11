@@ -17,10 +17,12 @@ before_script:
 - sudo docker run --name=mssql-server-linux-latest -e 'ACCEPT_EULA=Y' -e 'MSSQL_SA_PASSWORD=YourStrong!Passw0rd' -p 1433:1433 -d microsoft/mssql-server-linux:2017-latest
 
 script:
-- dotnet build ./Rdmp.Dicom/Rdmp.Dicom.csproj
+- dotnet build "./Rdmp.Dicom/Rdmp.Dicom.csproj"
 - wget https://github.com/HicServices/RDMP/releases/download/v3.2.1/rdmp-cli-linux-x64.zip
 - unzip -d rdmp-cli rdmp-cli-linux-x64.zip || true # Ignore exit code since unzip returns 1 for a warning we don't care about
 - cd rdmp-cli
 - chmod +x rdmp
 - ./rdmp install localhost TEST_ -u sa -p 'YourStrong!Passw0rd'
-- dotnet test ./Rdmp.Dicom.Tests/Rdmp.Dicom.Tests.csproj
+- cd ..
+- dotnet build "./Rdmp.Dicom.Tests/Rdmp.Dicom.Tests.csproj"
+- dotnet test "./Rdmp.Dicom.Tests/Rdmp.Dicom.Tests.csproj" -v d
