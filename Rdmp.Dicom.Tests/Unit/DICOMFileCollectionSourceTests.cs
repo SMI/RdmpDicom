@@ -117,19 +117,42 @@ namespace Rdmp.Dicom.Tests.Unit
         [TestCase(@"C:/bob/")] //mixed slash directions!
         public void TestRelativeUri_RootedInput(string root)
         {
-            if(EnvironmentInfo.IsLinux)
-                root = root.Replace(@"C:\","/").Replace(@"C:/","/");;
-
             var source = new DicomFileCollectionSource();
-            source.ArchiveRoot = root;
 
-            var result = source.ApplyArchiveRootToMakeRelativePath(@"C:\bob\fish\1.dcm");
+            if (EnvironmentInfo.IsLinux)
+            {
+                root = root.Replace(@"C:\","/").Replace(@"C:/","/");;
+                source.ArchiveRoot = root;
 
-            Assert.AreEqual(@"\fish\1.dcm",result);
+                var result = source.ApplyArchiveRootToMakeRelativePath(@"/bob/fish/1.dcm");
 
-            result = source.ApplyArchiveRootToMakeRelativePath(@"C:/bob/fish\1.dcm");
+                Assert.AreEqual(@"fish/1.dcm",result);
 
-            Assert.AreEqual(@"\fish\1.dcm", result);
+                result = source.ApplyArchiveRootToMakeRelativePath(@"/bob/fish/1.dcm");
+
+                Assert.AreEqual(@"fish/1.dcm", result);
+            }
+            else
+            {
+                source.ArchiveRoot = root;
+
+                var result = source.ApplyArchiveRootToMakeRelativePath(@"C:\bob\fish\1.dcm");
+
+                Assert.AreEqual(@"fish/1.dcm",result);
+
+                result = source.ApplyArchiveRootToMakeRelativePath(@"C:/bob/fish\1.dcm");
+
+                Assert.AreEqual(@"fish/1.dcm", result);
+            }
+        }
+
+        [Test]
+        public void Test_Linux_Root()
+        {
+            var source = new DicomFileCollectionSource();
+            source.ArchiveRoot = "/";
+            
+            Assert.AreEqual("/",source.ArchiveRoot);
         }
 
         [TestCase(@"C:\bob\")]
@@ -141,11 +164,11 @@ namespace Rdmp.Dicom.Tests.Unit
 
             var result = source.ApplyArchiveRootToMakeRelativePath(@"\fish\1.dcm");
 
-            Assert.AreEqual(@"\fish\1.dcm", result);
+            Assert.AreEqual(@"fish/1.dcm", result);
 
             result = source.ApplyArchiveRootToMakeRelativePath(@"fish\1.dcm");
 
-            Assert.AreEqual(@"fish\1.dcm", result);
+            Assert.AreEqual(@"fish/1.dcm", result);
         }      
 
         [Test]
