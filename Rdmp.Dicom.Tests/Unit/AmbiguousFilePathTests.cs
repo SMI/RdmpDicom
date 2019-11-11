@@ -22,8 +22,23 @@ namespace Rdmp.Dicom.Tests.Unit
            a = new AmbiguousFilePath(@"c:\temp", @"c:\temp\myzip.zip!my.dcm");
            Assert.AreEqual(@"c:\temp\myzip.zip!my.dcm", a.FullPath);
 
-           a = new AmbiguousFilePath(@"c:\temp", @"\myzip.zip!my.dcm");
+           a = new AmbiguousFilePath(@"c:\temp", @"myzip.zip!my.dcm");
            Assert.AreEqual(@"c:\temp\myzip.zip!my.dcm", a.FullPath);
+
+           //give it some linux style paths
+           a = new AmbiguousFilePath(@"/temp/my.dcm");
+           Assert.AreEqual(@"/temp/my.dcm", a.FullPath);
+
+           a = new AmbiguousFilePath(@"/temp",@"/temp/my.dcm");
+           Assert.AreEqual(@"/temp/my.dcm", a.FullPath);
+
+           a = new AmbiguousFilePath(@"/temp", @"/temp/myzip.zip!my.dcm");
+           Assert.AreEqual(@"/temp/myzip.zip!my.dcm", a.FullPath);
+
+           a = new AmbiguousFilePath(@"/temp/", @"./myzip.zip!my.dcm");
+           Assert.AreEqual(@"/temp/./myzip.zip!my.dcm", a.FullPath);
+
+
         }
         
 

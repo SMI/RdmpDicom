@@ -55,17 +55,12 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
                 return path;
 
             if (!IsZipReference(path))
-                return Path.Combine(Trim(root),Trim(path));
+                return Path.Combine(root,path);
             
             var bits = path.Split('!');
-            return Path.Combine(Trim(root), Trim(bits[0])) + '!' + bits[1];
+            return Path.Combine(root,bits[0]) + '!' + bits[1];
         }
-
-        private string Trim(string root)
-        {
-            return root.Trim(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-        }
-
+        
 
         public DicomFile GetDataset(ZipPool pool = null)
         {
@@ -126,32 +121,7 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
             if (string.IsNullOrWhiteSpace(path))
                 return false;
 
-            return Path.IsPathRooted(path) && 
-
-                   IsPathRootValid(path);
-
-        }
-
-        private bool IsPathRootValid(string path)
-        {
-            var drive = Path.GetPathRoot(path);
-
-            // for linux slash is the only valid root
-            if (EnvironmentInfo.IsLinux)
-                return
-                    !string.IsNullOrEmpty(drive)
-                    &&
-                    (
-                        drive.Equals(Path.DirectorySeparatorChar.ToString(), StringComparison.InvariantCulture)
-                        ||
-                        drive.Equals(Path.AltDirectorySeparatorChar.ToString(), StringComparison.InvariantCulture)
-                    );
-            
-            //in windows the path needs to have a root like c: or //myserver etc
-            return !Path.GetPathRoot(path)
-                       .Equals(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal) &&
-                   !Path.GetPathRoot(path).Equals(Path.AltDirectorySeparatorChar.ToString(),
-                       StringComparison.Ordinal);
+            return Path.IsPathRooted(path);
         }
     }
 }
