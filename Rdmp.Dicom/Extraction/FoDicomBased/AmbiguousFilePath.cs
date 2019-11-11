@@ -3,6 +3,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using Dicom;
+using Rdmp.Core.Startup;
 using Rdmp.Dicom.PACS;
 
 namespace Rdmp.Dicom.Extraction.FoDicomBased
@@ -118,10 +119,31 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
                 return false;
 
             return Path.IsPathRooted(path) && 
-                !Path.GetPathRoot(path).Equals(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal) &&
-                !Path.GetPathRoot(path).Equals(Path.AltDirectorySeparatorChar.ToString(), StringComparison.Ordinal) ;
+
+                   IsPathRootValid(path);
 
         }
 
+        private bool IsPathRootValid(string path)
+        {
+            var drive = Path.GetPathRoot(path);
+
+            // for linux slash is the only valid root
+            if (EnvironmentInfo.IsLinux)
+                return
+                    !string.IsNullOrEmpty(drive)
+                    &&
+                    (
+                        drive.Equals(Path.DirectorySeparatorChar.ToString(), StringComparison.InvariantCulture)
+                        ||
+                        drive.Equals(Path.AltDirectorySeparatorChar.ToString(), StringComparison.InvariantCulture)
+                    );
+            
+            //in windows the path needs to have a root like c: or //myserver etc
+            return !Path.GetPathRoot(path)
+                       .Equals(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal) &&
+                   !Path.GetPathRoot(path).Equals(Path.AltDirectorySeparatorChar.ToString(),
+                       StringComparison.Ordinal);
+        }
     }
 }
