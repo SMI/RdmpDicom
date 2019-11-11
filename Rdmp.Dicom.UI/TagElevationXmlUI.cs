@@ -10,6 +10,7 @@ using ScintillaNET;
 using System;
 using System.Linq;
 using System.Windows.Forms;
+using Rdmp.Core.Icons.IconProvision;
 using Rdmp.UI.ScintillaHelper;
 
 namespace Rdmp.Dicom.UI
