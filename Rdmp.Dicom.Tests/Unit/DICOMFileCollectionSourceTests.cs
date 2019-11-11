@@ -14,6 +14,7 @@ using Rdmp.Core.DataLoad.Engine.Pipeline.Destinations;
 using System.Xml;
 using DicomTypeTranslation.Elevation.Exceptions;
 using FAnsi;
+using Rdmp.Core.Startup;
 
 namespace Rdmp.Dicom.Tests.Unit
 {
@@ -116,6 +117,9 @@ namespace Rdmp.Dicom.Tests.Unit
         [TestCase(@"C:/bob/")] //mixed slash directions!
         public void TestRelativeUri_RootedInput(string root)
         {
+            if(EnvironmentInfo.IsLinux)
+                root = root.Replace(@"C:\","/").Replace(@"C:/","/");;
+
             var source = new DicomFileCollectionSource();
             source.ArchiveRoot = root;
 

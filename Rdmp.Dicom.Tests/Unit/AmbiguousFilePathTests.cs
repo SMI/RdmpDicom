@@ -32,7 +32,9 @@ namespace Rdmp.Dicom.Tests.Unit
         {
             FileInfo f = new FileInfo(Path.Combine(TestContext.CurrentContext.WorkDirectory,"test.dcm"));
             
-            File.WriteAllBytes(f.FullName,TestDicomFiles.IM_0001_0013);
+            File.Copy(
+                Path.Combine(TestContext.CurrentContext.TestDirectory,"TestData","IM-0001-0013.dcm"),
+                f.FullName);
 
             var a = new AmbiguousFilePath(f.FullName);
             var ds = a.GetDataset();
@@ -49,11 +51,13 @@ namespace Rdmp.Dicom.Tests.Unit
             if (fzip.Exists)
                 fzip.Delete();
 
+            var bytes = File.ReadAllBytes(Path.Combine(TestContext.CurrentContext.TestDirectory, "TestData", "IM-0001-0013.dcm"));
+
             using (var z = ZipFile.Open(fzip.FullName, ZipArchiveMode.Create))
             {
                 var entry = z.CreateEntry("test.dcm");
                 using (Stream s = entry.Open())
-                    s.Write(TestDicomFiles.IM_0001_0013, 0, TestDicomFiles.IM_0001_0013.Length);
+                    s.Write(bytes, 0, bytes.Length);
             }
 
             Assert.Throws<AmbiguousFilePathResolutionException>(()=>new AmbiguousFilePath(Path.Combine(TestContext.CurrentContext.WorkDirectory, "omgzip.zip")).GetDataset());
@@ -74,13 +78,15 @@ namespace Rdmp.Dicom.Tests.Unit
             if (fzip.Exists)
                 fzip.Delete();
 
+            var bytes = File.ReadAllBytes(Path.Combine(TestContext.CurrentContext.TestDirectory, "TestData", "IM-0001-0024.dcm"));
+
             //Create a zip file with lots of entries
             using (var z = ZipFile.Open(fzip.FullName, ZipArchiveMode.Create))
                 for (int i = 0; i < 1500; i++)
                 {
                     var entry = z.CreateEntry("test" + i + ".dcm");
                     using (Stream s = entry.Open())
-                        s.Write(TestDicomFiles.IM_0001_0024, 0, TestDicomFiles.IM_0001_0013.Length);
+                        s.Write(bytes, 0, bytes.Length);
                 }
 
             //we want to read one out of the middle
