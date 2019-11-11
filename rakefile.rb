@@ -89,9 +89,13 @@ task :deployplugins, [:config] do |t, args|
 	version = File.open('version') {|f| f.readline}
     puts "version: #{version}"
 	
+	Dir.chdir('Plugin/net461/') do
+		sh "dotnet publish --runtime win-x64 -c #{args.config} --self-contained false"
+	end
 	
 	Dir.chdir('Plugin/netcoreapp2.2/') do
-		sh "dotnet publish --runtime win-x64 -c #{args.config}"
+		sh "dotnet publish --runtime win-x64 -c #{args.config} --self-contained false"
+		sh "dotnet publish --runtime linux-x64 -c #{args.config} --self-contained false"
 	end
 	
 	#Packages the plugin which will be loaded into RDMP
