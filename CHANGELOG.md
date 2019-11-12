@@ -8,13 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
+## [2.0.1] 2019-11-12
+
 ### Added
 
 - Added support for Linux style paths e.g. archive `"/archive/root"` with subdir `"series1/1.dcm"`
 
 ### Changed
 
-- Updated to RDMP 4.0.1
+- Updated to RDMP 4.0.1-rc1
 - Local paths are now expressed without a leading "/" (e.g. `series1/1.dcm` when previously it would be `/series1/1.dcm`)
 - Database paths now use `/` instead of `\` to work with both Windows and Linux
 
@@ -66,7 +68,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial commit from private repo
 
-[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v1.3.2...develop
+[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v2.0.1...develop
+[2.0.1]: https://github.com/HicServices/RdmpDicom/compare/v1.3.2...v2.0.1
 [1.3.2]: https://github.com/HicServices/RdmpDicom/compare/v1.3.1...v1.3.2
 [1.3.1]: https://github.com/HicServices/RdmpDicom/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/HicServices/RdmpDicom/compare/v1.1.0...v1.3.0
