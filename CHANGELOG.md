@@ -8,6 +8,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
+### Added
+
+- Added support for Linux style paths e.g. archive `"/archive/root"` with subdir `"series1/1.dcm"`
+
+### Changed
+
+- Updated to RDMP 4.0.1
+- Local paths are now expressed without a leading "/" (e.g. `series1/1.dcm` when previously it would be `/series1/1.dcm`)
+- Database paths now use `/` instead of `\` to work with both Windows and Linux
+
+## Fixed
+
+- Fixed bug in FoDicomAnonymiser when using a UID mapping repository with sql authentication (username/password)
+- Fixed ZipPool not working in case sensitive file systems (e.g. Linux)
+
 ## [1.3.2] 2019-10-30
 
 ## Changed

@@ -5,6 +5,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
+using Rdmp.Core.Startup;
 
 namespace Rdmp.Dicom.Tests.Unit
 {
@@ -13,17 +14,48 @@ namespace Rdmp.Dicom.Tests.Unit
         [Test]
         public void BasicPathsTest()
         {
-            var a = new AmbiguousFilePath(@"c:\temp\my.dcm");
-            Assert.AreEqual(@"c:\temp\my.dcm", a.FullPath);
+            bool isLinux = EnvironmentInfo.IsLinux;
 
-            a = new AmbiguousFilePath(@"c:\temp",@"c:\temp\my.dcm");
-            Assert.AreEqual(@"c:\temp\my.dcm", a.FullPath);
 
-           a = new AmbiguousFilePath(@"c:\temp", @"c:\temp\myzip.zip!my.dcm");
-           Assert.AreEqual(@"c:\temp\myzip.zip!my.dcm", a.FullPath);
+            if (isLinux)
+            {
+                //in linux this looks like a relative path
+                var ex = Assert.Throws<ArgumentException>(()=>new AmbiguousFilePath(@"c:\temp\my.dcm"));
+                StringAssert.StartsWith("Relative path was encountered without specifying a root",ex.Message);
 
-           a = new AmbiguousFilePath(@"c:\temp", @"\myzip.zip!my.dcm");
-           Assert.AreEqual(@"c:\temp\myzip.zip!my.dcm", a.FullPath);
+
+                ex = Assert.Throws<ArgumentException>(()=>new AmbiguousFilePath(@"c:\temp",@"c:\temp\my.dcm"));
+                StringAssert.IsMatch("Specified root path '.*' was not IsAbsolute",ex.Message);
+            }
+            else
+            {
+                var a = new AmbiguousFilePath(@"c:\temp\my.dcm");
+                Assert.AreEqual(@"c:\temp\my.dcm", a.FullPath);
+
+                a = new AmbiguousFilePath(@"c:\temp",@"c:\temp\my.dcm");
+                Assert.AreEqual(@"c:\temp\my.dcm", a.FullPath);
+
+                a = new AmbiguousFilePath(@"c:\temp", @"c:\temp\myzip.zip!my.dcm");
+                Assert.AreEqual(@"c:\temp\myzip.zip!my.dcm", a.FullPath);
+
+                a = new AmbiguousFilePath(@"c:\temp", @"myzip.zip!my.dcm");
+                Assert.AreEqual(@"c:\temp\myzip.zip!my.dcm", a.FullPath);
+            }
+            
+            
+
+           //give it some linux style paths
+           var b = new AmbiguousFilePath(@"/temp/my.dcm");
+           Assert.AreEqual(@"/temp/my.dcm", b.FullPath);
+
+           b = new AmbiguousFilePath(@"/temp",@"/temp/my.dcm");
+           Assert.AreEqual(@"/temp/my.dcm", b.FullPath);
+
+           b = new AmbiguousFilePath(@"/temp", @"/temp/myzip.zip!my.dcm");
+           Assert.AreEqual(@"/temp/myzip.zip!my.dcm", b.FullPath);
+
+           b = new AmbiguousFilePath(@"/temp/", @"./myzip.zip!my.dcm");
+           Assert.AreEqual(@"/temp/./myzip.zip!my.dcm", b.FullPath);
         }
         
 
@@ -32,7 +64,9 @@ namespace Rdmp.Dicom.Tests.Unit
         {
             FileInfo f = new FileInfo(Path.Combine(TestContext.CurrentContext.WorkDirectory,"test.dcm"));
             
-            File.WriteAllBytes(f.FullName,TestDicomFiles.IM_0001_0013);
+            File.Copy(
+                Path.Combine(TestContext.CurrentContext.TestDirectory,"TestData","IM-0001-0013.dcm"),
+                f.FullName);
 
             var a = new AmbiguousFilePath(f.FullName);
             var ds = a.GetDataset();
@@ -49,11 +83,13 @@ namespace Rdmp.Dicom.Tests.Unit
             if (fzip.Exists)
                 fzip.Delete();
 
+            var bytes = File.ReadAllBytes(Path.Combine(TestContext.CurrentContext.TestDirectory, "TestData", "IM-0001-0013.dcm"));
+
             using (var z = ZipFile.Open(fzip.FullName, ZipArchiveMode.Create))
             {
                 var entry = z.CreateEntry("test.dcm");
                 using (Stream s = entry.Open())
-                    s.Write(TestDicomFiles.IM_0001_0013, 0, TestDicomFiles.IM_0001_0013.Length);
+                    s.Write(bytes, 0, bytes.Length);
             }
 
             Assert.Throws<AmbiguousFilePathResolutionException>(()=>new AmbiguousFilePath(Path.Combine(TestContext.CurrentContext.WorkDirectory, "omgzip.zip")).GetDataset());
@@ -74,13 +110,15 @@ namespace Rdmp.Dicom.Tests.Unit
             if (fzip.Exists)
                 fzip.Delete();
 
+            var bytes = File.ReadAllBytes(Path.Combine(TestContext.CurrentContext.TestDirectory, "TestData", "IM-0001-0024.dcm"));
+
             //Create a zip file with lots of entries
             using (var z = ZipFile.Open(fzip.FullName, ZipArchiveMode.Create))
                 for (int i = 0; i < 1500; i++)
                 {
                     var entry = z.CreateEntry("test" + i + ".dcm");
                     using (Stream s = entry.Open())
-                        s.Write(TestDicomFiles.IM_0001_0024, 0, TestDicomFiles.IM_0001_0013.Length);
+                        s.Write(bytes, 0, bytes.Length);
                 }
 
             //we want to read one out of the middle

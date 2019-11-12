@@ -1,5 +1,4 @@
 using MapsDirectlyToDatabaseTable.Versioning;
-using System.Reflection;
 
 namespace Rdmp.Dicom
 {

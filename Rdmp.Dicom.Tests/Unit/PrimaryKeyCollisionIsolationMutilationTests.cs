@@ -1,6 +1,5 @@
 ﻿using FAnsi;
 using FAnsi.Discovery;
-using FAnsi.Discovery.TypeTranslation;
 using Moq;
 using NUnit.Framework;
 using Rdmp.Core.Curation.Data;

@@ -14,6 +14,7 @@ using Rdmp.Core.DataLoad.Engine.Pipeline.Destinations;
 using System.Xml;
 using DicomTypeTranslation.Elevation.Exceptions;
 using FAnsi;
+using Rdmp.Core.Startup;
 
 namespace Rdmp.Dicom.Tests.Unit
 {
@@ -25,7 +26,7 @@ namespace Rdmp.Dicom.Tests.Unit
             var source = new DicomFileCollectionSource();
             source.FilenameField = "RelativeFileArchiveURI";
 
-            var f = Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestData\IM-0001-0013.dcm");
+            var f = Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestData/IM-0001-0013.dcm");
 
             source.PreInitialize(new FlatFileToLoadDicomFileWorklist(new FlatFileToLoad(new FileInfo(f))), new ThrowImmediatelyDataLoadEventListener());
             var result = source.GetChunk(new ThrowImmediatelyDataLoadEventListener(), new GracefulCancellationToken());
@@ -91,7 +92,7 @@ namespace Rdmp.Dicom.Tests.Unit
             var source = new DicomFileCollectionSource();
             source.FilenameField = "RelativeFileArchiveURI";
 
-            var f = new FlatFileToLoad(new FileInfo(Path.Combine(TestContext.CurrentContext.TestDirectory,@"TestData\IM-0001-0013.dcm")));
+            var f = new FlatFileToLoad(new FileInfo(Path.Combine(TestContext.CurrentContext.TestDirectory,@"TestData/IM-0001-0013.dcm")));
             
             source.PreInitialize(new FlatFileToLoadDicomFileWorklist(f), new ThrowImmediatelyDataLoadEventListener());
 
@@ -117,15 +118,41 @@ namespace Rdmp.Dicom.Tests.Unit
         public void TestRelativeUri_RootedInput(string root)
         {
             var source = new DicomFileCollectionSource();
-            source.ArchiveRoot = root;
 
-            var result = source.ApplyArchiveRootToMakeRelativePath(@"C:\bob\fish\1.dcm");
+            if (EnvironmentInfo.IsLinux)
+            {
+                root = root.Replace(@"C:\","/").Replace(@"C:/","/");;
+                source.ArchiveRoot = root;
 
-            Assert.AreEqual(@"\fish\1.dcm",result);
+                var result = source.ApplyArchiveRootToMakeRelativePath(@"/bob/fish/1.dcm");
 
-            result = source.ApplyArchiveRootToMakeRelativePath(@"C:/bob/fish\1.dcm");
+                Assert.AreEqual(@"fish/1.dcm",result);
 
-            Assert.AreEqual(@"\fish\1.dcm", result);
+                result = source.ApplyArchiveRootToMakeRelativePath(@"/bob/fish/1.dcm");
+
+                Assert.AreEqual(@"fish/1.dcm", result);
+            }
+            else
+            {
+                source.ArchiveRoot = root;
+
+                var result = source.ApplyArchiveRootToMakeRelativePath(@"C:\bob\fish\1.dcm");
+
+                Assert.AreEqual(@"fish/1.dcm",result);
+
+                result = source.ApplyArchiveRootToMakeRelativePath(@"C:/bob/fish\1.dcm");
+
+                Assert.AreEqual(@"fish/1.dcm", result);
+            }
+        }
+
+        [Test]
+        public void Test_Linux_Root()
+        {
+            var source = new DicomFileCollectionSource();
+            source.ArchiveRoot = "/";
+            
+            Assert.AreEqual("/",source.ArchiveRoot);
         }
 
         [TestCase(@"C:\bob\")]
@@ -137,11 +164,11 @@ namespace Rdmp.Dicom.Tests.Unit
 
             var result = source.ApplyArchiveRootToMakeRelativePath(@"\fish\1.dcm");
 
-            Assert.AreEqual(@"\fish\1.dcm", result);
+            Assert.AreEqual(@"fish/1.dcm", result);
 
             result = source.ApplyArchiveRootToMakeRelativePath(@"fish\1.dcm");
 
-            Assert.AreEqual(@"fish\1.dcm", result);
+            Assert.AreEqual(@"fish/1.dcm", result);
         }      
 
         [Test]

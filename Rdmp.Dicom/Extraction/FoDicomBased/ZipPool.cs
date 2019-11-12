@@ -13,7 +13,7 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
         public int CacheMisses { get; private set; }
         public int CacheHits { get; private set; }
 
-        readonly Dictionary<string, ZipArchive> _openZipFiles = new Dictionary<string, ZipArchive>();
+        readonly Dictionary<string, ZipArchive> _openZipFiles = new Dictionary<string, ZipArchive>(StringComparer.InvariantCultureIgnoreCase);
 
         public void Dispose()
         {
@@ -40,8 +40,7 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
         public static string NormalizePath(string path)
         {
             return Path.GetFullPath(new Uri(path).LocalPath)
-                       .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
-                       .ToUpperInvariant();
+                       .TrimEnd('\\','/');
         }
 
     }
