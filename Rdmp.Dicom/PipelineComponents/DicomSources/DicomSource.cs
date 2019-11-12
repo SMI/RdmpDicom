@@ -364,14 +364,14 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
                 return filename;
 
             //standardise directory separator character e.g. change \ to /
-            filename = filename.Replace(Path.DirectorySeparatorChar,Path.AltDirectorySeparatorChar);
+            filename = filename.Replace('\\','/');
 
             if (!string.IsNullOrWhiteSpace(ArchiveRoot))
                 if (Path.IsPathRooted(filename) && filename.StartsWith(ArchiveRoot, StringComparison.CurrentCultureIgnoreCase))
                     filename = filename.Substring(ArchiveRoot.Length);
 
             //return the relative path e.g. subdir/fish/1.dcm
-            return filename.TrimStart(Path.AltDirectorySeparatorChar);
+            return filename.TrimStart('/');
         }
 
         private void Add(DataTable dt, DataRow row, string header, object value)

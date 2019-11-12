@@ -5,6 +5,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
+using Rdmp.Core.Startup;
 
 namespace Rdmp.Dicom.Tests.Unit
 {
@@ -13,32 +14,48 @@ namespace Rdmp.Dicom.Tests.Unit
         [Test]
         public void BasicPathsTest()
         {
-            var a = new AmbiguousFilePath(@"c:\temp\my.dcm");
-            Assert.AreEqual(@"c:\temp\my.dcm", a.FullPath);
+            bool isLinux = EnvironmentInfo.IsLinux;
 
-            a = new AmbiguousFilePath(@"c:\temp",@"c:\temp\my.dcm");
-            Assert.AreEqual(@"c:\temp\my.dcm", a.FullPath);
 
-           a = new AmbiguousFilePath(@"c:\temp", @"c:\temp\myzip.zip!my.dcm");
-           Assert.AreEqual(@"c:\temp\myzip.zip!my.dcm", a.FullPath);
+            if (isLinux)
+            {
+                //in linux this looks like a relative path
+                var ex = Assert.Throws<ArgumentException>(()=>new AmbiguousFilePath(@"c:\temp\my.dcm"));
+                StringAssert.StartsWith("Relative path was encountered without specifying a root",ex.Message);
 
-           a = new AmbiguousFilePath(@"c:\temp", @"myzip.zip!my.dcm");
-           Assert.AreEqual(@"c:\temp\myzip.zip!my.dcm", a.FullPath);
+
+                ex = Assert.Throws<ArgumentException>(()=>new AmbiguousFilePath(@"c:\temp",@"c:\temp\my.dcm"));
+                StringAssert.IsMatch("Specified root path '.*'' was not IsAbsolute",ex.Message);
+            }
+            else
+            {
+                var a = new AmbiguousFilePath(@"c:\temp\my.dcm");
+                Assert.AreEqual(@"c:\temp\my.dcm", a.FullPath);
+
+                a = new AmbiguousFilePath(@"c:\temp",@"c:\temp\my.dcm");
+                Assert.AreEqual(@"c:\temp\my.dcm", a.FullPath);
+
+                a = new AmbiguousFilePath(@"c:\temp", @"c:\temp\myzip.zip!my.dcm");
+                Assert.AreEqual(@"c:\temp\myzip.zip!my.dcm", a.FullPath);
+
+                a = new AmbiguousFilePath(@"c:\temp", @"myzip.zip!my.dcm");
+                Assert.AreEqual(@"c:\temp\myzip.zip!my.dcm", a.FullPath);
+            }
+            
+            
 
            //give it some linux style paths
-           a = new AmbiguousFilePath(@"/temp/my.dcm");
-           Assert.AreEqual(@"/temp/my.dcm", a.FullPath);
+           var b = new AmbiguousFilePath(@"/temp/my.dcm");
+           Assert.AreEqual(@"/temp/my.dcm", b.FullPath);
 
-           a = new AmbiguousFilePath(@"/temp",@"/temp/my.dcm");
-           Assert.AreEqual(@"/temp/my.dcm", a.FullPath);
+           b = new AmbiguousFilePath(@"/temp",@"/temp/my.dcm");
+           Assert.AreEqual(@"/temp/my.dcm", b.FullPath);
 
-           a = new AmbiguousFilePath(@"/temp", @"/temp/myzip.zip!my.dcm");
-           Assert.AreEqual(@"/temp/myzip.zip!my.dcm", a.FullPath);
+           b = new AmbiguousFilePath(@"/temp", @"/temp/myzip.zip!my.dcm");
+           Assert.AreEqual(@"/temp/myzip.zip!my.dcm", b.FullPath);
 
-           a = new AmbiguousFilePath(@"/temp/", @"./myzip.zip!my.dcm");
-           Assert.AreEqual(@"/temp/./myzip.zip!my.dcm", a.FullPath);
-
-
+           b = new AmbiguousFilePath(@"/temp/", @"./myzip.zip!my.dcm");
+           Assert.AreEqual(@"/temp/./myzip.zip!my.dcm", b.FullPath);
         }
         
 

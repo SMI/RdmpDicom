@@ -26,7 +26,7 @@ namespace Rdmp.Dicom.Tests.Unit
             var source = new DicomFileCollectionSource();
             source.FilenameField = "RelativeFileArchiveURI";
 
-            var f = Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestData\IM-0001-0013.dcm");
+            var f = Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestData/IM-0001-0013.dcm");
 
             source.PreInitialize(new FlatFileToLoadDicomFileWorklist(new FlatFileToLoad(new FileInfo(f))), new ThrowImmediatelyDataLoadEventListener());
             var result = source.GetChunk(new ThrowImmediatelyDataLoadEventListener(), new GracefulCancellationToken());
@@ -92,7 +92,7 @@ namespace Rdmp.Dicom.Tests.Unit
             var source = new DicomFileCollectionSource();
             source.FilenameField = "RelativeFileArchiveURI";
 
-            var f = new FlatFileToLoad(new FileInfo(Path.Combine(TestContext.CurrentContext.TestDirectory,@"TestData\IM-0001-0013.dcm")));
+            var f = new FlatFileToLoad(new FileInfo(Path.Combine(TestContext.CurrentContext.TestDirectory,@"TestData/IM-0001-0013.dcm")));
             
             source.PreInitialize(new FlatFileToLoadDicomFileWorklist(f), new ThrowImmediatelyDataLoadEventListener());
 
