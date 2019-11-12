@@ -3,6 +3,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using Dicom;
+using Rdmp.Core.Startup;
 using Rdmp.Dicom.PACS;
 
 namespace Rdmp.Dicom.Extraction.FoDicomBased
@@ -16,7 +17,15 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
     /// C:\MassiveImageArchive\DOI\Calc-Test_P_00202_RIGHT_CC\1.3.6.1.4.1.9590.100.1.2.32737473111512049914158289192624777641\1.3.6.1.4.1.9590.100.1.2.178738814511944891404623704932278059093\000000.dcm
     /// C:\MassiveImageArchive\DOI\Calc-Test_P_00077_LEFT_CC\1.3.6.1.4.1.9590.100.1.2.171237778213286314004831596800955774428\1.3.6.1.4.1.9590.100.1.2.120762895113344405411143779050723940544\000000.dcm
     /// \Mass-Training_P_01983_LEFT_MLO_1\1.3.6.1.4.1.9590.100.1.2.315974405612087965807898763551341558217\1.3.6.1.4.1.9590.100.1.2.35571788212802531401890896782882200908\000000.dcm
-    /// 
+    ///
+    ///
+    /// Linux paths must follow the following rules:
+    ///
+    /// Absolute path:
+    ///     Anything starting with '/'
+    ///
+    /// Relative path:
+    ///     Anything not starting with '/' e.g. "./series1/1.dcm"
     /// 
     /// </summary>
     public class AmbiguousFilePath
@@ -46,17 +55,12 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
                 return path;
 
             if (!IsZipReference(path))
-                return Path.Combine(Trim(root),Trim(path));
+                return Path.Combine(root,path);
             
             var bits = path.Split('!');
-            return Path.Combine(Trim(root), Trim(bits[0])) + '!' + bits[1];
+            return Path.Combine(root,bits[0]) + '!' + bits[1];
         }
-
-        private string Trim(string root)
-        {
-            return root.Trim(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-        }
-
+        
 
         public DicomFile GetDataset(ZipPool pool = null)
         {
@@ -117,11 +121,7 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
             if (string.IsNullOrWhiteSpace(path))
                 return false;
 
-            return Path.IsPathRooted(path) && 
-                !Path.GetPathRoot(path).Equals(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal) &&
-                !Path.GetPathRoot(path).Equals(Path.AltDirectorySeparatorChar.ToString(), StringComparison.Ordinal) ;
-
+            return Path.IsPathRooted(path);
         }
-
     }
 }

@@ -40,7 +40,7 @@ namespace Rdmp.Dicom.Extraction
             else
             {
                 builder.UserID = server.Username;
-                builder.Password = server.Password;
+                builder.Password = server.GetDecryptedPassword();
             }
 
             return new DiscoveredServer(builder);

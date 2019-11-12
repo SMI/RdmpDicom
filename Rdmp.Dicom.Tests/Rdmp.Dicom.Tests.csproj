@@ -6,13 +6,37 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="TestData\FileWithLotsOfTags.dcm" />
+    <None Remove="TestData\IM-0001-0013.dcm" />
+    <None Remove="TestData\IM-0001-0019.dcm" />
+    <None Remove="TestData\IM-0001-0024.dcm" />
+    <None Remove="TestData\NotADicomFile.txt" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="..\SharedAssemblyInfo.cs" Link="SharedAssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="TestData\FileWithLotsOfTags.dcm">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestData\IM-0001-0013.dcm">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestData\IM-0001-0019.dcm">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestData\IM-0001-0024.dcm">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestData\NotADicomFile.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Rdmp.Dicom\Rdmp.Dicom.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="HIC.RDMP.Plugin.Test" Version="3.2.1" />
+    <PackageReference Include="HIC.RDMP.Plugin.Test" Version="4.0.1-rc1" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.2.0" />
     <PackageReference Include="NUnit" Version="3.12.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.13.0" />
@@ -20,21 +44,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Update="TestDatabases.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="TestData\FileWithLotsOfTags.dcm">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="TestData\IM-0001-0013.dcm">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="TestData\IM-0001-0019.dcm">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="TestData\IM-0001-0024.dcm">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="TestData\NotADicomFile.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

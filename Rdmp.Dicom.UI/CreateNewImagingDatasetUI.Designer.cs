@@ -1,4 +1,4 @@
-﻿using ReusableUIComponents;
+﻿using Rdmp.UI.SimpleControls;
 
 namespace Rdmp.Dicom.UI
 {
@@ -30,7 +30,7 @@ namespace Rdmp.Dicom.UI
         /// </summary>
         private void InitializeComponent()
         {
-            this.serverDatabaseTableSelector1 = new ReusableUIComponents.ServerDatabaseTableSelector();
+            this.serverDatabaseTableSelector1 = new ServerDatabaseTableSelector();
             this.rbJsonSources = new System.Windows.Forms.RadioButton();
             this.rbFileSources = new System.Windows.Forms.RadioButton();
             this.groupBox1 = new System.Windows.Forms.GroupBox();

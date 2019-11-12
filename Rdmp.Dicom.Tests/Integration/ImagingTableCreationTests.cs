@@ -2,7 +2,6 @@
 using FAnsi;
 using NUnit.Framework;
 using Rdmp.Dicom.CommandExecution;
-using System;
 using System.Linq;
 using Tests.Common;
 

@@ -1,4 +1,4 @@
-﻿using ReusableUIComponents.ChecksUI;
+﻿using Rdmp.UI.ChecksUI;
 using System.Windows.Forms;
 
 namespace Rdmp.Dicom.UI
@@ -35,7 +35,7 @@ namespace Rdmp.Dicom.UI
             this.panel2 = new System.Windows.Forms.Panel();
             this.btnCancel = new System.Windows.Forms.Button();
             this.btnRunChecks = new System.Windows.Forms.Button();
-            this.RagSmiley1 = new ReusableUIComponents.ChecksUI.RAGSmiley();
+            this.RagSmiley1 = new RAGSmiley();
             this.btnOk = new System.Windows.Forms.Button();
             this.panel2.SuspendLayout();
             this.SuspendLayout();

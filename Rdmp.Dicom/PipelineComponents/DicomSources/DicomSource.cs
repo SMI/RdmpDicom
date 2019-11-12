@@ -3,7 +3,6 @@ using DicomTypeTranslation;
 using DicomTypeTranslation.Elevation.Exceptions;
 using DicomTypeTranslation.Elevation.Serialization;
 using ReusableLibraryCode.Checks;
-using FAnsi.Discovery.TypeTranslation;
 using ReusableLibraryCode.Progress;
 using System;
 using System.Collections.Generic;
@@ -43,7 +42,14 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
         public string ArchiveRoot
         {
             get { return _archiveRoot; }
-            set { _archiveRoot = value != null ? value.TrimEnd('\\', '/', ' ', '\t', '\r', '\n').Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar) : null; }
+            set
+            {
+                //trim leading and ending whitespace and normalize slashes
+                value = value?.TrimStart().TrimEnd(' ', '\t', '\r', '\n').Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+
+                //if it has a trailing slash (but isn't just '/') then trim the end
+                _archiveRoot = value.Length != 1 ? value.TrimEnd('\\', '/') : value;
+            }
         }
 
         private TagElevationRequestCollection _elevationRequests;
@@ -358,13 +364,14 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
                 return filename;
 
             //standardise directory separator character e.g. change \ to /
-            filename = filename.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+            filename = filename.Replace('\\','/');
 
             if (!string.IsNullOrWhiteSpace(ArchiveRoot))
                 if (Path.IsPathRooted(filename) && filename.StartsWith(ArchiveRoot, StringComparison.CurrentCultureIgnoreCase))
                     filename = filename.Substring(ArchiveRoot.Length);
 
-            return filename;
+            //return the relative path e.g. subdir/fish/1.dcm
+            return filename.TrimStart('/');
         }
 
         private void Add(DataTable dt, DataRow row, string header, object value)

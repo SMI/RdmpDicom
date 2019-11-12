@@ -1,8 +1,4 @@
 ﻿using Dicom;
-using FAnsi.Implementation;
-using FAnsi.Implementations.MicrosoftSQL;
-using FAnsi.Implementations.MySql;
-using FAnsi.Implementations.Oracle;
 using MapsDirectlyToDatabaseTable;
 using MapsDirectlyToDatabaseTable.Versioning;
 using Moq;
