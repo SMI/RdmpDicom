@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Fixed
 
 - Fixed bug in FoDicomAnonymiser when using a UID mapping repository with sql authentication (username/password)
+- Fixed ZipPool not working in case sensitive file systems (e.g. Linux)
 
 ## [1.3.2] 2019-10-30
 

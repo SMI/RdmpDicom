@@ -25,7 +25,7 @@ namespace Rdmp.Dicom.Tests.Unit
 
 
                 ex = Assert.Throws<ArgumentException>(()=>new AmbiguousFilePath(@"c:\temp",@"c:\temp\my.dcm"));
-                StringAssert.IsMatch("Specified root path '.*'' was not IsAbsolute",ex.Message);
+                StringAssert.IsMatch("Specified root path '.*' was not IsAbsolute",ex.Message);
             }
             else
             {
