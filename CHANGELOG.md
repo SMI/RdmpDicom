@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed crash when setting `ArchiveRoot` to null on a `DicomSource`
+
 ...
 
 ## [2.0.1] 2019-11-12
