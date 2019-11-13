@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
+## [2.0.2] 2019-11-13
+
+### Fixed
+
+- Fixed crash when setting `ArchiveRoot` to null on a `DicomSource`
+
 ## [2.0.1] 2019-11-12
 
 ### Added
@@ -68,7 +74,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial commit from private repo
 
-[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v2.0.1...develop
+[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v2.0.2...develop
+[2.0.2]: https://github.com/HicServices/RdmpDicom/compare/v2.0.1...v2.0.2
 [2.0.1]: https://github.com/HicServices/RdmpDicom/compare/v1.3.2...v2.0.1
 [1.3.2]: https://github.com/HicServices/RdmpDicom/compare/v1.3.1...v1.3.2
 [1.3.1]: https://github.com/HicServices/RdmpDicom/compare/v1.3.0...v1.3.1

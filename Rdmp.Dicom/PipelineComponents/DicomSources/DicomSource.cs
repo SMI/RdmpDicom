@@ -41,14 +41,17 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
         [DemandsInitialization("Optional - The root directory of the images you are trying to load.  If you set this then any image paths loaded from this directory will be expressed as relative subdirectories e.g. c:\\MyImages\\1\\image1.dcm could be expressed \\1\\image1.dcm")]
         public string ArchiveRoot
         {
-            get { return _archiveRoot; }
+            get => _archiveRoot;
             set
             {
                 //trim leading and ending whitespace and normalize slashes
                 value = value?.TrimStart().TrimEnd(' ', '\t', '\r', '\n').Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
 
                 //if it has a trailing slash (but isn't just '/') then trim the end
-                _archiveRoot = value.Length != 1 ? value.TrimEnd('\\', '/') : value;
+                if(value != null)
+                    _archiveRoot = value.Length != 1 ? value.TrimEnd('\\', '/') : value;
+                else
+                    _archiveRoot = null;
             }
         }
 
