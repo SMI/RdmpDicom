@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
+## [2.0.3] 2019-11-21
+
+### Changed
+
+- Updated to latest DicomTypeTranslation package
+- Upgraded to latest RDMP package
+
 ## [2.0.2] 2019-11-13
 
 ### Fixed
@@ -74,7 +81,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial commit from private repo
 
-[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v2.0.2...develop
+[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v2.0.3...develop
+[2.0.3]: https://github.com/HicServices/RdmpDicom/compare/v2.0.2...v2.0.3
 [2.0.2]: https://github.com/HicServices/RdmpDicom/compare/v2.0.1...v2.0.2
 [2.0.1]: https://github.com/HicServices/RdmpDicom/compare/v1.3.2...v2.0.1
 [1.3.2]: https://github.com/HicServices/RdmpDicom/compare/v1.3.1...v1.3.2
