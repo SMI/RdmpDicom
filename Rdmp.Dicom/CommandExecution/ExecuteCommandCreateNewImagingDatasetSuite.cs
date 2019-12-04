@@ -94,6 +94,8 @@ namespace Rdmp.Dicom.CommandExecution
             IRDMPPlatformRepositoryServiceLocator repositoryLocator,
             DiscoveredDatabase databaseToCreateInto,
             DirectoryInfo projectDirectory,
+
+            [DemandsInitialization("The pipeline source for reading dicom tags from e.g. from files or from serialized JSON",TypeOf = typeof(DicomSource))]
             Type dicomSourceType,
             string tablePrefix,
             FileInfo templateFile,

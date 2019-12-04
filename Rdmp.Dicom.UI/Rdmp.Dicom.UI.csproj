@@ -12,7 +12,7 @@
     <ProjectReference Include="..\Rdmp.Dicom\Rdmp.Dicom.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="HIC.RDMP.Plugin.UI" Version="4.0.1-rc2" />
+    <PackageReference Include="HIC.RDMP.Plugin.UI" Version="4.0.1" />
     <PackageReference Include="System.Drawing.Common" Version="4.5.1" />
   </ItemGroup>
   <ItemGroup>

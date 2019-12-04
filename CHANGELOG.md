@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
+## [2.0.4] 2019-12-04
+
+### Changed
+
+- Upgraded to latest RDMP API (4.0.1)
+
 ## [2.0.3] 2019-11-21
 
 ### Changed
@@ -81,7 +87,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial commit from private repo
 
-[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v2.0.3...develop
+[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v2.0.4...develop
+[2.0.4]: https://github.com/HicServices/RdmpDicom/compare/v2.0.3...v2.0.4
 [2.0.3]: https://github.com/HicServices/RdmpDicom/compare/v2.0.2...v2.0.3
 [2.0.2]: https://github.com/HicServices/RdmpDicom/compare/v2.0.1...v2.0.2
 [2.0.1]: https://github.com/HicServices/RdmpDicom/compare/v1.3.2...v2.0.1
