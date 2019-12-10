@@ -369,12 +369,13 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
             //standardise directory separator character e.g. change \ to /
             filename = filename.Replace('\\','/');
 
+            //if it is relative to ArchiveRoot then express only the subsection with "./" at start
             if (!string.IsNullOrWhiteSpace(ArchiveRoot))
                 if (Path.IsPathRooted(filename) && filename.StartsWith(ArchiveRoot, StringComparison.CurrentCultureIgnoreCase))
-                    filename = filename.Substring(ArchiveRoot.Length);
+                    return "./" + filename.Substring(ArchiveRoot.Length).TrimStart('/');
 
-            //return the relative path e.g. subdir/fish/1.dcm
-            return filename.TrimStart('/');
+            //otherwise return the original
+            return filename;
         }
 
         private void Add(DataTable dt, DataRow row, string header, object value)

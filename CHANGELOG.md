@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
+### Changed
+
+- DicomSource now expresses relative paths (where possible) with the `./` prefix e.g. `./subdir/1.dcm` (previously `subdir/1.dcm`)
+
 ### Fixed
 
 - Fixed relative path expression bug when loading an explicit file list (of dicoms).  Bug caused file path to be expressed as filename only (i.e. no path)
