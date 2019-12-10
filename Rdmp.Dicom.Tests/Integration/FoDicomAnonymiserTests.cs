@@ -73,7 +73,7 @@ namespace Rdmp.Dicom.Tests.Integration
                 //Things we would want to disapear
                 {DicomTag.PatientName,"Moscow"},
                 {DicomTag.PatientBirthDate,"2001-01-01"},
-                {DicomTag.StudyDescription,"Frank has lots of problems this study identifies those, he lives at 60 Pancake road"},
+                {DicomTag.StudyDescription,"Frank has lots of problems, he lives at 60 Pancake road"},
                 {DicomTag.SeriesDescription,"Coconuts"},
                 {DicomTag.SmokingStatus,"Dave loves to smoke fine cigars"},
             };

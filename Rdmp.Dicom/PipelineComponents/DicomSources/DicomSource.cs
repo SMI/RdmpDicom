@@ -371,7 +371,7 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
 
             //if it is relative to ArchiveRoot then express only the subsection with "./" at start
             if (!string.IsNullOrWhiteSpace(ArchiveRoot))
-                if (Path.IsPathRooted(filename) && filename.StartsWith(ArchiveRoot, StringComparison.CurrentCultureIgnoreCase))
+                if (filename.StartsWith(ArchiveRoot, StringComparison.CurrentCultureIgnoreCase))
                     return "./" + filename.Substring(ArchiveRoot.Length).TrimStart('/');
 
             //otherwise return the original

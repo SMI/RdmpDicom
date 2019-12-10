@@ -83,6 +83,17 @@ namespace Rdmp.Dicom.Tests.Unit
             people.GeneratePeople(1,r);
             generator.GenerateTestDataFile(people,new FileInfo("./inventory.csv"),1);
 
+            //This generates
+            // Test_ZipFile
+            //      2015
+            //          3
+            //              18          
+            //                  751140 2.25.166922918107154891877498685128076062226.dcm
+            //                  751140 2.25.179610809676265137473873365625829826423.dcm
+            //                  751140 2.25.201969634959506849065133495434871450465.dcm
+            //                  751140 2.25.237492679533001779093365416814254319890.dcm
+            //                  751140 2.25.316241631782653383510844072713132248731.dcm
+
             //zip them up
             FileInfo zip = new FileInfo(Path.Combine(TestContext.CurrentContext.TestDirectory, nameof(Test_ZipFile) + ".zip"));Path.Combine(TestContext.CurrentContext.TestDirectory, nameof(Test_ZipFile) + ".zip");
 

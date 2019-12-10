@@ -41,6 +41,7 @@ namespace Rdmp.Dicom.Tests.Unit
         [TestCase(@"C:\bob\",@"D:/fish/1.dcm",@"D:/fish/1.dcm")]
         [TestCase(@"C:\bob\",@"C:\fish\bob\fish\1.dcm",@"C:/fish/bob/fish/1.dcm")] //not relative so just return verbatim string (with slash fixes)
         [TestCase(@"C:\bob\",@"./fish.dcm",@"./fish.dcm")]
+        [TestCase(@"./bob/",@"./bob/fish.dcm",@"./fish.dcm")] //if the "root" is relative then we can still express this relative to it
 
         public void Test_ApplyArchiveRootToMakeRelativePath(string root, string inputPath, string expectedRelativePath)
         {
