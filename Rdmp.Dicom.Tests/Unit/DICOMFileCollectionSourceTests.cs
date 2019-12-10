@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Text.RegularExpressions;
 using BadMedicine;
 using BadMedicine.Dicom;
@@ -14,6 +15,7 @@ using Rdmp.Core.DataFlowPipeline.Requirements;
 using Rdmp.Core.DataLoad.Engine.Pipeline.Destinations;
 using FAnsi;
 using Rdmp.Core.Startup;
+using Rdmp.Dicom.Extraction.FoDicomBased;
 
 namespace Rdmp.Dicom.Tests.Unit
 {
@@ -94,6 +96,9 @@ namespace Rdmp.Dicom.Tests.Unit
             //                  751140 2.25.237492679533001779093365416814254319890.dcm
             //                  751140 2.25.316241631782653383510844072713132248731.dcm
 
+            var yearDir = dirToLoad.GetDirectories().Single();
+            StringAssert.IsMatch("\\d{4}",yearDir.Name);
+
             //zip them up
             FileInfo zip = new FileInfo(Path.Combine(TestContext.CurrentContext.TestDirectory, nameof(Test_ZipFile) + ".zip"));Path.Combine(TestContext.CurrentContext.TestDirectory, nameof(Test_ZipFile) + ".zip");
 
@@ -128,13 +133,26 @@ namespace Rdmp.Dicom.Tests.Unit
                 //should be 5 rows in the final table (5 images)
                 Assert.AreEqual(5,dt.Rows.Count);
 
-                
+                string pathInDbToDicomFile = (string) dt.Rows[0]["RelativeFileArchiveURI"];
+
+                //We expect either something like:
+                // E:/RdmpDicom/Rdmp.Dicom.Tests/bin/Debug/netcoreapp2.2/Test_ZipFile.zip!2015/3/18/2.25.160787663560951826149226183314694084702.dcm
+                // ./Test_ZipFile.zip!2015/3/18/2.25.105592977437473375573190160334447272386.dcm
+
                 //the path referenced should be the file read in relative/absolute format
                 StringAssert.IsMatch(
-                    
-                    expressRelative ? $@"./{zip.Name}![\d.]*.dcm":
-                        $@"{Regex.Escape(zip.FullName.Replace('\\','/'))}![\d.]*.dcm",
-                    (string)dt.Rows[0]["RelativeFileArchiveURI"]);
+                    expressRelative ? $@"./{zip.Name}![\d./]*.dcm":
+                        $@"{Regex.Escape(zip.FullName.Replace('\\','/'))}![\d./]*.dcm",
+                    pathInDbToDicomFile);
+
+                StringAssert.Contains(yearDir.Name,pathInDbToDicomFile,"Expected zip file to have subdirectories and for them to be loaded correctly");
+
+                //confirm we can read that out again
+                using (var pool = new ZipPool())
+                {
+                    var path = new AmbiguousFilePath(TestContext.CurrentContext.TestDirectory, pathInDbToDicomFile);
+                    Assert.IsNotNull(path.GetDataset(pool));
+                }
             }
 
             Assert.IsTrue(finalTable.Exists());

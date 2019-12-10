@@ -127,7 +127,7 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
                             buffer = ByteStreamHelper.ReadFully(f.Open());
                             
                             using (var memoryStream = new MemoryStream(buffer))
-                                    ProcessFile(memoryStream, dt, zipFileName + "!" + f.Name, listener);
+                                    ProcessFile(memoryStream, dt, zipFileName + "!" + f.FullName, listener);
                         }
                         catch (Exception e)
                         {
