@@ -82,7 +82,7 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
                 else if (file.Extension == ".dcm")
                 {
                     using (var fs = file.Open(FileMode.Open))
-                        ProcessFile(fs, dt, file.Name, listener);
+                        ProcessFile(fs, dt, file.FullName, listener);
                 }
                 else
                     throw new Exception("Expected file to be either .zip or .dcm ");
