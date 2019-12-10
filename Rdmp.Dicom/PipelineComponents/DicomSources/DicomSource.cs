@@ -45,7 +45,7 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
             set
             {
                 //trim leading and ending whitespace and normalize slashes
-                value = value?.TrimStart().TrimEnd(' ', '\t', '\r', '\n').Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+                value = value?.TrimStart().TrimEnd(' ', '\t', '\r', '\n').Replace('\\','/');
 
                 //if it has a trailing slash (but isn't just '/') then trim the end
                 if(value != null)
