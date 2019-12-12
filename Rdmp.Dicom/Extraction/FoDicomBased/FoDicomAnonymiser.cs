@@ -96,7 +96,7 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
                 
                 foreach (DataRow row in toProcess.Rows)
                 {
-                    if(_errors > ErrorThreshold)
+                    if(_errors > 0 && _errors > ErrorThreshold)
                         throw new Exception($"Number of errors reported ({_errors}) reached the threshold ({ErrorThreshold})");
 
                     cancellationToken.ThrowIfAbortRequested();
@@ -111,7 +111,7 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
                     }
                     catch (Exception e)
                     {
-                        listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Error,$"Failed to get image at path '{path}'",e));
+                        listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Error,$"Failed to get image at path '{path.FullPath}'",e));
                         _errors++;
                         continue;
                     }
@@ -127,7 +127,7 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
                     }
                     catch (Exception e)
                     {
-                        listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Error,$"Failed to anonymize image at path '{path}'",e));
+                        listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Error,$"Failed to anonymize image at path '{path.FullPath}'",e));
                         _errors++;
                         continue;
                     }

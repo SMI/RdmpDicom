@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
+### Fixed
+
+- Fixed path in error messages from `FoDicomAnonymiser` (e.g. when failing to anonymize an image) to show full path
+
 ## [2.0.5] 2019-12-12
 
 ### Added
