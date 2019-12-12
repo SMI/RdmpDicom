@@ -38,10 +38,15 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
         [DemandsInitialization("Retain Full Dates in dicom tags during anonymisation")]
         public bool RetainDates { get; set; }
 
+        [DemandsInitialization("The number of errors (e.g. failed to find/anonymise file) to allow before abandoning the extraction",DefaultValue = 100)]
+        public int ErrorThreshold {get; set; }
+
         private IPutDicomFilesInExtractionDirectories _putter;
 
         private int _anonymisedImagesCount = 0;
         Stopwatch _sw = new Stopwatch();
+
+        private int _errors = 0;
 
         public DataTable ProcessPipelineData(DataTable toProcess, IDataLoadEventListener listener,GracefulCancellationToken cancellationToken)
         {
@@ -91,16 +96,41 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
                 
                 foreach (DataRow row in toProcess.Rows)
                 {
+                    if(_errors > ErrorThreshold)
+                        throw new Exception($"Number of errors reported ({_errors}) reached the threshold ({ErrorThreshold})");
+
                     cancellationToken.ThrowIfAbortRequested();
 
                     var path = new AmbiguousFilePath(ArchiveRootIfAny, (string)row[RelativeArchiveColumnName]);
 
-                    var dicomFile = path.GetDataset(pool);
+                    DicomFile dicomFile;
+                    
+                    try
+                    {
+                        dicomFile = path.GetDataset(pool);
+                    }
+                    catch (Exception e)
+                    {
+                        listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Error,$"Failed to get image at path '{path}'",e));
+                        _errors++;
+                        continue;
+                    }
 
                     //get the new patient ID
                     var releaseId = row[releaseCol.GetRuntimeName()].ToString();
                     
-                    var ds = anonymiser.Anonymize(dicomFile.Dataset);
+                    DicomDataset ds;
+
+                    try
+                    {
+                        ds = anonymiser.Anonymize(dicomFile.Dataset);
+                    }
+                    catch (Exception e)
+                    {
+                        listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Error,$"Failed to anonymize image at path '{path}'",e));
+                        _errors++;
+                        continue;
+                    }
 
                     //now we want to explicitly use our own release Id regardless of what FoDicom said
                     ds.AddOrUpdate(DicomTag.PatientID, releaseId);

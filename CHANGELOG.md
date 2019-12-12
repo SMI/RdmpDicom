@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
+### Added
+
+- Added better logging of error(s) in `FoDicomAnonymiser` (now includes file path of image failing)
+
 ### Changed
 
 - DicomSource now expresses relative paths (where possible) with the `./` prefix e.g. `./subdir/1.dcm` (previously `subdir/1.dcm`)
