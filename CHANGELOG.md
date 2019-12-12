@@ -8,6 +8,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
+## [2.0.5] 2019-12-12
+
+### Added
+
+- Added better logging of error(s) in `FoDicomAnonymiser` (now includes file path of image failing)
+
+### Changed
+
+- DicomSource now expresses relative paths (where possible) with the `./` prefix e.g. `./subdir/1.dcm` (previously `subdir/1.dcm`)
+
+### Fixed
+
+- Fixed relative path expression bug when loading an explicit file list (of dicoms).  Bug caused file path to be expressed as filename only (i.e. no path)
+- Fixed DicomSource not expressing subdirectories of zip files (meaning it previously only worked when everything was in the root of the zip file).
+
 ## [2.0.4] 2019-12-04
 
 ### Changed
@@ -87,7 +102,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial commit from private repo
 
-[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v2.0.4...develop
+[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v2.0.5...develop
+[2.0.5]: https://github.com/HicServices/RdmpDicom/compare/v2.0.4...v2.0.5
 [2.0.4]: https://github.com/HicServices/RdmpDicom/compare/v2.0.3...v2.0.4
 [2.0.3]: https://github.com/HicServices/RdmpDicom/compare/v2.0.2...v2.0.3
 [2.0.2]: https://github.com/HicServices/RdmpDicom/compare/v2.0.1...v2.0.2

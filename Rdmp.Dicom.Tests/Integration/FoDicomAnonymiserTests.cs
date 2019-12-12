@@ -68,14 +68,20 @@ namespace Rdmp.Dicom.Tests.Integration
             var eds = new ExternalDatabaseServer(CatalogueRepository, "eds", patcher);
             eds.SetProperties(uidMapDb);
             
-            Dictionary<DicomTag,string> thingThatShouldDisapear = new Dictionary<DicomTag, string>()
+            Dictionary<DicomTag,string> thingThatShouldDisappear = new Dictionary<DicomTag, string>()
             {
-                //Things we would want to disapear
+                //Things we would want to disappear
                 {DicomTag.PatientName,"Moscow"},
                 {DicomTag.PatientBirthDate,"2001-01-01"},
-                {DicomTag.StudyDescription,"Frank has lots of problems this study identifies those, he lives at 60 Pancake road"},
+                {DicomTag.StudyDescription,"Frank has lots of problems, he lives at 60 Pancake road"},
                 {DicomTag.SeriesDescription,"Coconuts"},
-                {DicomTag.SmokingStatus,"Dave loves to smoke fine cigars"},
+                {DicomTag.StudyDate,"2002-01-01"},
+            };
+
+            Dictionary<DicomTag,string> thingsThatShouldRemain = new Dictionary<DicomTag, string>()
+            {
+                //Things we would want to remain
+                {DicomTag.SmokingStatus,"CIGARS"},
             };
             
             var dicom = new DicomDataset()
@@ -84,10 +90,12 @@ namespace Rdmp.Dicom.Tests.Integration
                 {DicomTag.SeriesInstanceUID, "123.4.5"},
                 {DicomTag.StudyInstanceUID, "123.4.6"},
                 {DicomTag.SOPClassUID,"1"},
-                {DicomTag.StudyDate,"2002-01-01"},
             };
 
-            foreach (var kvp in thingThatShouldDisapear)
+            foreach (var kvp in thingThatShouldDisappear)
+                dicom.AddOrUpdate(kvp.Key, kvp.Value);
+            
+            foreach (var kvp in thingsThatShouldRemain)
                 dicom.AddOrUpdate(kvp.Key, kvp.Value);
 
             var fi = new FileInfo(Path.Combine(TestContext.CurrentContext.WorkDirectory, "madness.dcm"));
@@ -152,9 +160,8 @@ namespace Rdmp.Dicom.Tests.Integration
 
             Assert.AreEqual(anoDt.Rows[0]["StudyInstanceUID"], anoDicom.Dataset.GetValue<string>(DicomTag.StudyInstanceUID, 0));
 
-            Assert.AreEqual(df.Dataset.GetValue<string>(DicomTag.StudyDate, 0), anoDicom.Dataset.GetValue<string>(DicomTag.StudyDate, 0));
 
-            foreach (KeyValuePair<DicomTag, string> kvp in thingThatShouldDisapear)
+            foreach (KeyValuePair<DicomTag, string> kvp in thingThatShouldDisappear)
             {
                 //if it chopped out the entire tag
                 if(!anoDicom.Dataset.Contains(kvp.Key))
@@ -166,13 +173,19 @@ namespace Rdmp.Dicom.Tests.Integration
                 var value = anoDicom.Dataset.GetSingleValue<string>(kvp.Key);
                 switch (value)
                 {
-                        //allowed values
+                    //allowed values
                     case "ANONYMOUS":continue;
+
+                    //anonymous date
+                    case "00010101":continue;
 
                     default: Assert.Fail("Unexpected value for " + kvp.Key + ":" + value);
                         break;
                 }
             }
+
+            foreach (KeyValuePair<DicomTag, string> kvp in thingsThatShouldRemain)
+                Assert.AreEqual(kvp.Value, anoDicom.Dataset.GetValue<string>(kvp.Key, 0));
         }
 
         // The following commented tests will fail due to underlying system limits on paths
