@@ -128,7 +128,7 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
                 //get the tag name (human readable)
                 var entry = item.Tag.DictionaryEntry;
 
-                string header = entry.Keyword;
+                string header = item.Tag.IsPrivate ? GetPrivateTagName(item.Tag) : entry.Keyword;
 
                 if (ShouldSkip(dt, item.Tag))
                     continue;
@@ -287,6 +287,16 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
                 foreach (KeyValuePair<string, object> keyValuePair in rowValues)
                     Add(dt, row, keyValuePair.Key, keyValuePair.Value);
             }
+        }
+
+        /// <summary>
+        /// Returns the private tag number (e.g. "(3001,0010)") suitable for inserting into a database i.e. 3001_0010
+        /// </summary>
+        /// <param name="itemTag"></param>
+        /// <returns></returns>
+        public static string GetPrivateTagName(DicomTag itemTag)
+        {
+            return itemTag.ToString().Trim('(', ')').Replace(",", "_");
         }
 
         public bool ShouldSkip(DataTable dt, DicomTag tag)
