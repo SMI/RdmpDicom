@@ -128,7 +128,4 @@ Study.StudyInstanceUID = '9.9.9'
 
 ## Tests
 
-Unit tests for the component can be found in [PrimaryKeyCollisionIsolationMutilationTests.cs](../../SMIPluginTests/Unit/PrimaryKeyCollisionIsolationMutilationTests.cs)
-
-The full stack test (in which dicom images containing duplication at study level are created) is [IntegrationTest_HappyPath_WithIsolation](../../Microservices/Tests/Microservices.Tests.RDMPTests/MicroservicesIntegrationTest.cs)
-
+Unit tests for the component can be found in [PrimaryKeyCollisionIsolationMutilationTests.cs](../../Rdmp.Dicom.Tests/Unit/PrimaryKeyCollisionIsolationMutilationTests.cs)
