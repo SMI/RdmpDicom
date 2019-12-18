@@ -236,6 +236,171 @@ namespace Rdmp.Dicom.Tests.Unit
             Assert.AreEqual(4, dtChildIsolation.Rows.Count);
         }
 
+
+
+        [TestCase(DatabaseType.MicrosoftSQLServer,false)]
+        [TestCase(DatabaseType.MySql,false)]
+        [TestCase(DatabaseType.MicrosoftSQLServer,true)]
+        [TestCase(DatabaseType.MySql,true)]
+        public void Test_IsolateTwoTables_MutipleConflictingColumns(DatabaseType dbType,bool whitespace)
+        {
+            var db = GetCleanedServer(dbType);
+
+            //Create a table in 'RAW' (has no constraints)
+            var dt = new DataTable();
+            dt.Columns.Add("Pk");
+            dt.Columns.Add("OtherCol");
+
+            dt.Rows.Add("A",1); //these are colliding on pk "A" with different values of "OtherCol"
+            dt.Rows.Add(whitespace? "A " :"A",2);
+
+            //Create a table in 'RAW' (has no constraints)
+            var dt2 = new DataTable();
+            dt2.Columns.Add("Pk2");
+            dt2.Columns.Add("Fk");
+            dt2.Columns.Add("OtherCol2");
+            dt2.Columns.Add("OtherCol3");
+
+            dt2.Rows.Add(whitespace ? "X ": "X", "A", "FF",DBNull.Value); //these are colliding on pk "X" with different values of "OtherCol2"
+            dt2.Rows.Add("X", whitespace ? "A " :"A", "GG",DBNull.Value);
+            dt2.Rows.Add(whitespace ? "X ": "X", "A", "FF","HH"); //these are colliding on pk "X" with different values of "OtherCol2"
+            dt2.Rows.Add("X", whitespace ? "A " :"A", "GG","HH");
+            
+            var tblParent = db.CreateTable("Parent", dt);
+            var tblChild = db.CreateTable("Child", dt2);
+
+            //import the table and make A look like a primary key to the metadata layer (and A would be pk in LIVE but not in RAW ofc)
+            TableInfo parentTableInfo;
+            ColumnInfo[] parentColumnInfosCreated;
+
+            TableInfo childTableInfo;
+            ColumnInfo[] childColumnInfosCreated;
+
+            Import(tblParent, out parentTableInfo, out parentColumnInfosCreated);
+            Import(tblChild, out childTableInfo, out childColumnInfosCreated);
+
+            //make sure RDMP knows joins start with this table
+            parentTableInfo.IsPrimaryExtractionTable = true;
+            parentTableInfo.SaveToDatabase();
+
+            //lie about the primary key statuses (to simulate live)
+            var seriesInstanceUIdCol =
+                parentColumnInfosCreated.Single(c => c.GetRuntimeName().Equals("Pk"));
+            seriesInstanceUIdCol.IsPrimaryKey = true;
+            seriesInstanceUIdCol.SaveToDatabase();
+
+            var sopInstanceUIdCol = childColumnInfosCreated.Single(c => c.GetRuntimeName().Equals("Pk2"));
+            sopInstanceUIdCol.IsPrimaryKey = true;
+            sopInstanceUIdCol.SaveToDatabase();
+
+            //Create a new mutilator for these two tables
+            var mutilator = GetMutilator(db, parentTableInfo, childTableInfo);
+
+            //tell RDMP about how to join tables
+            new JoinInfo(CatalogueRepository,childColumnInfosCreated.Single(
+                c => c.GetRuntimeName().Equals("Fk")),
+                parentColumnInfosCreated.Single(c => c.GetRuntimeName().Equals("Pk")),
+                ExtractionJoinType.Right, null);
+
+            //now that we have a join it should pass checks
+            mutilator.Check(new AcceptAllCheckNotifier());
+
+            var config = new HICDatabaseConfiguration(db.Server,new ReturnSameString());
+            var job = Mock.Of<IDataLoadJob>(j => j.JobID==999 && j.Configuration == config);            
+
+            mutilator.Initialize(db, LoadStage.AdjustRaw);
+            mutilator.Mutilate(job);
+
+            //parent should now be empty
+            var dtParent = parentTableInfo.Discover(DataAccessContext.InternalDataProcessing).GetDataTable();
+            Assert.AreEqual(0, dtParent.Rows.Count);
+
+            //isolation should have 2
+            var dtParentIsolation = db.ExpectTable("Parent_Isolation").GetDataTable();
+            Assert.AreEqual(2, dtParentIsolation.Rows.Count); //candy and frank should be left 
+
+            //child table should also be empty
+            var dtChild = childTableInfo.Discover(DataAccessContext.InternalDataProcessing).GetDataTable();
+            Assert.AreEqual(0, dtChild.Rows.Count);
+
+            //child isolation table should have 4:
+            var dtChildIsolation = db.ExpectTable("Child_Isolation").GetDataTable();
+            Assert.AreEqual(4, dtChildIsolation.Rows.Count);
+        }
+
+
+        [TestCase(DatabaseType.MicrosoftSQLServer)]
+        [TestCase(DatabaseType.MySql)]
+        public void Test_IsolateTables_Orphans(DatabaseType dbType)
+        {
+            var db = GetCleanedServer(dbType);
+
+            //Create a table in 'RAW' (has no constraints)
+            var dt = new DataTable();
+            dt.Columns.Add("Pk");
+            dt.Columns.Add("OtherCol");
+
+            dt.Rows.Add("A",1); //these are colliding on pk "A" with different values of "OtherCol"
+            dt.Rows.Add("A",2);
+
+            //Create a table in 'RAW' (has no constraints)
+            var dt2 = new DataTable();
+            dt2.Columns.Add("Pk2");
+            dt2.Columns.Add("Fk");
+            dt2.Columns.Add("OtherCol2");
+            dt2.Columns.Add("OtherCol3");
+
+            dt2.Rows.Add("X", "B", "FF",DBNull.Value); //these are colliding (on pk 'X') and also orphans (B does not appear in parent table dt)
+            dt2.Rows.Add("X", "B", "GG",DBNull.Value);
+            
+            var tblParent = db.CreateTable("Parent", dt);
+            var tblChild = db.CreateTable("Child", dt2);
+
+            //import the table and make A look like a primary key to the metadata layer (and A would be pk in LIVE but not in RAW ofc)
+            TableInfo parentTableInfo;
+            ColumnInfo[] parentColumnInfosCreated;
+
+            TableInfo childTableInfo;
+            ColumnInfo[] childColumnInfosCreated;
+
+            Import(tblParent, out parentTableInfo, out parentColumnInfosCreated);
+            Import(tblChild, out childTableInfo, out childColumnInfosCreated);
+
+            //make sure RDMP knows joins start with this table
+            parentTableInfo.IsPrimaryExtractionTable = true;
+            parentTableInfo.SaveToDatabase();
+
+            //lie about the primary key statuses (to simulate live)
+            var seriesInstanceUIdCol =
+                parentColumnInfosCreated.Single(c => c.GetRuntimeName().Equals("Pk"));
+            seriesInstanceUIdCol.IsPrimaryKey = true;
+            seriesInstanceUIdCol.SaveToDatabase();
+
+            var sopInstanceUIdCol = childColumnInfosCreated.Single(c => c.GetRuntimeName().Equals("Pk2"));
+            sopInstanceUIdCol.IsPrimaryKey = true;
+            sopInstanceUIdCol.SaveToDatabase();
+
+            //Create a new mutilator for these two tables
+            var mutilator = GetMutilator(db, parentTableInfo, childTableInfo);
+
+            //tell RDMP about how to join tables
+            new JoinInfo(CatalogueRepository,childColumnInfosCreated.Single(
+                c => c.GetRuntimeName().Equals("Fk")),
+                parentColumnInfosCreated.Single(c => c.GetRuntimeName().Equals("Pk")),
+                ExtractionJoinType.Right, null);
+
+            //now that we have a join it should pass checks
+            mutilator.Check(new AcceptAllCheckNotifier());
+
+            var config = new HICDatabaseConfiguration(db.Server,new ReturnSameString());
+            var job = Mock.Of<IDataLoadJob>(j => j.JobID==999 && j.Configuration == config);            
+
+            mutilator.Initialize(db, LoadStage.AdjustRaw);
+            var ex = Assert.Throws<Exception>(()=>mutilator.Mutilate(job));
+
+            Assert.AreEqual("Primary key value not found for X", ex.Message);
+        }
+
         class ReturnSameString : INameDatabasesAndTablesDuringLoads
         {
             public string GetDatabaseName(string rootDatabaseName, LoadBubble convention)
