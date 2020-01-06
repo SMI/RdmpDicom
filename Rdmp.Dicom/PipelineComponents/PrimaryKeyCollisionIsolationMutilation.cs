@@ -53,13 +53,6 @@ namespace Rdmp.Dicom.PipelineComponents
             {
                 if (t.ColumnInfos.Count(c => c.IsPrimaryKey) != 1)
                     throw new Exception("Table '" + t + "' did not have exactly 1 IsPrimaryKey column");
-
-                var pk = t.ColumnInfos.Single(c => c.IsPrimaryKey);
-
-                var type = t.GetQuerySyntaxHelper().TypeTranslater.GetCSharpTypeForSQLDBType(pk.Data_type);
-                
-                if (type != typeof(string))
-                    notifier.OnCheckPerformed(new CheckEventArgs("Expected primary key column " + pk + " to be a string data type but it was '" + pk.Data_type +"'" ,CheckResult.Fail));
             }
 
             //if there are multiple tables then we must know how to join them
@@ -229,17 +222,18 @@ namespace Rdmp.Dicom.PipelineComponents
             {
                 var pkCol = tableInfo.ColumnInfos.Single(c => c.IsPrimaryKey);
 
-                foreach (string pkValue in DetectCollisions(pkCol, tableInfo))
-                {
-                    _job.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information, "Found duplication in column '" + pkCol +"', duplicate value was '" + pkValue +"'"));
-                    MigrateRecords(pkCol, pkValue);
-                }
+                var allCollisions = DetectCollisions(pkCol, tableInfo).Distinct().ToArray();
+
+                _job.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information, 
+                    $"Found duplication in column '{pkCol}', duplicate values were '{string.Join(",",allCollisions)}'"));
+                MigrateRecords(pkCol, allCollisions);
+            
             }
 
             return ExitCodeType.Success;
         }
 
-        private void MigrateRecords(ColumnInfo deleteOn,string deleteValue)
+        private void MigrateRecords(ColumnInfo deleteOn,object[] deleteValues)
         {
             var deleteOnColumnName = GetRAWColumnNameFullyQualified(deleteOn);
 
@@ -250,22 +244,15 @@ namespace Rdmp.Dicom.PipelineComponents
                 //if we are deleting on a child table we need to look up the primary table primary key (e.g. StudyInstanceUID) we should then migrate that data instead (for all tables)
                 if (!deleteOn.Equals(_primaryTablePk))
                 {
-                    var oldValue = deleteValue;
-
-                    deleteValue = GetPrimaryKeyValueFor(deleteOn, deleteValue, con);
+                    deleteValues = GetPrimaryKeyValuesFor(deleteOn, deleteValues, con);
                     deleteOnColumnName = GetRAWColumnNameFullyQualified(_primaryTablePk);
-
-                    if(deleteValue == null)
-                        throw new Exception("Primary key value not found for " + oldValue);
-
-                    _job.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information, "Corresponding primary key is '" + deleteValue + "' ('" + deleteOnColumnName + "')"));
                 }
 
                 //pull all records that we must isolate in all joined tables
                 Dictionary<TableInfo,DataTable> toPush = new Dictionary<TableInfo, DataTable>();
 
                 foreach (TableInfo tableInfo in TablesToIsolate)
-                    toPush.Add(tableInfo, PullTable(tableInfo,con, deleteOnColumnName, deleteValue));
+                    toPush.Add(tableInfo, PullTable(tableInfo,con, deleteOnColumnName, deleteValues));
 
                 //push the results to isolation
                 foreach (KeyValuePair<TableInfo, DataTable> kvp in toPush)
@@ -278,7 +265,7 @@ namespace Rdmp.Dicom.PipelineComponents
                 }
 
                 foreach (TableInfo t in TablesToIsolate.Reverse())
-                    DeleteRows(t, deleteOnColumnName, deleteValue, con);
+                    DeleteRows(t, deleteOnColumnName, deleteValues, con);
             }
         }
 
@@ -292,23 +279,53 @@ namespace Rdmp.Dicom.PipelineComponents
             return _syntaxHelper.EnsureFullyQualified(_raw.GetRuntimeName(), null, col.TableInfo.GetRuntimeName(LoadBubble.Raw, _namer), col.GetRuntimeName(LoadStage.AdjustRaw));
         }
 
-        private string GetPrimaryKeyValueFor(ColumnInfo deleteOn, string deleteValue, DbConnection con)
+        /// <summary>
+        /// Looks up the full join table to identify primary key value(s) for all colliding child tables
+        /// </summary>
+        /// <param name="deleteOn"></param>
+        /// <param name="deleteValue"></param>
+        /// <param name="con"></param>
+        /// <returns></returns>
+        private object[] GetPrimaryKeyValuesFor(ColumnInfo deleteOn, object[] deleteValue, DbConnection con)
         {
             var deleteOnColumnName = GetRAWColumnNameFullyQualified(deleteOn);
             var pkColumnName = GetRAWColumnNameFullyQualified(_primaryTablePk);
+
+            HashSet<object> toReturn = new HashSet<object>();
 
             //fetch all the data
             string sqlSelect = string.Format("Select distinct {0} {1} WHERE {2} = @val", pkColumnName, _fromSql, deleteOnColumnName);
             var cmdSelect = _raw.Server.GetCommand(sqlSelect, con);
             var p = cmdSelect.CreateParameter();
             p.ParameterName = "@val";
-            p.Value = deleteValue;
             cmdSelect.Parameters.Add(p);
 
-            return  cmdSelect.ExecuteScalar() as string;
+            foreach (var d in deleteValue)
+            {
+                p.Value = d;
+                bool readOne = false;
+                using (var r = cmdSelect.ExecuteReader())
+                {
+                    while (r.Read())
+                    {
+                        var result = r[0];
+
+                        if(result == DBNull.Value || result == null)
+                            throw new Exception("Primary key value not found for " + d + " foreign Key was null");
+
+                        toReturn.Add(result);
+                        readOne = true;
+                    }
+
+                    if(!readOne)
+                        throw new Exception("Primary key value not found for " + d);
+                }
+            }
+
+            return toReturn.ToArray();
         }
 
-        private DataTable PullTable(TableInfo tableInfo, DbConnection con, string deleteOnColumnName, string deleteValue)
+        private DataTable PullTable(TableInfo tableInfo, DbConnection con, string deleteOnColumnName, object[] deleteValues)
         {
             DataTable dt = new DataTable();
             var pk = tableInfo.ColumnInfos.Single(c => c.IsPrimaryKey);
@@ -320,13 +337,17 @@ namespace Rdmp.Dicom.PipelineComponents
             string sqlSelect = string.Format("Select distinct {0}.* {1} WHERE {2} = @val AND {3} is not null", deleteFromTableName, _fromSql, deleteOnColumnName, pkColumnName);
             var cmdSelect = _raw.Server.GetCommand(sqlSelect, con);
             var p = cmdSelect.CreateParameter();
-            p.ParameterName = "@val";
-            p.Value = deleteValue;
             cmdSelect.Parameters.Add(p);
 
-            var da = _raw.Server.GetDataAdapter(cmdSelect);
-            da.Fill(dt);
+            foreach (var value in deleteValues)
+            {
+                p.ParameterName = "@val";
+                p.Value = value;
 
+                using(var da = _raw.Server.GetDataAdapter(cmdSelect))
+                    da.Fill(dt);
+            }
+            
             dt.Columns.Add(SpecialFieldNames.DataLoadRunID, typeof(int));
             
             foreach (DataRow row in dt.Rows)
@@ -335,23 +356,27 @@ namespace Rdmp.Dicom.PipelineComponents
             return dt;
         }
 
-        private void DeleteRows(TableInfo toDelete, string deleteOnColumnName, string deleteValue, DbConnection con)
+        private void DeleteRows(TableInfo toDelete, string deleteOnColumnName, object[] deleteValues, DbConnection con)
         {
             //now delete all records
             string sqlDelete = string.Format("DELETE {0} {1} WHERE {2} = @val", toDelete.GetRuntimeName(LoadBubble.Raw,_namer), _fromSql, deleteOnColumnName);
 
             var cmdDelete = _raw.Server.GetCommand(sqlDelete, con);
             var p2 = cmdDelete.CreateParameter();
-            p2.ParameterName = "@val";
-            p2.Value = deleteValue;
             cmdDelete.Parameters.Add(p2);
 
-            //then delete it
-            cmdDelete.ExecuteNonQuery();
+            foreach (var d in deleteValues)
+            {
+                p2.ParameterName = "@val";
+                p2.Value = d;
+                
+                //then delete it
+                cmdDelete.ExecuteNonQuery();
+            }
         }
 
 
-        private IEnumerable<string> DetectCollisions(ColumnInfo pkCol,TableInfo tableInfo)
+        private IEnumerable<object> DetectCollisions(ColumnInfo pkCol,TableInfo tableInfo)
         {
             var pkColName = pkCol.GetRuntimeName(LoadStage.AdjustRaw);
 
@@ -370,7 +395,7 @@ namespace Rdmp.Dicom.PipelineComponents
                 var r = cmd.ExecuteReader();
 
                 while (r.Read())
-                    yield return (string) r[pkColName];
+                    yield return r[pkColName];
             }
         }
     }
