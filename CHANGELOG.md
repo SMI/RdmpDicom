@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
+## [2.0.6] 2020-01-06
+
 ### Changed
 
 - `PrimaryKeyCollisionIsolationMutilation` now supports non string primary/foreign values.
@@ -116,7 +118,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial commit from private repo
 
-[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v2.0.5...develop
+[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v2.0.6...develop
+[2.0.6]: https://github.com/HicServices/RdmpDicom/compare/v2.0.5...v2.0.6
 [2.0.5]: https://github.com/HicServices/RdmpDicom/compare/v2.0.4...v2.0.5
 [2.0.4]: https://github.com/HicServices/RdmpDicom/compare/v2.0.3...v2.0.4
 [2.0.3]: https://github.com/HicServices/RdmpDicom/compare/v2.0.2...v2.0.3
