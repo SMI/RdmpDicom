@@ -53,13 +53,6 @@ namespace Rdmp.Dicom.PipelineComponents
             {
                 if (t.ColumnInfos.Count(c => c.IsPrimaryKey) != 1)
                     throw new Exception("Table '" + t + "' did not have exactly 1 IsPrimaryKey column");
-
-                var pk = t.ColumnInfos.Single(c => c.IsPrimaryKey);
-
-                var type = t.GetQuerySyntaxHelper().TypeTranslater.GetCSharpTypeForSQLDBType(pk.Data_type);
-                
-                if (type != typeof(string))
-                    notifier.OnCheckPerformed(new CheckEventArgs("Expected primary key column " + pk + " to be a string data type but it was '" + pk.Data_type +"'" ,CheckResult.Fail));
             }
 
             //if there are multiple tables then we must know how to join them
@@ -310,12 +303,23 @@ namespace Rdmp.Dicom.PipelineComponents
             foreach (var d in deleteValue)
             {
                 p.Value = d;
-                var result = cmdSelect.ExecuteScalar();
+                bool readOne = false;
+                using (var r = cmdSelect.ExecuteReader())
+                {
+                    while (r.Read())
+                    {
+                        var result = r[0];
 
-                if(result == DBNull.Value || result == null)
-                    throw new Exception("Primary key value not found for " + d);
+                        if(result == DBNull.Value || result == null)
+                            throw new Exception("Primary key value not found for " + d + " foreign Key was null");
 
-                toReturn.Add(result);
+                        toReturn.Add(result);
+                        readOne = true;
+                    }
+
+                    if(!readOne)
+                        throw new Exception("Primary key value not found for " + d);
+                }
             }
 
             return toReturn.ToArray();
