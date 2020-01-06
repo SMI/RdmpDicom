@@ -701,7 +701,7 @@ namespace Rdmp.Dicom.Tests.Unit
         private void AssertContains(DataTable dt, params object[] rowValues)
         {
             Assert.IsTrue(dt.Rows.Cast<DataRow>().Any(r=>
-                    r.ItemArray.SequenceEqual(rowValues)),"Did not find expected row " + string.Join("," , rowValues)
+                    rowValues.All(v=>r.ItemArray.Contains(v))),"Did not find expected row " + string.Join("," , rowValues)
                                                           + Environment.NewLine + "Rows seen were:" + 
                                                           string.Join(Environment.NewLine,
                                                               dt.Rows.Cast<DataRow>().Select(r=>string.Join(",",r.ItemArray))));
