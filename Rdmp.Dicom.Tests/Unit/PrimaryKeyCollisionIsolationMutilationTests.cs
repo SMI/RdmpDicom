@@ -359,7 +359,7 @@ namespace Rdmp.Dicom.Tests.Unit
             dt2.Columns.Add("OtherCol");
 
             dt2.Rows.Add("X", "A",1); //these are colliding on pk "X" which will ship A to the isolation table
-            dt2.Rows.Add("X", "A",1);
+            dt2.Rows.Add("X", "A",2);
             dt2.Rows.Add("Y", "A",2); //these are colliding on pk "Y" but also reference A (which has already been shipped to isolation)
             dt2.Rows.Add("Y", "A",1);
             
@@ -430,6 +430,14 @@ namespace Rdmp.Dicom.Tests.Unit
         {
             var db = GetCleanedServer(dbType);
 
+            /***************************************
+             *      Parent(Pk)     Child (Pk2,Fk,OtherCol)
+             *         A        <>       X,B,FF
+             *                               ⬍  (collision on pk X causes lookup of Fk B which does not exist in Parent)
+             *                           X,B,GG
+             *
+             **********************************/
+
             //Create a table in 'RAW' (has no constraints)
             var dt = new DataTable();
             dt.Columns.Add("Pk");
@@ -495,7 +503,101 @@ namespace Rdmp.Dicom.Tests.Unit
 
             Assert.AreEqual("Primary key value not found for X", ex.Message);
         }
+        [TestCase(DatabaseType.MicrosoftSQLServer)]
+        [TestCase(DatabaseType.MySql)]
+        public void Test_IsolateTables_NoRecordsLeftBehind(DatabaseType dbType)
+        {
+            var db = GetCleanedServer(dbType);
 
+            /***************************************
+             *      Parent(Pk)     Child (Pk2,Fk,OtherCol)
+             *         A        ->       X,A,FF
+             *                               ⬍  (collision on Pk X means we migrate A but we must make sure to ship Y too or it will be an orphan)
+             *                           X,A,GG
+             *                           Y,A,HH ('good' record but must be isolated because referenced foreign key A is going away).
+             *
+             **********************************/
+
+            //Create a table in 'RAW' (has no constraints)
+            var dt = new DataTable();
+            dt.Columns.Add("Pk");
+            dt.Columns.Add("OtherCol");
+
+            dt.Rows.Add("A",1);
+
+            //Create a table in 'RAW' (has no constraints)
+            var dt2 = new DataTable();
+            dt2.Columns.Add("Pk2");
+            dt2.Columns.Add("Fk");
+            dt2.Columns.Add("OtherCol2");
+            dt2.Columns.Add("OtherCol3");
+
+            dt2.Rows.Add("X", "A", "FF",DBNull.Value); //these are colliding (on pk 'X')
+            dt2.Rows.Add("X", "A", "GG",DBNull.Value);
+            dt2.Rows.Add("Y", "A", "HH",DBNull.Value); //must not be left behind
+            
+            var tblParent = db.CreateTable("Parent", dt);
+            var tblChild = db.CreateTable("Child", dt2);
+
+            //import the table and make A look like a primary key to the metadata layer (and A would be pk in LIVE but not in RAW ofc)
+            TableInfo parentTableInfo;
+            ColumnInfo[] parentColumnInfosCreated;
+
+            TableInfo childTableInfo;
+            ColumnInfo[] childColumnInfosCreated;
+
+            Import(tblParent, out parentTableInfo, out parentColumnInfosCreated);
+            Import(tblChild, out childTableInfo, out childColumnInfosCreated);
+
+            //make sure RDMP knows joins start with this table
+            parentTableInfo.IsPrimaryExtractionTable = true;
+            parentTableInfo.SaveToDatabase();
+
+            //lie about the primary key statuses (to simulate live)
+            var seriesInstanceUIdCol =
+                parentColumnInfosCreated.Single(c => c.GetRuntimeName().Equals("Pk"));
+            seriesInstanceUIdCol.IsPrimaryKey = true;
+            seriesInstanceUIdCol.SaveToDatabase();
+
+            var sopInstanceUIdCol = childColumnInfosCreated.Single(c => c.GetRuntimeName().Equals("Pk2"));
+            sopInstanceUIdCol.IsPrimaryKey = true;
+            sopInstanceUIdCol.SaveToDatabase();
+
+            //Create a new mutilator for these two tables
+            var mutilator = GetMutilator(db, parentTableInfo, childTableInfo);
+
+            //tell RDMP about how to join tables
+            new JoinInfo(CatalogueRepository,childColumnInfosCreated.Single(
+                c => c.GetRuntimeName().Equals("Fk")),
+                parentColumnInfosCreated.Single(c => c.GetRuntimeName().Equals("Pk")),
+                ExtractionJoinType.Right, null);
+
+            //now that we have a join it should pass checks
+            mutilator.Check(new AcceptAllCheckNotifier());
+
+            var config = new HICDatabaseConfiguration(db.Server,new ReturnSameString());
+            var job = Mock.Of<IDataLoadJob>(j => j.JobID==999 && j.Configuration == config);            
+
+            mutilator.Initialize(db, LoadStage.AdjustRaw);
+            Assert.DoesNotThrow(()=>mutilator.Mutilate(job));
+
+            //parent should now have 0...
+            var dtParent = parentTableInfo.Discover(DataAccessContext.InternalDataProcessing).GetDataTable();
+            Assert.AreEqual(0, dtParent.Rows.Count);
+
+            //isolation should have 1
+            var dtParentIsolation = db.ExpectTable("Parent_Isolation").GetDataTable();
+            Assert.AreEqual(1, dtParentIsolation.Rows.Count); //candy and frank should be left 
+
+            //child table should also be empty
+            var dtChild = childTableInfo.Discover(DataAccessContext.InternalDataProcessing).GetDataTable();
+            Assert.AreEqual(0, dtChild.Rows.Count);
+
+            //child isolation table should have 3 (both bad records and the good record that would otherwise be an orphan in live)
+            var dtChildIsolation = db.ExpectTable("Child_Isolation").GetDataTable();
+            Assert.AreEqual(3, dtChildIsolation.Rows.Count);
+
+        }
         class ReturnSameString : INameDatabasesAndTablesDuringLoads
         {
             public string GetDatabaseName(string rootDatabaseName, LoadBubble convention)

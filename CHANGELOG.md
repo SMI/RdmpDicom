@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Fixed path in error messages from `FoDicomAnonymiser` (e.g. when failing to anonymize an image) to show full path
+- Fixed bug in `PrimaryKeyCollisionIsolationMutilation` when collisions occur in multiple sets of child records of a primary key.
+    - All records are now migrated at once then deleted at once
+    - See test [Test_IsolateTwoTables_MultipleCollidingChildren](./Rdmp.Dicom.Tests/Unit/PrimaryKeyCollisionIsolationMutilationTests.cs)
 
 ## [2.0.5] 2019-12-12
 
