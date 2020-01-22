@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -201,8 +202,9 @@ namespace Rdmp.Dicom.Tests.Unit
             Assert.AreEqual(5,dicomFiles.Length);
 
             //e.g. \2015\3\18\2.25.223398837779449245317520567111874824918.dcm
-            var relativePathWithinZip = dicomFiles.First().FullName.Substring(dirToLoad.FullName.Length);
-
+            //e.g. \2015\3\18\2.25.179610809676265137473873365625829826423.dcm
+            var relativePathWithinZip1 = dicomFiles[0].FullName.Substring(dirToLoad.FullName.Length);
+            var relativePathWithinZip2 = dicomFiles[1].FullName.Substring(dirToLoad.FullName.Length);
             
             //zip them up
             FileInfo zip = new FileInfo(Path.Combine(TestContext.CurrentContext.TestDirectory, nameof(Test_ZipFile) + ".zip"));Path.Combine(TestContext.CurrentContext.TestDirectory, nameof(Test_ZipFile) + ".zip");
@@ -213,37 +215,44 @@ namespace Rdmp.Dicom.Tests.Unit
             ZipFile.CreateFromDirectory(dirToLoad.FullName,zip.FullName);
 
             //e.g. E:\RdmpDicom\Rdmp.Dicom.Tests\bin\Debug\netcoreapp2.2\Test_ZipFile.zip!\2015\3\18\2.25.223398837779449245317520567111874824918.dcm
-            string pathToLoad = zip.FullName + "!" + relativePathWithinZip;
+            string pathToLoad1 = zip.FullName + "!" + relativePathWithinZip1;
+            string pathToLoad2 = zip.FullName + "!" + relativePathWithinZip2;
 
             var loadMeTextFile = new FileInfo(Path.Combine(dirToLoad.FullName, "LoadMe.txt"));
 
             //tell the source to load the zip
-            File.WriteAllText(loadMeTextFile.FullName,pathToLoad);
+            File.WriteAllText(loadMeTextFile.FullName,string.Join(Environment.NewLine, pathToLoad1, pathToLoad2));
             
             var f = new FlatFileToLoad(loadMeTextFile);
 
+            //Setup source
             var source = new DicomFileCollectionSource();
             source.FilenameField = "RelativeFileArchiveURI";
 
             if (expressRelative)
                 source.ArchiveRoot = TestContext.CurrentContext.TestDirectory;
 
-            source.PreInitialize(new FlatFileToLoadDicomFileWorklist(f), new ThrowImmediatelyDataLoadEventListener());
+            var worklist = new FlatFileToLoadDicomFileWorklist(f);
 
-            var tbl = source.GetChunk(new ThrowImmediatelyDataLoadEventListener(), new GracefulCancellationToken());
+            //Setup destination
             var destination = new DataTableUploadDestination();
-            
-            destination.PreInitialize(db,new ThrowImmediatelyDataLoadEventListener());
             destination.AllowResizingColumnsAtUploadTime = true;
-            destination.ProcessPipelineData(tbl, new ThrowImmediatelyDataLoadEventListener(), new GracefulCancellationToken());
-            destination.Dispose(new ThrowImmediatelyDataLoadEventListener(), null);
+
+            //setup pipeline
+            var contextFactory = new DataFlowPipelineContextFactory<DataTable>();
+            var context = contextFactory.Create(PipelineUsage.FixedDestination | PipelineUsage.FixedDestination);
+
+            //run pipeline
+            var pipe = new DataFlowPipelineEngine<DataTable>(context,source,destination,new ThrowImmediatelyDataLoadEventListener());
+            pipe.Initialize(db,worklist);
+            pipe.ExecutePipeline(new GracefulCancellationToken());
 
             var finalTable = db.ExpectTable(destination.TargetTableName);
             
             using (var dt = finalTable.GetDataTable())
             {
-                //should be only 1 row (since we told it to only load 1 line of the zip)
-                Assert.AreEqual(1,dt.Rows.Count);
+                //should be 2 rows (since we told it to only load 2 files out of the zip)
+                Assert.AreEqual(2,dt.Rows.Count);
 
                 string pathInDbToDicomFile = (string) dt.Rows[0]["RelativeFileArchiveURI"];
 

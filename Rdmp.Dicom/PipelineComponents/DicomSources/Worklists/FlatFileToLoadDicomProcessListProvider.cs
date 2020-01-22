@@ -69,6 +69,7 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources.Worklists
 
                 if (AmbiguousFilePath.IsZipReference(line))
                 {
+                    _linesCurrent++;
                     file = new AmbiguousFilePath(line);
                     return true;
                 }
