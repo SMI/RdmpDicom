@@ -2,6 +2,7 @@ using Rdmp.Core.DataFlowPipeline.Requirements;
 using System;
 using System.IO;
 using System.Linq;
+using Rdmp.Dicom.Extraction.FoDicomBased;
 
 namespace Rdmp.Dicom.PipelineComponents.DicomSources.Worklists
 {
@@ -30,7 +31,7 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources.Worklists
             
         }
         
-        public bool GetNextFileOrDirectoryToProcess(out DirectoryInfo directory, out FileInfo file)
+        public bool GetNextFileOrDirectoryToProcess(out DirectoryInfo directory, out AmbiguousFilePath file)
         {
             file = null;
             directory = null;
@@ -43,7 +44,7 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources.Worklists
             {
                 _dataExhausted = true;
 
-                file = _file.File;
+                file = new AmbiguousFilePath(_file.File.FullName);
                 return true;
             }
 
@@ -55,7 +56,7 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources.Worklists
                 if (File.Exists(line.Trim()))
                 {
                     _linesCurrent++;
-                    file = new FileInfo(line.Trim());
+                    file = new AmbiguousFilePath(new FileInfo(line.Trim()).FullName);
                     return true;
                 }
                     
@@ -65,7 +66,13 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources.Worklists
                     directory = new DirectoryInfo(line);
                     return true;
                 }
-                    
+
+                if (AmbiguousFilePath.IsZipReference(line))
+                {
+                    file = new AmbiguousFilePath(line);
+                    return true;
+                }
+
                 throw new Exception("Text file '" + _file.File.Name +"' contained a line that was neither a File or a Directory:'" + line + "'");
             }
 

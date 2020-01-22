@@ -15,6 +15,7 @@ using Rdmp.Dicom.PipelineComponents.DicomSources.Worklists;
 using Rdmp.Core.Curation.Data;
 using Rdmp.Core.DataFlowPipeline.Requirements;
 using Rdmp.Core.DataFlowPipeline;
+using Rdmp.Dicom.Extraction.FoDicomBased;
 
 namespace Rdmp.Dicom.PipelineComponents.DicomSources
 {
@@ -39,6 +40,8 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
 
         private IDataLoadEventListener _listener;
 
+        private readonly ZipPool _zipPool = new ZipPool();
+
         public override DataTable GetChunk(IDataLoadEventListener listener, GracefulCancellationToken cancellationToken)
         {
             _listener = listener;
@@ -55,14 +58,14 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
 
             try
             {
-                FileInfo file;
+                AmbiguousFilePath file;
                 DirectoryInfo directory;
                 
                 if (!_fileWorklist.GetNextFileOrDirectoryToProcess(out directory, out file))
                     return null;
 
                 if(file != null && directory == null)
-                    dt.TableName = QuerySyntaxHelper.MakeHeaderNameSensible(Path.GetFileNameWithoutExtension(file.Name));
+                    dt.TableName = QuerySyntaxHelper.MakeHeaderNameSensible(Path.GetFileNameWithoutExtension(file.FullPath));
                 else if (directory != null)
                     dt.TableName = QuerySyntaxHelper.MakeHeaderNameSensible(Path.GetFileNameWithoutExtension(directory.Name));
                 else
@@ -75,17 +78,16 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
                 }
                 else
                 //Input is a single zip file
-                if (file.Extension == ".zip")
+                if (file.FullPath.EndsWith(".zip"))
                 {
-                    ProcessZipArchive(dt, listener, file.FullName);
-                }
-                else if (file.Extension == ".dcm")
-                {
-                    using (var fs = file.Open(FileMode.Open))
-                        ProcessFile(fs, dt, file.FullName, listener);
+                    ProcessZipArchive(dt, listener, file.FullPath);
                 }
                 else
-                    throw new Exception("Expected file to be either .zip or .dcm ");
+                {
+                    var df = file.GetDataset(_zipPool);
+                    ProcessDataset(file.FullPath, df.Dataset, dt, listener);
+                }
+                    
             }
             finally
             {
@@ -298,6 +300,14 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
             {
                 _stopwatch = new Stopwatch();
             }
+        }
+
+        public override void Dispose(IDataLoadEventListener listener, Exception pipelineFailureExceptionIfAny)
+        {
+            _zipPool?.Dispose();
+
+            base.Dispose(listener, pipelineFailureExceptionIfAny);
+
         }
     }
 }
