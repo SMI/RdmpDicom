@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## Added
+
+- Support for zip file notation when loading dicoms from zip files (e.g. load only `c:\myzip!1.dcm` and `c:\myzip!3.dcm` )
+
 ...
 
 ## [2.0.6] 2020-01-06

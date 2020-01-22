@@ -147,5 +147,45 @@ namespace Rdmp.Dicom.Tests.Unit
             
 
         }
+
+        [Test]
+        public void TestZipEntry_Exists()
+        {
+            var zipFile = new FileInfo(Path.Combine(TestContext.CurrentContext.WorkDirectory, "my.zip"));
+            var rootDir = Directory.CreateDirectory(Path.Combine(TestContext.CurrentContext.WorkDirectory,nameof(TestZipEntry_Exists)));
+            var subDirectory = rootDir.CreateSubdirectory("subdir");
+            
+            var sourceFile = new FileInfo(Path.Combine(TestContext.CurrentContext.TestDirectory,@"TestData/IM-0001-0013.dcm"));
+
+            sourceFile.CopyTo(Path.Combine(rootDir.FullName, "file1.dcm"),true);
+            sourceFile.CopyTo(Path.Combine(subDirectory.FullName,"file2.dcm"),true);
+
+            if(zipFile.Exists)
+                zipFile.Delete();
+            
+            ZipFile.CreateFromDirectory(rootDir.FullName,zipFile.FullName);
+            
+            FileAssert.Exists(zipFile.FullName);
+
+            var exists = new AmbiguousFilePath(zipFile.FullName + "!file1.dcm");
+            Assert.IsNotNull(exists.GetDataset());
+
+            var notexists = new AmbiguousFilePath(zipFile.FullName + "!file2.dcm");
+            var ex = Assert.Throws<AmbiguousFilePathResolutionException>(()=>notexists.GetDataset());
+
+            StringAssert.Contains("Could not find path 'file2.dcm' within zip archive",ex.Message);
+
+            var existsRelative = new AmbiguousFilePath(zipFile.DirectoryName,"my.zip!file1.dcm"); 
+            Assert.IsNotNull(existsRelative.GetDataset());
+
+            var existsRelativeWithLeadingSlash = new AmbiguousFilePath(zipFile.DirectoryName,"my.zip!/file1.dcm"); 
+            Assert.IsNotNull(existsRelativeWithLeadingSlash.GetDataset());
+
+            var existsRelativeWithLeadingSlashInSubdir = new AmbiguousFilePath(zipFile.DirectoryName,"my.zip!/subdir/file2.dcm"); 
+            Assert.IsNotNull(existsRelativeWithLeadingSlashInSubdir.GetDataset());
+
+            var existsRelativeWithLeadingBackSlashInSubdir = new AmbiguousFilePath(zipFile.DirectoryName,"my.zip!\\subdir\\file2.dcm"); 
+            Assert.IsNotNull(existsRelativeWithLeadingBackSlashInSubdir.GetDataset());
+        }
     }
 }
