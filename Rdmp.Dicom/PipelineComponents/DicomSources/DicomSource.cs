@@ -42,17 +42,26 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
         public string ArchiveRoot
         {
             get => _archiveRoot;
-            set
-            {
-                //trim leading and ending whitespace and normalize slashes
-                value = value?.TrimStart().TrimEnd(' ', '\t', '\r', '\n').Replace('\\','/');
+            set => _archiveRoot = StandardisePath(value);
+        }
 
-                //if it has a trailing slash (but isn't just '/') then trim the end
-                if(value != null)
-                    _archiveRoot = value.Length != 1 ? value.TrimEnd('\\', '/') : value;
+        private string StandardisePath(string value)
+        {
+            //trim leading and ending whitespace and normalize slashes
+            value = value?.TrimStart().TrimEnd(' ', '\t', '\r', '\n');
+
+            //Standardize on forward slashes (but don't try to fix \\ e.g. at the start of a UNC path
+            if (!string.IsNullOrEmpty(value))
+                if (value.StartsWith("\\\\")) //if it is a UNC path
+                    value = "\\\\" + value.Substring(2).Replace('\\', '/');
                 else
-                    _archiveRoot = null;
-            }
+                    value = value.Replace('\\', '/');
+
+            //if it has a trailing slash (but isn't just '/') then trim the end
+            if(value != null)
+                return value.Length != 1 ? value.TrimEnd('\\', '/') : value;
+            
+            return null;
         }
 
         private TagElevationRequestCollection _elevationRequests;
@@ -366,8 +375,8 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
             if (string.IsNullOrWhiteSpace(filename))
                 return filename;
 
-            //standardise directory separator character e.g. change \ to /
-            filename = filename.Replace('\\','/');
+            //standardize directory separator character e.g. change \ to /
+            filename = StandardisePath(filename);
 
             //if it is relative to ArchiveRoot then express only the subsection with "./" at start
             if (!string.IsNullOrWhiteSpace(ArchiveRoot))
