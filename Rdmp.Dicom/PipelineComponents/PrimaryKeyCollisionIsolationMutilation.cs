@@ -224,10 +224,11 @@ namespace Rdmp.Dicom.PipelineComponents
 
                 var allCollisions = DetectCollisions(pkCol, tableInfo).Distinct().ToArray();
 
-                _job.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information, 
-                    $"Found duplication in column '{pkCol}', duplicate values were '{string.Join(",",allCollisions)}'"));
-                MigrateRecords(pkCol, allCollisions);
-            
+                if (allCollisions.Any())
+                {
+                    _job.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information, $"Found duplication in column '{pkCol}', duplicate values were '{string.Join(",",allCollisions)}'"));
+                    MigrateRecords(pkCol, allCollisions);
+                }            
             }
 
             return ExitCodeType.Success;

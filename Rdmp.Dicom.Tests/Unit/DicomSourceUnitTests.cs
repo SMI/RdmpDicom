@@ -36,6 +36,8 @@ namespace Rdmp.Dicom.Tests.Unit
         [TestCase(@"C:/bob/",@"C:\bob\fish/1.dcm","./fish/1.dcm")] //mixed slash directions!
         [TestCase("/bob/","/bob/fish/1.dcm","./fish/1.dcm")] //linux style paths
         [TestCase("/bob/",@"\bob\fish\1.dcm","./fish/1.dcm")]
+        [TestCase(@"\\myserver\bob",@"\\myserver\bob\fish\1.dcm","./fish/1.dcm")] // UNC server paths
+        [TestCase(@"\\myserver\bob",@"\\myOtherServer\bob\fish\1.dcm",@"\\myOtherServer/bob/fish/1.dcm")]
         [TestCase("/","/bob/fish/1.dcm","./bob/fish/1.dcm")]
         [TestCase(@"C:\bob\",@"D:\fish\1.dcm",@"D:/fish/1.dcm")] //not relative so just return verbatim string (with slash fixes)
         [TestCase(@"C:\bob\",@"D:/fish/1.dcm",@"D:/fish/1.dcm")]

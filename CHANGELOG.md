@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.7] 2020-02-05
+
+## Added
+
+- Support for zip file notation when loading dicoms from zip files (e.g. load only `c:\myzip!1.dcm` and `c:\myzip!3.dcm` )
+- Upgraded to latest RDMP release (4.0.2)
 ...
 
 ## [2.0.6] 2020-01-06
@@ -118,7 +124,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial commit from private repo
 
-[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v2.0.6...develop
+[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v2.0.7...develop
+[2.0.7]: https://github.com/HicServices/RdmpDicom/compare/v2.0.6...v2.0.7
 [2.0.6]: https://github.com/HicServices/RdmpDicom/compare/v2.0.5...v2.0.6
 [2.0.5]: https://github.com/HicServices/RdmpDicom/compare/v2.0.4...v2.0.5
 [2.0.4]: https://github.com/HicServices/RdmpDicom/compare/v2.0.3...v2.0.4

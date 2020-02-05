@@ -74,6 +74,27 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
                 {
                     var entry = zip.GetEntry(bits[1]);
 
+                    if (entry == null)
+                    {
+                        //Maybe user has formatted it dodgy
+                        //e.g. \2015\3\18\2.25.177481563701402448825228719253578992342.dcm
+                        string adjusted = bits[1].TrimStart('\\','/');
+
+                        //if that doesn't work
+                        if ((entry = zip.GetEntry(adjusted)) == null)
+                        {
+                            //try normalizing the slashes
+                            adjusted = adjusted.Replace('\\','/');
+
+                            //nope we just cannot get a legit path in this zip
+                            if ((entry = zip.GetEntry(adjusted)) == null)
+                                throw new AmbiguousFilePathResolutionException($"Could not find path '{bits[1]}' within zip archive '{bits[0]}'");
+                        }
+
+                        //we fixed it to something that actually exists so update our state that we don't make the same mistake again
+                        FullPath = bits[0] + '!' + adjusted;
+                    }
+                        
                     if (!IsDicomReference(bits[1]))
                         throw new AmbiguousFilePathResolutionException("Path provided '" + FullPath + "' was to a zip file but not to a dicom file entry");
 
@@ -106,7 +127,7 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
             return fullPath.EndsWith(".dcm", StringComparison.CurrentCultureIgnoreCase);
         }
 
-        private bool IsZipReference(string path)
+        public static bool IsZipReference(string path)
         {
             switch (path.Count(c=>c=='!'))
             {
