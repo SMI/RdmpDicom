@@ -49,6 +49,10 @@ namespace Rdmp.Dicom.Tests
                 string package = p.Groups[1].Value;
                 string version = p.Groups[2].Value;
 
+                // NOTE(rkm 2020-02-14) Fix for specifiers which contain lower or upper bounds
+                if (version.Contains("[") || version.Contains("("))
+                    version = version.Substring(1, version.Length - 2);
+
                 bool found = false;
 
                 //analyzers do not have to be listed as a dependency in nuspec (but we should document them in packages.md)
@@ -59,6 +63,10 @@ namespace Rdmp.Dicom.Tests
                     {
                         string packageDependency = d.Groups[1].Value;
                         string versionDependency = d.Groups[2].Value;
+
+                        // NOTE(rkm 2020-02-14) Fix for specifiers which contain lower or upper bounds
+                        if (versionDependency.Contains("[") || versionDependency.Contains("("))
+                            versionDependency = versionDependency.Substring(1, versionDependency.Length - 2);
 
                         if (packageDependency.Equals(package))
                         {
