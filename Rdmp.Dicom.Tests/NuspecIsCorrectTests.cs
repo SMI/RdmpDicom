@@ -50,8 +50,7 @@ namespace Rdmp.Dicom.Tests
                 string version = p.Groups[2].Value;
 
                 // NOTE(rkm 2020-02-14) Fix for specifiers which contain lower or upper bounds
-                if (version.Contains("[") || version.Contains("("))
-                    version = version.Substring(1, version.Length - 2);
+                version = version?.Trim('(',')','[',']');
 
                 bool found = false;
 
