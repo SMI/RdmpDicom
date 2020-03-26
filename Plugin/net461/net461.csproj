@@ -11,7 +11,7 @@
     <Compile Include="..\..\SharedAssemblyInfo.cs" Link="SharedAssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="fo-dicom.Desktop" Version="4.0.1" />
+    <PackageReference Include="fo-dicom.Desktop" Version="[4.0.4]" />
     <PackageReference Include="HIC.DicomTypeTranslation" Version="2.1.2" />
   </ItemGroup>
   <ItemGroup>
