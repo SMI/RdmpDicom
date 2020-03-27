@@ -79,12 +79,10 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
             var flags = DicomAnonymizer.SecurityProfileOptions.BasicProfile |
                         DicomAnonymizer.SecurityProfileOptions.CleanStructdCont |
                         DicomAnonymizer.SecurityProfileOptions.CleanDesc |
-                        DicomAnonymizer.SecurityProfileOptions.CleanGraph |
-                        DicomAnonymizer.SecurityProfileOptions.RetainLongFullDates |
                         DicomAnonymizer.SecurityProfileOptions.RetainUIDs;
 
             if (RetainDates)
-                flags = flags | DicomAnonymizer.SecurityProfileOptions.RetainLongFullDates;
+              flags = flags | DicomAnonymizer.SecurityProfileOptions.RetainLongFullDates;
 
             var profile = DicomAnonymizer.SecurityProfile.LoadProfile(null,flags);
             

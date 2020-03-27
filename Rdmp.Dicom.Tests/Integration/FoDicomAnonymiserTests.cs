@@ -54,10 +54,13 @@ namespace Rdmp.Dicom.Tests.Integration
         // The following commented tests will fail due to underlying system limits on paths
         // there is no reliable method to get maximum path length (apprently?)
         //        [TestCase(typeof(PutInUidStudySeriesFolders))]
-        [TestCase(typeof(PutInUidSeriesFolders))]
-        [TestCase(typeof(PutInReleaseIdentifierSubfolders))]
-        [TestCase(typeof(PutInRoot))]
-        public void TestAnonymisingDataset(Type putterType)
+        [TestCase(typeof(PutInUidSeriesFolders),true)]
+        [TestCase(typeof(PutInUidSeriesFolders),false)]
+        [TestCase(typeof(PutInReleaseIdentifierSubfolders),true)]
+        [TestCase(typeof(PutInReleaseIdentifierSubfolders),false)]
+        [TestCase(typeof(PutInRoot),true)]
+        [TestCase(typeof(PutInRoot),true)]
+        public void TestAnonymisingDataset(Type putterType,bool keepDates)
         {
             var uidMapDb = GetCleanedServer(DatabaseType.MicrosoftSQLServer, "TESTUIDMapp");
 
@@ -81,7 +84,7 @@ namespace Rdmp.Dicom.Tests.Integration
             Dictionary<DicomTag,string> thingsThatShouldRemain = new Dictionary<DicomTag, string>()
             {
                 //Things we would want to remain
-                {DicomTag.SmokingStatus,"CIGARS"},
+                //{DicomTag.SmokingStatus,"YES"},
             };
             
             var dicom = new DicomDataset()
@@ -97,6 +100,8 @@ namespace Rdmp.Dicom.Tests.Integration
             
             foreach (var kvp in thingsThatShouldRemain)
                 dicom.AddOrUpdate(kvp.Key, kvp.Value);
+
+            dicom.AddOrUpdate(DicomTag.StudyDate, new DateTime(2002 , 01 , 01));
 
             var fi = new FileInfo(Path.Combine(TestContext.CurrentContext.WorkDirectory, "madness.dcm"));
 
@@ -124,7 +129,7 @@ namespace Rdmp.Dicom.Tests.Integration
             anonymiser.ArchiveRootIfAny = TestContext.CurrentContext.WorkDirectory;
             anonymiser.RelativeArchiveColumnName = "Filepath";
             anonymiser.UIDMappingServer = eds;
-            anonymiser.RetainDates = true;
+            anonymiser.RetainDates = keepDates;
             
             var anoDt = anonymiser.ProcessPipelineData(dt,new ThrowImmediatelyDataLoadEventListener(),new GracefulCancellationToken());
 
@@ -177,7 +182,11 @@ namespace Rdmp.Dicom.Tests.Integration
                     case "ANONYMOUS":continue;
 
                     //anonymous date
-                    case "00010101":continue;
+                    case "00010101":  Assert.IsFalse(keepDates);
+                        continue;
+                    case "20020101":    Assert.IsTrue(keepDates);
+                        continue;
+
 
                     default: Assert.Fail("Unexpected value for " + kvp.Key + ":" + value);
                         break;

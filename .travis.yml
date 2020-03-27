@@ -27,4 +27,4 @@ script:
 - ./rdmp install localhost TEST_ -u sa -p 'YourStrong!Passw0rd'
 - cd ..
 - dotnet build "./Rdmp.Dicom.Tests/Rdmp.Dicom.Tests.csproj"
-- dotnet test "./Rdmp.Dicom.Tests/Rdmp.Dicom.Tests.csproj" -v d
+- dotnet test "./Rdmp.Dicom.Tests/Rdmp.Dicom.Tests.csproj"
