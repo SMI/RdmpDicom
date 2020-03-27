@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-- Bump & freeze HIC.DicomTypeTranslation from `2.1.2` to `2.2.0`
+- Bump HIC.DicomTypeTranslation from `2.1.2` to `2.2.0`
   - This includes an update to fo-dicom from `4.0.1` to `4.0.4`
 
 ## [2.0.7] 2020-02-05
