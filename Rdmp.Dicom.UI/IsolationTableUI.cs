@@ -1,5 +1,8 @@
-﻿using System.Windows.Forms;
+﻿using System.Collections.Generic;
+using System.Windows.Forms;
+using FAnsi.Discovery;
 using Rdmp.Core.Curation;
+using Rdmp.Core.Curation.Data;
 using Rdmp.Core.Curation.Data.DataLoad;
 using Rdmp.Core.DataLoad.Engine.LoadExecution.Components.Arguments;
 using Rdmp.Core.DataLoad.Engine.LoadExecution.Components.Runtime;
@@ -16,6 +19,22 @@ namespace Rdmp.Dicom.UI
         {
             _reviewer = reviewer;
             InitializeComponent();
+        }
+
+        private void IsolationTableUI_Load(object sender, System.EventArgs e)
+        {
+            foreach (var kvp in _reviewer.GetIsolationTables())
+            {
+                var btn = new Button();
+                btn.Text = kvp.Value.GetRuntimeName();
+                btn.Click += (a, b) => HandleClick(kvp);
+                flpTables.Controls.Add(btn);
+            }
+        }
+
+        private void HandleClick(KeyValuePair<TableInfo, DiscoveredTable> kvp)
+        {
+            
         }
     }
 }
