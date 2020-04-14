@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using FAnsi;
@@ -22,6 +23,35 @@ namespace Rdmp.Dicom.Tests
         {
             var db = GetCleanedServer(dbType);
 
+            var dt = new DataTable();
+            dt.Columns.Add("A");
+            dt.Columns.Add("B");
+            dt.Columns.Add("C");
+
+            // 'pk' 1 differs on col B AND col C
+            dt.Rows.Add(1, 2, 3);
+            dt.Rows.Add(1, 3, 2);
+
+            //novel (should not appear in diff table)
+            dt.Rows.Add(4, 1, 1);
+
+            //novel (should not appear in diff table)
+            dt.Rows.Add(5, 1, 1);
+
+            // 'pk' 2 differs on col C
+            dt.Rows.Add(2, 1, 1);
+            dt.Rows.Add(2, 1, 2);
+
+            //novel (should not appear in diff table)
+            dt.Rows.Add(6, 1, 1);
+
+            // 'pk' 3 differs on col B
+            dt.Rows.Add(3, 1, 1);
+            dt.Rows.Add(3, 2, 1);
+            
+            
+            db.CreateTable("mytbl_Isolation",dt);
+
             var lmd = new LoadMetadata(CatalogueRepository, "ExampleLoad");
             var pt = new ProcessTask(CatalogueRepository, lmd,LoadStage.AdjustRaw);
             pt.ProcessTaskType = ProcessTaskType.MutilateDataTable;
@@ -35,18 +65,27 @@ namespace Rdmp.Dicom.Tests
             var args = pt.CreateArgumentsForClassIfNotExists(typeof(PrimaryKeyCollisionIsolationMutilation));
 
             var ti = new TableInfo(CatalogueRepository, "mytbl");
+            var ci = new ColumnInfo(CatalogueRepository,"A","varchar(1)",ti);
+            ci.IsPrimaryKey = true;
+            ci.SaveToDatabase();
 
-            SetArg(args, nameof(PrimaryKeyCollisionIsolationMutilation.IsolationDatabase), eds);
-            SetArg(args, nameof(PrimaryKeyCollisionIsolationMutilation.TablesToIsolate), new []{ti});
+            SetArg(args, "IsolationDatabase", eds);
+            SetArg(args, "TablesToIsolate", new []{ti});
             
             var reviewer = new IsolationReview(pt);
 
             //no error since it is configured correctly
             Assert.IsNull(reviewer.Error);
 
-            //but no tables on the other end
-            Assert.IsFalse(reviewer.GetIsolationTables().First().Value.Exists());
+            //tables should exist
+            var isolationTables = reviewer.GetIsolationTables();
+            Assert.IsTrue(isolationTables.Single().Value.Exists());
 
+            
+            var diffDataTable = reviewer.GetDifferences(isolationTables.Single(),out List<IsolationDifference> diffs);
+            
+            Assert.AreEqual(6,diffDataTable.Rows.Count);
+            Assert.AreEqual(6,diffs.Count);
         }
 
         private void SetArg(IArgument[] args, string argName, object value)
