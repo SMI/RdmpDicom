@@ -95,9 +95,7 @@ namespace Rdmp.Dicom.PipelineComponents
             var isolationPk = isolationPks[0];
             
             var sortOn = isolationPk.GetRuntimeName();
-            var diffOn = tbl.DiscoverColumns().Except(new List<DiscoveredColumn> {isolationPk});
-
-
+         
             using (var con = tbl.Database.Server.GetConnection())
             {
                 con.Open();
