@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Added tool to help visualize primary key collisions stored in an isolation table.
+
 ## [2.0.8] 2020-03-27
 
 - Bump HIC.DicomTypeTranslation from `2.1.2` to `2.2.0`
