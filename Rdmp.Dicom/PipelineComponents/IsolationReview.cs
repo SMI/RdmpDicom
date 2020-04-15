@@ -198,11 +198,14 @@ namespace Rdmp.Dicom.PipelineComponents
 
         private bool AreDifferent(object a, object b)
         {
-            if (a == null)
-                return b != null;
+            if (a == null || b == null)
+                return a != b;
 
             if (a == DBNull.Value)
                 return b != DBNull.Value;
+
+            if (b == DBNull.Value)
+                return a != DBNull.Value;
 
             return !a.ToString().Equals(b.ToString());
         }
