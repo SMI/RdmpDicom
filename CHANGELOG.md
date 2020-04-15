@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.9] 2020-04-15
+
 ### Added
 
 - Added tool to help visualize primary key collisions stored in an isolation table.
@@ -133,7 +135,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial commit from private repo
 
-[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v2.0.8...develop
+[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v2.0.9...develop
+[2.0.9]: https://github.com/HicServices/RdmpDicom/compare/v2.0.8...v2.0.9
 [2.0.8]: https://github.com/HicServices/RdmpDicom/compare/v2.0.7...v2.0.8
 [2.0.7]: https://github.com/HicServices/RdmpDicom/compare/v2.0.6...v2.0.7
 [2.0.6]: https://github.com/HicServices/RdmpDicom/compare/v2.0.5...v2.0.6
