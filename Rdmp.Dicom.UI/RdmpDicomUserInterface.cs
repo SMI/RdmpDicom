@@ -6,6 +6,7 @@ using Rdmp.UI.ItemActivation;
 using Rdmp.UI.Refreshing;
 using Rdmp.UI.PluginChildProvision;
 using Rdmp.Core.Curation.Data;
+using Rdmp.Core.Curation.Data.DataLoad;
 using Rdmp.UI.Collections;
 using Rdmp.UI.CommandExecution.AtomicCommands;
 using Rdmp.Core.Providers.Nodes;
@@ -37,7 +38,10 @@ namespace Rdmp.Dicom.UI
                 return GetMenuArray(
                     new ExecuteCommandCreateNewImagingDataset(ItemActivator),
                     new ExecuteCommandPromoteNewTag(ItemActivator).SetTarget(databaseEntity));
-            
+
+            if (databaseEntity is ProcessTask pt)
+                return GetMenuArray(new ExecuteCommandReviewIsolations(ItemActivator, pt));
+
             if (databaseEntity is TableInfo)
                 return GetMenuArray(new ExecuteCommandPromoteNewTag(ItemActivator).SetTarget(databaseEntity));
 

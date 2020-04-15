@@ -103,7 +103,7 @@ namespace Rdmp.Dicom.PipelineComponents
             }
         }
 
-        private string GetIsolationTableName(TableInfo tableInfo)
+        public static string GetIsolationTableName(TableInfo tableInfo)
         {
             return tableInfo.GetRuntimeName(LoadBubble.Live) + "_Isolation";
         }
