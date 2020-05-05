@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+## [2.1.0] 2020-05-05
+
+### Changed
+
+- Updated to RDMP 4.1.0
+- Updated to DicomTypeTranslation 2.2.0
+
 ## [2.0.9] 2020-04-15
 
 ### Added
@@ -15,7 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.0.8] 2020-03-27
 
 - Bump HIC.DicomTypeTranslation from `2.1.2` to `2.2.0`
-  - This includes an update to fo-dicom from `4.0.1` to `4.0.4`
+- This includes an update to fo-dicom from `4.0.1` to `4.0.4`
 
 ## [2.0.7] 2020-02-05
 
@@ -135,7 +143,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial commit from private repo
 
-[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v2.0.9...develop
+[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v2.1.0...develop
+[2.1.0]: https://github.com/HicServices/RdmpDicom/compare/v2.0.9...v2.1.0
 [2.0.9]: https://github.com/HicServices/RdmpDicom/compare/v2.0.8...v2.0.9
 [2.0.8]: https://github.com/HicServices/RdmpDicom/compare/v2.0.7...v2.0.8
 [2.0.7]: https://github.com/HicServices/RdmpDicom/compare/v2.0.6...v2.0.7
