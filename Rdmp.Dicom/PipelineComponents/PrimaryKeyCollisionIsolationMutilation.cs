@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Linq;
+using System.Text;
 using FAnsi;
 using FAnsi.Discovery;
 using FAnsi.Discovery.QuerySyntax;
@@ -379,15 +380,7 @@ namespace Rdmp.Dicom.PipelineComponents
 
             if(syntax.DatabaseType == DatabaseType.PostgreSql)
             {
-                if(!_joins.Any())
-                {
-                    sqlDelete = string.Format("DELETE FROM {0} WHERE {1} = @val", 
-                    syntax.EnsureWrapped(toDelete.GetRuntimeName(LoadBubble.Raw,_namer)),deleteOnColumnName);
-                }
-                else
-                {
-                    throw new NotImplementedException("Postgres requires USING syntax when doing a DELETE join");
-                }
+                sqlDelete = GetPostgreSqlDeleteCommand(toDelete,deleteOnColumnName,syntax);
             }
 
             _job.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,"Running:" + sqlDelete));
@@ -395,11 +388,11 @@ namespace Rdmp.Dicom.PipelineComponents
             using(var cmdDelete = _raw.Server.GetCommand(sqlDelete, con))
             {
                 var p2 = cmdDelete.CreateParameter();
+                p2.ParameterName = "@val";
                 cmdDelete.Parameters.Add(p2);
 
                 foreach (var d in deleteValues)
                 {
-                    p2.ParameterName = "@val";
                     p2.Value = d;
                     
                     //then delete it
@@ -411,6 +404,42 @@ namespace Rdmp.Dicom.PipelineComponents
             }
         }
 
+        private string GetPostgreSqlDeleteCommand(TableInfo toDelete,string deleteOnColumnName, IQuerySyntaxHelper syntax)
+        {
+            if(!_joins.Any())
+            {
+                return string.Format("DELETE FROM {0} WHERE {1} = @val", syntax.EnsureWrapped(toDelete.GetRuntimeName(LoadBubble.Raw,_namer)),deleteOnColumnName);
+            }
+            else
+            {
+
+                var sb = new StringBuilder();
+
+                foreach(var j in _joins)
+                {
+                    
+                    sb.Append(syntax.EnsureWrapped(j.PrimaryKey.TableInfo.GetRuntimeName(LoadBubble.Raw,_namer)));
+                    sb.Append(".");
+                    sb.Append(syntax.EnsureWrapped(j.PrimaryKey.GetRuntimeName(LoadStage.AdjustRaw)));
+                    
+                    sb.Append("=");
+                    
+                    sb.Append(syntax.EnsureWrapped(j.ForeignKey.TableInfo.GetRuntimeName(LoadBubble.Raw,_namer)));
+                    sb.Append(".");
+                    sb.Append(syntax.EnsureWrapped(j.ForeignKey.GetRuntimeName(LoadStage.AdjustRaw)));
+
+                    sb.Append(" AND ");
+                }
+
+                return string.Format("DELETE FROM {0} USING {1} WHERE {2} {3} = @val", 
+                    syntax.EnsureWrapped(toDelete.GetRuntimeName(LoadBubble.Raw,_namer)),
+
+                    //USING the other table names (as appearing in RAW)
+                    string.Join(",",TablesToIsolate.Except(new []{toDelete}).Select(t=>syntax.EnsureWrapped(t.GetRuntimeName(LoadBubble.Raw,_namer)))),
+                    sb,
+                    deleteOnColumnName);
+            }
+        }
 
         private IEnumerable<object> DetectCollisions(ColumnInfo pkCol,TableInfo tableInfo)
         {
