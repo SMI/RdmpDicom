@@ -267,6 +267,8 @@ namespace Rdmp.Dicom.PipelineComponents
 
                 foreach (TableInfo t in TablesToIsolate.Reverse())
                     DeleteRows(t, deleteOnColumnName, deleteValues, con);
+
+                con.Close();
             }
         }
 
@@ -366,8 +368,13 @@ namespace Rdmp.Dicom.PipelineComponents
 
         private void DeleteRows(TableInfo toDelete, string deleteOnColumnName, object[] deleteValues, DbConnection con)
         {
+            var syntax = _raw.Server.GetQuerySyntaxHelper();
+
             //now delete all records
-            string sqlDelete = string.Format("DELETE {0} {1} WHERE {2} = @val", toDelete.GetRuntimeName(LoadBubble.Raw,_namer), _fromSql, deleteOnColumnName);
+            string sqlDelete = string.Format("DELETE {0} {1} WHERE {2} = @val", 
+                syntax.EnsureWrapped(toDelete.GetRuntimeName(LoadBubble.Raw,_namer)),
+                _fromSql,
+                deleteOnColumnName);
 
             using(var cmdDelete = _raw.Server.GetCommand(sqlDelete, con))
             {
