@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Linq;
+using System.Text;
+using FAnsi;
 using FAnsi.Discovery;
 using FAnsi.Discovery.QuerySyntax;
 using MapsDirectlyToDatabaseTable;
@@ -267,6 +269,8 @@ namespace Rdmp.Dicom.PipelineComponents
 
                 foreach (TableInfo t in TablesToIsolate.Reverse())
                     DeleteRows(t, deleteOnColumnName, deleteValues, con);
+
+                con.Close();
             }
         }
 
@@ -296,32 +300,36 @@ namespace Rdmp.Dicom.PipelineComponents
 
             //fetch all the data
             string sqlSelect = string.Format("Select distinct {0} {1} WHERE {2} = @val", pkColumnName, _fromSql, deleteOnColumnName);
-            var cmdSelect = _raw.Server.GetCommand(sqlSelect, con);
-            var p = cmdSelect.CreateParameter();
-            p.ParameterName = "@val";
-            cmdSelect.Parameters.Add(p);
-
-            foreach (var d in deleteValue)
+            using(var cmdSelect = _raw.Server.GetCommand(sqlSelect, con))
             {
-                p.Value = d;
-                bool readOne = false;
-                using (var r = cmdSelect.ExecuteReader())
+                var p = cmdSelect.CreateParameter();
+                p.ParameterName = "@val";
+                cmdSelect.Parameters.Add(p);
+
+                foreach (var d in deleteValue)
                 {
-                    while (r.Read())
+                    p.Value = d;
+                    bool readOne = false;
+                    using (var r = cmdSelect.ExecuteReader())
                     {
-                        var result = r[0];
+                        while (r.Read())
+                        {
+                            var result = r[0];
 
-                        if(result == DBNull.Value || result == null)
-                            throw new Exception("Primary key value not found for " + d + " foreign Key was null");
+                            if(result == DBNull.Value || result == null)
+                                throw new Exception("Primary key value not found for " + d + " foreign Key was null");
 
-                        toReturn.Add(result);
-                        readOne = true;
+                            toReturn.Add(result);
+                            readOne = true;
+                        }
+
+                        if(!readOne)
+                            throw new Exception("Primary key value not found for " + d);
                     }
-
-                    if(!readOne)
-                        throw new Exception("Primary key value not found for " + d);
                 }
+
             }
+            
 
             return toReturn.ToArray();
         }
@@ -336,46 +344,129 @@ namespace Rdmp.Dicom.PipelineComponents
             
             //fetch all the data (LEFT/RIGHT joins can introduce null records so add not null to WHERE for the table being migrated to avoid full null rows)
             string sqlSelect = string.Format("Select distinct {0}.* {1} WHERE {2} = @val AND {3} is not null", deleteFromTableName, _fromSql, deleteOnColumnName, pkColumnName);
-            var cmdSelect = _raw.Server.GetCommand(sqlSelect, con);
-            var p = cmdSelect.CreateParameter();
-            cmdSelect.Parameters.Add(p);
-
-            foreach (var value in deleteValues)
+            using(var cmdSelect = _raw.Server.GetCommand(sqlSelect, con))
             {
+                var p = cmdSelect.CreateParameter();
                 p.ParameterName = "@val";
-                p.Value = value;
+                cmdSelect.Parameters.Add(p);
 
-                using(var da = _raw.Server.GetDataAdapter(cmdSelect))
-                    da.Fill(dt);
+                foreach (var value in deleteValues)
+                {
+                    p.Value = value;
+
+                    using(var da = _raw.Server.GetDataAdapter(cmdSelect))
+                        da.Fill(dt);
+                }
+                
+                dt.Columns.Add(SpecialFieldNames.DataLoadRunID, typeof(int));
+                
+                foreach (DataRow row in dt.Rows)
+                    row[SpecialFieldNames.DataLoadRunID] = _dataLoadInfoId;
             }
-            
-            dt.Columns.Add(SpecialFieldNames.DataLoadRunID, typeof(int));
-            
-            foreach (DataRow row in dt.Rows)
-                row[SpecialFieldNames.DataLoadRunID] = _dataLoadInfoId;
+
 
             return dt;
         }
 
         private void DeleteRows(TableInfo toDelete, string deleteOnColumnName, object[] deleteValues, DbConnection con)
         {
+            var syntax = _raw.Server.GetQuerySyntaxHelper();
+
             //now delete all records
-            string sqlDelete = string.Format("DELETE {0} {1} WHERE {2} = @val", toDelete.GetRuntimeName(LoadBubble.Raw,_namer), _fromSql, deleteOnColumnName);
+            string sqlDelete = string.Format("DELETE {0} {1} WHERE {2} = @val", 
+                syntax.EnsureWrapped(toDelete.GetRuntimeName(LoadBubble.Raw,_namer)),
+                _fromSql,
+                deleteOnColumnName);
 
-            var cmdDelete = _raw.Server.GetCommand(sqlDelete, con);
-            var p2 = cmdDelete.CreateParameter();
-            cmdDelete.Parameters.Add(p2);
-
-            foreach (var d in deleteValues)
+            if(syntax.DatabaseType == DatabaseType.PostgreSql)
             {
+                sqlDelete = GetPostgreSqlDeleteCommand(toDelete,deleteOnColumnName,syntax);
+            }
+
+            _job.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,"Running:" + sqlDelete));
+
+            using(var cmdDelete = _raw.Server.GetCommand(sqlDelete, con))
+            {
+                var p2 = cmdDelete.CreateParameter();
                 p2.ParameterName = "@val";
-                p2.Value = d;
-                
-                //then delete it
-                cmdDelete.ExecuteNonQuery();
+                cmdDelete.Parameters.Add(p2);
+
+                foreach (var d in deleteValues)
+                {
+                    p2.Value = d;
+                    
+                    //then delete it
+                    int affectedRows = cmdDelete.ExecuteNonQuery();
+
+                    _job.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,affectedRows + " affected rows"));
+
+                }
             }
         }
 
+        private string GetPostgreSqlDeleteCommand(TableInfo toDelete,string deleteOnColumnName, IQuerySyntaxHelper syntax)
+        {
+            if(!_joins.Any())
+            {
+                return string.Format("DELETE FROM {0} WHERE {1} = @val", syntax.EnsureWrapped(toDelete.GetRuntimeName(LoadBubble.Raw,_namer)),deleteOnColumnName);
+            }
+            else
+            {
+
+                var sb = new StringBuilder();
+
+                // 1 join per pair of tables
+                
+                if(_joins.Count != TablesToIsolate.Length -1)
+                    throw new Exception($"Unexpected join count, expected {(TablesToIsolate.Length -1)} but found {_joins.Count}");
+
+                // Imagine a 3 table query (2 joins)
+                // if we are index 2 (child)
+                   // we want all joins
+                // if we are index 1 (middle)
+                   // we want first join only
+                // if we are index 0 (parent)
+                   // we want no joins at all
+
+                var idx = Array.IndexOf(TablesToIsolate,toDelete);
+                var usings = new HashSet<TableInfo>();
+
+                foreach(var j in _joins)
+                {
+                    //MIMIC a LEFT join
+                    if(idx <= 0)
+                        continue;
+                    
+                    idx--;
+
+                    sb.Append(syntax.EnsureWrapped(j.PrimaryKey.TableInfo.GetRuntimeName(LoadBubble.Raw,_namer)));
+                    sb.Append(".");
+                    sb.Append(syntax.EnsureWrapped(j.PrimaryKey.GetRuntimeName(LoadStage.AdjustRaw)));
+                    
+                    sb.Append("=");
+                    
+                    sb.Append(syntax.EnsureWrapped(j.ForeignKey.TableInfo.GetRuntimeName(LoadBubble.Raw,_namer)));
+                    sb.Append(".");
+                    sb.Append(syntax.EnsureWrapped(j.ForeignKey.GetRuntimeName(LoadStage.AdjustRaw)));
+
+                    sb.Append(" AND ");
+
+                    usings.Add(j.ForeignKey.TableInfo);
+                    usings.Add(j.PrimaryKey.TableInfo);
+                }
+
+                var usingsStr = string.Join(",",usings.Except(new []{toDelete}).Select(t=>syntax.EnsureWrapped(t.GetRuntimeName(LoadBubble.Raw,_namer))));
+
+                return string.Format("DELETE FROM {0} {1} WHERE {2} {3} = @val", 
+                    syntax.EnsureWrapped(toDelete.GetRuntimeName(LoadBubble.Raw,_namer)),
+
+                    //USING the other table names (as appearing in RAW)
+                    string.IsNullOrWhiteSpace(usingsStr) ? "" : " USING " + usingsStr,
+
+                    sb,
+                    deleteOnColumnName);
+            }
+        }
 
         private IEnumerable<object> DetectCollisions(ColumnInfo pkCol,TableInfo tableInfo)
         {
@@ -392,11 +483,12 @@ namespace Rdmp.Dicom.PipelineComponents
             using (var con = _raw.Server.GetConnection())
             {
                 con.Open();
-                var cmd = _raw.Server.GetCommand(primaryKeysColliding, con);
-                var r = cmd.ExecuteReader();
-
-                while (r.Read())
-                    yield return r[pkColName];
+                using(var cmd = _raw.Server.GetCommand(primaryKeysColliding, con))
+                {
+                    using(var r = cmd.ExecuteReader())
+                        while (r.Read())
+                            yield return r[pkColName];
+                }
             }
         }
     }

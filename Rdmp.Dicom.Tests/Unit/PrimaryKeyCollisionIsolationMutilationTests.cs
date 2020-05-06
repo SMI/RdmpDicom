@@ -22,6 +22,7 @@ namespace Rdmp.Dicom.Tests.Unit
     {
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.MySql)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void Test_IsolateSingleTable_Check(DatabaseType dbType)
         {
             var db = GetCleanedServer(dbType);
@@ -76,6 +77,7 @@ namespace Rdmp.Dicom.Tests.Unit
 
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.MySql)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void Test_IsolateSingleTable_Dupliction(DatabaseType dbType)
         {
             var db = GetCleanedServer(dbType);
@@ -108,7 +110,7 @@ namespace Rdmp.Dicom.Tests.Unit
             mutilator.Check(new AcceptAllCheckNotifier());
 
             var config = new HICDatabaseConfiguration(db.Server,RdmpMockFactory.Mock_INameDatabasesAndTablesDuringLoads(db, "MyCoolTable2"));
-            var job = Mock.Of<IDataLoadJob>(p => p.JobID == 999 &&  p.Configuration == config);
+            var job = new ThrowImmediatelyDataLoadJob(config,tableInfoCreated);
                                     
             mutilator.Initialize(db,LoadStage.AdjustRaw);
             mutilator.Mutilate(job);
@@ -122,6 +124,7 @@ namespace Rdmp.Dicom.Tests.Unit
 
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.MySql)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void Test_IsolateTwoTables_Dupliction(DatabaseType dbType)
         {
             var db = GetCleanedServer(dbType);
@@ -207,7 +210,7 @@ namespace Rdmp.Dicom.Tests.Unit
             mutilator.Check(new AcceptAllCheckNotifier());
 
             var config = new HICDatabaseConfiguration(db.Server,new ReturnSameString());
-            var job = Mock.Of<IDataLoadJob>(j => j.JobID==999 && j.Configuration == config);            
+            var job = new ThrowImmediatelyDataLoadJob(config,parentTableInfo,childTableInfo);
 
             mutilator.Initialize(db, LoadStage.AdjustRaw);
             mutilator.Mutilate(job);
@@ -242,6 +245,8 @@ namespace Rdmp.Dicom.Tests.Unit
         [TestCase(DatabaseType.MySql,false)]
         [TestCase(DatabaseType.MicrosoftSQLServer,true)]
         [TestCase(DatabaseType.MySql,true)]
+        [TestCase(DatabaseType.PostgreSql,false)]
+        [TestCase(DatabaseType.PostgreSql,true)]
         public void Test_IsolateTwoTables_MutipleConflictingColumns(DatabaseType dbType,bool whitespace)
         {
             var db = GetCleanedServer(dbType);
@@ -306,7 +311,7 @@ namespace Rdmp.Dicom.Tests.Unit
             mutilator.Check(new AcceptAllCheckNotifier());
 
             var config = new HICDatabaseConfiguration(db.Server,new ReturnSameString());
-            var job = Mock.Of<IDataLoadJob>(j => j.JobID==999 && j.Configuration == config);            
+            var job = new ThrowImmediatelyDataLoadJob(config,parentTableInfo,childTableInfo);
 
             mutilator.Initialize(db, LoadStage.AdjustRaw);
             mutilator.Mutilate(job);
@@ -330,6 +335,7 @@ namespace Rdmp.Dicom.Tests.Unit
         
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.MySql)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void Test_IsolateTwoTables_IntKeys(DatabaseType dbType)
         { 
             /***************************************
@@ -403,7 +409,7 @@ namespace Rdmp.Dicom.Tests.Unit
             mutilator.Check(new AcceptAllCheckNotifier());
 
             var config = new HICDatabaseConfiguration(db.Server,new ReturnSameString());
-            var job = Mock.Of<IDataLoadJob>(j => j.JobID==999 && j.Configuration == config);            
+            var job = new ThrowImmediatelyDataLoadJob(config,parentTableInfo,childTableInfo);
 
             mutilator.Initialize(db, LoadStage.AdjustRaw);
             mutilator.Mutilate(job);
@@ -427,6 +433,7 @@ namespace Rdmp.Dicom.Tests.Unit
 
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.MySql)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void Test_IsolateTwoTables_MultipleCollidingChildren(DatabaseType dbType)
         { 
             /***************************************
@@ -500,7 +507,7 @@ namespace Rdmp.Dicom.Tests.Unit
             mutilator.Check(new AcceptAllCheckNotifier());
 
             var config = new HICDatabaseConfiguration(db.Server,new ReturnSameString());
-            var job = Mock.Of<IDataLoadJob>(j => j.JobID==999 && j.Configuration == config);            
+            var job = new ThrowImmediatelyDataLoadJob(config,parentTableInfo,childTableInfo);
 
             mutilator.Initialize(db, LoadStage.AdjustRaw);
             mutilator.Mutilate(job);
@@ -523,6 +530,7 @@ namespace Rdmp.Dicom.Tests.Unit
         }
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.MySql)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void Test_IsolateTables_Orphans(DatabaseType dbType)
         {
             var db = GetCleanedServer(dbType);
@@ -593,7 +601,7 @@ namespace Rdmp.Dicom.Tests.Unit
             mutilator.Check(new AcceptAllCheckNotifier());
 
             var config = new HICDatabaseConfiguration(db.Server,new ReturnSameString());
-            var job = Mock.Of<IDataLoadJob>(j => j.JobID==999 && j.Configuration == config);            
+            var job = new ThrowImmediatelyDataLoadJob(config,parentTableInfo,childTableInfo);
 
             mutilator.Initialize(db, LoadStage.AdjustRaw);
             var ex = Assert.Throws<Exception>(()=>mutilator.Mutilate(job));
@@ -603,6 +611,7 @@ namespace Rdmp.Dicom.Tests.Unit
 
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.MySql)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void Test_IsolateTables_NullForeignKey(DatabaseType dbType)
         {
             var db = GetCleanedServer(dbType);
@@ -672,8 +681,8 @@ namespace Rdmp.Dicom.Tests.Unit
             mutilator.Check(new AcceptAllCheckNotifier());
 
             var config = new HICDatabaseConfiguration(db.Server,new ReturnSameString());
-            var job = Mock.Of<IDataLoadJob>(j => j.JobID==999 && j.Configuration == config);            
-
+            var job = new ThrowImmediatelyDataLoadJob(config,parentTableInfo,childTableInfo);
+            
             mutilator.Initialize(db, LoadStage.AdjustRaw);
             mutilator.Mutilate(job);
             
@@ -684,7 +693,7 @@ namespace Rdmp.Dicom.Tests.Unit
             //isolation should have 1 (A)
             var dtParentIsolation = db.ExpectTable("Parent_Isolation").GetDataTable();
             Assert.AreEqual(1, dtParentIsolation.Rows.Count);
-            AssertContains(dtParentIsolation,"A",true,999);
+            AssertContains(dtParentIsolation,"A",true,0);
 
             //child table should have the null record only
             var dtChild = childTableInfo.Discover(DataAccessContext.InternalDataProcessing).GetDataTable();
@@ -694,7 +703,7 @@ namespace Rdmp.Dicom.Tests.Unit
             //child isolation table should have 1 record (the X,A,FF)
             var dtChildIsolation = db.ExpectTable("Child_Isolation").GetDataTable();
             Assert.AreEqual(1, dtChildIsolation.Rows.Count);
-            AssertContains(dtChildIsolation,"X","A","FF",DBNull.Value,999);
+            AssertContains(dtChildIsolation,"X","A","FF",DBNull.Value,0);
 
         }
 
@@ -709,6 +718,7 @@ namespace Rdmp.Dicom.Tests.Unit
 
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.MySql)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void Test_IsolateTables_AmbiguousFk(DatabaseType dbType)
         {
             var db = GetCleanedServer(dbType);
@@ -780,7 +790,7 @@ namespace Rdmp.Dicom.Tests.Unit
             mutilator.Check(new AcceptAllCheckNotifier());
 
             var config = new HICDatabaseConfiguration(db.Server,new ReturnSameString());
-            var job = Mock.Of<IDataLoadJob>(j => j.JobID==999 && j.Configuration == config);            
+            var job = new ThrowImmediatelyDataLoadJob(config,parentTableInfo,childTableInfo);
 
             mutilator.Initialize(db, LoadStage.AdjustRaw);
             mutilator.Mutilate(job);
@@ -806,6 +816,7 @@ namespace Rdmp.Dicom.Tests.Unit
 
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.MySql)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void Test_IsolateTables_NoRecordsLeftBehind(DatabaseType dbType)
         {
             var db = GetCleanedServer(dbType);
@@ -877,7 +888,7 @@ namespace Rdmp.Dicom.Tests.Unit
             mutilator.Check(new AcceptAllCheckNotifier());
 
             var config = new HICDatabaseConfiguration(db.Server,new ReturnSameString());
-            var job = Mock.Of<IDataLoadJob>(j => j.JobID==999 && j.Configuration == config);            
+            var job = new ThrowImmediatelyDataLoadJob(config,parentTableInfo,childTableInfo);
 
             mutilator.Initialize(db, LoadStage.AdjustRaw);
             Assert.DoesNotThrow(()=>mutilator.Mutilate(job));
