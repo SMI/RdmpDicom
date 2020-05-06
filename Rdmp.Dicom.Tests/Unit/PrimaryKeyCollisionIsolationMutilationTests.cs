@@ -108,7 +108,7 @@ namespace Rdmp.Dicom.Tests.Unit
             mutilator.Check(new AcceptAllCheckNotifier());
 
             var config = new HICDatabaseConfiguration(db.Server,RdmpMockFactory.Mock_INameDatabasesAndTablesDuringLoads(db, "MyCoolTable2"));
-            var job = Mock.Of<IDataLoadJob>(p => p.JobID == 999 &&  p.Configuration == config);
+            var job = new ThrowImmediatelyDataLoadJob(config,tableInfoCreated);
                                     
             mutilator.Initialize(db,LoadStage.AdjustRaw);
             mutilator.Mutilate(job);
@@ -207,7 +207,7 @@ namespace Rdmp.Dicom.Tests.Unit
             mutilator.Check(new AcceptAllCheckNotifier());
 
             var config = new HICDatabaseConfiguration(db.Server,new ReturnSameString());
-            var job = Mock.Of<IDataLoadJob>(j => j.JobID==999 && j.Configuration == config);            
+            var job = new ThrowImmediatelyDataLoadJob(config,parentTableInfo,childTableInfo);
 
             mutilator.Initialize(db, LoadStage.AdjustRaw);
             mutilator.Mutilate(job);
@@ -306,7 +306,7 @@ namespace Rdmp.Dicom.Tests.Unit
             mutilator.Check(new AcceptAllCheckNotifier());
 
             var config = new HICDatabaseConfiguration(db.Server,new ReturnSameString());
-            var job = Mock.Of<IDataLoadJob>(j => j.JobID==999 && j.Configuration == config);            
+            var job = new ThrowImmediatelyDataLoadJob(config,parentTableInfo,childTableInfo);
 
             mutilator.Initialize(db, LoadStage.AdjustRaw);
             mutilator.Mutilate(job);
@@ -403,7 +403,7 @@ namespace Rdmp.Dicom.Tests.Unit
             mutilator.Check(new AcceptAllCheckNotifier());
 
             var config = new HICDatabaseConfiguration(db.Server,new ReturnSameString());
-            var job = Mock.Of<IDataLoadJob>(j => j.JobID==999 && j.Configuration == config);            
+            var job = new ThrowImmediatelyDataLoadJob(config,parentTableInfo,childTableInfo);
 
             mutilator.Initialize(db, LoadStage.AdjustRaw);
             mutilator.Mutilate(job);
@@ -500,7 +500,7 @@ namespace Rdmp.Dicom.Tests.Unit
             mutilator.Check(new AcceptAllCheckNotifier());
 
             var config = new HICDatabaseConfiguration(db.Server,new ReturnSameString());
-            var job = Mock.Of<IDataLoadJob>(j => j.JobID==999 && j.Configuration == config);            
+            var job = new ThrowImmediatelyDataLoadJob(config,parentTableInfo,childTableInfo);
 
             mutilator.Initialize(db, LoadStage.AdjustRaw);
             mutilator.Mutilate(job);
@@ -593,7 +593,7 @@ namespace Rdmp.Dicom.Tests.Unit
             mutilator.Check(new AcceptAllCheckNotifier());
 
             var config = new HICDatabaseConfiguration(db.Server,new ReturnSameString());
-            var job = Mock.Of<IDataLoadJob>(j => j.JobID==999 && j.Configuration == config);            
+            var job = new ThrowImmediatelyDataLoadJob(config,parentTableInfo,childTableInfo);
 
             mutilator.Initialize(db, LoadStage.AdjustRaw);
             var ex = Assert.Throws<Exception>(()=>mutilator.Mutilate(job));
@@ -672,7 +672,7 @@ namespace Rdmp.Dicom.Tests.Unit
             mutilator.Check(new AcceptAllCheckNotifier());
 
             var config = new HICDatabaseConfiguration(db.Server,new ReturnSameString());
-            var job = Mock.Of<IDataLoadJob>(j => j.JobID==999 && j.Configuration == config);            
+            var job = new ThrowImmediatelyDataLoadJob(config,parentTableInfo,childTableInfo);
 
             mutilator.Initialize(db, LoadStage.AdjustRaw);
             mutilator.Mutilate(job);
@@ -780,7 +780,7 @@ namespace Rdmp.Dicom.Tests.Unit
             mutilator.Check(new AcceptAllCheckNotifier());
 
             var config = new HICDatabaseConfiguration(db.Server,new ReturnSameString());
-            var job = Mock.Of<IDataLoadJob>(j => j.JobID==999 && j.Configuration == config);            
+            var job = new ThrowImmediatelyDataLoadJob(config,parentTableInfo,childTableInfo);
 
             mutilator.Initialize(db, LoadStage.AdjustRaw);
             mutilator.Mutilate(job);
@@ -877,7 +877,7 @@ namespace Rdmp.Dicom.Tests.Unit
             mutilator.Check(new AcceptAllCheckNotifier());
 
             var config = new HICDatabaseConfiguration(db.Server,new ReturnSameString());
-            var job = Mock.Of<IDataLoadJob>(j => j.JobID==999 && j.Configuration == config);            
+            var job = new ThrowImmediatelyDataLoadJob(config,parentTableInfo,childTableInfo);
 
             mutilator.Initialize(db, LoadStage.AdjustRaw);
             Assert.DoesNotThrow(()=>mutilator.Mutilate(job));
