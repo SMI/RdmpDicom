@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.1.0] 2020-05-05
 
+### Added
+
+- Added PostgresSql support in PrimaryKeyCollisionIsolationMutilation
+
 ### Changed
 
 - Updated to RDMP 4.1.0
