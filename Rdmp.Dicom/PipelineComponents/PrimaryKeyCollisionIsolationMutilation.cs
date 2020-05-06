@@ -377,6 +377,18 @@ namespace Rdmp.Dicom.PipelineComponents
                 _fromSql,
                 deleteOnColumnName);
 
+            if(syntax.DatabaseType == DatabaseType.PostgreSql)
+            {
+                if(!_joins.Any())
+                {
+                    sqlDelete = string.Format("DELETE FROM {0} WHERE {1} = @val", 
+                    syntax.EnsureWrapped(toDelete.GetRuntimeName(LoadBubble.Raw,_namer)),deleteOnColumnName);
+                }
+                else
+                {
+                    throw new NotImplementedException("Postgres requires USING syntax when doing a DELETE join");
+                }
+            }
 
             _job.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,"Running:" + sqlDelete));
 
