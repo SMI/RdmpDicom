@@ -429,6 +429,7 @@ namespace Rdmp.Dicom.PipelineComponents
                    // we want no joins at all
 
                 var idx = Array.IndexOf(TablesToIsolate,toDelete);
+                var usings = new HashSet<TableInfo>();
 
                 foreach(var j in _joins)
                 {
@@ -449,13 +450,19 @@ namespace Rdmp.Dicom.PipelineComponents
                     sb.Append(syntax.EnsureWrapped(j.ForeignKey.GetRuntimeName(LoadStage.AdjustRaw)));
 
                     sb.Append(" AND ");
+
+                    usings.Add(j.ForeignKey.TableInfo);
+                    usings.Add(j.PrimaryKey.TableInfo);
                 }
 
-                return string.Format("DELETE FROM {0} USING {1} WHERE {2} {3} = @val", 
+                var usingsStr = string.Join(",",usings.Except(new []{toDelete}).Select(t=>syntax.EnsureWrapped(t.GetRuntimeName(LoadBubble.Raw,_namer))));
+
+                return string.Format("DELETE FROM {0} {1} WHERE {2} {3} = @val", 
                     syntax.EnsureWrapped(toDelete.GetRuntimeName(LoadBubble.Raw,_namer)),
 
                     //USING the other table names (as appearing in RAW)
-                    string.Join(",",TablesToIsolate.Except(new []{toDelete}).Select(t=>syntax.EnsureWrapped(t.GetRuntimeName(LoadBubble.Raw,_namer)))),
+                    string.IsNullOrWhiteSpace(usingsStr) ? "" : " USING " + usingsStr,
+
                     sb,
                     deleteOnColumnName);
             }
