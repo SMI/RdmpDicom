@@ -22,6 +22,7 @@ namespace Rdmp.Dicom.Tests.Unit
     {
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.MySql)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void Test_IsolateSingleTable_Check(DatabaseType dbType)
         {
             var db = GetCleanedServer(dbType);
@@ -76,6 +77,7 @@ namespace Rdmp.Dicom.Tests.Unit
 
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.MySql)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void Test_IsolateSingleTable_Dupliction(DatabaseType dbType)
         {
             var db = GetCleanedServer(dbType);
@@ -122,6 +124,7 @@ namespace Rdmp.Dicom.Tests.Unit
 
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.MySql)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void Test_IsolateTwoTables_Dupliction(DatabaseType dbType)
         {
             var db = GetCleanedServer(dbType);
@@ -242,6 +245,8 @@ namespace Rdmp.Dicom.Tests.Unit
         [TestCase(DatabaseType.MySql,false)]
         [TestCase(DatabaseType.MicrosoftSQLServer,true)]
         [TestCase(DatabaseType.MySql,true)]
+        [TestCase(DatabaseType.PostgreSql,false)]
+        [TestCase(DatabaseType.PostgreSql,true)]
         public void Test_IsolateTwoTables_MutipleConflictingColumns(DatabaseType dbType,bool whitespace)
         {
             var db = GetCleanedServer(dbType);
@@ -330,6 +335,7 @@ namespace Rdmp.Dicom.Tests.Unit
         
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.MySql)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void Test_IsolateTwoTables_IntKeys(DatabaseType dbType)
         { 
             /***************************************
@@ -427,6 +433,7 @@ namespace Rdmp.Dicom.Tests.Unit
 
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.MySql)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void Test_IsolateTwoTables_MultipleCollidingChildren(DatabaseType dbType)
         { 
             /***************************************
@@ -523,6 +530,7 @@ namespace Rdmp.Dicom.Tests.Unit
         }
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.MySql)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void Test_IsolateTables_Orphans(DatabaseType dbType)
         {
             var db = GetCleanedServer(dbType);
@@ -603,6 +611,7 @@ namespace Rdmp.Dicom.Tests.Unit
 
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.MySql)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void Test_IsolateTables_NullForeignKey(DatabaseType dbType)
         {
             var db = GetCleanedServer(dbType);
@@ -709,6 +718,7 @@ namespace Rdmp.Dicom.Tests.Unit
 
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.MySql)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void Test_IsolateTables_AmbiguousFk(DatabaseType dbType)
         {
             var db = GetCleanedServer(dbType);
@@ -806,6 +816,7 @@ namespace Rdmp.Dicom.Tests.Unit
 
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.MySql)]
+        [TestCase(DatabaseType.PostgreSql)]
         public void Test_IsolateTables_NoRecordsLeftBehind(DatabaseType dbType)
         {
             var db = GetCleanedServer(dbType);
