@@ -296,32 +296,36 @@ namespace Rdmp.Dicom.PipelineComponents
 
             //fetch all the data
             string sqlSelect = string.Format("Select distinct {0} {1} WHERE {2} = @val", pkColumnName, _fromSql, deleteOnColumnName);
-            var cmdSelect = _raw.Server.GetCommand(sqlSelect, con);
-            var p = cmdSelect.CreateParameter();
-            p.ParameterName = "@val";
-            cmdSelect.Parameters.Add(p);
-
-            foreach (var d in deleteValue)
+            using(var cmdSelect = _raw.Server.GetCommand(sqlSelect, con))
             {
-                p.Value = d;
-                bool readOne = false;
-                using (var r = cmdSelect.ExecuteReader())
+                var p = cmdSelect.CreateParameter();
+                p.ParameterName = "@val";
+                cmdSelect.Parameters.Add(p);
+
+                foreach (var d in deleteValue)
                 {
-                    while (r.Read())
+                    p.Value = d;
+                    bool readOne = false;
+                    using (var r = cmdSelect.ExecuteReader())
                     {
-                        var result = r[0];
+                        while (r.Read())
+                        {
+                            var result = r[0];
 
-                        if(result == DBNull.Value || result == null)
-                            throw new Exception("Primary key value not found for " + d + " foreign Key was null");
+                            if(result == DBNull.Value || result == null)
+                                throw new Exception("Primary key value not found for " + d + " foreign Key was null");
 
-                        toReturn.Add(result);
-                        readOne = true;
+                            toReturn.Add(result);
+                            readOne = true;
+                        }
+
+                        if(!readOne)
+                            throw new Exception("Primary key value not found for " + d);
                     }
-
-                    if(!readOne)
-                        throw new Exception("Primary key value not found for " + d);
                 }
+
             }
+            
 
             return toReturn.ToArray();
         }
@@ -336,23 +340,26 @@ namespace Rdmp.Dicom.PipelineComponents
             
             //fetch all the data (LEFT/RIGHT joins can introduce null records so add not null to WHERE for the table being migrated to avoid full null rows)
             string sqlSelect = string.Format("Select distinct {0}.* {1} WHERE {2} = @val AND {3} is not null", deleteFromTableName, _fromSql, deleteOnColumnName, pkColumnName);
-            var cmdSelect = _raw.Server.GetCommand(sqlSelect, con);
-            var p = cmdSelect.CreateParameter();
-            cmdSelect.Parameters.Add(p);
-
-            foreach (var value in deleteValues)
+            using(var cmdSelect = _raw.Server.GetCommand(sqlSelect, con))
             {
-                p.ParameterName = "@val";
-                p.Value = value;
+                var p = cmdSelect.CreateParameter();
+                cmdSelect.Parameters.Add(p);
 
-                using(var da = _raw.Server.GetDataAdapter(cmdSelect))
-                    da.Fill(dt);
+                foreach (var value in deleteValues)
+                {
+                    p.ParameterName = "@val";
+                    p.Value = value;
+
+                    using(var da = _raw.Server.GetDataAdapter(cmdSelect))
+                        da.Fill(dt);
+                }
+                
+                dt.Columns.Add(SpecialFieldNames.DataLoadRunID, typeof(int));
+                
+                foreach (DataRow row in dt.Rows)
+                    row[SpecialFieldNames.DataLoadRunID] = _dataLoadInfoId;
             }
-            
-            dt.Columns.Add(SpecialFieldNames.DataLoadRunID, typeof(int));
-            
-            foreach (DataRow row in dt.Rows)
-                row[SpecialFieldNames.DataLoadRunID] = _dataLoadInfoId;
+
 
             return dt;
         }
@@ -362,17 +369,19 @@ namespace Rdmp.Dicom.PipelineComponents
             //now delete all records
             string sqlDelete = string.Format("DELETE {0} {1} WHERE {2} = @val", toDelete.GetRuntimeName(LoadBubble.Raw,_namer), _fromSql, deleteOnColumnName);
 
-            var cmdDelete = _raw.Server.GetCommand(sqlDelete, con);
-            var p2 = cmdDelete.CreateParameter();
-            cmdDelete.Parameters.Add(p2);
-
-            foreach (var d in deleteValues)
+            using(var cmdDelete = _raw.Server.GetCommand(sqlDelete, con))
             {
-                p2.ParameterName = "@val";
-                p2.Value = d;
-                
-                //then delete it
-                cmdDelete.ExecuteNonQuery();
+                var p2 = cmdDelete.CreateParameter();
+                cmdDelete.Parameters.Add(p2);
+
+                foreach (var d in deleteValues)
+                {
+                    p2.ParameterName = "@val";
+                    p2.Value = d;
+                    
+                    //then delete it
+                    cmdDelete.ExecuteNonQuery();
+                }
             }
         }
 
@@ -392,11 +401,12 @@ namespace Rdmp.Dicom.PipelineComponents
             using (var con = _raw.Server.GetConnection())
             {
                 con.Open();
-                var cmd = _raw.Server.GetCommand(primaryKeysColliding, con);
-                var r = cmd.ExecuteReader();
-
-                while (r.Read())
-                    yield return r[pkColName];
+                using(var cmd = _raw.Server.GetCommand(primaryKeysColliding, con))
+                {
+                    using(var r = cmd.ExecuteReader())
+                        while (r.Read())
+                            yield return r[pkColName];
+                }
             }
         }
     }
