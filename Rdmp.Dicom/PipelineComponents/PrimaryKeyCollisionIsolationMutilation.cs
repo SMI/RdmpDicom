@@ -417,7 +417,9 @@ namespace Rdmp.Dicom.PipelineComponents
 
                 foreach(var j in _joins)
                 {
+                    //MIMIC a LEFT join
                     
+                    sb.Append("(");
                     sb.Append(syntax.EnsureWrapped(j.PrimaryKey.TableInfo.GetRuntimeName(LoadBubble.Raw,_namer)));
                     sb.Append(".");
                     sb.Append(syntax.EnsureWrapped(j.PrimaryKey.GetRuntimeName(LoadStage.AdjustRaw)));
@@ -428,6 +430,15 @@ namespace Rdmp.Dicom.PipelineComponents
                     sb.Append(".");
                     sb.Append(syntax.EnsureWrapped(j.ForeignKey.GetRuntimeName(LoadStage.AdjustRaw)));
 
+
+                    sb.Append(" OR ");
+
+                    sb.Append(syntax.EnsureWrapped(j.ForeignKey.TableInfo.GetRuntimeName(LoadBubble.Raw,_namer)));
+                    sb.Append(".");
+                    sb.Append(syntax.EnsureWrapped(j.ForeignKey.GetRuntimeName(LoadStage.AdjustRaw)));
+                    sb.Append(" IS NULL");
+
+                    sb.Append(")");
                     sb.Append(" AND ");
                 }
 
