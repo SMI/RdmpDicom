@@ -1,6 +1,7 @@
-language: csharp
+language: generic
 mono: none
-dotnet: 2.2.100
+dist: bionic
+os: linux
 
 addons:
   postgresql: "10"
@@ -8,23 +9,43 @@ addons:
     packages:
     - postgresql-10
     - postgresql-client-10
+    sources:
+    - sourceline: 'deb [arch=amd64] https://packages.microsoft.com/ubuntu/18.04/prod bionic main'
+      key_url: 'https://packages.microsoft.com/keys/microsoft.asc'
+    - sourceline: 'deb [arch=amd64,arm64,armhf] https://packages.microsoft.com/ubuntu/16.04/mssql-server-2017 xenial main'
 
 services:
-  - postgresql
-  - mysql
+- postgresql
+- mysql
+env:
+  global:
+  - MSSQL_SA_PASSWORD="YourStrong!Passw0rd"
+  - ACCEPT_EULA=Y
+  - MSSQL_PID='developer'
+cache:
+  directories:
+  - $HOME/.local/share/NuGet/
+  - $HOME/.nuget
+  - $HOME/rdmp-cli
 
-before_script:
-- sudo docker run --name=mssql-server-linux-latest -e 'ACCEPT_EULA=Y' -e 'MSSQL_SA_PASSWORD=YourStrong!Passw0rd' -p 1433:1433 -d microsoft/mssql-server-linux:2017-latest
-- sudo apt install libc6-dev 
-- sudo apt install libgdiplus
+install:
+- sudo apt-get install -y --no-install-recommends mssql-tools mssql-server dotnet-runtime-2.2 dotnet-sdk-3.1
+- sudo /opt/mssql/bin/mssql-conf -n setup accept-eula
+- |
+  if [ ! -x $HOME/rdmp-cli/rdmp || ! fgrep -q 4.1.0 $HOME/rdmp-cli/rdmp.dll ]
+  then
+    rm -rf $HOME/rdmp-cli
+    wget https://github.com/HicServices/RDMP/releases/download/v4.1.0/rdmp-cli-linux-x64.zip
+    # RDMP is still being packaged using a ZIP tool with a bug Microsoft fixed in .Net 4.6.1; excluding Chinese language support file and keyword help avoids unzip being affected by the bug: https://docs.microsoft.com/en-us/dotnet/framework/migration-guide/mitigation-ziparchiveentry-fullname-path-separator?redirectedfrom=MSDN
+    unzip -d $HOME/rdmp-cli rdmp-cli-linux-x64.zip -x "Curation*" "zh-*"
+    chmod +x $HOME/rdmp-cli/rdmp
+  fi
+- $HOME/rdmp-cli/rdmp install localhost TEST_ -u sa -p 'YourStrong!Passw0rd'
 
 script:
 - dotnet build "./Rdmp.Dicom/Rdmp.Dicom.csproj"
-- wget https://github.com/HicServices/RDMP/releases/download/v4.1.0/rdmp-cli-linux-x64.zip
-- unzip -d rdmp-cli rdmp-cli-linux-x64.zip || true # Ignore exit code since unzip returns 1 for a warning we don't care about
-- cd rdmp-cli
-- chmod +x rdmp
-- ./rdmp install localhost TEST_ -u sa -p 'YourStrong!Passw0rd'
-- cd ..
 - dotnet build "./Rdmp.Dicom.Tests/Rdmp.Dicom.Tests.csproj"
 - dotnet test "./Rdmp.Dicom.Tests/Rdmp.Dicom.Tests.csproj"
+- dotnet pack -p:Version=$(fgrep Version SharedAssemblyInfo.cs|cut -d'"' -f2|head -n1) -c Release --include-symbols --include-source
+- find . -name "*.nupkg"
+- if [ ! -z "$TRAVIS_TAG" ]; then dotnet nuget push bin/Release/HIC.DicomTypeTranslation.$TRAVIS_TAG.nupkg -s https://api.nuget.org/v3/index.json -k $NUGET_KEY; fi
