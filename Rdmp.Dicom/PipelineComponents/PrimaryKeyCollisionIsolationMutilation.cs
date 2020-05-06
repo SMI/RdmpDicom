@@ -347,11 +347,11 @@ namespace Rdmp.Dicom.PipelineComponents
             using(var cmdSelect = _raw.Server.GetCommand(sqlSelect, con))
             {
                 var p = cmdSelect.CreateParameter();
+                p.ParameterName = "@val";
                 cmdSelect.Parameters.Add(p);
 
                 foreach (var value in deleteValues)
                 {
-                    p.ParameterName = "@val";
                     p.Value = value;
 
                     using(var da = _raw.Server.GetDataAdapter(cmdSelect))
