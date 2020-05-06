@@ -682,7 +682,7 @@ namespace Rdmp.Dicom.Tests.Unit
 
             var config = new HICDatabaseConfiguration(db.Server,new ReturnSameString());
             var job = new ThrowImmediatelyDataLoadJob(config,parentTableInfo,childTableInfo);
-
+            
             mutilator.Initialize(db, LoadStage.AdjustRaw);
             mutilator.Mutilate(job);
             
@@ -693,7 +693,7 @@ namespace Rdmp.Dicom.Tests.Unit
             //isolation should have 1 (A)
             var dtParentIsolation = db.ExpectTable("Parent_Isolation").GetDataTable();
             Assert.AreEqual(1, dtParentIsolation.Rows.Count);
-            AssertContains(dtParentIsolation,"A",true,999);
+            AssertContains(dtParentIsolation,"A",true,0);
 
             //child table should have the null record only
             var dtChild = childTableInfo.Discover(DataAccessContext.InternalDataProcessing).GetDataTable();
@@ -703,7 +703,7 @@ namespace Rdmp.Dicom.Tests.Unit
             //child isolation table should have 1 record (the X,A,FF)
             var dtChildIsolation = db.ExpectTable("Child_Isolation").GetDataTable();
             Assert.AreEqual(1, dtChildIsolation.Rows.Count);
-            AssertContains(dtChildIsolation,"X","A","FF",DBNull.Value,999);
+            AssertContains(dtChildIsolation,"X","A","FF",DBNull.Value,0);
 
         }
 
