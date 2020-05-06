@@ -415,11 +415,29 @@ namespace Rdmp.Dicom.PipelineComponents
 
                 var sb = new StringBuilder();
 
+                // 1 join per pair of tables
+                
+                if(_joins.Count != TablesToIsolate.Length -1)
+                    throw new Exception($"Unexpected join count, expected {(TablesToIsolate.Length -1)} but found {_joins.Count}");
+
+                // Imagine a 3 table query (2 joins)
+                // if we are index 2 (child)
+                   // we want all joins
+                // if we are index 1 (middle)
+                   // we want first join only
+                // if we are index 0 (parent)
+                   // we want no joins at all
+
+                var idx = Array.IndexOf(TablesToIsolate,toDelete);
+
                 foreach(var j in _joins)
                 {
                     //MIMIC a LEFT join
+                    if(idx <= 0)
+                        continue;
                     
-                    sb.Append("(");
+                    idx--;
+
                     sb.Append(syntax.EnsureWrapped(j.PrimaryKey.TableInfo.GetRuntimeName(LoadBubble.Raw,_namer)));
                     sb.Append(".");
                     sb.Append(syntax.EnsureWrapped(j.PrimaryKey.GetRuntimeName(LoadStage.AdjustRaw)));
@@ -430,15 +448,6 @@ namespace Rdmp.Dicom.PipelineComponents
                     sb.Append(".");
                     sb.Append(syntax.EnsureWrapped(j.ForeignKey.GetRuntimeName(LoadStage.AdjustRaw)));
 
-
-                    sb.Append(" OR ");
-
-                    sb.Append(syntax.EnsureWrapped(j.ForeignKey.TableInfo.GetRuntimeName(LoadBubble.Raw,_namer)));
-                    sb.Append(".");
-                    sb.Append(syntax.EnsureWrapped(j.ForeignKey.GetRuntimeName(LoadStage.AdjustRaw)));
-                    sb.Append(" IS NULL");
-
-                    sb.Append(")");
                     sb.Append(" AND ");
                 }
 
