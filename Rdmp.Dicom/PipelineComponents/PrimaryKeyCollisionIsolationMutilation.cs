@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Linq;
+using FAnsi;
 using FAnsi.Discovery;
 using FAnsi.Discovery.QuerySyntax;
 using MapsDirectlyToDatabaseTable;
@@ -376,6 +377,9 @@ namespace Rdmp.Dicom.PipelineComponents
                 _fromSql,
                 deleteOnColumnName);
 
+
+            _job.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,"Running:" + sqlDelete));
+
             using(var cmdDelete = _raw.Server.GetCommand(sqlDelete, con))
             {
                 var p2 = cmdDelete.CreateParameter();
@@ -387,7 +391,10 @@ namespace Rdmp.Dicom.PipelineComponents
                     p2.Value = d;
                     
                     //then delete it
-                    cmdDelete.ExecuteNonQuery();
+                    int affectedRows = cmdDelete.ExecuteNonQuery();
+
+                    _job.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,affectedRows + " affected rows"));
+
                 }
             }
         }
