@@ -1,46 +1,28 @@
-language: generic
-mono: none
-dist: bionic
-os: linux
+language: bash
+os: windows
 
 addons:
-  postgresql: "10"
-  apt:
-    packages:
-    - postgresql-10
-    - postgresql-client-10
-    sources:
-    - sourceline: 'deb [arch=amd64] https://packages.microsoft.com/ubuntu/18.04/prod bionic main'
-      key_url: 'https://packages.microsoft.com/keys/microsoft.asc'
-    - sourceline: 'deb [arch=amd64,arm64,armhf] https://packages.microsoft.com/ubuntu/16.04/mssql-server-2017 xenial main'
 
 services:
-- postgresql
-- mysql
 env:
-  global:
-  - MSSQL_SA_PASSWORD="YourStrong!Passw0rd"
-  - ACCEPT_EULA=Y
-  - MSSQL_PID='developer'
 cache:
   directories:
-  - $HOME/.local/share/NuGet/
-  - $HOME/.nuget
   - $HOME/rdmp-cli
 
 install:
-- sudo apt-get install -y --no-install-recommends mssql-tools mssql-server dotnet-runtime-2.2 dotnet-sdk-3.1 libgdiplus libc6-dev mono-complete
-- sudo /opt/mssql/bin/mssql-conf -n setup accept-eula
+- 'echo "ServerName: localhost" > Rdmp.Dicom.Tests/TestDatabases.txt'
+- 'echo "Prefix: TEST_" >> Rdmp.Dicom.Tests/TestDatabases.txt'
 - |
-  if [ ! -x $HOME/rdmp-cli/rdmp ] || ! fgrep -q 4.1.0 $HOME/rdmp-cli/rdmp.dll
+  if [ ! -x $HOME/rdmp-cli/rdmp.exe ] || ! fgrep -q 4.1.0 $HOME/rdmp-cli/rdmp.dll
   then
     rm -rf $HOME/rdmp-cli
-    wget https://github.com/HicServices/RDMP/releases/download/v4.1.0/rdmp-cli-linux-x64.zip
-    # RDMP is still being packaged using a ZIP tool with a bug Microsoft fixed in .Net 4.6.1; excluding Chinese language support file and keyword help avoids unzip being affected by the bug: https://docs.microsoft.com/en-us/dotnet/framework/migration-guide/mitigation-ziparchiveentry-fullname-path-separator?redirectedfrom=MSDN
-    unzip -d $HOME/rdmp-cli rdmp-cli-linux-x64.zip -x "Curation*" "zh-*"
-    chmod +x $HOME/rdmp-cli/rdmp
+    wget https://github.com/HicServices/RDMP/releases/download/v4.1.0/rdmp-cli-win-x64.zip
+    7z x rdmp-cli-win-x64.zip -o$HOME/rdmp-cli
   fi
-- $HOME/rdmp-cli/rdmp install localhost TEST_ -u sa -p 'YourStrong!Passw0rd'
+- choco install sql-server-2017
+- choco install dotnetcore --version=2.2.2
+- choco install dotnetcore-sdk
+- $HOME/rdmp-cli/rdmp.exe install localhost TEST_
 
 script:
 - dotnet build "./Rdmp.Dicom/Rdmp.Dicom.csproj"
