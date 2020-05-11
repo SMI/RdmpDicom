@@ -1,5 +1,24 @@
-language: bash
-os: windows
+jobs:
+  include:
+    - os: windows
+      language: bash
+    - os: linux
+      dist: bionic
+      env:
+      - MSSQL_SA_PASSWORD="YourStrong!Passw0rd"
+      - ACCEPT_EULA=Y
+      - MSSQL_PID='evaluation'
+      services:
+      - postgresql
+      - mysql
+      addons:
+        apt:
+          sources:
+            - sourceline: 'deb [arch=amd64] https://packages.microsoft.com/ubuntu/18.04/prod bionic main'
+              key_url: 'https://packages.microsoft.com/keys/microsoft.asc'
+            - sourceline: 'deb [arch=amd64,arm64,armhf] https://packages.microsoft.com/ubuntu/16.04/mssql-server-2017 xenial main'
+            
+
 
 addons:
 
@@ -7,27 +26,50 @@ services:
 env:
 cache:
   directories:
+  - $HOME/.local/share/NuGet/
+  - $HOME/.nuget
+  - $HOME/.m2
   - $HOME/rdmp-cli
 
 install:
-- 'echo "ServerName: localhost" > Rdmp.Dicom.Tests/TestDatabases.txt'
-- 'echo "Prefix: TEST_" >> Rdmp.Dicom.Tests/TestDatabases.txt'
 - |
-  if [ ! -x $HOME/rdmp-cli/rdmp.exe ] || ! fgrep -q 4.1.0 $HOME/rdmp-cli/rdmp.dll
-  then
-    rm -rf $HOME/rdmp-cli
-    wget https://github.com/HicServices/RDMP/releases/download/v4.1.0/rdmp-cli-win-x64.zip
-    7z x rdmp-cli-win-x64.zip -o$HOME/rdmp-cli
+  if [ "$TRAVIS_OS_NAME" = "linux" ]
+    sudo apt-get install -y --no-install-recommends mssql-tools mssql-server dotnet-runtime-2.2 dotnet-sdk-3.1
+    sudo /opt/mssql/bin/mssql-conf -n setup accept-eula
+    if [ ! -x $HOME/rdmp-cli/rdmp ] || ! fgrep -q 4.1.0 $HOME/rdmp-cli/rdmp.dll
+    then
+      rm -rf $HOME/rdmp-cli
+      wget https://github.com/HicServices/RDMP/releases/download/v4.1.0/rdmp-cli-linux-x64.zip
+      # RDMP is still being packaged using a ZIP tool with a bug Microsoft fixed in .Net 4.6.1; excluding Chinese language support file and keyword help avoids unzip being affected by the bug: https://docs.microsoft.com/en-us/dotnet/framework/migration-guide/mitigation-ziparchiveentry-fullname-path-separator?redirectedfrom=MSDN
+      unzip -d $HOME/rdmp-cli rdmp-cli-linux-x64.zip -x "Curation*" "zh-*"
+      chmod +x $HOME/rdmp-cli/rdmp
+    fi
+  $HOME/rdmp-cli/rdmp install localhost TEST_
   fi
-- choco install sql-server-2017
-- choco install dotnetcore --version=2.2.2
-- choco install dotnetcore-sdk
-- $HOME/rdmp-cli/rdmp.exe install localhost TEST_
+- |
+  if [ "$TRAVIS_OS_NAME" = "windows" ]
+    if [ ! -x $HOME/rdmp-cli/rdmp.exe ] || ! fgrep -q 4.1.0 $HOME/rdmp-cli/rdmp.dll
+    then
+      rm -rf $HOME/rdmp-cli
+      wget https://github.com/HicServices/RDMP/releases/download/v4.1.0/rdmp-cli-win-x64.zip
+      7z x rdmp-cli-win-x64.zip -o$HOME/rdmp-cli
+    fi
+    echo "ServerName: localhost" > Rdmp.Dicom.Tests/TestDatabases.txt
+    echo "Prefix: TEST_" >> Rdmp.Dicom.Tests/TestDatabases.txt
+    choco install sql-server-2017
+    choco install dotnetcore --version=2.2.2
+    choco install dotnetcore-sdk
+    $HOME/rdmp-cli/rdmp.exe install localhost TEST_
+  fi
 
 script:
 - dotnet build "./Rdmp.Dicom/Rdmp.Dicom.csproj"
 - dotnet build "./Rdmp.Dicom.Tests/Rdmp.Dicom.Tests.csproj"
 - dotnet test "./Rdmp.Dicom.Tests/Rdmp.Dicom.Tests.csproj"
-- dotnet pack -p:Version=$(fgrep Version SharedAssemblyInfo.cs|cut -d'"' -f2|head -n1) -c Release --include-symbols --include-source
-- find . -name "*.nupkg"
-- if [ ! -z "$TRAVIS_TAG" ]; then dotnet nuget push bin/Release/HIC.DicomTypeTranslation.$TRAVIS_TAG.nupkg -s https://api.nuget.org/v3/index.json -k $NUGET_KEY; fi
+- |
+  if [ "$TRAVIS_OS_NAME" = "windows" ]
+    dotnet nuget pack ./Rdmp.Dicom.nuspec
+    dotnet nuget pack ./Rdmp.Dicom.Library.nuspec
+    ls -lh *.nupkg
+    #if [ ! -z "$TRAVIS_TAG" ]; then dotnet nuget push bin/Release/HIC.DicomTypeTranslation.$TRAVIS_TAG.nupkg -s https://api.nuget.org/v3/index.json -k $NUGET_KEY; fi
+  fi
