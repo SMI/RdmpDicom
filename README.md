@@ -17,7 +17,7 @@ Once installed the following functionality is available:
 
 - [Data Load](./Documentation/DataLoad.md)
 - [Data Extraction](./Documentation/DataExtraction.md)
-- [Caching (Fetching images from a DicomServer)](./Documentation/DataLoad.md)
+- [Caching (Fetching images from a DicomServer)](./Documentation/Caching.md)
 
 # Building
 
