@@ -34,6 +34,7 @@ cache:
 install:
 - |
   if [ "$TRAVIS_OS_NAME" = "linux" ]
+  then
     sudo apt-get install -y --no-install-recommends mssql-tools mssql-server dotnet-runtime-2.2 dotnet-sdk-3.1
     sudo /opt/mssql/bin/mssql-conf -n setup accept-eula
     if [ ! -x $HOME/rdmp-cli/rdmp ] || ! fgrep -q 4.1.0 $HOME/rdmp-cli/rdmp.dll
@@ -48,6 +49,7 @@ install:
   fi
 - |
   if [ "$TRAVIS_OS_NAME" = "windows" ]
+  then
     if [ ! -x $HOME/rdmp-cli/rdmp.exe ] || ! fgrep -q 4.1.0 $HOME/rdmp-cli/rdmp.dll
     then
       rm -rf $HOME/rdmp-cli
@@ -68,6 +70,7 @@ script:
 - dotnet test "./Rdmp.Dicom.Tests/Rdmp.Dicom.Tests.csproj"
 - |
   if [ "$TRAVIS_OS_NAME" = "windows" ]
+  then
     dotnet nuget pack ./Rdmp.Dicom.nuspec
     dotnet nuget pack ./Rdmp.Dicom.Library.nuspec
     ls -lh *.nupkg
