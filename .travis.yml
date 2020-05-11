@@ -1,30 +1,33 @@
-language: csharp
-mono: none
-dotnet: 2.2.100
+language: bash
+os: windows
 
 addons:
-  postgresql: "10"
-  apt:
-    packages:
-    - postgresql-10
-    - postgresql-client-10
 
 services:
-  - postgresql
-  - mysql
+env:
+cache:
+  directories:
+  - $HOME/rdmp-cli
 
-before_script:
-- sudo docker run --name=mssql-server-linux-latest -e 'ACCEPT_EULA=Y' -e 'MSSQL_SA_PASSWORD=YourStrong!Passw0rd' -p 1433:1433 -d microsoft/mssql-server-linux:2017-latest
-- sudo apt install libc6-dev 
-- sudo apt install libgdiplus
+install:
+- 'echo "ServerName: localhost" > Rdmp.Dicom.Tests/TestDatabases.txt'
+- 'echo "Prefix: TEST_" >> Rdmp.Dicom.Tests/TestDatabases.txt'
+- |
+  if [ ! -x $HOME/rdmp-cli/rdmp.exe ] || ! fgrep -q 4.1.0 $HOME/rdmp-cli/rdmp.dll
+  then
+    rm -rf $HOME/rdmp-cli
+    wget https://github.com/HicServices/RDMP/releases/download/v4.1.0/rdmp-cli-win-x64.zip
+    7z x rdmp-cli-win-x64.zip -o$HOME/rdmp-cli
+  fi
+- choco install sql-server-2017
+- choco install dotnetcore --version=2.2.2
+- choco install dotnetcore-sdk
+- $HOME/rdmp-cli/rdmp.exe install localhost TEST_
 
 script:
 - dotnet build "./Rdmp.Dicom/Rdmp.Dicom.csproj"
-- wget https://github.com/HicServices/RDMP/releases/download/v4.1.0/rdmp-cli-linux-x64.zip
-- unzip -d rdmp-cli rdmp-cli-linux-x64.zip || true # Ignore exit code since unzip returns 1 for a warning we don't care about
-- cd rdmp-cli
-- chmod +x rdmp
-- ./rdmp install localhost TEST_ -u sa -p 'YourStrong!Passw0rd'
-- cd ..
 - dotnet build "./Rdmp.Dicom.Tests/Rdmp.Dicom.Tests.csproj"
 - dotnet test "./Rdmp.Dicom.Tests/Rdmp.Dicom.Tests.csproj"
+- dotnet pack -p:Version=$(fgrep Version SharedAssemblyInfo.cs|cut -d'"' -f2|head -n1) -c Release --include-symbols --include-source
+- find . -name "*.nupkg"
+- if [ ! -z "$TRAVIS_TAG" ]; then dotnet nuget push bin/Release/HIC.DicomTypeTranslation.$TRAVIS_TAG.nupkg -s https://api.nuget.org/v3/index.json -k $NUGET_KEY; fi

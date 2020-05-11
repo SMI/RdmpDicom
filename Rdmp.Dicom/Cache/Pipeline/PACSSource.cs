@@ -216,6 +216,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
                     #endregion
                     //go and get them
                     #region Retrieval
+                    DicomClient client = new DicomClient();
 
                     var transferStopwatch = new Stopwatch();
                         //start building request to fill orders 
@@ -274,7 +275,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
                                     transferStopwatch.Elapsed));
                              //do not use requestSender.ThrottleRequest(cMoveRequest, cancellationToken);
                             //TODO is there any need to throtttle this request given its lifetime
-                            DicomClient client = new DicomClient();
+                            
                             requestSender.ThrottleRequest(cMoveRequest, client, cancellationToken);
                             transferTimeOutTimer.Reset();
                             while (!pickerFilled && !hasTransferTimedOut)
@@ -284,12 +285,13 @@ namespace Rdmp.Dicom.Cache.Pipeline
                                 transferTimerPollingPeriods++;
                             }
                             transferTimeOutTimer.Stop();
-                            client.Release();
                             listener.OnProgress(this,
                                 new ProgressEventArgs(CMoveRequestToString(cMoveRequest),
                                     new ProgressMeasurement(picker.Filled(), ProgressType.Records, picker.Total()),
                                     transferStopwatch.Elapsed));
                         }
+
+                        client.Release();
 
                         #endregion
                     }
