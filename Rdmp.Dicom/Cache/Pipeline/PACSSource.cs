@@ -301,6 +301,8 @@ namespace Rdmp.Dicom.Cache.Pipeline
                         server.Stop();
                     }
             }
+
+            transferTimeOutTimer.Dispose();
             return Chunk;
         }
 

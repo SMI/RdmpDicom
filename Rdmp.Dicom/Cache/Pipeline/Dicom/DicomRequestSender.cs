@@ -120,32 +120,18 @@ namespace Rdmp.Dicom.Cache.Pipeline.Dicom
         public void SendRequest(DicomClient client,CancellationToken token)
         {
             _listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information, "Sending request to " + _dicomConfiguration.RemoteAetTitle + " at " + _dicomConfiguration.RemoteAetUri.Host + ":" + _dicomConfiguration.RemoteAetUri.Port));
-            var t = new Task(() =>
+            
+            try
             {
-                try
-                {
-                    client.SendAsync(token).Wait(token);
-                }
-                catch (Exception ex)
-                {
-                    if (OnRequestException != null) OnRequestException(ex);
-                    throw new Exception("Error when attempting to send DICOM request: " + ex.Message, ex);
-                }
+                client.SendAsync(token).Wait(_dicomConfiguration.TransferTimeOutInMilliseconds + 1000,token);
             }
-                );
-            //var canceller = new CancellationTokenSource();
-            t.Start();
-            //allow some extra time.
-            var canceller = new CancellationTokenSource();
-            t.Wait(_dicomConfiguration.TransferTimeOutInMilliseconds + 1000, canceller.Token);
+            catch (Exception ex)
+            {
+                OnRequestException?.Invoke(ex);
+                throw new Exception("Error when attempting to send DICOM request: " + ex.Message, ex);
+            }
 
-            if (!t.IsCompleted)
-            {
-                if (OnRequestTimeout != null) OnRequestTimeout();
-                canceller.Cancel(true);
-            }
-            else
-                if (OnRequestSucess != null) OnRequestSucess();
+            OnRequestSucess?.Invoke();
 
         }
         #endregion
