@@ -4,6 +4,7 @@ jobs:
       language: bash
     - os: linux
       dist: bionic
+      language: generic
       env:
       - MSSQL_SA_PASSWORD="YourStrong!Passw0rd"
       - ACCEPT_EULA=Y
@@ -17,7 +18,7 @@ jobs:
             - sourceline: 'deb [arch=amd64] https://packages.microsoft.com/ubuntu/18.04/prod bionic main'
               key_url: 'https://packages.microsoft.com/keys/microsoft.asc'
             - sourceline: 'deb [arch=amd64,arm64,armhf] https://packages.microsoft.com/ubuntu/16.04/mssql-server-2017 xenial main'
-            
+            - sourceline: 'deb [arch=i386] http://oss.oracle.com/debian unstable main non-free'
 
 
 addons:
@@ -35,7 +36,7 @@ install:
 - |
   if [ "$TRAVIS_OS_NAME" = "linux" ]
   then
-    sudo apt-get install -y --no-install-recommends mssql-tools mssql-server dotnet-runtime-2.2 dotnet-sdk-3.1
+    sudo apt-get install -y --no-install-recommends mssql-tools mssql-server libc6-dev libgdiplus dotnet-runtime-2.2 dotnet-sdk-3.1
     sudo /opt/mssql/bin/mssql-conf -n setup accept-eula
     if [ ! -x $HOME/rdmp-cli/rdmp ] || ! fgrep -q 4.1.0 $HOME/rdmp-cli/rdmp.dll
     then
@@ -74,5 +75,8 @@ script:
     nuget pack ./Rdmp.Dicom.nuspec
     nuget pack ./Rdmp.Dicom.Library.nuspec
     ls -lh *.nupkg
-    #if [ ! -z "$TRAVIS_TAG" ]; then dotnet nuget push bin/Release/HIC.DicomTypeTranslation.$TRAVIS_TAG.nupkg -s https://api.nuget.org/v3/index.json -k $NUGET_KEY; fi
+    if [ ! -z "$TRAVIS_TAG" ]
+    then
+      echo dotnet nuget push bin/Release/HIC.DicomTypeTranslation.$TRAVIS_TAG.nupkg -s https://api.nuget.org/v3/index.json -k $NUGET_KEY
+    fi
   fi
