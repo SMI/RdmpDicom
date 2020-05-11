@@ -3,9 +3,11 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Dicom.Network;
+using Dicom.Network.Client;
 using ReusableLibraryCode.Progress;
 using Rdmp.Dicom.PACS;
 using Rdmp.Core.DataFlowPipeline;
+using DicomClient = Dicom.Network.Client.DicomClient;
 
 namespace Rdmp.Dicom.Cache.Pipeline.Dicom
 {
@@ -37,7 +39,7 @@ namespace Rdmp.Dicom.Cache.Pipeline.Dicom
         public void Check()
         {
             var echoRequest = new DicomCEchoRequest();
-            SendRequest(echoRequest);
+            SendRequest(echoRequest, new CancellationToken(false));
         }
         #endregion
 
@@ -48,9 +50,9 @@ namespace Rdmp.Dicom.Cache.Pipeline.Dicom
         /// </summary>
         /// 
         #region ThrottleRequest
-        public void ThrottleRequest(DicomRequest dicomRequest, DicomClient client, GracefulCancellationToken cancellationToken)
+        public void ThrottleRequest(DicomRequest dicomRequest, DicomClient client, CancellationToken cancellationToken)
         {
-            client.AddRequest(dicomRequest);
+            client.AddRequestAsync(dicomRequest).Wait(cancellationToken);
             ThrottleRequest(client, cancellationToken);
         }
         #endregion
@@ -61,18 +63,18 @@ namespace Rdmp.Dicom.Cache.Pipeline.Dicom
         /// </summary>
         /// 
         #region ThrottleRequest
-        public void ThrottleRequest(DicomClient client, GracefulCancellationToken cancellationToken)
+        public void ThrottleRequest(DicomClient client, CancellationToken cancellationToken)
         {
             var transferTimer = new Stopwatch();
             transferTimer.Start();
-            SendRequest(client);
+            SendRequest(client,cancellationToken);
             transferTimer.Stop();
             //valuein mills
             var delay = ((int)(_dicomConfiguration.RequestDelayFactor * (1000 * transferTimer.Elapsed.Seconds)) + _dicomConfiguration.RequestCooldownInMilliseconds);
             if (delay > 0)
             {
                 _listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information, "Requests sleeping for " + delay / 1000 + "seconds"));
-                Task.Delay(delay, cancellationToken.AbortToken).Wait(cancellationToken.AbortToken);
+                Task.Delay(delay, cancellationToken).Wait(cancellationToken);
             }
         }
         #endregion
@@ -84,12 +86,10 @@ namespace Rdmp.Dicom.Cache.Pipeline.Dicom
         /// </summary>
         /// <param name="dicomRequest"></param>
         #region SendRequest
-        public void SendRequest(DicomRequest dicomRequest)
+        private void SendRequest(DicomRequest dicomRequest, CancellationToken token)
         {
-            var client = new DicomClient();
-            SendRequest(dicomRequest, client);
-            client.Release();
-
+            var client = new DicomClient(_dicomConfiguration.RemoteAetUri.Host,_dicomConfiguration.RemoteAetUri.Port,false,_dicomConfiguration.LocalAetTitle,_dicomConfiguration.RemoteAetTitle);
+            SendRequest(dicomRequest, client,token);
         }
         #endregion
 
@@ -102,28 +102,29 @@ namespace Rdmp.Dicom.Cache.Pipeline.Dicom
         /// <param name="client"></param>
 
         #region SendRequest
-        public void SendRequest(DicomRequest dicomRequest, DicomClient client)
+        public void SendRequest(DicomRequest dicomRequest, DicomClient client,CancellationToken token)
         {
-            client.AddRequest(dicomRequest);
-            SendRequest(client);
+            client.AddRequestAsync(dicomRequest).Wait(token);
+            SendRequest(client,token);
         }
         #endregion
+
         /// <summary>
         ///     Blocks until the request is received so calling code doesn't have to deal with asynchrony (see the EventWaitHandle in TrySend).
         ///     Only the timeout is applied no Throtelling, the client is unreleased on return 
         /// </summary>
-        /// <param name="dicomRequest"></param>
         /// <param name="client"></param>
+        /// <param name="token"></param>
+
         #region SendRequest
-        public void SendRequest(DicomClient client)
+        public void SendRequest(DicomClient client,CancellationToken token)
         {
             _listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information, "Sending request to " + _dicomConfiguration.RemoteAetTitle + " at " + _dicomConfiguration.RemoteAetUri.Host + ":" + _dicomConfiguration.RemoteAetUri.Port));
             var t = new Task(() =>
             {
                 try
                 {
-                    client.Send(_dicomConfiguration.RemoteAetUri.Host, _dicomConfiguration.RemoteAetUri.Port, false, _dicomConfiguration.LocalAetTitle, _dicomConfiguration.RemoteAetTitle);
-
+                    client.SendAsync(token).Wait(token);
                 }
                 catch (Exception ex)
                 {
