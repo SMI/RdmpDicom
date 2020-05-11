@@ -41,18 +41,6 @@ namespace Rdmp.Dicom.Cache.Pipeline.Dicom
         }
         #endregion
 
-        /// <summary>
-        ///    Throttle requests using W(O) = mO(t) + c where W is the wait period, O is the opertaion duration, m and c are positive constants
-        ///    Uses a new client every time which is released before return 
-        /// </summary>
-        #region ThrottleRequest
-        public void ThrottleRequest(DicomRequest dicomRequest, GracefulCancellationToken cancellationToken)
-        {
-            var client = new DicomClient();
-            ThrottleRequest(dicomRequest, client, cancellationToken);
-            client.Release();
-        }
-        #endregion
 
         /// <summary>
         ///    Throttle requests using W(O) = mO(t) + c where W is the wait period, O is the opertaion duration, m and c are positive constants 

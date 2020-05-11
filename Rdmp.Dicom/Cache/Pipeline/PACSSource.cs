@@ -139,6 +139,8 @@ namespace Rdmp.Dicom.Cache.Pipeline
             //helps with tyding up resources if we abort or through an exception and neatly avoids ->  Access to disposed closure
             using (var server = (DicomServer<CachingSCP>) DicomServer.Create<CachingSCP>(dicomConfiguration.LocalAetUri.Port))
             {
+                DicomClient client = new DicomClient();
+
                     try
                     {
                         // Find a list of studies
@@ -155,7 +157,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
                                 studyUids.Add(response.Dataset.GetSingleValue<string>(DicomTag.StudyInstanceUID));
 
                         };
-                        requestSender.ThrottleRequest(request, cancellationToken);
+                        requestSender.ThrottleRequest(request,client, cancellationToken);
                         listener.OnNotify(this,
                             new NotifyEventArgs(ProgressEventType.Debug,
                                 "Total filtered studies for " + dateFrom + " to " + dateTo +"is " + studyUids.Count));
@@ -174,7 +176,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
                                 if (seriesInstanceUID != null)
                                     seriesUids.Add(seriesInstanceUID);
                             };
-                            requestSender.ThrottleRequest(request, cancellationToken);
+                            requestSender.ThrottleRequest(request,client, cancellationToken);
                             listener.OnNotify(this,
                                 new NotifyEventArgs(ProgressEventType.Debug,
                                     "Total series for " + studyUid + "is " + seriesUids.Count));
@@ -200,7 +202,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
                                         imageCount++;
                                     }
                                 };
-                                requestSender.ThrottleRequest(request, cancellationToken);
+                                requestSender.ThrottleRequest(request,client, cancellationToken);
                                 listener.OnNotify(this,
                                     new NotifyEventArgs(ProgressEventType.Debug,
                                         "Successfully finished image query for " + seriesUid + " Toal images in series = " +imageCount));
@@ -216,7 +218,6 @@ namespace Rdmp.Dicom.Cache.Pipeline
                     #endregion
                     //go and get them
                     #region Retrieval
-                    DicomClient client = new DicomClient();
 
                     var transferStopwatch = new Stopwatch();
                         //start building request to fill orders 
