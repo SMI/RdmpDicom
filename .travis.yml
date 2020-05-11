@@ -45,7 +45,7 @@ install:
       unzip -d $HOME/rdmp-cli rdmp-cli-linux-x64.zip -x "Curation*" "zh-*"
       chmod +x $HOME/rdmp-cli/rdmp
     fi
-  $HOME/rdmp-cli/rdmp install localhost TEST_
+  $HOME/rdmp-cli/rdmp install localhost TEST_ -u sa -p 'YourStrong!Passw0rd'
   fi
 - |
   if [ "$TRAVIS_OS_NAME" = "windows" ]
@@ -71,8 +71,8 @@ script:
 - |
   if [ "$TRAVIS_OS_NAME" = "windows" ]
   then
-    dotnet nuget pack ./Rdmp.Dicom.nuspec
-    dotnet nuget pack ./Rdmp.Dicom.Library.nuspec
+    nuget pack ./Rdmp.Dicom.nuspec
+    nuget pack ./Rdmp.Dicom.Library.nuspec
     ls -lh *.nupkg
     #if [ ! -z "$TRAVIS_TAG" ]; then dotnet nuget push bin/Release/HIC.DicomTypeTranslation.$TRAVIS_TAG.nupkg -s https://api.nuget.org/v3/index.json -k $NUGET_KEY; fi
   fi
