@@ -71,7 +71,11 @@ script:
 - |
   if [ "$TRAVIS_OS_NAME" = "windows" ]
   then
-    nuget pack ./Rdmp.Dicom.nuspec
+    cd Plugin/net461 && dotnet publish --runtime win-x64 -c Release --self-contained false
+    cd Plugin/netcoreapp2.2 && dotnet publish --runtime win-x64 -c Release --self-contained false
+    cd Plugin/netcoreapp2.2 && dotnet publish --runtime linux-x64 -c Release --self-contained false
+    nuget pack ./Rdmp.Dicom.nuspec -Properties Configuration=Release -IncludeReferencedProjects -Symbols -Version $(fgrep Version ../SharedAssemblyInfo.cs|cut -d'"' -f2|head -n1)
+
     nuget pack ./Rdmp.Dicom.Library.nuspec
     ls -lh *.nupkg
     if [ ! -z "$TRAVIS_TAG" ]
