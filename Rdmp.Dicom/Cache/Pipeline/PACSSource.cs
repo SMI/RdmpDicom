@@ -5,6 +5,7 @@ using System.IO;
 using System.Threading.Tasks;
 using Dicom;
 using Dicom.Network;
+using Dicom.Network.Client;
 using MapsDirectlyToDatabaseTable;
 using ReusableLibraryCode.Checks;
 using ReusableLibraryCode.DataAccess;
@@ -19,6 +20,7 @@ using Rdmp.Core.Caching.Requests;
 using Rdmp.Core.DataFlowPipeline;
 using Rdmp.Core.Curation;
 using Rdmp.Core.QueryBuilding;
+using DicomClient = Dicom.Network.Client.DicomClient;
 
 namespace Rdmp.Dicom.Cache.Pipeline
 {
@@ -139,6 +141,8 @@ namespace Rdmp.Dicom.Cache.Pipeline
             //helps with tyding up resources if we abort or through an exception and neatly avoids ->  Access to disposed closure
             using (var server = (DicomServer<CachingSCP>) DicomServer.Create<CachingSCP>(dicomConfiguration.LocalAetUri.Port))
             {
+                    DicomClient client = new DicomClient(dicomConfiguration.RemoteAetUri.Host, dicomConfiguration.RemoteAetUri.Port, false, dicomConfiguration.LocalAetTitle, dicomConfiguration.RemoteAetTitle);
+                
                     try
                     {
                         // Find a list of studies
@@ -155,7 +159,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
                                 studyUids.Add(response.Dataset.GetSingleValue<string>(DicomTag.StudyInstanceUID));
 
                         };
-                        requestSender.ThrottleRequest(request, cancellationToken);
+                        requestSender.ThrottleRequest(request,client, cancellationToken.AbortToken);
                         listener.OnNotify(this,
                             new NotifyEventArgs(ProgressEventType.Debug,
                                 "Total filtered studies for " + dateFrom + " to " + dateTo +"is " + studyUids.Count));
@@ -174,7 +178,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
                                 if (seriesInstanceUID != null)
                                     seriesUids.Add(seriesInstanceUID);
                             };
-                            requestSender.ThrottleRequest(request, cancellationToken);
+                            requestSender.ThrottleRequest(request,client, cancellationToken.AbortToken);
                             listener.OnNotify(this,
                                 new NotifyEventArgs(ProgressEventType.Debug,
                                     "Total series for " + studyUid + "is " + seriesUids.Count));
@@ -200,7 +204,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
                                         imageCount++;
                                     }
                                 };
-                                requestSender.ThrottleRequest(request, cancellationToken);
+                                requestSender.ThrottleRequest(request,client, cancellationToken.AbortToken);
                                 listener.OnNotify(this,
                                     new NotifyEventArgs(ProgressEventType.Debug,
                                         "Successfully finished image query for " + seriesUid + " Toal images in series = " +imageCount));
@@ -216,7 +220,6 @@ namespace Rdmp.Dicom.Cache.Pipeline
                     #endregion
                     //go and get them
                     #region Retrieval
-                    DicomClient client = new DicomClient();
 
                     var transferStopwatch = new Stopwatch();
                         //start building request to fill orders 
@@ -276,7 +279,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
                              //do not use requestSender.ThrottleRequest(cMoveRequest, cancellationToken);
                             //TODO is there any need to throtttle this request given its lifetime
                             
-                            requestSender.ThrottleRequest(cMoveRequest, client, cancellationToken);
+                            requestSender.ThrottleRequest(cMoveRequest, client, cancellationToken.AbortToken);
                             transferTimeOutTimer.Reset();
                             while (!pickerFilled && !hasTransferTimedOut)
                             {
@@ -290,9 +293,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
                                     new ProgressMeasurement(picker.Filled(), ProgressType.Records, picker.Total()),
                                     transferStopwatch.Elapsed));
                         }
-
-                        client.Release();
-
+                        
                         #endregion
                     }
                     finally
@@ -300,6 +301,8 @@ namespace Rdmp.Dicom.Cache.Pipeline
                         server.Stop();
                     }
             }
+
+            transferTimeOutTimer.Dispose();
             return Chunk;
         }
 
