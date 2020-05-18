@@ -207,7 +207,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
                                 requestSender.ThrottleRequest(request,client, cancellationToken.AbortToken);
                                 listener.OnNotify(this,
                                     new NotifyEventArgs(ProgressEventType.Debug,
-                                        "Successfully finished image query for " + seriesUid + " Toal images in series = " +imageCount));
+                                        "Successfully finished image query for " + seriesUid + " Total images in series = " +imageCount));
                             }
                         listener.OnNotify(this,
                                 new NotifyEventArgs(ProgressEventType.Debug,
