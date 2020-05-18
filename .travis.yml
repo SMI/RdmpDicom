@@ -1,51 +1,106 @@
-language: generic
-mono: none
-dist: bionic
-os: linux
+merge_mode: replace
+jobs:
+  include:
+    - os: windows
+      language: bash
+    - os: linux
+      dist: bionic
+      language: generic
+      env:
+      - MSSQL_SA_PASSWORD="YourStrong!Passw0rd"
+      - ACCEPT_EULA=Y
+      - MSSQL_PID='evaluation'
+      services:
+      - postgresql
+      - mysql
+      addons:
+        apt:
+          sources:
+            - sourceline: 'deb [arch=amd64] https://packages.microsoft.com/ubuntu/18.04/prod bionic main'
+              key_url: 'https://packages.microsoft.com/keys/microsoft.asc'
+            - sourceline: 'deb [arch=amd64,arm64,armhf] https://packages.microsoft.com/ubuntu/16.04/mssql-server-2017 xenial main'
 
 addons:
-  postgresql: "10"
-  apt:
-    packages:
-    - postgresql-10
-    - postgresql-client-10
-    sources:
-    - sourceline: 'deb [arch=amd64] https://packages.microsoft.com/ubuntu/18.04/prod bionic main'
-      key_url: 'https://packages.microsoft.com/keys/microsoft.asc'
-    - sourceline: 'deb [arch=amd64,arm64,armhf] https://packages.microsoft.com/ubuntu/16.04/mssql-server-2017 xenial main'
 
 services:
-- postgresql
-- mysql
 env:
-  global:
-  - MSSQL_SA_PASSWORD="YourStrong!Passw0rd"
-  - ACCEPT_EULA=Y
-  - MSSQL_PID='developer'
 cache:
   directories:
   - $HOME/.local/share/NuGet/
   - $HOME/.nuget
+  - $HOME/.m2
   - $HOME/rdmp-cli
 
 install:
-- sudo apt-get install -y --no-install-recommends mssql-tools mssql-server dotnet-runtime-2.2 dotnet-sdk-3.1 libgdiplus libc6-dev mono-complete
-- sudo /opt/mssql/bin/mssql-conf -n setup accept-eula
+- export RDVERSION=$(fgrep Version SharedAssemblyInfo.cs|cut -d'"' -f2|head -n1)
 - |
-  if [ ! -x $HOME/rdmp-cli/rdmp ] || ! fgrep -q 4.1.0 $HOME/rdmp-cli/rdmp.dll
+  if [ "$TRAVIS_OS_NAME" = "linux" ]
   then
-    rm -rf $HOME/rdmp-cli
-    wget https://github.com/HicServices/RDMP/releases/download/v4.1.0/rdmp-cli-linux-x64.zip
-    # RDMP is still being packaged using a ZIP tool with a bug Microsoft fixed in .Net 4.6.1; excluding Chinese language support file and keyword help avoids unzip being affected by the bug: https://docs.microsoft.com/en-us/dotnet/framework/migration-guide/mitigation-ziparchiveentry-fullname-path-separator?redirectedfrom=MSDN
-    unzip -d $HOME/rdmp-cli rdmp-cli-linux-x64.zip -x "Curation*" "zh-*"
-    chmod +x $HOME/rdmp-cli/rdmp
+    sudo apt-get install -y --no-install-recommends mssql-tools mssql-server libc6-dev libgdiplus dotnet-runtime-2.2 dotnet-sdk-3.1
+    sudo /opt/mssql/bin/mssql-conf -n setup accept-eula
+    if [ ! -x $HOME/rdmp-cli/rdmp ] || ! fgrep -q 4.1.0 $HOME/rdmp-cli/rdmp.dll
+    then
+      rm -rf $HOME/rdmp-cli
+      wget https://github.com/HicServices/RDMP/releases/download/v4.1.0/rdmp-cli-linux-x64.zip
+      # RDMP is still being packaged using a ZIP tool with a bug Microsoft fixed in .Net 4.6.1; excluding Chinese language support file and keyword help avoids unzip being affected by the bug: https://docs.microsoft.com/en-us/dotnet/framework/migration-guide/mitigation-ziparchiveentry-fullname-path-separator?redirectedfrom=MSDN
+      unzip -d $HOME/rdmp-cli rdmp-cli-linux-x64.zip -x "Curation*" "zh-*"
+      chmod +x $HOME/rdmp-cli/rdmp
+    fi
+  $HOME/rdmp-cli/rdmp install localhost TEST_ -u sa -p 'YourStrong!Passw0rd'
   fi
-- $HOME/rdmp-cli/rdmp install localhost TEST_ -u sa -p 'YourStrong!Passw0rd'
+- |
+  if [ "$TRAVIS_OS_NAME" = "windows" ]
+  then
+    if [ ! -x $HOME/rdmp-cli/rdmp.exe ] || ! fgrep -q 4.1.0 $HOME/rdmp-cli/rdmp.dll
+    then
+      rm -rf $HOME/rdmp-cli
+      wget https://github.com/HicServices/RDMP/releases/download/v4.1.0/rdmp-cli-win-x64.zip
+      7z x rdmp-cli-win-x64.zip -o$HOME/rdmp-cli
+    fi
+    echo "ServerName: localhost" > Rdmp.Dicom.Tests/TestDatabases.txt
+    echo "Prefix: TEST_" >> Rdmp.Dicom.Tests/TestDatabases.txt
+    choco install sql-server-2017
+    choco install dotnetcore --version=2.2.2
+    choco install dotnetcore-sdk
+    choco install nuget.commandline
+    $HOME/rdmp-cli/rdmp.exe install localhost TEST_
+  fi
 
 script:
 - dotnet build "./Rdmp.Dicom/Rdmp.Dicom.csproj"
 - dotnet build "./Rdmp.Dicom.Tests/Rdmp.Dicom.Tests.csproj"
 - dotnet test "./Rdmp.Dicom.Tests/Rdmp.Dicom.Tests.csproj"
-- dotnet pack -p:Version=$(fgrep Version SharedAssemblyInfo.cs|cut -d'"' -f2|head -n1) -c Release --include-symbols --include-source
-- find . -name "*.nupkg"
-- if [ ! -z "$TRAVIS_TAG" ]; then dotnet nuget push bin/Release/HIC.DicomTypeTranslation.$TRAVIS_TAG.nupkg -s https://api.nuget.org/v3/index.json -k $NUGET_KEY; fi
+- |
+  if [ "$TRAVIS_OS_NAME" = "windows" ]
+  then
+    cd Plugin/net461
+    dotnet publish --runtime win-x64 -c Release --self-contained false
+    cd ../netcoreapp2.2
+    dotnet publish --runtime win-x64 -c Release --self-contained false
+    dotnet publish --runtime linux-x64 -c Release --self-contained false
+    cd ../..
+    nuget pack ./Rdmp.Dicom.nuspec -Properties Configuration=Release -IncludeReferencedProjects -Symbols -Version ${RDVERSION}
+    nuget pack ./Rdmp.Dicom.Library.nuspec -Properties Configuration=Release -IncludeReferencedProjects -Symbols -Version ${RDVERSION}
+    ls -lh *.nupkg
+    $HOME/rdmp-cli/rdmp.exe pack --file Rdmp.Dicom.${RDVERSION}.nupkg --servername localhost --cataloguedatabasename TEST_Catalogue --dataexportdatabasename TEST_DataExport
+    $HOME/rdmp-cli/rdmp.exe cmd listsupportedcommands --servername localhost --cataloguedatabasename TEST_Catalogue --dataexportdatabasename TEST_DataExport
+    $HOME/rdmp-cli/rdmp.exe cmd describecommand CreateNewImagingDatasetSuite --servername localhost --cataloguedatabasename TEST_Catalogue --dataexportdatabasename TEST_DataExport
+    mkdir -p $HOME/dist
+    mv Rdmp.Dicom.${RDVERSION}.nupkg $HOME/dist/
+    
+    if [ ! -z "$TRAVIS_TAG" ]
+    then
+      nuget push HIC.Rdmp.Dicom.${RDVERSION}.nupkg -s https://api.nuget.org/v3/index.json -k $NUGET_KEY
+    fi
+  fi
+
+deploy:
+      provider: releases
+      token:
+        secure: DdirbOkYUePnKisYPlqYOpyti2HQFWmSIwY5spWflTUglzEZbnp+Q3sEltTebdlWo18i9skz6P5seAAXbX2ye1c3EZhqEyirWMxz1lvGdlNoQGHhWK6x+suM1DrG6Uun5dmcG/CEpWhDpcEbF8xQ/revtyCHEJj4xK9TXUHyFFG/KrzKSLGtsiBG1BOPkHJr4CoHjcpLzpmDB2hn+pYENtl3Nk0EeKmJgWdY/BWctEmUmRAXgfwsO/ejm9IbC5mIy5KBxbIUco/mf2JEKQB1drwdbINMxJXkbx+mWZYiDJBo5CWuWIzNOxv0Z3+Kg+N2cSwPX833v+W5YRTHyef/7Dum1yUrD3T7LMLY+3EIeCoGvARfRnQbi+BM9n1rFobPy/PWHWYxYRDnhDEfXrMcAyH/66InlQIhUh7XD01oZLEbsdZAbGnEsv5Ttz3F9LaEpk3EfoGqLxOWkL50OCxw6Jk6TfxsNtMoLpK1g7Jp8sI/EkjxYISer7S5myzLhKtgbtBwI0RcKh/sUo2m69QX++1JYy6CeN7/EwRmV4zJLk0WgalJuxgNFYrdzPLvg09okgxr1stHZQ7a5RkLH+r8KzA/Lmj6vTQG9HB44lHvX1hMiD0v8aCii+/wfr9AZZlNHjYq8RuHsP5uQ5U5F8G9uMqfiVb75MOPKY7qdYCZZZg=
+      file_glob: true
+      file: $HOME/dist/*.nupkg
+      skip_cleanup: true
+      on:
+        all_branches: true
+        tags: true
