@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.2] 2020-05-18
+
+### Changed
+
+- Updated Networking API for PACSSource to latest (non deprecated) `DicomClient`
+
 ## [2.1.1] 2020-05-11
 
 ### Fixed
@@ -152,7 +158,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial commit from private repo
 
-[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v2.1.1...develop
+[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v2.1.2...develop
+[2.1.1]: https://github.com/HicServices/RdmpDicom/compare/v2.1.1...v2.1.2
 [2.1.1]: https://github.com/HicServices/RdmpDicom/compare/v2.1.0...v2.1.1
 [2.1.0]: https://github.com/HicServices/RdmpDicom/compare/v2.0.9...v2.1.0
 [2.0.9]: https://github.com/HicServices/RdmpDicom/compare/v2.0.8...v2.0.9
