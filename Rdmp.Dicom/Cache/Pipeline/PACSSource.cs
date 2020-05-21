@@ -85,6 +85,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
 
         public override SMIDataChunk DoGetChunk(ICacheFetchRequest cacheRequest, IDataLoadEventListener listener,GracefulCancellationToken cancellationToken)
         {
+            listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,$"PACSSource version is {typeof(PACSSource).Assembly.GetName().Version}.  Assembly is {typeof(PACSSource).Assembly} " ));
             #region assigns
             var dicomConfiguration = GetConfiguration();
             var requestSender = new DicomRequestSender(dicomConfiguration, listener);
