@@ -90,7 +90,7 @@ script:
     
     if [ ! -z "$TRAVIS_TAG" ]
     then
-      nuget push HIC.Rdmp.Dicom.${RDVERSION}.nupkg -s https://api.nuget.org/v3/index.json -k $NUGET_KEY
+      nuget push HIC.Rdmp.Dicom.${RDVERSION}.nupkg -Source https://api.nuget.org/v3/index.json -k $NUGET_KEY
     fi
   fi
 
