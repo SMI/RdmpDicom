@@ -90,14 +90,14 @@ script:
     
     if [ ! -z "$TRAVIS_TAG" ]
     then
-      nuget push HIC.Rdmp.Dicom.${RDVERSION}.nupkg -s https://api.nuget.org/v3/index.json -k $NUGET_KEY
+      nuget push HIC.Rdmp.Dicom.${RDVERSION}.nupkg -Source https://api.nuget.org/v3/index.json -ApiKey $NUGET_KEY
     fi
   fi
 
 deploy:
       provider: releases
       token:
-        secure: DdirbOkYUePnKisYPlqYOpyti2HQFWmSIwY5spWflTUglzEZbnp+Q3sEltTebdlWo18i9skz6P5seAAXbX2ye1c3EZhqEyirWMxz1lvGdlNoQGHhWK6x+suM1DrG6Uun5dmcG/CEpWhDpcEbF8xQ/revtyCHEJj4xK9TXUHyFFG/KrzKSLGtsiBG1BOPkHJr4CoHjcpLzpmDB2hn+pYENtl3Nk0EeKmJgWdY/BWctEmUmRAXgfwsO/ejm9IbC5mIy5KBxbIUco/mf2JEKQB1drwdbINMxJXkbx+mWZYiDJBo5CWuWIzNOxv0Z3+Kg+N2cSwPX833v+W5YRTHyef/7Dum1yUrD3T7LMLY+3EIeCoGvARfRnQbi+BM9n1rFobPy/PWHWYxYRDnhDEfXrMcAyH/66InlQIhUh7XD01oZLEbsdZAbGnEsv5Ttz3F9LaEpk3EfoGqLxOWkL50OCxw6Jk6TfxsNtMoLpK1g7Jp8sI/EkjxYISer7S5myzLhKtgbtBwI0RcKh/sUo2m69QX++1JYy6CeN7/EwRmV4zJLk0WgalJuxgNFYrdzPLvg09okgxr1stHZQ7a5RkLH+r8KzA/Lmj6vTQG9HB44lHvX1hMiD0v8aCii+/wfr9AZZlNHjYq8RuHsP5uQ5U5F8G9uMqfiVb75MOPKY7qdYCZZZg=
+        secure: lrduiWMD0cuQgmtlhSzmZRoLc3XPLOyJEBYQsCE6Mjrwa/ITtttaB9h1gPs88eZvtWKFlLv7IcW8wZIobS4ZVzzpXq/aY6R2AHWhwqg+RfgOlNscPM28tiagXEe1hf8ypQkaouZBmARXact11pq3Ce/Jc8XYC7++xVfhTNQrRRVOvJ86h1Sd2KAThorP2cLaCzPXuhhC7CD9O4c+VfmhwDbfuCmgzxuHx8+XqOcC4lKNhp03aS4fChxwfJagKPO1HYQ9QidXqR62Wo7mquTJ1STR3zwGhTA57QMEMER0Sj7f5VnyZJALSrr4mu8Ho1mPwXHMJMFwvXKCgD0l6mwVaIUPezbIUFmpo3rZR4MC+iH1dzMDP95c53ChCPTDXLdDI2nWTL+IIBWyaiTYUZX95hAAV8CrgBmOCA+s7J7+/8IgEgznhOGVnnF28B5JDDADsM0YReYrwDZ3RTN3wu6ZB1N0MaBKVAT7ghgCLdHyHESteoQhri+CNYnu9XAdTOZqWjYKV7kFcMGf8htzy0y9p/4u40DU8icXitrR4cIZVn1nIq5cu8uz84TraaBIAcOmRRcVBLBXSgxYmlWF8NrEZQxBPYsQOs+iA/AvZ2tYCtlqsFGgJi5zl1t2BHPqjoKZb5mhy95E71oA/JL4riUpLgser4PfFQccyTEG7tM5ExA=
       file_glob: true
       file: $HOME/dist/*.nupkg
       skip_cleanup: true
