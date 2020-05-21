@@ -21,6 +21,7 @@ using Rdmp.Core.DataFlowPipeline;
 using Rdmp.Core.Curation;
 using Rdmp.Core.QueryBuilding;
 using DicomClient = Dicom.Network.Client.DicomClient;
+using System.Threading;
 
 namespace Rdmp.Dicom.Cache.Pipeline
 {
@@ -278,13 +279,21 @@ namespace Rdmp.Dicom.Cache.Pipeline
                                     transferStopwatch.Elapsed));
                              //do not use requestSender.ThrottleRequest(cMoveRequest, cancellationToken);
                             //TODO is there any need to throtttle this request given its lifetime
-                            
+
+                            lock(CachingSCP.locker)
+                        {
+                            CachingSCP.pending = true;
+                        }                            
                             requestSender.ThrottleRequest(cMoveRequest, client, cancellationToken.AbortToken);
                             transferTimeOutTimer.Reset();
-                            while (!pickerFilled && !hasTransferTimedOut)
+                            while (CachingSCP.pending && !pickerFilled && !hasTransferTimedOut)
                             {
-                                Task.Delay(dicomConfiguration.TransferPollingInMilliseconds, cancellationToken.AbortToken)
-                                    .Wait(cancellationToken.AbortToken);
+                                lock(CachingSCP.locker)
+                            {
+                                Monitor.Wait(CachingSCP.locker, dicomConfiguration.TransferPollingInMilliseconds);
+                            }
+                                /*Task.Delay(dicomConfiguration.TransferPollingInMilliseconds, cancellationToken.AbortToken)
+                                    .Wait(cancellationToken.AbortToken);*/
                                 transferTimerPollingPeriods++;
                             }
                             transferTimeOutTimer.Stop();
