@@ -61,7 +61,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
         public Task OnReceiveAssociationReleaseRequestAsync()
         {
             OnReceiveAssociationReleaseRequest();
-            return SendAssociationReleaseRequestAsync();
+            return SendAssociationReleaseResponseAsync();
         }
         #endregion
 
@@ -160,3 +160,4 @@ namespace Rdmp.Dicom.Cache.Pipeline
 
     }
 }
+

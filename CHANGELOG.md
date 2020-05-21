@@ -6,6 +6,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Bugfix: respond correctly to far-end association release requests in CachingSCP
+- Revert 2.1.3's temporary workaround for the above issue
+
+## [2.1.3] 2020-05-21
+
+### Added
+
+- Add condition variable for CachingSCP to alert PACSSource when transfer completes
+- Added version number logging of plugin and fo-dicom
+
 ## [2.1.2] 2020-05-18
 
 ### Changed
@@ -158,8 +168,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial commit from private repo
 
-[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v2.1.2...develop
-[2.1.1]: https://github.com/HicServices/RdmpDicom/compare/v2.1.1...v2.1.2
+[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v2.1.3...develop
+[2.1.3]: https://github.com/HicServices/RdmpDicom/compare/v2.1.2...v2.1.3
+[2.1.2]: https://github.com/HicServices/RdmpDicom/compare/v2.1.1...v2.1.2
 [2.1.1]: https://github.com/HicServices/RdmpDicom/compare/v2.1.0...v2.1.1
 [2.1.0]: https://github.com/HicServices/RdmpDicom/compare/v2.0.9...v2.1.0
 [2.0.9]: https://github.com/HicServices/RdmpDicom/compare/v2.0.8...v2.0.9
