@@ -6,7 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-...
+- Bugfix: respond correctly to far-end association release requests in CachingSCP
+- Revert 2.1.3's temporary workaround for the above issue
 
 ## [2.1.3] 2020-05-21
 
