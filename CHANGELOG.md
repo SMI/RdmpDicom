@@ -6,7 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-...
+## [2.1.4] 2020-05-26
+
+- Bugfix: respond correctly to far-end association release requests in CachingSCP
+- Revert 2.1.3's temporary workaround for the above issue
 
 ## [2.1.3] 2020-05-21
 
@@ -167,7 +170,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial commit from private repo
 
-[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v2.1.3...develop
+[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v2.1.4...develop
+[2.1.4]: https://github.com/HicServices/RdmpDicom/compare/v2.1.3...v2.1.4
 [2.1.3]: https://github.com/HicServices/RdmpDicom/compare/v2.1.2...v2.1.3
 [2.1.2]: https://github.com/HicServices/RdmpDicom/compare/v2.1.1...v2.1.2
 [2.1.1]: https://github.com/HicServices/RdmpDicom/compare/v2.1.0...v2.1.1

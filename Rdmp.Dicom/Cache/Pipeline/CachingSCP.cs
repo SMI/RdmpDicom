@@ -6,7 +6,6 @@ using System.Text;
 using System.Threading.Tasks;
 using ReusableLibraryCode.Progress;
 using Rdmp.Core.Logging;
-using System.Threading;
 
 namespace Rdmp.Dicom.Cache.Pipeline
 {
@@ -43,9 +42,6 @@ namespace Rdmp.Dicom.Cache.Pipeline
         private String CalledAE = String.Empty;
         private String CallingAE = String.Empty;
 
-        public static Boolean pending = false;
-        public static readonly object locker = new object();
-
         public CachingSCP(INetworkStream stream, Encoding encoding, Logger logger): base(stream, encoding, logger)
         {
             Options.LogDimseDatasets = false;
@@ -65,7 +61,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
         public Task OnReceiveAssociationReleaseRequestAsync()
         {
             OnReceiveAssociationReleaseRequest();
-            return SendAssociationReleaseRequestAsync();
+            return SendAssociationReleaseResponseAsync();
         }
         #endregion
 
@@ -156,11 +152,6 @@ namespace Rdmp.Dicom.Cache.Pipeline
         #region OnReceiveAssociationReleaseRequest
         public void OnReceiveAssociationReleaseRequest()
         {
-            lock(locker)
-            {
-                pending = false;
-                Monitor.PulseAll(locker);
-            }
             Listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Trace, "Released Association from " + CallingAE + " to " + CalledAE));
         }
         #endregion
@@ -169,3 +160,4 @@ namespace Rdmp.Dicom.Cache.Pipeline
 
     }
 }
+
