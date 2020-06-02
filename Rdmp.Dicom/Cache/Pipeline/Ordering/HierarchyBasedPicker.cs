@@ -82,6 +82,13 @@ namespace Rdmp.Dicom.Cache.Pipeline.Ordering
             return _order.Requested();
         }
 
-
+        public void RetryOnce()
+        {
+            lock(_oItemsLock)
+            {
+                _order.Retry(LastRequested);
+                _items.Clear();
+            }
+        }
     }
 }

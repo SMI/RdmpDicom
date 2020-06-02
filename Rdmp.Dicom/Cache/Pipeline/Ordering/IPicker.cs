@@ -17,5 +17,6 @@ namespace Rdmp.Dicom.Cache.Pipeline.Ordering
         int Total();
         int Filled();
         int Requested();
+        void RetryOnce();
     }
 }
