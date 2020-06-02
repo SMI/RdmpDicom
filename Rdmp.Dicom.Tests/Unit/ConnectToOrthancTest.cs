@@ -28,7 +28,7 @@ namespace Rdmp.Dicom.Tests.Unit
             }
             ).Wait();
             client.SendAsync().Wait();
-            Debug.Assert(success,$"No echo response from PACS on {host}:{port}");
+            Assert.True(success,$"No echo response from PACS on {host}:{port}");
         }
 
         
