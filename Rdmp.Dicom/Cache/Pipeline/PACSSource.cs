@@ -253,6 +253,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
                             /* this won't work which means we cannot enforce (low) priority
                             cMoveRequest.Priority=DicomPriority.Low;*/
 
+                            var picker1 = picker;
                             cMoveRequest.OnResponseReceived += (requ, response) =>
                             {
                                 if (response.Status.State == DicomState.Pending)
@@ -272,6 +273,9 @@ namespace Rdmp.Dicom.Cache.Pipeline
                                     listener.OnNotify(this,
                                         new NotifyEventArgs(ProgressEventType.Debug,
                                             "Request: " + requ.ToString() + "failed to download: " + response.Failures));
+
+                                    picker1.Fill(picker1.LastRequested);
+                                    pickerFilled = picker1.IsFilled();
                                 }
                             };
                             

@@ -9,6 +9,9 @@ namespace Rdmp.Dicom.Cache.Pipeline.Ordering
         private readonly IOrder _order;
         private readonly Object _oItemsLock = new Object();
 
+        /// <inheritdoc />
+        public Item LastRequested { get; set; }
+
         public ItemsBasedPicker(IOrder order)
         {
             lock (_oItemsLock)
@@ -42,7 +45,7 @@ namespace Rdmp.Dicom.Cache.Pipeline.Ordering
 
         public DicomCMoveRequest GetDicomCMoveRequest(string destination)
         {
-            return _order.GetDicomCMoveRequest(destination, _order.NextItem());
+            return _order.GetDicomCMoveRequest(destination, LastRequested = _order.NextItem());
         }
 
         public Item NextItem()
