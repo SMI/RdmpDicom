@@ -22,6 +22,7 @@ namespace Rdmp.Dicom.Cache.Pipeline.Ordering
         private readonly DateTime _dateTo;
         private readonly HierarchyBasedOrder parent;
         private Queue<HierarchyBasedPicker> _pickers;
+        private readonly HashSet<Item> retried = new HashSet<Item>();
 
         public HierarchyBasedOrder(HierarchyBasedOrder order)
         {
@@ -78,6 +79,29 @@ namespace Rdmp.Dicom.Cache.Pipeline.Ordering
                 }
             }
 
+        }
+
+        internal void Retry(Item item)
+        {
+            if (parent is null)
+            {
+                if (retried.Contains(item))
+                    return;
+                retried.Add(item);
+                HierarchyBasedOrder order = null;
+                HierarchyBasedPicker picker = null;
+                order = new HierarchyBasedOrder(this);
+                picker = new HierarchyBasedPicker(order);
+                order.Place(item);
+
+                var items = _pickers.ToArray();
+                _pickers.Clear();
+                _pickers.Enqueue(picker);
+                foreach (var p in items)
+                    _pickers.Enqueue(p);
+            }
+            else
+                parent.Retry(item);
         }
 
         //TODO Non-Elegant

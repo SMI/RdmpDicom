@@ -1,5 +1,7 @@
-﻿using Dicom.Network;
+﻿using System.Diagnostics;
+using Dicom.Network;
 using NUnit.Framework;
+using DicomClient = Dicom.Network.Client.DicomClient;
 
 namespace Rdmp.Dicom.Tests.Unit
 {
@@ -9,36 +11,24 @@ namespace Rdmp.Dicom.Tests.Unit
         private const string LocalAetTitle = "STORESCP";
         public const string RemoteAetTitle = "ORTHANC";
 
-        [Test]
-        public void TestCreatingConnectionToLocalhostByIP()
-        {
-            var stream = DesktopNetworkManager.CreateNetworkStream("127.0.0.1", 4242, false, true, true);
-        }
-        [Test]
-        public void TestCreatingConnectionToLocalhostByHostName()
-        {
-            var stream = DesktopNetworkManager.CreateNetworkStream("localhost", 4242, false, true, true);
-        }
 
-
-        [Test]
-        public void EchoOrthancTest()
+        [TestCase("127.0.0.1", 4242)]
+        [TestCase("localhost", 4242)]
+        public void EchoOrthancTest(string host, int port)
         {
+            bool success = false;
             var stream = DesktopNetworkManager.CreateNetworkStream("localhost", 4242, false, true, true);
             
-            var client = new DicomClient();
-            client.AddRequest(new DicomCEchoRequest());
-            
-            var sendTask = client.SendAsync(stream,
-                    LocalAetTitle,
-                RemoteAetTitle);
-
-            sendTask.Wait(1000);
-
-            Assert.IsTrue(sendTask.IsCompleted);
-            Assert.IsFalse(sendTask.IsFaulted);
-            Assert.IsNull(sendTask.Exception);
-
+            var client = new DicomClient(host,port,false,LocalAetTitle,RemoteAetTitle);
+            client.AddRequestAsync(new DicomCEchoRequest()
+            {
+                OnResponseReceived = (req,res) => {
+                    success = true;
+                }
+            }
+            ).Wait();
+            client.SendAsync().Wait();
+            Assert.True(success,$"No echo response from PACS on {host}:{port}");
         }
 
         

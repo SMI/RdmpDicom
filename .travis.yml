@@ -87,6 +87,7 @@ script:
     $HOME/rdmp-cli/rdmp.exe cmd describecommand CreateNewImagingDatasetSuite --servername localhost --cataloguedatabasename TEST_Catalogue --dataexportdatabasename TEST_DataExport
     mkdir -p $HOME/dist
     mv Rdmp.Dicom.${RDVERSION}.nupkg $HOME/dist/
+    cd
     
     if [ ! -z "$TRAVIS_TAG" ]
     then
@@ -99,7 +100,7 @@ deploy:
       token:
         secure: pNiGAFpzcMJahZx2120I0xUR4JoQIsZ53JnYZ1JKaVPPwD3w0IoQyXybvCTYSJErGyFD2eYNDo/gem7r2SuahdvZEPBDWqEfgoNb+ky8DjLNofe44Ul7KRmVbNYUS4/aW5uE9vLi7vUh0ULTPL9SgOZJdZVlI/M3kI6ptiE3ZEkA81u94snpeT1ihMTTJoicUYp+rkpvWmfZBi4q/NY11MiglwowFuInu4qRJ2Lrv2i1E3EqO9qT7Q++MyYWZK+hjcrW1qVHyrRSBBUUTItuPGaD2PHNVl2ymj3ONo3ctngn5zfwCG02QXlfg1JtwaW2z9onloKKWIHZdHaLCJn9VQ4fQ3jf0mOp14EYmwAnPoNRbZKJTM2QsgWjYFpOvS/8w1I0TR7soPNFGoZsbT5GZHfrG5cjUworwbz9fUQ5LJ0ytQoe79QpTmW8cJnFvQUmEag/SSO/7wCCbkDkKXyvivVD92+fY2Tb7v1NTy26ySo47yOHeiJ/jFubwuuij225+WqJGu3jp46wIWA3LH83m8qR6GPLAinPW6N903H+dyj1/CBKsnk/8S8+OYSIYDcbbP4adsNlI5XSG1H0l+h23X5UYlsjJEONqXuqAW+g115fl/SykYXYJ7qWeipgC/Z4pgXiy6zu7xfe92W7K0ZdHgMAWdqMYJC76SVfE1D42Tk=
       file_glob: true
-      file: $HOME/dist/*.nupkg
+      file: dist/*.nupkg
       skip_cleanup: true
       on:
         all_branches: true
