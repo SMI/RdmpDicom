@@ -272,6 +272,10 @@ namespace Rdmp.Dicom.Cache.Pipeline
                                     listener.OnNotify(this,
                                         new NotifyEventArgs(ProgressEventType.Debug,
                                             "Request: " + requ.ToString() + "failed to download: " + response.Failures));
+
+                                    // Empty the picker of items
+                                    picker.RetryOnce();
+                                    pickerFilled = picker.IsFilled();
                                 }
                             };
                             

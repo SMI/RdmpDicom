@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed issue with failed store requests hanging ordering
+
 ## [2.1.4] 2020-05-26
 
 - Bugfix: respond correctly to far-end association release requests in CachingSCP
