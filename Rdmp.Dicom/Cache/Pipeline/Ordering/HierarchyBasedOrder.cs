@@ -56,6 +56,10 @@ namespace Rdmp.Dicom.Cache.Pipeline.Ordering
             }
         }
 
+        internal int attemptcount(Item lastRequested)
+        {
+            return retried.Contains(lastRequested) ? 2 : 1;
+        }
 
         public bool HasNextPicker()
         {

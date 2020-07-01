@@ -12,7 +12,7 @@ namespace Rdmp.Dicom.Cache.Pipeline.Ordering
         void Fill(Item item);
         void Fill(string patId, string studyUid, string seriesUid, string sopInstanceUid);
         bool IsFilled();
-        DicomCMoveRequest GetDicomCMoveRequest(string destination);
+        DicomCMoveRequest GetDicomCMoveRequest(string destination, out int attempt);
         Item NextItem();
         int Total();
         int Filled();

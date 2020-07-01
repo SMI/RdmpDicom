@@ -248,8 +248,9 @@ namespace Rdmp.Dicom.Cache.Pipeline
                             transferTimerPollingPeriods = 0;
                             //get next picker
                             picker = order.NextPicker();
+                            int attempt;
                             //  A CMove will be performed if the storescp exists and this storescp is known to the QRSCP:
-                            var cMoveRequest = picker.GetDicomCMoveRequest(LocalAETitle);
+                            var cMoveRequest = picker.GetDicomCMoveRequest(LocalAETitle, out attempt);
                             /* this won't work which means we cannot enforce (low) priority
                             cMoveRequest.Priority=DicomPriority.Low;*/
 
@@ -296,7 +297,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
                             }
                             transferTimeOutTimer.Stop();
                             listener.OnProgress(this,
-                                new ProgressEventArgs(CMoveRequestToString(cMoveRequest),
+                                new ProgressEventArgs(CMoveRequestToString(cMoveRequest,attempt),
                                     new ProgressMeasurement(picker.Filled(), ProgressType.Records, picker.Total()),
                                     transferStopwatch.Elapsed));
                         }
@@ -521,9 +522,9 @@ namespace Rdmp.Dicom.Cache.Pipeline
  
 
         #region CMoveRequestToString
-        private string CMoveRequestToString(DicomCMoveRequest cMoveRequest)
+        private string CMoveRequestToString(DicomCMoveRequest cMoveRequest, int attempt)
         {
-            var stub = "Retrieving " + cMoveRequest.Level.ToString() + " : ";
+            var stub = "Retrieving " + cMoveRequest.Level.ToString() + $" (attempt {attempt}) : ";
             switch (cMoveRequest.Level)
             {
                 case DicomQueryRetrieveLevel.Patient:
