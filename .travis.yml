@@ -87,12 +87,12 @@ script:
     $HOME/rdmp-cli/rdmp.exe cmd describecommand CreateNewImagingDatasetSuite --servername localhost --cataloguedatabasename TEST_Catalogue --dataexportdatabasename TEST_DataExport
     mkdir -p $HOME/dist
     mv Rdmp.Dicom.${RDVERSION}.nupkg $HOME/dist/
-    cd
     
     if [ ! -z "$TRAVIS_TAG" ]
     then
       nuget push HIC.Rdmp.Dicom.${RDVERSION}.nupkg -Source https://api.nuget.org/v3/index.json -ApiKey $NUGET_KEY
     fi
+    cd
   fi
 
 deploy:
