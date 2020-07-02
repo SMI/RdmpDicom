@@ -4,7 +4,6 @@ using Dicom;
 
 namespace Rdmp.Dicom.Extraction.FoDicomBased.DirectoryDecisions
 {
-    [Obsolete("This is deprecated, limits on the path length imposed by diferent platforms mean it is unreliable.", false)]
     public class PutInUidStudySeriesFolders : PutDicomFilesInExtractionDirectories
     {
         protected override string WriteOutDatasetImpl(DirectoryInfo outputDirectory, string releaseIdentifier, DicomDataset dicomDataset)

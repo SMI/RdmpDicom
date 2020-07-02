@@ -31,15 +31,13 @@ namespace Rdmp.Dicom.TagPromotionSchema
         private readonly TableInfo _tableInfo;
 
         private readonly ICheckNotifier _notifierForExecute;
-        private readonly bool _includeLoadedField;
 
-        public TagColumnAdder(string tagName, string datatype, TableInfo table, ICheckNotifier notifierForExecute, bool includeLoadedField=false)
+        public TagColumnAdder(string tagName, string datatype, TableInfo table, ICheckNotifier notifierForExecute)
         {
             _tagName = tagName;
             _datatype = datatype;
             _tableInfo = table;
             _notifierForExecute = notifierForExecute;
-            _includeLoadedField = includeLoadedField;
         }
 
         public bool SkipChecksAndSynchronization { get; set; }
@@ -64,14 +62,6 @@ namespace Rdmp.Dicom.TagPromotionSchema
 
                 if (archiveTable.Exists())
                     archiveTable.AddColumn(_tagName, _datatype, true, DatabaseCommandHelper.GlobalTimeout);
-
-                if (_includeLoadedField)
-                {
-                    table.AddColumn(_tagName + "_Loaded", TagLoadedColumnPair.LoadedColumnDataType, true, DatabaseCommandHelper.GlobalTimeout);
-                    
-                    if (archiveTable.Exists())
-                        archiveTable.AddColumn(_tagName + "_Loaded", TagLoadedColumnPair.LoadedColumnDataType, true, DatabaseCommandHelper.GlobalTimeout);
-                }
             }
 
             if (!SkipChecksAndSynchronization)
