@@ -36,11 +36,13 @@ namespace Rdmp.Dicom.UI.CommandExecution.AtomicCommands
 
             if(ui.ShowDialog() == DialogResult.OK)
             {
-                var popup = new PopupChecksUI("Adding Column", false);
-                var columnAdder = new TagColumnAdder(ui.ColumnName, ui.ColumnDataType, _tableInfo, popup);
+                using (var popup = new PopupChecksUI("Adding Column", false))
+                {
+                    var columnAdder = new TagColumnAdder(ui.ColumnName, ui.ColumnDataType, _tableInfo, popup);
 
-                columnAdder.Execute();
-                Publish(_tableInfo);
+                    columnAdder.Execute();
+                    Publish(_tableInfo);
+                }
             }
         }
 
