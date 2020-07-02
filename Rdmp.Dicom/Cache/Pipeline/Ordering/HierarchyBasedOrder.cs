@@ -23,7 +23,9 @@ namespace Rdmp.Dicom.Cache.Pipeline.Ordering
         private readonly DateTime _dateTo;
         private readonly HierarchyBasedOrder parent;
         private Queue<HierarchyBasedPicker> _pickers;
-        private readonly ConcurrentDictionary<Item,int> _retried = new ConcurrentDictionary<Item,int>();
+        private static readonly ConcurrentDictionary<Item,int> _retried = new ConcurrentDictionary<Item,int>();
+
+        public const int MaxAttempts = 2;
 
         public HierarchyBasedOrder(HierarchyBasedOrder order)
         {
@@ -95,7 +97,10 @@ namespace Rdmp.Dicom.Cache.Pipeline.Ordering
         {
             if (parent is null)
             {                
-                _retried.AddOrUpdate(item ,(k)=>2,(k,v)=>v++);
+                var attempts = _retried.AddOrUpdate(item ,(k)=>2,(k,v)=>v++);
+
+                if(attempts > MaxAttempts)
+                    return;
                 
                 HierarchyBasedOrder order = null;
                 HierarchyBasedPicker picker = null;
