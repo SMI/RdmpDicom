@@ -23,7 +23,7 @@ namespace Rdmp.Dicom.Cache.Pipeline.Ordering
         private readonly DateTime _dateTo;
         private readonly HierarchyBasedOrder parent;
         private Queue<HierarchyBasedPicker> _pickers;
-        private readonly ConcurrentDictionary<Item,int> retried = new ConcurrentDictionary<Item,int>();
+        private readonly ConcurrentDictionary<Item,int> _retried = new ConcurrentDictionary<Item,int>();
 
         public HierarchyBasedOrder(HierarchyBasedOrder order)
         {
@@ -57,9 +57,14 @@ namespace Rdmp.Dicom.Cache.Pipeline.Ordering
             }
         }
 
-        internal int attemptcount(Item lastRequested)
+        /// <summary>
+        /// Returns a count of how often we have attempted to fetch the given <paramref name="lastRequested"/> via CMove
+        /// </summary>
+        /// <param name="lastRequested"></param>
+        /// <returns></returns>
+        public int GetAttemptCount(Item lastRequested)
         {
-            return retried.GetOrAdd(lastRequested ,1);
+            return _retried.GetOrAdd(lastRequested ,1);
         }
 
         public bool HasNextPicker()
@@ -90,7 +95,7 @@ namespace Rdmp.Dicom.Cache.Pipeline.Ordering
         {
             if (parent is null)
             {                
-                retried.AddOrUpdate(item ,(k)=>2,(k,v)=>v++);
+                _retried.AddOrUpdate(item ,(k)=>2,(k,v)=>v++);
                 
                 HierarchyBasedOrder order = null;
                 HierarchyBasedPicker picker = null;
