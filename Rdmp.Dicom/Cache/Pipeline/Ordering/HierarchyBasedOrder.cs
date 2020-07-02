@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using ReusableLibraryCode.Progress;
+using System.Collections.Concurrent;
 
 namespace Rdmp.Dicom.Cache.Pipeline.Ordering
 {
@@ -22,7 +23,7 @@ namespace Rdmp.Dicom.Cache.Pipeline.Ordering
         private readonly DateTime _dateTo;
         private readonly HierarchyBasedOrder parent;
         private Queue<HierarchyBasedPicker> _pickers;
-        private readonly HashSet<Item> retried = new HashSet<Item>();
+        private readonly ConcurrentDictionary<Item,int> retried = new ConcurrentDictionary<Item,int>();
 
         public HierarchyBasedOrder(HierarchyBasedOrder order)
         {
@@ -58,7 +59,7 @@ namespace Rdmp.Dicom.Cache.Pipeline.Ordering
 
         internal int attemptcount(Item lastRequested)
         {
-            return retried.Contains(lastRequested) ? 2 : 1;
+            return retried.GetOrAdd(lastRequested ,1);
         }
 
         public bool HasNextPicker()
@@ -88,10 +89,9 @@ namespace Rdmp.Dicom.Cache.Pipeline.Ordering
         internal void Retry(Item item)
         {
             if (parent is null)
-            {
-                if (retried.Contains(item))
-                    return;
-                retried.Add(item);
+            {                
+                retried.AddOrUpdate(item ,(k)=>2,(k,v)=>v++);
+                
                 HierarchyBasedOrder order = null;
                 HierarchyBasedPicker picker = null;
                 order = new HierarchyBasedOrder(this);

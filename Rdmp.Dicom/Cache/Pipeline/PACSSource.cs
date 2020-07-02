@@ -281,7 +281,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
                             };
                             
                             listener.OnProgress(this,
-                                new ProgressEventArgs(CMoveRequestToString(cMoveRequest),
+                                new ProgressEventArgs(CMoveRequestToString(cMoveRequest,attempt),
                                     new ProgressMeasurement(picker.Filled(), ProgressType.Records, picker.Total()),
                                     transferStopwatch.Elapsed));
                              //do not use requestSender.ThrottleRequest(cMoveRequest, cancellationToken);
