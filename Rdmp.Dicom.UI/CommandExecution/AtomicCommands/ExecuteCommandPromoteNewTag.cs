@@ -14,12 +14,10 @@ namespace Rdmp.Dicom.UI.CommandExecution.AtomicCommands
 {
     public class ExecuteCommandPromoteNewTag:BasicUICommandExecution,IAtomicCommandWithTarget
     {
-        private readonly bool _includeLoadedField;
         private TableInfo _tableInfo;
 
-        public ExecuteCommandPromoteNewTag(IActivateItems activator, bool includeLoadedField = false) : base(activator)
+        public ExecuteCommandPromoteNewTag(IActivateItems activator) : base(activator)
         {
-            _includeLoadedField = includeLoadedField;
         }
 
         public override Image GetImage(IIconProvider iconProvider)
@@ -39,7 +37,7 @@ namespace Rdmp.Dicom.UI.CommandExecution.AtomicCommands
             if(ui.ShowDialog() == DialogResult.OK)
             {
                 var popup = new PopupChecksUI("Adding Column", false);
-                var columnAdder = new TagColumnAdder(ui.ColumnName, ui.ColumnDataType, _tableInfo, popup,_includeLoadedField);
+                var columnAdder = new TagColumnAdder(ui.ColumnName, ui.ColumnDataType, _tableInfo, popup);
 
                 columnAdder.Execute();
                 Publish(_tableInfo);
