@@ -84,7 +84,7 @@ namespace Rdmp.Dicom.UI
 
             try
             {
-                var collection = new TagElevationRequestCollection(queryEditor.Text);
+                new TagElevationRequestCollection(queryEditor.Text);
                 RagSmiley1.OnCheckPerformed(new CheckEventArgs("Succesfully created elevator",CheckResult.Success));
             }
             catch(Exception ex)

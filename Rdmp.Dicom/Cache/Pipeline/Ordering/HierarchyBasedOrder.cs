@@ -397,10 +397,7 @@ namespace Rdmp.Dicom.Cache.Pipeline.Ordering
                 {
                     foreach (var series in study.Series.Values)
                     {
-                        foreach (var image in series.Images.Values)
-                        {
-                            count++;
-                        }
+                        count += series.Images.Values.Count;
                     }
                 }
             }

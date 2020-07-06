@@ -76,7 +76,7 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
                     ProcessDirectoryAsync(dt, directory, listener);
                     Task.WaitAll(tasks.ToArray());
                 }
-                else
+                else if (file != null)
                 //Input is a single zip file
                 if (file.FullPath.EndsWith(".zip"))
                 {
