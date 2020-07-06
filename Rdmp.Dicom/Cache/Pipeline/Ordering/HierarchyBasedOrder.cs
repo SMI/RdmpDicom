@@ -23,7 +23,7 @@ namespace Rdmp.Dicom.Cache.Pipeline.Ordering
         private readonly DateTime _dateTo;
         private readonly HierarchyBasedOrder parent;
         private Queue<HierarchyBasedPicker> _pickers;
-        private static readonly ConcurrentDictionary<Item,int> _retried = new ConcurrentDictionary<Item,int>();
+        private readonly ConcurrentDictionary<Item,int> _retried = new ConcurrentDictionary<Item,int>();
 
         public const int MaxAttempts = 2;
 
