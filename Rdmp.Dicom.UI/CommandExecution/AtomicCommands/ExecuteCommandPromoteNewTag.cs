@@ -36,13 +36,23 @@ namespace Rdmp.Dicom.UI.CommandExecution.AtomicCommands
 
             if(ui.ShowDialog() == DialogResult.OK)
             {
-                using (var popup = new PopupChecksUI("Adding Column", false))
-                {
-                    var columnAdder = new TagColumnAdder(ui.ColumnName, ui.ColumnDataType, _tableInfo, popup);
+                var checks = new PopupChecksUI("Adding Column", false);
+                
+                var columnAdder = new TagColumnAdder(ui.ColumnName, ui.ColumnDataType, _tableInfo, checks);
 
-                    columnAdder.Execute();
-                    Publish(_tableInfo);
-                }
+                columnAdder.Execute();
+                Publish(_tableInfo);
+
+                //Checks have likely been popped up as a non modal dialogue by the execute action (allowing the user to review the events)
+                if(checks.Visible)
+                    checks.FormClosed += (s,e)=>
+                    {
+                        //schedule disposal of the control for when the user closes it
+                        if(!checks.IsDisposed)
+                            checks.Dispose();
+                    };                        
+                else
+                    checks.Dispose(); // for some reason the checks were not spawned so explicitly dispose of the resources
             }
         }
 
