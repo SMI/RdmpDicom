@@ -1,5 +1,6 @@
 ﻿using Dicom;
 using Dicom.Network;
+using System.Collections.Generic;
 
 namespace Rdmp.Dicom.Cache.Pipeline.Ordering
 {
@@ -83,6 +84,28 @@ namespace Rdmp.Dicom.Cache.Pipeline.Ordering
         public void Request()
         {
             IsRequested=true;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is Item item &&
+                   PatientId == item.PatientId &&
+                   StudyInstanceUID == item.StudyInstanceUID &&
+                   SeriesInstanceUID == item.SeriesInstanceUID &&
+                   SOPInstanceUID == item.SOPInstanceUID;
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hashCode = -916670253;
+                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(PatientId);
+                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(StudyInstanceUID);
+                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(SeriesInstanceUID);
+                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(SOPInstanceUID);
+                return hashCode;
+            }
         }
     }
 }
