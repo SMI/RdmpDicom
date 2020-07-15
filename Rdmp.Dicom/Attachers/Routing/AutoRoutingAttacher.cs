@@ -5,7 +5,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
 using FAnsi.Implementations.MySql;
-using MySql.Data.MySqlClient;
 using Rdmp.Core.Curation.Data;
 using Rdmp.Core.Curation.Data.DataLoad;
 using Rdmp.Core.Curation.Data.Pipelines;
@@ -173,7 +172,7 @@ This Grouping will be used to extract the Modality code when deciding which tabl
         {
 
             //todo: This really shouldn't be needed surely
-            MySqlConnection.ClearAllPools();
+            MySql.Data.MySqlClient.MySqlConnection.ClearAllPools();
             MySqlBulkCopy.BulkInsertBatchTimeoutInSeconds = int.MaxValue; //forever
 
             _sw.Start();
