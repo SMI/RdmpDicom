@@ -14,7 +14,7 @@
         <copyright>Copyright 2018-2019</copyright>
         <dependencies>
           <dependency id="HIC.DicomTypeTranslation" version="2.3.0" />
-          <dependency id="HIC.RDMP.Plugin" version="4.1.4" />
+          <dependency id="HIC.RDMP.Plugin" version="4.1.5" />
         </dependencies>
     </metadata>
   <files>
