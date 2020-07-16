@@ -70,7 +70,7 @@ namespace Rdmp.Dicom.Cache.Pipeline.Dicom
             SendRequest(client,cancellationToken);
             transferTimer.Stop();
             //valuein mills
-            var delay = ((int)(_dicomConfiguration.RequestDelayFactor * (1000 * transferTimer.Elapsed.Seconds)) + _dicomConfiguration.RequestCooldownInMilliseconds);
+            var delay = ((int)(_dicomConfiguration.RequestDelayFactor * (1000f * transferTimer.Elapsed.Seconds)) + _dicomConfiguration.RequestCooldownInMilliseconds);
             if (delay > 0)
             {
                 _listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information, "Requests sleeping for " + delay / 1000 + "seconds"));

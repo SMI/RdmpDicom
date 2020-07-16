@@ -64,30 +64,33 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
                 if (!_fileWorklist.GetNextFileOrDirectoryToProcess(out directory, out file))
                     return null;
 
-                if(file != null && directory == null)
-                    dt.TableName = QuerySyntaxHelper.MakeHeaderNameSensible(Path.GetFileNameWithoutExtension(file.FullPath));
-                else if (directory != null)
-                    dt.TableName = QuerySyntaxHelper.MakeHeaderNameSensible(Path.GetFileNameWithoutExtension(directory.Name));
-                else
+                // Exactly one of file/directory must be null:
+                if ((file!=null) == (directory!=null))
                     throw new Exception("Expected IDicomProcessListProvider to return either a DirectoryInfo or a FileInfo not both/neither");
-                
-                if(directory != null)
+
+                if (file != null)
                 {
+                    dt.TableName = QuerySyntaxHelper.MakeHeaderNameSensible(Path.GetFileNameWithoutExtension(file.FullPath));
+                    if (file.FullPath.EndsWith(".zip"))
+                    {
+                        //Input is a single zip file
+                        ProcessZipArchive(dt, listener, file.FullPath);
+                    }
+                    else
+                    {
+                        var df = file.GetDataset(_zipPool);
+                        ProcessDataset(file.FullPath, df.Dataset, dt, listener);
+                    }
+                }
+
+                if (directory!=null)
+                {
+                    // Processing a directory
+                    dt.TableName = QuerySyntaxHelper.MakeHeaderNameSensible(Path.GetFileNameWithoutExtension(directory.Name));
                     ProcessDirectoryAsync(dt, directory, listener);
                     Task.WaitAll(tasks.ToArray());
                 }
-                else
-                //Input is a single zip file
-                if (file.FullPath.EndsWith(".zip"))
-                {
-                    ProcessZipArchive(dt, listener, file.FullPath);
-                }
-                else
-                {
-                    var df = file.GetDataset(_zipPool);
-                    ProcessDataset(file.FullPath, df.Dataset, dt, listener);
-                }
-                    
+
             }
             finally
             {

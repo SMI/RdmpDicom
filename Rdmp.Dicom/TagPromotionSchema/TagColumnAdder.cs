@@ -83,7 +83,7 @@ namespace Rdmp.Dicom.TagPromotionSchema
             try
             {
                 var cSharpType = db.Server.GetQuerySyntaxHelper().TypeTranslater.GetCSharpTypeForSQLDBType(_datatype);
-                notifier.OnCheckPerformed(new CheckEventArgs("Datatype is compatible with TypeTranslater",CheckResult.Success));
+                notifier.OnCheckPerformed(new CheckEventArgs($"Datatype { _datatype } is compatible with TypeTranslater as { cSharpType }",CheckResult.Success));
             }
             catch (Exception ex)
             {
