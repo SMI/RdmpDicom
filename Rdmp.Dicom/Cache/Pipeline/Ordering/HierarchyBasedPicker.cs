@@ -43,7 +43,7 @@ namespace Rdmp.Dicom.Cache.Pipeline.Ordering
             }
         }
 
-        public DicomCMoveRequest GetDicomCMoveRequest(string destination)
+        public DicomCMoveRequest GetDicomCMoveRequest(string destination, out int attempt)
         {
             if(_items == null)
             {
@@ -56,6 +56,7 @@ namespace Rdmp.Dicom.Cache.Pipeline.Ordering
             {
                 _dicomCMoveRequest = _order.GetDicomCMoveRequest(destination, LastRequested = _items.Values.FirstOrDefault());
             }
+            attempt = _order.GetAttemptCount(LastRequested);
             return _dicomCMoveRequest;
         }
 
