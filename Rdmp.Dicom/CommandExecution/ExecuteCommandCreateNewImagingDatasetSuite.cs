@@ -115,7 +115,7 @@ namespace Rdmp.Dicom.CommandExecution
             if (DicomSourceType == null)
             {
                 SetImpossible("You must specify a Type for DicomSourceType");
-                return;
+                throw new ImpossibleCommandException(this, ReasonCommandImpossible);
             }
 
             base.Execute();
@@ -260,10 +260,14 @@ namespace Rdmp.Dicom.CommandExecution
 
         private void SetArgument(IArgument[] args, string property, object value)
         {
+            if (value == null)
+                throw new ArgumentException();
+
             var arg = args.Single(a => a.Name.Equals(property));
 
             var mef = ((CatalogueRepository) arg.Repository).MEF;
-            mef.GetType(value.GetType().FullName);
+            if (mef.GetType(value.GetType().FullName) == null)
+                throw new ArgumentException($"No type found for { value.GetType().FullName }");
 
             //if this fails, look to see if GetType returned null (indicates that your Type is not loaded by MEF).  Look at mef.DescribeBadAssembliesIfAny() to investigate this issue
             arg.SetValue(value);
