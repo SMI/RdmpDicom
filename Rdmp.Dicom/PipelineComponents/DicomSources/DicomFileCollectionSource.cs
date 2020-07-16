@@ -65,7 +65,7 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
                     return null;
 
                 // Exactly one of file/directory must be null:
-                if ((file!=null) != (directory!=null))
+                if ((file!=null) == (directory!=null))
                     throw new Exception("Expected IDicomProcessListProvider to return either a DirectoryInfo or a FileInfo not both/neither");
 
                 if (file != null)
