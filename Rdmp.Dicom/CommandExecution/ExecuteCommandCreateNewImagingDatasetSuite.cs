@@ -261,7 +261,7 @@ namespace Rdmp.Dicom.CommandExecution
         private void SetArgument(IArgument[] args, string property, object value)
         {
             if (value == null)
-                throw new ArgumentException();
+                throw new ArgumentNullException(nameof(value));
 
             var arg = args.Single(a => a.Name.Equals(property));
 
