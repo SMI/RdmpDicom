@@ -12,12 +12,15 @@ namespace Rdmp.Dicom.Cache.Pipeline
 {
     public class ProcessBasedCacheSource : CacheSource<SMIDataChunk>
     {
-        [DemandsInitialization(@"Process to start.  Template with 
+        [DemandsInitialization(@"Process to start (path only)",Mandatory = true)]
+        public string Command {get;set;}
+
+        [DemandsInitialization(@"Arguments to provide to the Process.  Template with 
 %s start time
 %e end time time to fetch
 %d directory to put files fetched
-Example:. './GetImages.exe ""%s"" ""%e%""'",Mandatory = true)]
-        public string Command {get;set;}
+Example:. './GetImages.exe ""%s"" ""%e%""'")]
+        public string Args {get;set;}
 
         [DemandsInitialization("The datetime format for %s and %e.",Mandatory = true,DefaultValue = "yyyy-MM-dd HH:mm:ss")]
         public string TimeFormat {get;set;}
@@ -61,18 +64,28 @@ Example:. './GetImages.exe ""%s"" ""%e%""'",Mandatory = true)]
             listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,"Fetch Start is:" + request.Start));
             listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,"Fetch End is:" + request.End));
 
-            listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,"Command template is:" + Command));
+            listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,"Command is:" + Command));
+            listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,"Args template is:" + Args));
             listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,"Datetime format is:" + TimeFormat));
             
 
-            string toRun = Command
+            string args = Args
                 .Replace("%s",request.Start.ToString(TimeFormat))
                 .Replace("%e",request.End.ToString(TimeFormat))
                 .Replace("%d",workingDirectory.FullName);
 
-            listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,"Running Process:" + toRun));
-              
-            var p = Process.Start(toRun);
+            listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,"Args resolved is:" + args));
+
+            var p = new Process();
+            p.StartInfo.FileName = Command;
+            p.StartInfo.Arguments = args;
+            p.StartInfo.UseShellExecute = false;
+            p.StartInfo.RedirectStandardOutput = true;
+            p.OutputDataReceived += (sender, a) => listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,a.Data));
+            
+            p.Start();
+            p.BeginOutputReadLine();
+
             p.WaitForExit();
 
             listener.OnNotify(this,new NotifyEventArgs( p.ExitCode == 0 ? ProgressEventType.Information : ProgressEventType.Warning , "Process exited with code " + p.ExitCode));
