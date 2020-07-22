@@ -76,22 +76,24 @@ Example:. './GetImages.exe ""%s"" ""%e%""'")]
 
             listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,"Args resolved is:" + args));
 
-            var p = new Process();
-            p.StartInfo.FileName = Command;
-            p.StartInfo.Arguments = args;
-            p.StartInfo.UseShellExecute = false;
-            p.StartInfo.RedirectStandardOutput = true;
-            p.OutputDataReceived += (sender, a) => listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,a.Data));
+            using(var p = new Process())
+            {
+                p.StartInfo.FileName = Command;
+                p.StartInfo.Arguments = args;
+                p.StartInfo.UseShellExecute = false;
+                p.StartInfo.RedirectStandardOutput = true;
+                p.OutputDataReceived += (sender, a) => listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,a.Data));
             
-            p.Start();
-            p.BeginOutputReadLine();
+                p.Start();
+                p.BeginOutputReadLine();
 
-            p.WaitForExit();
+                p.WaitForExit();
 
-            listener.OnNotify(this,new NotifyEventArgs( p.ExitCode == 0 ? ProgressEventType.Information : ProgressEventType.Warning , "Process exited with code " + p.ExitCode));
+                listener.OnNotify(this,new NotifyEventArgs( p.ExitCode == 0 ? ProgressEventType.Information : ProgressEventType.Warning , "Process exited with code " + p.ExitCode));
 
-            if(p.ExitCode != 0 && ThrowOnNonZeroExitCode)
-                throw new Exception("Process exited with code " + p.ExitCode);
+                if(p.ExitCode != 0 && ThrowOnNonZeroExitCode)
+                    throw new Exception("Process exited with code " + p.ExitCode);
+            }
             
             return Chunk;
         }
