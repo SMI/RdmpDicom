@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Added new cache source `ProcessBasedCacheSource` that calls out to a remote process
+
 ## [2.1.6] 2020-06-17
 
 ### Fixed
