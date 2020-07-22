@@ -6,6 +6,7 @@ using Rdmp.Core.Curation;
 using Rdmp.Core.Curation.Data;
 using Rdmp.Core.Curation.Data.Cache;
 using Rdmp.Core.DataFlowPipeline;
+using Rdmp.Core.Startup;
 using Rdmp.Dicom.Cache.Pipeline;
 using ReusableLibraryCode.Checks;
 using ReusableLibraryCode.Progress;
@@ -25,8 +26,15 @@ namespace Rdmp.Dicom.Tests
         {
             var source = new ProcessBasedCacheSource();
 
-            source.Command = "cmd.exe";
-            source.Args = "/c echo Hey Thomas go get %s";
+            if(IsLinux)
+            {   
+                // TODO
+            }
+            else
+            {
+                source.Command = "cmd.exe";
+                source.Args = "/c echo Hey Thomas go get %s";
+            }
             source.TimeFormat = "dd/MM/yy";
             source.ThrowOnNonZeroExitCode = true;
 
@@ -55,6 +63,15 @@ namespace Rdmp.Dicom.Tests
             
             
 
+        }
+
+        public static bool IsLinux
+        {
+            get
+            {
+                int p = (int) Environment.OSVersion.Platform;
+                return (p == 4) || (p == 6) || (p == 128);
+            }
         }
     }
 }
