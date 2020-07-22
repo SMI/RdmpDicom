@@ -75,7 +75,7 @@ Example:. './GetImages.exe ""%s"" ""%e%""'",Mandatory = true)]
             var p = Process.Start(toRun);
             p.WaitForExit();
 
-            listener.OnNotify(this,new NotifyEventArgs( p.ExitCode == 0 ? ProgressEventType.Information : ProgressEventType.Warning , "Process exited with code " + p.ExitCode);
+            listener.OnNotify(this,new NotifyEventArgs( p.ExitCode == 0 ? ProgressEventType.Information : ProgressEventType.Warning , "Process exited with code " + p.ExitCode));
 
             if(p.ExitCode != 0 && ThrowOnNonZeroExitCode)
                 throw new Exception("Process exited with code " + p.ExitCode);
