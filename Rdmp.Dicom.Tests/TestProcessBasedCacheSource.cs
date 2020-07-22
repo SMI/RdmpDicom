@@ -27,8 +27,9 @@ namespace Rdmp.Dicom.Tests
             var source = new ProcessBasedCacheSource();
 
             if(IsLinux)
-            {   
-                // TODO
+            {
+                source.Command = "/bin/echo";
+                source.Args = "Hey Thomas go get %s";
             }
             else
             {
