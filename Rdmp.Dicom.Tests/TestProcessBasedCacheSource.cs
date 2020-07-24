@@ -58,7 +58,9 @@ namespace Rdmp.Dicom.Tests
             source.PreInitialize(new PermissionWindow(cp.CatalogueRepository),new ThrowImmediatelyDataLoadEventListener());
             
             var toMem = new ToMemoryDataLoadEventListener(true);
-            source.GetChunk(toMem,new GracefulCancellationToken());
+            var fork = new ForkDataLoadEventListener(toMem,new ThrowImmediatelyDataLoadEventListener(){WriteToConsole = true});
+
+            source.GetChunk(fork,new GracefulCancellationToken());
 
             Assert.Contains("Hey Thomas go get 24/12/01",toMem.GetAllMessagesByProgressEventType()[ProgressEventType.Information].Select(v=>v.Message).ToArray());
             
