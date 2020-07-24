@@ -29,12 +29,12 @@ namespace Rdmp.Dicom.Tests
             if(IsLinux)
             {
                 source.Command = "/bin/echo";
-                source.Args = "Hey Thomas go get %s";
+                source.Args = "Hey Thomas go get %s and store in %d";
             }
             else
             {
                 source.Command = "cmd.exe";
-                source.Args = "/c echo Hey Thomas go get %s";
+                source.Args = "/c echo Hey Thomas go get %s and store in %d";
             }
             source.TimeFormat = "dd/MM/yy";
             source.ThrowOnNonZeroExitCode = true;
@@ -62,7 +62,7 @@ namespace Rdmp.Dicom.Tests
 
             source.GetChunk(fork,new GracefulCancellationToken());
 
-            Assert.Contains("Hey Thomas go get 24/12/01",toMem.GetAllMessagesByProgressEventType()[ProgressEventType.Information].Select(v=>v.Message).ToArray());
+            Assert.Contains($"Hey Thomas go get 24/12/01 and store in {Path.Combine(loadDir.Cache.FullName,"ALL")}",toMem.GetAllMessagesByProgressEventType()[ProgressEventType.Information].Select(v=>v.Message).ToArray());
             
             
 
