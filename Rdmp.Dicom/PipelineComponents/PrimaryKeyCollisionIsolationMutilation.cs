@@ -60,10 +60,11 @@ namespace Rdmp.Dicom.PipelineComponents
             //if there are multiple tables then we must know how to join them
             if (TablesToIsolate.Length >1 && TablesToIsolate.Count(t => t.IsPrimaryExtractionTable) != 1)
             {
+                var primaryTables = TablesToIsolate.Where(t => t.IsPrimaryExtractionTable).ToArray();
+                
                 notifier.OnCheckPerformed(
                     new CheckEventArgs(
-                        "There are " + TablesToIsolate.Length +
-                        " tables to operate on but none are marked IsPrimaryExtractionTable.  This should be set on the top level table e.g. Study",
+                        $"There are {TablesToIsolate.Length} tables to operate on but {primaryTables.Length} are marked IsPrimaryExtractionTable ({string.Join(",",primaryTables.Select(t=>t.Name))}).  This should be set on a single top level table only e.g. Study",
                         CheckResult.Fail));
             }
 
