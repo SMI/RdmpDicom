@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Allow the PACS to send us lossy compressed versions if it wants, otherwise we won't be able to receive anything it has in that format
+
 ### Added
 
 - Added new cache source `ProcessBasedCacheSource` that calls out to a remote process
