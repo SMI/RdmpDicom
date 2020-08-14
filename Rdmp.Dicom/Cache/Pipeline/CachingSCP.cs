@@ -27,6 +27,12 @@ namespace Rdmp.Dicom.Cache.Pipeline
             DicomTransferSyntax.JPEGProcess14SV1,
             DicomTransferSyntax.JPEGProcess14,
             DicomTransferSyntax.RLELossless,
+
+            // Lossy - if that's all the PACS has, that's all it can give us
+            DicomTransferSyntax.JPEGLSNearLossless,
+            DicomTransferSyntax.JPEG2000Lossy,
+            DicomTransferSyntax.JPEGProcess1,
+            DicomTransferSyntax.JPEGProcess2_4,
 			
             // Uncompressed
             DicomTransferSyntax.ExplicitVRLittleEndian,
