@@ -170,9 +170,6 @@ This Grouping will be used to extract the Modality code when deciding which tabl
         #region Process Results Of Pipeline Read
         public DataTable ProcessPipelineData(DataTable toProcess, IDataLoadEventListener listener,GracefulCancellationToken cancellationToken)
         {
-
-            //todo: This really shouldn't be needed surely
-            MySql.Data.MySqlClient.MySqlConnection.ClearAllPools();
             MySqlBulkCopy.BulkInsertBatchTimeoutInSeconds = int.MaxValue; //forever
 
             _sw.Start();
