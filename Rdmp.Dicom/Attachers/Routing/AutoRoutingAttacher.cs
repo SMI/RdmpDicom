@@ -5,7 +5,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
 using FAnsi.Implementations.MySql;
-using MySql.Data.MySqlClient;
 using Rdmp.Core.Curation.Data;
 using Rdmp.Core.Curation.Data.DataLoad;
 using Rdmp.Core.Curation.Data.Pipelines;
@@ -171,9 +170,6 @@ This Grouping will be used to extract the Modality code when deciding which tabl
         #region Process Results Of Pipeline Read
         public DataTable ProcessPipelineData(DataTable toProcess, IDataLoadEventListener listener,GracefulCancellationToken cancellationToken)
         {
-
-            //todo: This really shouldn't be needed surely
-            MySqlConnection.ClearAllPools();
             MySqlBulkCopy.BulkInsertBatchTimeoutInSeconds = int.MaxValue; //forever
 
             _sw.Start();

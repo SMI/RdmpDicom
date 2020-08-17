@@ -51,23 +51,26 @@ namespace Rdmp.Dicom.UI
                 
         private void btnCreateSuiteWithTemplate_Click(object sender, EventArgs e)
         {
-            OpenFileDialog ofd = new OpenFileDialog();
-            ofd.Filter = "Imaging Template|*.it";
-
-            if (ofd.ShowDialog() == DialogResult.OK)
+            string filename;
+            using (OpenFileDialog ofd = new OpenFileDialog()
             {
-                try
-                {
-                    var yaml = File.ReadAllText(ofd.FileName);
+                Filter = "Imaging Template|*.it"
+            })
+            {
+                if (ofd.ShowDialog() != DialogResult.OK)
+                    return;
+                filename = ofd.FileName;
+            }
 
-                    var template = ImageTableTemplateCollection.LoadFrom(yaml);
-
-                    CreateSuite(template);
-                }
-                catch (Exception exception)
-                {
-                    ExceptionViewer.Show(exception);
-                }
+            try
+            {
+                var yaml = File.ReadAllText(filename);
+                var template = ImageTableTemplateCollection.LoadFrom(yaml);
+                CreateSuite(template);
+            }
+            catch (Exception exception)
+            {
+                ExceptionViewer.Show(exception);
             }
         }
 
@@ -78,17 +81,19 @@ namespace Rdmp.Dicom.UI
             if (!CreateDatabaseIfNotExists(db))
                 return;
 
-            
-            FolderBrowserDialog dialog = new FolderBrowserDialog();
-            DirectoryInfo dir = null;
-            dialog.Description = "Select Project Directory (For Sql scripts/Executables etc)";
 
-            //if we are creating a load we need to know where to store load scripts etc
-            if(cbCreateLoad.Checked)
-                if (dialog.ShowDialog() == DialogResult.OK)
-                    dir = new DirectoryInfo(dialog.SelectedPath);
-                else
-                    return;
+            DirectoryInfo dir = null;
+            using (FolderBrowserDialog dialog = new FolderBrowserDialog() {
+                Description = "Select Project Directory (For Sql scripts/Executables etc)"
+            })
+            {
+                //if we are creating a load we need to know where to store load scripts etc
+                if (cbCreateLoad.Checked)
+                    if (dialog.ShowDialog() == DialogResult.OK)
+                        dir = new DirectoryInfo(dialog.SelectedPath);
+                    else
+                        return;
+            }
 
             var cmd = new ExecuteCommandCreateNewImagingDatasetSuite(_activator.RepositoryLocator, db,dir);
             cmd.DicomSourceType = rbJsonSources.Checked ? typeof(DicomDatasetCollectionSource) : typeof(DicomFileCollectionSource);

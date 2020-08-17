@@ -98,32 +98,34 @@ namespace Rdmp.Dicom.Extraction
             var table = _database.ExpectTable(_tableName);
 
             // Create data table
-            var dt = new DataTable(_tableName);
-            using (var conn = (SqlConnection) _server.GetConnection())
+            using (var dt = new DataTable(_tableName))
             {
-                conn.Open();
-                var da = new SqlDataAdapter(table.GetTopXSql(0), conn);
-                da.Fill(dt);
-            }
+                using (var conn = (SqlConnection)_server.GetConnection())
+                {
+                    conn.Open();
+                    using (var da = new SqlDataAdapter(table.GetTopXSql(0), conn))
+                        da.Fill(dt);
+                }
 
-            // Fill up the data table
-            foreach (var mapping in newMappings)
-            {
-                var row = dt.NewRow();
-                row["PrivateUID"] = mapping.PrivateUID;
-                row["ReleaseUID"] = mapping.ReleaseUID;
-                row["ProjectNumber"] = mapping.ProjectNumber;
-                row["UIDType"] = mapping.UIDType;
-                row["IsExternalReference"] = mapping.IsExternalReference;
-                dt.Rows.Add(row);
-            }
+                // Fill up the data table
+                foreach (var mapping in newMappings)
+                {
+                    var row = dt.NewRow();
+                    row["PrivateUID"] = mapping.PrivateUID;
+                    row["ReleaseUID"] = mapping.ReleaseUID;
+                    row["ProjectNumber"] = mapping.ProjectNumber;
+                    row["UIDType"] = mapping.UIDType;
+                    row["IsExternalReference"] = mapping.IsExternalReference;
+                    dt.Rows.Add(row);
+                }
 
-            // Perform the bulk copy
-            using (var conn = (SqlConnection) _server.GetConnection())
-            {
-                conn.Open();
-                using (var bulkCopy = table.BeginBulkInsert())
-                    bulkCopy.Upload(dt);                
+                // Perform the bulk copy
+                using (var conn = (SqlConnection)_server.GetConnection())
+                {
+                    conn.Open();
+                    using (var bulkCopy = table.BeginBulkInsert())
+                        bulkCopy.Upload(dt);
+                }
             }
         }
 
