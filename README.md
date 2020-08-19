@@ -25,20 +25,14 @@ Building requires MSBuild 15 or later (or Visual Studio 2017 or later).  You wil
 
 You can build Rdmp.Dicom as a plugin for RDMP by running the following (use the Version number in [SharedAssemblyInfo.cs](SharedAssemblyInfo.cs) in place of 0.0.1)
 
+```bash
+cd Plugin/net461
+dotnet publish --runtime win-x64 -c Release --self-contained false
+cd ../netcoreapp2.2
+dotnet publish --runtime win-x64 -c Release --self-contained false
+dotnet publish --runtime linux-x64 -c Release --self-contained false
+cd ../..
+nuget pack ./Rdmp.Dicom.nuspec -Properties Configuration=Release -IncludeReferencedProjects -Symbols -Version 0.0.1
 ```
-dotnet publish .\Plugin\netcoreapp2.2\netcoreapp2.2.csproj -r win-x64
-nuget pack Rdmp.Dicom.nuspec -Properties Configuration=Debug -IncludeReferencedProjects -Version 0.0.1
-```
-
-This should produce a nuget package with runtimes compatible with RDMP client and CLI.
-
-If you need to build the plugin for linux you can run the following instead:
-
-```
-dotnet publish .\Plugin\netcoreapp2.2\netcoreapp2.2.csproj -r win-x64
-dotnet publish .\Plugin\netcoreapp2.2\netcoreapp2.2.csproj -r linux-x64
-nuget pack Linux.Rdmp.Dicom.nuspec -Properties Configuration=Debug -IncludeReferencedProjects -Version 0.0.1
-```
-_Plugins that run in native Linux (e.g. via RDMP CLI) still need the windows publish to be compatible with the RDMP Client UI_
 
 This will produce a nupkg file (e.g. Rdmp.Dicom.0.0.1.nupkg) which can be consumed by both the RDMP client and dot net core RDMP CLI.

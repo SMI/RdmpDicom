@@ -34,10 +34,11 @@ namespace Rdmp.Dicom.UI
                 return GetMenuArray(new ExecuteCommandCreateNewImagingDataset(ItemActivator));
             }
 
-            if (databaseEntity is Catalogue)
+            if (databaseEntity is Catalogue c)
                 return GetMenuArray(
                     new ExecuteCommandCreateNewImagingDataset(ItemActivator),
-                    new ExecuteCommandPromoteNewTag(ItemActivator).SetTarget(databaseEntity));
+                    new ExecuteCommandPromoteNewTag(ItemActivator).SetTarget(databaseEntity),
+                    new ExecuteCommandCompareImagingSchemas(ItemActivator,c));
 
             if (databaseEntity is ProcessTask pt)
                 return GetMenuArray(new ExecuteCommandReviewIsolations(ItemActivator, pt));
