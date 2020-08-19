@@ -52,12 +52,10 @@ namespace Rdmp.Dicom
 
         private string TailorLiveSql(string liveSql, DatabaseType databaseType)
         {
-            if(databaseType == DatabaseType.MicrosoftSQLServer)
-            {
-                liveSql = Regex.Replace(liveSql,"COLLATE \\w+","");
-            }
-
-            //condense all multiple spaces to single spaces
+            // get rid of collation
+            liveSql = Regex.Replace(liveSql,"\\bCOLLATE \\w+","");
+            
+            // condense all multiple spaces to single spaces
             liveSql = Regex.Replace(liveSql,"  +"," ");
             
             return liveSql;
