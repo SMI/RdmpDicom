@@ -13,7 +13,7 @@ using Rdmp.Core.Curation;
 
 namespace Rdmp.Dicom.TagPromotionSchema
 {
-    public class TagColumnAdder: BasicCommandExecution,ICheckable
+    public class TagColumnAdder: ICheckable
     {
         /// <summary>
         /// The new tag (or transform column) the user wants to add to the table
@@ -42,10 +42,8 @@ namespace Rdmp.Dicom.TagPromotionSchema
 
         public bool SkipChecksAndSynchronization { get; set; }
 
-        public override void Execute()
+        public void Execute()
         {
-            base.Execute();
-
             if(!SkipChecksAndSynchronization)
                 Check(_notifierForExecute);
 
