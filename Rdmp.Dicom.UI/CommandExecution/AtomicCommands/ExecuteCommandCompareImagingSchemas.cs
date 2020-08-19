@@ -46,7 +46,7 @@ namespace Rdmp.Dicom.UI.CommandExecution.AtomicCommands
 
             var comparer = new LiveVsTemplateComparer(_tableInfo,templateCollection);
 
-            var viewer = new SQLBeforeAndAfterViewer(comparer.LiveSql,comparer.TemplateSql,"Your Database", "Template","Differences between live table and image template",MessageBoxButtons.OK);
+            var viewer = new SQLBeforeAndAfterViewer(comparer.LiveSql,comparer.TemplateSql,"Your Database", "Template","Differences between live table and image template",MessageBoxButtons.OK); // lgtm[cs/local-not-disposed]
             viewer.Show();
         }
 
