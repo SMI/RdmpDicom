@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Added new command `CompareImagingSchemas` accessible from the Catalogue right click context menu.  The command shows differences between a live database table and the template used to create it.
+- Added new command `AddTag` which adds a given dicom tag or typed column to the provided Catalogue (change is synced with RDMP and any `_Archive` tables)
 
 ## [2.1.7] 2020-08-17
 
