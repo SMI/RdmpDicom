@@ -49,11 +49,11 @@ namespace Rdmp.Dicom.CommandExecution
 
                     if(similar.Any())
                     {
-                        SetImpossible($"Could not find a tag called '{similar}'. Possibly  you meant:" + Environment.NewLine + string.Join(Environment.NewLine,similar));
+                        SetImpossible($"Could not find a tag called '{column}'. Possibly  you meant:" + Environment.NewLine + string.Join(Environment.NewLine,similar));
                         return;
                     }
                         
-                    SetImpossible($"Could not find a tag called '{similar}' or any like it");
+                    SetImpossible($"Could not find a tag called '{column}' or any like it");
                     return;
                 }
 
