@@ -2,6 +2,7 @@
 using FAnsi;
 using NUnit.Framework;
 using Rdmp.Core.CommandExecution.AtomicCommands;
+using Rdmp.Core.CommandLine.Interactive;
 using Rdmp.Core.Curation;
 using Rdmp.Core.Curation.Data;
 using Rdmp.Core.DataLoad.Triggers.Implementations;
@@ -18,7 +19,7 @@ namespace Rdmp.Dicom.Tests.Integration
     {
         [TestCase(DatabaseType.MySql)]
         [TestCase(DatabaseType.MicrosoftSQLServer)]
-        public void TestImageTemplates(DatabaseType type)
+        public void TestAddTag_WithArchive(DatabaseType type)
         {
             var db = GetCleanedServer(type);
 
@@ -56,26 +57,34 @@ namespace Rdmp.Dicom.Tests.Integration
 
             Assert.IsTrue(archive.Exists());
 
+            var activator = new ConsoleInputManager(RepositoryLocator,new ThrowImmediatelyCheckNotifier())
+            {
+                DisallowInput = true
+            };
+
             // Test the actual commands
-            cmd = new ExecuteCommandAddTag(null,catalogue,"ffffff","int");
+            cmd = new ExecuteCommandAddTag(activator,catalogue,"ffffff","int");
             Assert.IsFalse(cmd.IsImpossible,cmd.ReasonCommandImpossible);
             cmd.Execute();
 
-            cmd = new ExecuteCommandAddTag(null,catalogue,"EchoTime",null);
+            cmd = new ExecuteCommandAddTag(activator,catalogue,"EchoTime",null);
             Assert.IsFalse(cmd.IsImpossible,cmd.ReasonCommandImpossible);
             cmd.Execute();
 
-            cmd = new ExecuteCommandAddTag(null,catalogue,"StudyDate",null);
+            var ex = Assert.Throws<Exception>(()=>new ExecuteCommandAddTag(activator,catalogue,"StudyDate",null).Execute());
+            StringAssert.StartsWith("Failed check with message: There is already a column called 'StudyDate' in TableInfo ",ex.Message);
+
+            cmd = new ExecuteCommandAddTag(activator,catalogue,"SeriesDate",null);
             Assert.IsFalse(cmd.IsImpossible,cmd.ReasonCommandImpossible);
             cmd.Execute();
 
             Assert.AreEqual("int",tbl.DiscoverColumn("ffffff").DataType.SQLType);
-            Assert.AreEqual("int",tbl.DiscoverColumn("EchoTime").DataType.SQLType);
-            Assert.AreEqual(typeof(DateTime),tbl.DiscoverColumn("StudyDate").DataType.GetCSharpDataType());
+            Assert.AreEqual("decimal(38,19)",tbl.DiscoverColumn("EchoTime").DataType.SQLType);
+            Assert.AreEqual(typeof(DateTime),tbl.DiscoverColumn("SeriesDate").DataType.GetCSharpDataType());
 
             Assert.AreEqual("int",archive.DiscoverColumn("ffffff").DataType.SQLType);
-            Assert.AreEqual("int",archive.DiscoverColumn("EchoTime").DataType.SQLType);
-            Assert.AreEqual(typeof(DateTime),archive.DiscoverColumn("StudyDate").DataType.GetCSharpDataType());
+            Assert.AreEqual("decimal(38,19)",archive.DiscoverColumn("EchoTime").DataType.SQLType);
+            Assert.AreEqual(typeof(DateTime),archive.DiscoverColumn("SeriesDate").DataType.GetCSharpDataType());
 
         }
     }
