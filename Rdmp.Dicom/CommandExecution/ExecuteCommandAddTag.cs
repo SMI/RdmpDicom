@@ -12,7 +12,7 @@ namespace Rdmp.Dicom.CommandExecution
     /// <summary>
     /// Adds a new column to a <see cref="Catalogue"/> based on either a dicom tag (with infered datatype) or an explict name/datatype combination
     /// </summary>
-    class ExecuteCommandAddTag : BasicCommandExecution
+    public class ExecuteCommandAddTag : BasicCommandExecution
     {
         private TagColumnAdder _adder;
 
