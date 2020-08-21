@@ -15,7 +15,7 @@ namespace Rdmp.Dicom.Tests
         /// <returns>
         /// A DataTable containing the specified data.
         /// </returns>
-        static public DataTable CreateDataTable(
+        public static DataTable CreateDataTable(
             string[] columnNames,
             string[,] data
             )
@@ -52,7 +52,7 @@ namespace Rdmp.Dicom.Tests
         /// <returns>
         /// true if the data table contains the specified row, false otherwise
         /// </returns>
-        static public bool ContainsRow(DataTable dataTable, object[] expectedRow)
+        public static bool ContainsRow(DataTable dataTable, object[] expectedRow)
         {
             if (expectedRow.Length != dataTable.Columns.Count) return false;
 
