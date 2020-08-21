@@ -95,12 +95,16 @@ namespace Rdmp.Dicom.UI
                         return;
             }
 
-            var cmd = new ExecuteCommandCreateNewImagingDatasetSuite(_activator.RepositoryLocator, db,dir);
-            cmd.DicomSourceType = rbJsonSources.Checked ? typeof(DicomDatasetCollectionSource) : typeof(DicomFileCollectionSource);
-            cmd.CreateCoalescer = cbMergeNullability.Checked;
-            cmd.CreateLoad = cbCreateLoad.Checked;
-            cmd.TablePrefix = tbPrefix.Text;
-            cmd.Template = template;
+            var cmd = new ExecuteCommandCreateNewImagingDatasetSuite(_activator.RepositoryLocator, db, dir)
+            {
+                DicomSourceType = rbJsonSources.Checked
+                    ? typeof(DicomDatasetCollectionSource)
+                    : typeof(DicomFileCollectionSource),
+                CreateCoalescer = cbMergeNullability.Checked,
+                CreateLoad = cbCreateLoad.Checked,
+                TablePrefix = tbPrefix.Text,
+                Template = template
+            };
 
             cmd.Execute();
 

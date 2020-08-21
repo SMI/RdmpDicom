@@ -55,9 +55,8 @@ namespace Rdmp.Dicom.UI
             pEditor.Controls.Add(queryEditor);
 
 
-            var autoComplete = new AutocompleteMenu();
+            var autoComplete = new AutocompleteMenu {ImageList = new ImageList()};
 
-            autoComplete.ImageList = new ImageList();
             autoComplete.ImageList.Images.Add(CatalogueIcons.File);
             autoComplete.MaximumSize = new System.Drawing.Size(300,500);
             

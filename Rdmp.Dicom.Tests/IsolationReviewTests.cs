@@ -51,9 +51,11 @@ namespace Rdmp.Dicom.Tests
             db.CreateTable("mytbl_Isolation",dt);
 
             var lmd = new LoadMetadata(CatalogueRepository, "ExampleLoad");
-            var pt = new ProcessTask(CatalogueRepository, lmd,LoadStage.AdjustRaw);
-            pt.ProcessTaskType = ProcessTaskType.MutilateDataTable;
-            pt.Path = typeof(PrimaryKeyCollisionIsolationMutilation).FullName;
+            var pt = new ProcessTask(CatalogueRepository, lmd, LoadStage.AdjustRaw)
+            {
+                ProcessTaskType = ProcessTaskType.MutilateDataTable,
+                Path = typeof(PrimaryKeyCollisionIsolationMutilation).FullName
+            };
             pt.SaveToDatabase();
 
             //make an isolation db that is the 
@@ -63,8 +65,7 @@ namespace Rdmp.Dicom.Tests
             var args = pt.CreateArgumentsForClassIfNotExists(typeof(PrimaryKeyCollisionIsolationMutilation));
 
             var ti = new TableInfo(CatalogueRepository, "mytbl");
-            var ci = new ColumnInfo(CatalogueRepository,"A","varchar(1)",ti);
-            ci.IsPrimaryKey = true;
+            var ci = new ColumnInfo(CatalogueRepository, "A", "varchar(1)", ti) {IsPrimaryKey = true};
             ci.SaveToDatabase();
 
             SetArg(args, "IsolationDatabase", eds);

@@ -24,9 +24,7 @@ namespace Rdmp.Dicom.Tests
 
             for (int i = 0; i < columnNames.Length; i++)
             {
-                DataColumn column = new DataColumn();
-                column.DataType = data[0, i].GetType();
-                column.ColumnName = columnNames[i];
+                DataColumn column = new DataColumn {DataType = data[0, i].GetType(), ColumnName = columnNames[i]};
                 result.Columns.Add(column);
             }
 

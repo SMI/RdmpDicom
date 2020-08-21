@@ -19,18 +19,38 @@ namespace Rdmp.Dicom.Tests.Integration
             var db = GetCleanedServer(type);
 
             // Create a nice template with lots of columns
-            var template = new ImageTableTemplate();
-            template.TableName = "Fish";
-            template.Columns = new[]
+            var template = new ImageTableTemplate
             {
-                new ImageColumnTemplate {IsPrimaryKey = true, AllowNulls = true,ColumnName = "RelativeFileArchiveURI"},
-                new ImageColumnTemplate {IsPrimaryKey = false,AllowNulls = true, ColumnName = "SeriesInstanceUID"},
-                new ImageColumnTemplate {IsPrimaryKey = false,AllowNulls = true, ColumnName = "StudyDate"},
-                new ImageColumnTemplate {IsPrimaryKey = false,AllowNulls = true, ColumnName = "StudyInstanceUID"},
-                new ImageColumnTemplate {IsPrimaryKey = false,AllowNulls = true, ColumnName = "StudyDescription"},
-                new ImageColumnTemplate {IsPrimaryKey = false,AllowNulls = true, ColumnName = "EchoTime"},
-                new ImageColumnTemplate {IsPrimaryKey = false,AllowNulls = true, ColumnName = "RepetitionTime"},
-                new ImageColumnTemplate {IsPrimaryKey = false,AllowNulls = true, ColumnName = "PatientAge"},
+                TableName = "Fish",
+                Columns = new[]
+                {
+                    new ImageColumnTemplate
+                    {
+                        IsPrimaryKey = true, AllowNulls = true, ColumnName = "RelativeFileArchiveURI"
+                    },
+                    new ImageColumnTemplate
+                    {
+                        IsPrimaryKey = false, AllowNulls = true, ColumnName = "SeriesInstanceUID"
+                    },
+                    new ImageColumnTemplate {IsPrimaryKey = false, AllowNulls = true, ColumnName = "StudyDate"},
+                    new ImageColumnTemplate
+                    {
+                        IsPrimaryKey = false, AllowNulls = true, ColumnName = "StudyInstanceUID"
+                    },
+                    new ImageColumnTemplate
+                    {
+                        IsPrimaryKey = false, AllowNulls = true, ColumnName = "StudyDescription"
+                    },
+                    new ImageColumnTemplate {IsPrimaryKey = false, AllowNulls = true, ColumnName = "EchoTime"},
+                    new ImageColumnTemplate
+                    {
+                        IsPrimaryKey = false, AllowNulls = true, ColumnName = "RepetitionTime"
+                    },
+                    new ImageColumnTemplate
+                    {
+                        IsPrimaryKey = false, AllowNulls = true, ColumnName = "PatientAge"
+                    },
+                }
             };
 
             // use it to create a table

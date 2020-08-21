@@ -20,9 +20,8 @@ namespace Rdmp.Dicom.Tests.Unit
         [Test]
         public void Test_Linux_Root()
         {
-            var source = new DicomFileCollectionSource();
-            source.ArchiveRoot = "/";
-            
+            var source = new DicomFileCollectionSource {ArchiveRoot = "/"};
+
             Assert.AreEqual("/",source.ArchiveRoot);
         }
 
@@ -47,8 +46,7 @@ namespace Rdmp.Dicom.Tests.Unit
 
         public void Test_ApplyArchiveRootToMakeRelativePath(string root, string inputPath, string expectedRelativePath)
         {
-            var source = new DicomFileCollectionSource();
-            source.ArchiveRoot = root;
+            var source = new DicomFileCollectionSource {ArchiveRoot = root};
 
             var result = source.ApplyArchiveRootToMakeRelativePath(inputPath);
             Assert.AreEqual(expectedRelativePath, result);
@@ -56,8 +54,7 @@ namespace Rdmp.Dicom.Tests.Unit
         [Test]
         public void AssembleDataTableFromFile()
         {
-            var source = new DicomFileCollectionSource();
-            source.FilenameField = "RelativeFileArchiveURI";
+            var source = new DicomFileCollectionSource {FilenameField = "RelativeFileArchiveURI"};
 
             var f = Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestData/IM-0001-0013.dcm");
 
@@ -104,8 +101,7 @@ namespace Rdmp.Dicom.Tests.Unit
             var controlFile = new FileInfo(Path.Combine(TestContext.CurrentContext.TestDirectory,"list.txt"));
             File.WriteAllText(controlFile.FullName,file1.FullName + Environment.NewLine + file2.FullName);
 
-            var source = new DicomFileCollectionSource();
-            source.FilenameField = "RelativeFileArchiveURI";
+            var source = new DicomFileCollectionSource {FilenameField = "RelativeFileArchiveURI"};
             source.PreInitialize(new FlatFileToLoadDicomFileWorklist(new FlatFileToLoad(controlFile)), new ThrowImmediatelyDataLoadEventListener());
             
             var toMemory = new ToMemoryDataLoadEventListener(true);

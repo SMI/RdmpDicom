@@ -174,12 +174,14 @@ namespace Rdmp.Dicom.Extraction
 
                 if (result == DBNull.Value || result == null)
                 {
-                    var m = new UIDMapping();
-                    m.UIDType = uidType;
-                    m.ProjectNumber = projectNumber;
-                    m.PrivateUID = value;
-                    m.ReleaseUID = GetKindaUid();
-                    m.IsExternalReference = false;
+                    var m = new UIDMapping
+                    {
+                        UIDType = uidType,
+                        ProjectNumber = projectNumber,
+                        PrivateUID = value,
+                        ReleaseUID = GetKindaUid(),
+                        IsExternalReference = false
+                    };
 
                     InsertMapping(m);
 

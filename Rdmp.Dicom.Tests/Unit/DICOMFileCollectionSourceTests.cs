@@ -27,8 +27,7 @@ namespace Rdmp.Dicom.Tests.Unit
         {
             var db = GetCleanedServer(DatabaseType.MicrosoftSQLServer);
 
-            var source = new DicomFileCollectionSource();
-            source.FilenameField = "RelativeFileArchiveURI";
+            var source = new DicomFileCollectionSource {FilenameField = "RelativeFileArchiveURI"};
 
             if (expressRelative)
                 source.ArchiveRoot = TestContext.CurrentContext.TestDirectory;
@@ -79,8 +78,7 @@ namespace Rdmp.Dicom.Tests.Unit
 
             //generate some random dicoms
             var r = new Random(999);
-            DicomDataGenerator generator = new DicomDataGenerator(r,dirToLoad,"CT");
-            generator.MaximumImages = 5;
+            DicomDataGenerator generator = new DicomDataGenerator(r, dirToLoad, "CT") {MaximumImages = 5};
             var people = new PersonCollection();
             people.GeneratePeople(1,r);
             generator.GenerateTestDataFile(people,new FileInfo("./inventory.csv"),1);
@@ -110,8 +108,7 @@ namespace Rdmp.Dicom.Tests.Unit
             //tell the source to load the zip
             var f = new FlatFileToLoad(zip);
 
-            var source = new DicomFileCollectionSource();
-            source.FilenameField = "RelativeFileArchiveURI";
+            var source = new DicomFileCollectionSource {FilenameField = "RelativeFileArchiveURI"};
 
             if (expressRelative)
                 source.ArchiveRoot = TestContext.CurrentContext.TestDirectory;
@@ -176,8 +173,7 @@ namespace Rdmp.Dicom.Tests.Unit
 
             //generate some random dicoms
             var r = new Random(999);
-            DicomDataGenerator generator = new DicomDataGenerator(r,dirToLoad,"CT");
-            generator.MaximumImages = 5;
+            DicomDataGenerator generator = new DicomDataGenerator(r, dirToLoad, "CT") {MaximumImages = 5};
             var people = new PersonCollection();
             people.GeneratePeople(1,r);
             generator.GenerateTestDataFile(people,new FileInfo("./inventory.csv"),1);
@@ -225,8 +221,7 @@ namespace Rdmp.Dicom.Tests.Unit
             var f = new FlatFileToLoad(loadMeTextFile);
 
             //Setup source
-            var source = new DicomFileCollectionSource();
-            source.FilenameField = "RelativeFileArchiveURI";
+            var source = new DicomFileCollectionSource {FilenameField = "RelativeFileArchiveURI"};
 
             if (expressRelative)
                 source.ArchiveRoot = TestContext.CurrentContext.TestDirectory;
@@ -234,8 +229,7 @@ namespace Rdmp.Dicom.Tests.Unit
             var worklist = new FlatFileToLoadDicomFileWorklist(f);
 
             //Setup destination
-            var destination = new DataTableUploadDestination();
-            destination.AllowResizingColumnsAtUploadTime = true;
+            var destination = new DataTableUploadDestination {AllowResizingColumnsAtUploadTime = true};
 
             //setup pipeline
             var contextFactory = new DataFlowPipelineContextFactory<DataTable>();

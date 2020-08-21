@@ -16,12 +16,20 @@ namespace Rdmp.Dicom.Tests.Integration
         {
             var db = GetCleanedServer(type);
 
-            var template = new ImageTableTemplate();
-            template.TableName = "Fish";
-            template.Columns = new[]
+            var template = new ImageTableTemplate
             {
-                new ImageColumnTemplate {IsPrimaryKey = true, AllowNulls = true,ColumnName = "RelativeFileArchiveURI"},
-                new ImageColumnTemplate {IsPrimaryKey = false,AllowNulls = true, ColumnName = "SeriesInstanceUID"}
+                TableName = "Fish",
+                Columns = new[]
+                {
+                    new ImageColumnTemplate
+                    {
+                        IsPrimaryKey = true, AllowNulls = true, ColumnName = "RelativeFileArchiveURI"
+                    },
+                    new ImageColumnTemplate
+                    {
+                        IsPrimaryKey = false, AllowNulls = true, ColumnName = "SeriesInstanceUID"
+                    }
+                }
             };
             var tbl = db.ExpectTable(template.TableName);
             var cmd = new ExecuteCommandCreateNewImagingDataset(RepositoryLocator,tbl , template);
