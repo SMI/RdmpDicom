@@ -50,7 +50,7 @@ namespace Rdmp.Dicom.Tests
                 string version = p.Groups[2].Value;
 
                 // NOTE(rkm 2020-02-14) Fix for specifiers which contain lower or upper bounds
-                version = version?.Trim('(',')','[',']');
+                version = version.Trim('(',')','[',']');
 
                 bool found = false;
 
@@ -64,7 +64,7 @@ namespace Rdmp.Dicom.Tests
                         string versionDependency = d.Groups[2].Value;
 
                         // NOTE(rkm 2020-02-14) Fix for specifiers which contain lower or upper bounds
-                        versionDependency = versionDependency?.Trim('(',')','[',']');
+                        versionDependency = versionDependency.Trim('(',')','[',']');
                         
                         if (packageDependency.Equals(package))
                         {

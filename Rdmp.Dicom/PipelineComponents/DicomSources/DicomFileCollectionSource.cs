@@ -71,7 +71,7 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
                 if (file != null)
                 {
                     dt.TableName = QuerySyntaxHelper.MakeHeaderNameSensible(Path.GetFileNameWithoutExtension(file.FullPath));
-                    if (file.FullPath.EndsWith(".zip"))
+                    if (file.FullPath!=null && file.FullPath.EndsWith(".zip"))
                     {
                         //Input is a single zip file
                         ProcessZipArchive(dt, listener, file.FullPath);
