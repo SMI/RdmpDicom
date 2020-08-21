@@ -78,10 +78,9 @@ namespace Rdmp.Dicom.Tests.Unit
             
             ZipFile.CreateFromDirectory(dir,zip);
 
-            var fileCount = Directory.GetFiles(dir,"*.dcm").Count();
+            var fileCount = Directory.GetFiles(dir,"*.dcm").Length;
 
-            var source = new DicomFileCollectionSource();
-            source.FilenameField = "RelativeFileArchiveURI";
+            var source = new DicomFileCollectionSource {FilenameField = "RelativeFileArchiveURI"};
             source.PreInitialize(new FlatFileToLoadDicomFileWorklist(new FlatFileToLoad(new FileInfo(zip))), new ThrowImmediatelyDataLoadEventListener());
             var toMemory = new ToMemoryDataLoadEventListener(true);
             var result = source.GetChunk(toMemory, new GracefulCancellationToken());

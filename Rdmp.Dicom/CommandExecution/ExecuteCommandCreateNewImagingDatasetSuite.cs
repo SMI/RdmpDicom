@@ -176,13 +176,17 @@ namespace Rdmp.Dicom.CommandExecution
             
 
             //Create the load process task that uses the pipe to load RAW tables with data from the dicom files
-            var pt = new ProcessTask(_catalogueRepository, NewLoadMetadata, LoadStage.Mounting);
-            pt.Name = "Auto Routing Attacher";
-            pt.ProcessTaskType = ProcessTaskType.Attacher;
+            var pt = new ProcessTask(_catalogueRepository, NewLoadMetadata, LoadStage.Mounting)
+            {
+                Name = "Auto Routing Attacher",
+                ProcessTaskType = ProcessTaskType.Attacher,
+                Path = PersistentRaw
+                    ? typeof(AutoRoutingAttacherWithPersistentRaw).FullName
+                    : typeof(AutoRoutingAttacher).FullName,
+                Order = 1
+            };
 
-            pt.Path = PersistentRaw? typeof(AutoRoutingAttacherWithPersistentRaw).FullName: typeof(AutoRoutingAttacher).FullName;
 
-            pt.Order = 1;
             pt.SaveToDatabase();
 
             var args = PersistentRaw? pt.CreateArgumentsForClassIfNotExists<AutoRoutingAttacherWithPersistentRaw>() : pt.CreateArgumentsForClassIfNotExists<AutoRoutingAttacher>();
@@ -205,11 +209,13 @@ namespace Rdmp.Dicom.CommandExecution
 
             if(CreateCoalescer)
             {
-                var coalescer =  new ProcessTask(_catalogueRepository, NewLoadMetadata, LoadStage.AdjustRaw);
-                coalescer.Name = "Coalescer";
-                coalescer.ProcessTaskType = ProcessTaskType.MutilateDataTable;
-                coalescer.Path = typeof(Coalescer).FullName;
-                coalescer.Order = 3;
+                var coalescer = new ProcessTask(_catalogueRepository, NewLoadMetadata, LoadStage.AdjustRaw)
+                {
+                    Name = "Coalescer",
+                    ProcessTaskType = ProcessTaskType.MutilateDataTable,
+                    Path = typeof(Coalescer).FullName,
+                    Order = 3
+                };
                 coalescer.SaveToDatabase();
 
                 StringBuilder regexPattern = new StringBuilder();
@@ -226,11 +232,13 @@ namespace Rdmp.Dicom.CommandExecution
 
             ////////////////////////////////Load Ender (if no rows in load) ////////////////////////////
 
-            var prematureLoadEnder = new ProcessTask(_catalogueRepository, NewLoadMetadata, LoadStage.Mounting);
-            prematureLoadEnder.Name = "Premature Load Ender";
-            prematureLoadEnder.ProcessTaskType = ProcessTaskType.MutilateDataTable;
-            prematureLoadEnder.Path = typeof(PrematureLoadEnder).FullName;
-            prematureLoadEnder.Order = 4;
+            var prematureLoadEnder = new ProcessTask(_catalogueRepository, NewLoadMetadata, LoadStage.Mounting)
+            {
+                Name = "Premature Load Ender",
+                ProcessTaskType = ProcessTaskType.MutilateDataTable,
+                Path = typeof(PrematureLoadEnder).FullName,
+                Order = 4
+            };
             prematureLoadEnder.SaveToDatabase();
 
             args = prematureLoadEnder.CreateArgumentsForClassIfNotExists<PrematureLoadEnder>();
