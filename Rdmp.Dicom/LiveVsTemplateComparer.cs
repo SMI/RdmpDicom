@@ -27,7 +27,7 @@ namespace Rdmp.Dicom
             // The live table name e.g. CT_StudyTable
             var liveTableName = discoveredTable.GetRuntimeName();
             // Without the prefix e.g. StudyTable
-            var liveTableNameWithoutPrefix = liveTableName.Substring(liveTableName.IndexOf("_")+1);
+            var liveTableNameWithoutPrefix = liveTableName.Substring(liveTableName.IndexOf("_", StringComparison.Ordinal)+1);
 
             var template = templateCollection.Tables.FirstOrDefault(
                 c=>c.TableName.Equals(liveTableName,StringComparison.CurrentCultureIgnoreCase) ||
