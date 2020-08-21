@@ -44,7 +44,7 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
         private IPutDicomFilesInExtractionDirectories _putter;
 
         private int _anonymisedImagesCount = 0;
-        Stopwatch _sw = new Stopwatch();
+        readonly Stopwatch _sw = new Stopwatch();
 
         private int _errors = 0;
 

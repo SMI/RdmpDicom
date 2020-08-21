@@ -169,7 +169,7 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
 
 
         List<Task>  tasks = new List<Task>();
-        object oTasksLock = new object();
+        readonly object oTasksLock = new object();
         
         
         private void ProcessDirectoryAsync(DataTable dt,DirectoryInfo directoryInfo, IDataLoadEventListener listener)

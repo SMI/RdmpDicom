@@ -10,7 +10,7 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources.Worklists
     {
         private readonly FlatFileToLoad _file;
 
-        private string[] _lines;
+        private readonly string[] _lines;
         private int _linesCurrent;
         private bool _dataExhausted = false;
 

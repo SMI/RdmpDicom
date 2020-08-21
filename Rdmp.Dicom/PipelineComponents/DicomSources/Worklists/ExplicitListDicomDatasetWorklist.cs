@@ -8,7 +8,7 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources.Worklists
         private readonly DicomDataset[] _datasets;
         private readonly string _filenameToPretend;
         private int index = 0;
-        private Dictionary<string, string> _otherValuesToStoreInRow;
+        private readonly Dictionary<string, string> _otherValuesToStoreInRow;
 
 
         public HashSet<DicomDataset> CorruptMessages = new HashSet<DicomDataset>();

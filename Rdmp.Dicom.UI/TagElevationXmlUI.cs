@@ -16,7 +16,7 @@ namespace Rdmp.Dicom.UI
 {
     public partial class TagElevationXmlUI : Form,ICustomUI<DicomSource.TagElevationXml>
     {
-        private Scintilla queryEditor;
+        private readonly Scintilla queryEditor;
 
 
         public const string ExampleElevationFile

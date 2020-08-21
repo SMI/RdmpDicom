@@ -30,11 +30,11 @@ namespace Rdmp.Dicom.CommandExecution
         
         private readonly DiscoveredDatabase _databaseToCreateInto;
         private readonly DirectoryInfo _projectDirectory;
-        private IExternalDatabaseServer _loggingServer;
-        private IRDMPPlatformRepositoryServiceLocator _repositoryLocator;
-        private ICatalogueRepository _catalogueRepository;
+        private readonly IExternalDatabaseServer _loggingServer;
+        private readonly IRDMPPlatformRepositoryServiceLocator _repositoryLocator;
+        private readonly ICatalogueRepository _catalogueRepository;
 
-        public List<Catalogue> NewCataloguesCreated { get; private set; }
+        public readonly List<Catalogue> NewCataloguesCreated;
         public LoadMetadata NewLoadMetadata { get; private set; }
         
         /// <summary>

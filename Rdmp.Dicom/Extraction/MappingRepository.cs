@@ -193,7 +193,7 @@ namespace Rdmp.Dicom.Extraction
             
         }
 
-        static Random r = new Random();
+        static readonly Random r = new Random();
         
         private string GetKindaUid()
         {

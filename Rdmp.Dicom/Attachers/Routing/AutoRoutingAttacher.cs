@@ -45,7 +45,7 @@ This Grouping will be used to extract the Modality code when deciding which tabl
         
         readonly Dictionary<string, bool> _columnNamesRoutedSuccesfully = new Dictionary<string, bool>(StringComparer.CurrentCultureIgnoreCase);
 
-        Stopwatch _sw = new Stopwatch();
+        readonly Stopwatch _sw = new Stopwatch();
         Dictionary<DataTable, string> _modalityMap;
 
         protected AutoRoutingAttacher(bool requestsExternalDatabaseCreation) : base(requestsExternalDatabaseCreation) //Derrived classes can change mind about RAW creation

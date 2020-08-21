@@ -18,12 +18,12 @@ namespace Rdmp.Dicom.Attachers.Routing
     /// </summary>
     public class PersistentRawTableCreator : IDisposeAfterDataLoad
     {
-        List<DiscoveredTable> _rawTables = new List<DiscoveredTable>();
+        readonly List<DiscoveredTable> _rawTables = new List<DiscoveredTable>();
 
         public void CreateRAWTablesInDatabase(DiscoveredDatabase rawDb, IDataLoadJob job)
         {
             var namer = job.Configuration.DatabaseNamer;
-            foreach (TableInfo tableInfo in job.RegularTablesToLoad)
+            foreach (ITableInfo tableInfo in job.RegularTablesToLoad)
             {
                 var liveTable = tableInfo.Discover(DataAccessContext.DataLoad);
 

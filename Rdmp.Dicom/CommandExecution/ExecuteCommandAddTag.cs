@@ -12,7 +12,7 @@ namespace Rdmp.Dicom.CommandExecution
     /// </summary>
     public class ExecuteCommandAddTag : BasicCommandExecution
     {
-        private TagColumnAdder _adder;
+        private readonly TagColumnAdder _adder;
 
         public ExecuteCommandAddTag(BasicActivateItems activator,Catalogue catalogue, 
             [DemandsInitialization("Name of the new column you want created.")]
