@@ -43,8 +43,7 @@ namespace Rdmp.Dicom.Cache.Pipeline.Ordering
             {
                 if (PlacementMode == PlacementMode.PlaceThenFill)
                     Listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning, "DicomRetriever.Order.Order Attempt to fill order prior to placement" + seriesUid + "-" + sopInstance));
-                else
-                    Series.Add(seriesUid, new Series(seriesUid, sopInstance, PlacementMode, OrderLevel, Listener));
+                Series.Add(seriesUid, new Series(seriesUid, sopInstance, PlacementMode, OrderLevel, Listener));
             }
             Series[seriesUid].Fill(sopInstance);
         }

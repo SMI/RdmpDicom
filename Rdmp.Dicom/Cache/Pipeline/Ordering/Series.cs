@@ -45,8 +45,7 @@ namespace Rdmp.Dicom.Cache.Pipeline.Ordering
             {
                 if (PlacementMode == PlacementMode.PlaceThenFill)
                     Listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning, "DicomRetriever.Order.Order Attempt to fill order prior to placement" + sopInstance));
-                else
-                    Images.Add(sopInstance, new Image(sopInstance, PlacementMode, OrderLevel));
+                Images.Add(sopInstance, new Image(sopInstance, PlacementMode, OrderLevel));
             }
             Images[sopInstance].Fill();
         }
