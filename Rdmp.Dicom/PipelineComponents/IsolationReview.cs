@@ -135,7 +135,7 @@ namespace Rdmp.Dicom.PipelineComponents
 
                 differences = new List<IsolationDifference>();
                 
-                //if theres only 1 row in the table then there are no differences!
+                //if there's only 1 row in the table then there are no differences!
                 if (dt.Rows.Count < 2)
                 {
                     dt.Rows.Clear();

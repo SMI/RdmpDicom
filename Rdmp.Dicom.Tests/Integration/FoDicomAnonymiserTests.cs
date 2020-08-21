@@ -191,7 +191,7 @@ namespace Rdmp.Dicom.Tests.Integration
         }
 
         // The following commented tests will fail due to underlying system limits on paths
-        // there is no reliable method to get maximum path length (apprently?)
+        // there is no reliable method to get maximum path length (apparently?)
         //        [TestCase(typeof(PutInUidStudySeriesFolders))]
         [TestCase(typeof(PutInReleaseIdentifierSubfolders))]
         [TestCase(typeof(PutInUidSeriesFolders))]

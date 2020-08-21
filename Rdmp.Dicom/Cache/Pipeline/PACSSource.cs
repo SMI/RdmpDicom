@@ -141,7 +141,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
             };
             #endregion
 
-            //helps with tyding up resources if we abort or through an exception and neatly avoids ->  Access to disposed closure
+            //helps with tidying up resources if we abort or through an exception and neatly avoids ->  Access to disposed closure
             using (var server = (DicomServer<CachingSCP>) DicomServer.Create<CachingSCP>(dicomConfiguration.LocalAetUri.Port))
             {
                     DicomClient client = new DicomClient(dicomConfiguration.RemoteAetUri.Host, dicomConfiguration.RemoteAetUri.Port, false, dicomConfiguration.LocalAetTitle, dicomConfiguration.RemoteAetTitle);
