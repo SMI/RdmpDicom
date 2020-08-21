@@ -31,7 +31,7 @@ namespace Rdmp.Dicom.Cache.Pipeline.Ordering
 
             if (Images.ContainsKey(sopInstance))
             {
-                Listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Error, "DicomRetriever.Order.Series Attempt to add duplicate _sopInstance:" + sopInstance));
+                Listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning, "DicomRetriever.Order.Series Attempt to add duplicate _sopInstance:" + sopInstance));
             }
             else
             {
@@ -44,11 +44,9 @@ namespace Rdmp.Dicom.Cache.Pipeline.Ordering
             if (!Images.ContainsKey(sopInstance))
             {
                 if (PlacementMode == PlacementMode.PlaceThenFill)
-                {
-                    Listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Error, "DicomRetriever.Order.Order Attempt to fill order prior to placement" + sopInstance));
-                    return;
-                }
-                Images.Add(sopInstance, new Image(sopInstance, PlacementMode, OrderLevel));
+                    Listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning, "DicomRetriever.Order.Order Attempt to fill order prior to placement" + sopInstance));
+                else
+                    Images.Add(sopInstance, new Image(sopInstance, PlacementMode, OrderLevel));
             }
             Images[sopInstance].Fill();
         }
