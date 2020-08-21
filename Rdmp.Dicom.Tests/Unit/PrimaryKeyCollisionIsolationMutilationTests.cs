@@ -73,7 +73,7 @@ namespace Rdmp.Dicom.Tests.Unit
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.MySql)]
         [TestCase(DatabaseType.PostgreSql)]
-        public void Test_IsolateSingleTable_Dupliction(DatabaseType dbType)
+        public void Test_IsolateSingleTable_Duplication(DatabaseType dbType)
         {
             var db = GetCleanedServer(dbType);
 
@@ -117,7 +117,7 @@ namespace Rdmp.Dicom.Tests.Unit
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.MySql)]
         [TestCase(DatabaseType.PostgreSql)]
-        public void Test_IsolateTwoTables_Dupliction(DatabaseType dbType)
+        public void Test_IsolateTwoTables_Duplication(DatabaseType dbType)
         {
             var db = GetCleanedServer(dbType);
 
@@ -233,7 +233,7 @@ namespace Rdmp.Dicom.Tests.Unit
         [TestCase(DatabaseType.MySql,true)]
         [TestCase(DatabaseType.PostgreSql,false)]
         [TestCase(DatabaseType.PostgreSql,true)]
-        public void Test_IsolateTwoTables_MutipleConflictingColumns(DatabaseType dbType,bool whitespace)
+        public void Test_IsolateTwoTables_MultipleConflictingColumns(DatabaseType dbType,bool whitespace)
         {
             var db = GetCleanedServer(dbType);
 
