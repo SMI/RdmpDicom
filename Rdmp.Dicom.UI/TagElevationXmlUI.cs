@@ -105,7 +105,7 @@ namespace Rdmp.Dicom.UI
 
         public void SetUnderlyingObjectTo(DicomSource.TagElevationXml value)
         {
-            if(value != null && value.xml != null)
+            if(value?.xml != null)
             {
                 queryEditor.Text = value.xml;
                 RunChecks();

@@ -29,7 +29,7 @@ namespace Rdmp.Dicom.UI
             var databaseEntity = o as DatabaseEntity;
 
             //allow clicking in Catalogue collection whitespace
-            if (o is RDMPCollection && ((RDMPCollection)o) == RDMPCollection.Catalogue)
+            if (o is RDMPCollection collection && collection == RDMPCollection.Catalogue)
             {
                 return GetMenuArray(new ExecuteCommandCreateNewImagingDataset(ItemActivator));
             }

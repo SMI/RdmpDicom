@@ -199,8 +199,8 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
                         throw new ArgumentOutOfRangeException();
                 }
 
-                if (value is string && DataTooLongHandlingStrategy != DataTooWideHandling.None)
-                    if (!IsValidLength(listener, item.Tag, (string)value))
+                if (value is string s && DataTooLongHandlingStrategy != DataTooWideHandling.None)
+                    if (!IsValidLength(listener, item.Tag, s))
                     {
 
                         //the string is too long!
@@ -209,7 +209,7 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
                             case DataTooWideHandling.TruncateAndWarn:
                                 lock (_oDictLock)
                                 {
-                                    value = ((string)value).Substring(0, _maxTagLengths[item.Tag]);
+                                    value = s.Substring(0, _maxTagLengths[item.Tag]);
                                 }
                                 break;
                             case DataTooWideHandling.MarkCorrupt:
