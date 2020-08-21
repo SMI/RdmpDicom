@@ -30,7 +30,7 @@ namespace Rdmp.Dicom.CommandExecution
 
             if(string.IsNullOrWhiteSpace(column))
             {
-                SetImpossible($"Column name must be supplied");
+                SetImpossible("Column name must be supplied");
                 return;
             }
                 

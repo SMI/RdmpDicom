@@ -103,7 +103,7 @@ namespace Rdmp.Dicom.Tests
 
         private object BuildRecommendedDependencyLine(string package, string version)
         {
-            return string.Format("<dependency id=\"{0}\" version=\"{1}\" />", package, version);
+            return $"<dependency id=\"{package}\" version=\"{version}\" />";
         }
 
         private object BuildRecommendedMarkdownLine(string package, string version)

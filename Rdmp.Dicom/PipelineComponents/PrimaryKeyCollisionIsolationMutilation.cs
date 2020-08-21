@@ -138,7 +138,7 @@ namespace Rdmp.Dicom.PipelineComponents
             cloner.CloneTable(from.Database, toCreate.Database, from, toCreate.GetRuntimeName(), true, true, true, tableInfo.PreLoadDiscardedColumns);
             
             if(!toCreate.Exists())
-                throw new Exception(string.Format("Table '{0}' did not exist after issuing create command",toCreate));
+                throw new Exception($"Table '{toCreate}' did not exist after issuing create command");
 
             //Add the data load run id
             toCreate.AddColumn(SpecialFieldNames.DataLoadRunID,new DatabaseTypeRequest(typeof(int)),false,10);
@@ -300,7 +300,7 @@ namespace Rdmp.Dicom.PipelineComponents
             HashSet<object> toReturn = new HashSet<object>();
 
             //fetch all the data
-            string sqlSelect = string.Format("Select distinct {0} {1} WHERE {2} = @val", pkColumnName, _fromSql, deleteOnColumnName);
+            string sqlSelect = $"Select distinct {pkColumnName} {_fromSql} WHERE {deleteOnColumnName} = @val";
             using(var cmdSelect = _raw.Server.GetCommand(sqlSelect, con))
             {
                 var p = cmdSelect.CreateParameter();
@@ -344,7 +344,8 @@ namespace Rdmp.Dicom.PipelineComponents
             string deleteFromTableName = GetRAWTableNameFullyQualified(tableInfo);
             
             //fetch all the data (LEFT/RIGHT joins can introduce null records so add not null to WHERE for the table being migrated to avoid full null rows)
-            string sqlSelect = string.Format("Select distinct {0}.* {1} WHERE {2} = @val AND {3} is not null", deleteFromTableName, _fromSql, deleteOnColumnName, pkColumnName);
+            string sqlSelect =
+                $"Select distinct {deleteFromTableName}.* {_fromSql} WHERE {deleteOnColumnName} = @val AND {pkColumnName} is not null";
             using(var cmdSelect = _raw.Server.GetCommand(sqlSelect, con))
             {
                 var p = cmdSelect.CreateParameter();
@@ -374,10 +375,8 @@ namespace Rdmp.Dicom.PipelineComponents
             var syntax = _raw.Server.GetQuerySyntaxHelper();
 
             //now delete all records
-            string sqlDelete = string.Format("DELETE {0} {1} WHERE {2} = @val", 
-                syntax.EnsureWrapped(toDelete.GetRuntimeName(LoadBubble.Raw,_namer)),
-                _fromSql,
-                deleteOnColumnName);
+            string sqlDelete =
+                $"DELETE {syntax.EnsureWrapped(toDelete.GetRuntimeName(LoadBubble.Raw, _namer))} {_fromSql} WHERE {deleteOnColumnName} = @val";
 
             if(syntax.DatabaseType == DatabaseType.PostgreSql)
             {
@@ -409,7 +408,8 @@ namespace Rdmp.Dicom.PipelineComponents
         {
             if(!_joins.Any())
             {
-                return string.Format("DELETE FROM {0} WHERE {1} = @val", syntax.EnsureWrapped(toDelete.GetRuntimeName(LoadBubble.Raw,_namer)),deleteOnColumnName);
+                return
+                    $"DELETE FROM {syntax.EnsureWrapped(toDelete.GetRuntimeName(LoadBubble.Raw, _namer))} WHERE {deleteOnColumnName} = @val";
             }
             else
             {
@@ -458,14 +458,8 @@ namespace Rdmp.Dicom.PipelineComponents
 
                 var usingsStr = string.Join(",",usings.Except(new []{toDelete}).Select(t=>syntax.EnsureWrapped(t.GetRuntimeName(LoadBubble.Raw,_namer))));
 
-                return string.Format("DELETE FROM {0} {1} WHERE {2} {3} = @val", 
-                    syntax.EnsureWrapped(toDelete.GetRuntimeName(LoadBubble.Raw,_namer)),
-
-                    //USING the other table names (as appearing in RAW)
-                    string.IsNullOrWhiteSpace(usingsStr) ? "" : " USING " + usingsStr,
-
-                    sb,
-                    deleteOnColumnName);
+                return
+                    $"DELETE FROM {syntax.EnsureWrapped(toDelete.GetRuntimeName(LoadBubble.Raw, _namer))} {(string.IsNullOrWhiteSpace(usingsStr) ? "" : " USING " + usingsStr)} WHERE {sb} {deleteOnColumnName} = @val";
             }
         }
 

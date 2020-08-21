@@ -34,7 +34,7 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
         public AmbiguousFilePath(string fullPath)
         {
             if(!IsAbsolute(fullPath))
-                throw new ArgumentException("Relative path was encountered without specifying a root, if you want to process relative paths you will need to provide a root path too.  fullPath was '" + fullPath + "'","fullPath");
+                throw new ArgumentException("Relative path was encountered without specifying a root, if you want to process relative paths you will need to provide a root path too.  fullPath was '" + fullPath + "'",nameof(fullPath));
 
             FullPath = fullPath;
         }
@@ -43,7 +43,7 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
         {
             //if root is provided but is not absolute
             if(!string.IsNullOrWhiteSpace(root) && !IsAbsolute(root))
-                throw new ArgumentException("Specified root path '" + root + "' was not IsAbsolute", "root");
+                throw new ArgumentException("Specified root path '" + root + "' was not IsAbsolute", nameof(root));
 
             FullPath = Combine(root, path);
         }
