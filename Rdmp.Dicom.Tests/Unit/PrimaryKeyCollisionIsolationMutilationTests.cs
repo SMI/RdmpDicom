@@ -35,12 +35,9 @@ namespace Rdmp.Dicom.Tests.Unit
             var tbl = db.CreateTable("CoolTable", dt);
 
             //import the table and make A look like a primary key to the metadata layer (and A would be pk in LIVE but not in RAW ofc)
-            TableInfo tableInfoCreated;
-            ColumnInfo[] columnInfosCreated;
+            Import(tbl, out var tableInfoCreated, out var columnInfosCreated);
 
-            Import(tbl, out tableInfoCreated, out columnInfosCreated);
-
-            //lie abot the primary key status
+            //lie about the primary key status
             var a = columnInfosCreated.Single(c => c.GetRuntimeName().Equals("A"));
             a.IsPrimaryKey = true;
             a.SaveToDatabase();
@@ -94,12 +91,9 @@ namespace Rdmp.Dicom.Tests.Unit
             var tbl = db.CreateTable("MyCoolTable2", dt);
 
             //import the table and make A look like a primary key to the metadata layer (and A would be pk in LIVE but not in RAW ofc)
-            TableInfo tableInfoCreated;
-            ColumnInfo[] columnInfosCreated;
-
-            Import(tbl, out tableInfoCreated, out columnInfosCreated);
+            Import(tbl, out var tableInfoCreated, out var columnInfosCreated);
             
-            //lie abot the primary key status
+            //lie about the primary key status
             var a = columnInfosCreated.Single(c => c.GetRuntimeName().Equals("A"));
             a.IsPrimaryKey = true;
             a.SaveToDatabase();
@@ -168,20 +162,14 @@ namespace Rdmp.Dicom.Tests.Unit
             });
 
             //import the table and make A look like a primary key to the metadata layer (and A would be pk in LIVE but not in RAW ofc)
-            TableInfo parentTableInfo;
-            ColumnInfo[] parentColumnInfosCreated;
-
-            TableInfo childTableInfo;
-            ColumnInfo[] childColumnInfosCreated;
-
-            Import(tblParent, out parentTableInfo, out parentColumnInfosCreated);
-            Import(tblChild, out childTableInfo, out childColumnInfosCreated);
+            Import(tblParent, out var parentTableInfo, out var parentColumnInfosCreated);
+            Import(tblChild, out var childTableInfo, out var childColumnInfosCreated);
 
             //make sure RDMP knows joins start with this table
             parentTableInfo.IsPrimaryExtractionTable = true;
             parentTableInfo.SaveToDatabase();
 
-            //lie abot the primary key statuses
+            //lie about the primary key statuses
             var seriesInstanceUIdCol =
                 parentColumnInfosCreated.Single(c => c.GetRuntimeName().Equals("SeriesInstanceUID"));
             seriesInstanceUIdCol.IsPrimaryKey = true;
@@ -273,14 +261,8 @@ namespace Rdmp.Dicom.Tests.Unit
             var tblChild = db.CreateTable("Child", dt2);
 
             //import the table and make A look like a primary key to the metadata layer (and A would be pk in LIVE but not in RAW ofc)
-            TableInfo parentTableInfo;
-            ColumnInfo[] parentColumnInfosCreated;
-
-            TableInfo childTableInfo;
-            ColumnInfo[] childColumnInfosCreated;
-
-            Import(tblParent, out parentTableInfo, out parentColumnInfosCreated);
-            Import(tblChild, out childTableInfo, out childColumnInfosCreated);
+            Import(tblParent, out var parentTableInfo, out var parentColumnInfosCreated);
+            Import(tblChild, out var childTableInfo, out var childColumnInfosCreated);
 
             //make sure RDMP knows joins start with this table
             parentTableInfo.IsPrimaryExtractionTable = true;
@@ -371,14 +353,8 @@ namespace Rdmp.Dicom.Tests.Unit
             Assert.AreEqual(typeof(int),tblParent.DiscoverColumn("Pk").GetGuesser().Guess.CSharpType);
 
             //import the table and make A look like a primary key to the metadata layer (and A would be pk in LIVE but not in RAW ofc)
-            TableInfo parentTableInfo;
-            ColumnInfo[] parentColumnInfosCreated;
-
-            TableInfo childTableInfo;
-            ColumnInfo[] childColumnInfosCreated;
-
-            Import(tblParent, out parentTableInfo, out parentColumnInfosCreated);
-            Import(tblChild, out childTableInfo, out childColumnInfosCreated);
+            Import(tblParent, out var parentTableInfo, out var parentColumnInfosCreated);
+            Import(tblChild, out var childTableInfo, out var childColumnInfosCreated);
 
             //make sure RDMP knows joins start with this table
             parentTableInfo.IsPrimaryExtractionTable = true;
@@ -469,14 +445,8 @@ namespace Rdmp.Dicom.Tests.Unit
             var tblChild = db.CreateTable("Child", dt2);
 
             //import the table and make A look like a primary key to the metadata layer (and A would be pk in LIVE but not in RAW ofc)
-            TableInfo parentTableInfo;
-            ColumnInfo[] parentColumnInfosCreated;
-
-            TableInfo childTableInfo;
-            ColumnInfo[] childColumnInfosCreated;
-
-            Import(tblParent, out parentTableInfo, out parentColumnInfosCreated);
-            Import(tblChild, out childTableInfo, out childColumnInfosCreated);
+            Import(tblParent, out var parentTableInfo, out var parentColumnInfosCreated);
+            Import(tblChild, out var childTableInfo, out var childColumnInfosCreated);
 
             //make sure RDMP knows joins start with this table
             parentTableInfo.IsPrimaryExtractionTable = true;
@@ -563,14 +533,8 @@ namespace Rdmp.Dicom.Tests.Unit
             var tblChild = db.CreateTable("Child", dt2);
 
             //import the table and make A look like a primary key to the metadata layer (and A would be pk in LIVE but not in RAW ofc)
-            TableInfo parentTableInfo;
-            ColumnInfo[] parentColumnInfosCreated;
-
-            TableInfo childTableInfo;
-            ColumnInfo[] childColumnInfosCreated;
-
-            Import(tblParent, out parentTableInfo, out parentColumnInfosCreated);
-            Import(tblChild, out childTableInfo, out childColumnInfosCreated);
+            Import(tblParent, out var parentTableInfo, out var parentColumnInfosCreated);
+            Import(tblChild, out var childTableInfo, out var childColumnInfosCreated);
 
             //make sure RDMP knows joins start with this table
             parentTableInfo.IsPrimaryExtractionTable = true;
@@ -643,14 +607,8 @@ namespace Rdmp.Dicom.Tests.Unit
             var tblChild = db.CreateTable("Child", dt2);
 
             //import the table and make A look like a primary key to the metadata layer (and A would be pk in LIVE but not in RAW ofc)
-            TableInfo parentTableInfo;
-            ColumnInfo[] parentColumnInfosCreated;
-
-            TableInfo childTableInfo;
-            ColumnInfo[] childColumnInfosCreated;
-
-            Import(tblParent, out parentTableInfo, out parentColumnInfosCreated);
-            Import(tblChild, out childTableInfo, out childColumnInfosCreated);
+            Import(tblParent, out var parentTableInfo, out var parentColumnInfosCreated);
+            Import(tblChild, out var childTableInfo, out var childColumnInfosCreated);
 
             //make sure RDMP knows joins start with this table
             parentTableInfo.IsPrimaryExtractionTable = true;
@@ -752,14 +710,8 @@ namespace Rdmp.Dicom.Tests.Unit
             var tblChild = db.CreateTable("Child", dt2);
 
             //import the table and make A look like a primary key to the metadata layer (and A would be pk in LIVE but not in RAW ofc)
-            TableInfo parentTableInfo;
-            ColumnInfo[] parentColumnInfosCreated;
-
-            TableInfo childTableInfo;
-            ColumnInfo[] childColumnInfosCreated;
-
-            Import(tblParent, out parentTableInfo, out parentColumnInfosCreated);
-            Import(tblChild, out childTableInfo, out childColumnInfosCreated);
+            Import(tblParent, out var parentTableInfo, out var parentColumnInfosCreated);
+            Import(tblChild, out var childTableInfo, out var childColumnInfosCreated);
 
             //make sure RDMP knows joins start with this table
             parentTableInfo.IsPrimaryExtractionTable = true;
@@ -850,14 +802,8 @@ namespace Rdmp.Dicom.Tests.Unit
             var tblChild = db.CreateTable("Child", dt2);
 
             //import the table and make A look like a primary key to the metadata layer (and A would be pk in LIVE but not in RAW ofc)
-            TableInfo parentTableInfo;
-            ColumnInfo[] parentColumnInfosCreated;
-
-            TableInfo childTableInfo;
-            ColumnInfo[] childColumnInfosCreated;
-
-            Import(tblParent, out parentTableInfo, out parentColumnInfosCreated);
-            Import(tblChild, out childTableInfo, out childColumnInfosCreated);
+            Import(tblParent, out var parentTableInfo, out var parentColumnInfosCreated);
+            Import(tblChild, out var childTableInfo, out var childColumnInfosCreated);
 
             //make sure RDMP knows joins start with this table
             parentTableInfo.IsPrimaryExtractionTable = true;

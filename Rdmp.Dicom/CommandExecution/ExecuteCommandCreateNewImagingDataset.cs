@@ -32,15 +32,10 @@ namespace Rdmp.Dicom.CommandExecution
             tableCreator.CreateTable(_expectedTable, _tableTemplate);
 
             var importer = new TableInfoImporter(_repositoryLocator.CatalogueRepository, _expectedTable);
-            TableInfo tis;
-            ColumnInfo[] cis;
-            importer.DoImport(out tis, out cis);
+            importer.DoImport(out var tis, out var cis);
 
             var engineer = new ForwardEngineerCatalogue(tis, cis, true);
-            Catalogue cata;
-            CatalogueItem[] cataItems;
-            ExtractionInformation[] eis;
-            engineer.ExecuteForwardEngineering(out cata, out cataItems, out eis);
+            engineer.ExecuteForwardEngineering(out var cata, out var cataItems, out var eis);
 
             var patientIdentifier = eis.SingleOrDefault(e => e.GetRuntimeName().Equals("PatientID"));
 

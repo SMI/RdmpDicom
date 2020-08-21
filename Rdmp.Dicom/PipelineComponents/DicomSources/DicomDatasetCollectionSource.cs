@@ -42,14 +42,11 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
             }
 
             var currentBatch = BatchSize;
-            DicomDataset ds = null;
+            DicomDataset ds;
             
             var dt = GetDataTable();
 
-            string filename;
-            Dictionary<string, string> otherValuesToStoreInRow;
-            
-            while (currentBatch > 0 && (ds = _datasetListWorklist.GetNextDatasetToProcess(out filename,out otherValuesToStoreInRow)) != null)
+            while (currentBatch > 0 && (ds = _datasetListWorklist.GetNextDatasetToProcess(out var filename,out var otherValuesToStoreInRow)) != null)
             {
                 string filename1 = filename;
                 Dictionary<string, string> row = otherValuesToStoreInRow;
