@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Handle duplicate object delivery better, to support retry scenario
+
 ### Added
 
 - Added new command `CompareImagingSchemas` accessible from the Catalogue right click context menu.  The command shows differences between a live database table and the template used to create it.

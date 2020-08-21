@@ -235,12 +235,10 @@ namespace Rdmp.Dicom.Cache.Pipeline.Ordering
             if (!_patients.ContainsKey(patId))
             {
                 if (PlacementMode == PlacementMode.PlaceThenFill)
-                {
-                    Listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Error, "DicomRetriever.Order.Order Attempt to fill order prior to placement" + patId + "-" + studyUid + "-" + seriesUid + "-" + sopInstance));
-                    return;
-                }
+                    Listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning, "DicomRetriever.Order.Order Attempt to fill order prior to placement" + patId + "-" + studyUid + "-" + seriesUid + "-" + sopInstance));
                 _patients.Add(patId, new Patient(patId, studyUid, seriesUid, sopInstance, PlacementMode, OrderLevel, Listener));
-                if(parent != null) parent._patients.Add(patId, new Patient(patId, studyUid, seriesUid, sopInstance, PlacementMode, OrderLevel, Listener));
+                if(parent != null && !parent._patients.ContainsKey(patId))
+                    parent._patients.Add(patId, new Patient(patId, studyUid, seriesUid, sopInstance, PlacementMode, OrderLevel, Listener));
             }
             _patients[patId].Fill(studyUid, seriesUid, sopInstance);
         }
