@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using Dicom.Network;
+﻿using Dicom.Network;
 using NUnit.Framework;
 using DicomClient = Dicom.Network.Client.DicomClient;
 
@@ -17,7 +16,7 @@ namespace Rdmp.Dicom.Tests.Unit
         public void EchoOrthancTest(string host, int port)
         {
             bool success = false;
-            var stream = DesktopNetworkManager.CreateNetworkStream("localhost", 4242, false, true, true);
+            NetworkManager.CreateNetworkStream("localhost", 4242, false, true, true);
             
             var client = new DicomClient(host,port,false,LocalAetTitle,RemoteAetTitle);
             client.AddRequestAsync(new DicomCEchoRequest()
