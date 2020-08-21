@@ -1,20 +1,14 @@
-﻿using MapsDirectlyToDatabaseTable;
-using NUnit.Framework;
-using Rdmp.Core.Caching.Requests;
+﻿using NUnit.Framework;
 using Rdmp.Core.Caching.Requests.FetchRequestProvider;
 using Rdmp.Core.Curation;
 using Rdmp.Core.Curation.Data;
 using Rdmp.Core.Curation.Data.Cache;
 using Rdmp.Core.DataFlowPipeline;
-using Rdmp.Core.Startup;
 using Rdmp.Dicom.Cache.Pipeline;
-using ReusableLibraryCode.Checks;
 using ReusableLibraryCode.Progress;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using Tests.Common;
 
 namespace Rdmp.Dicom.Tests

@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.Common;
 using System.Linq;
 using FAnsi.Discovery;
 using FAnsi.Discovery.QuerySyntax;
 using Rdmp.Core.Curation.Data;
 using Rdmp.Core.Curation.Data.DataLoad;
-using Rdmp.Core.Curation.Data.Spontaneous;
-using Rdmp.Core.QueryBuilding;
 using ReusableLibraryCode.DataAccess;
 
 namespace Rdmp.Dicom.PipelineComponents

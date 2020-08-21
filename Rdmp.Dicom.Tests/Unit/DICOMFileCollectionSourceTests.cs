@@ -15,7 +15,6 @@ using ReusableLibraryCode.Progress;
 using Rdmp.Core.DataFlowPipeline.Requirements;
 using Rdmp.Core.DataLoad.Engine.Pipeline.Destinations;
 using FAnsi;
-using Rdmp.Core.Startup;
 using Rdmp.Dicom.Extraction.FoDicomBased;
 
 namespace Rdmp.Dicom.Tests.Unit

@@ -3,9 +3,7 @@ using Rdmp.Core.Curation.Data;
 using Rdmp.Dicom.TagPromotionSchema;
 using ReusableLibraryCode.Checks;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Rdmp.Dicom.CommandExecution
 {

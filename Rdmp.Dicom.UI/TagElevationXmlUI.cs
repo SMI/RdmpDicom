@@ -4,7 +4,6 @@ using DicomTypeTranslation.Elevation.Serialization;
 using Rdmp.Core.Curation.Data.DataLoad;
 using Rdmp.Core.Repositories;
 using Rdmp.Dicom.PipelineComponents.DicomSources;
-using Rdmp.UI.Icons.IconProvision;
 using ReusableLibraryCode.Checks;
 using ScintillaNET;
 using System;

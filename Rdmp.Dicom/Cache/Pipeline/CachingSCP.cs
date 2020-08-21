@@ -5,7 +5,6 @@ using System;
 using System.Text;
 using System.Threading.Tasks;
 using ReusableLibraryCode.Progress;
-using Rdmp.Core.Logging;
 
 namespace Rdmp.Dicom.Cache.Pipeline
 {
@@ -52,7 +51,6 @@ namespace Rdmp.Dicom.Cache.Pipeline
         };
         #endregion
 
-        public ILogManager LogManager { get; set; }
         public static string LocalAet { get; set; }
         public static IDataLoadEventListener Listener { get; set; }
         public static Action<DicomCStoreRequest, DicomCStoreResponse> OnEndProcessingCStoreRequest;

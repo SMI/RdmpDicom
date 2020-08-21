@@ -8,7 +8,6 @@ using Rdmp.UI.ItemActivation;
 using Rdmp.Core.Curation.Data;
 using Rdmp.Core.Icons.IconProvision;
 using Rdmp.UI.ChecksUI;
-using Rdmp.UI.Icons.IconProvision;
 
 namespace Rdmp.Dicom.UI.CommandExecution.AtomicCommands
 {

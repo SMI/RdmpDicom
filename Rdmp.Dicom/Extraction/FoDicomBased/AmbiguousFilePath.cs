@@ -3,7 +3,6 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using Dicom;
-using Rdmp.Core.Startup;
 using Rdmp.Dicom.PACS;
 
 namespace Rdmp.Dicom.Extraction.FoDicomBased
