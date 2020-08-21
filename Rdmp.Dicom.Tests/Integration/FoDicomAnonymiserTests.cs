@@ -40,19 +40,12 @@ namespace Rdmp.Dicom.Tests.Integration
         private void TidyUpImages()
         {
             var imagesDir = new DirectoryInfo(Path.Combine(TestContext.CurrentContext.WorkDirectory, "Images"));
-        if (imagesDir.Exists)
-        {
-            var children = imagesDir.GetDirectories();
-            foreach (var directory in children)
-            {
+            if (imagesDir.Exists)
                 imagesDir.Delete(true);
-            }
-        }
-
         }
 
         // The following commented tests will fail due to underlying system limits on paths
-        // there is no reliable method to get maximum path length (apprently?)
+        // there is no reliable method to get maximum path length (apparently?)
         //        [TestCase(typeof(PutInUidStudySeriesFolders))]
         [TestCase(typeof(PutInUidSeriesFolders),true)]
         [TestCase(typeof(PutInUidSeriesFolders),false)]
