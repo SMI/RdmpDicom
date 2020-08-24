@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Add local stub PACS in test package to enable further testing in future
+- Point existing Orthanc unit test at public PACS server for better coverage
+- Add unit tests to reproduce fixed issue below
+
 ### Fixed
 
 - Handle duplicate object delivery better, to support retry scenario
