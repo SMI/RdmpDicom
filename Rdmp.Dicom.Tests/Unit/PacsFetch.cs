@@ -91,7 +91,7 @@ namespace Rdmp.Dicom.Tests.Unit
         [OneTimeSetUp]
         public void StartOwnPacs()
         {
-            _ourPacs=DicomServer.Create<QRService>(112);
+            _ourPacs=DicomServer.Create<QRService>(11112);
         }
 
         [OneTimeTearDown]
@@ -104,7 +104,7 @@ namespace Rdmp.Dicom.Tests.Unit
         public void EchoTest()
         {
             var success=false;
-            var client = new DicomClient("localhost", 112, false, "me", "also_me");
+            var client = new DicomClient("localhost", 11112, false, "me", "also_me");
             client.AddRequestAsync(new DicomCEchoRequest
                 {
                     OnResponseReceived = (req, res) => {
