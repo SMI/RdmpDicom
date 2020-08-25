@@ -14,19 +14,6 @@ namespace Rdmp.Dicom.Tests.Unit
 {
     internal class PacsFetch
     {
-        private class NopProgressListener : IDataLoadEventListener
-        {
-            public void OnNotify(object sender, NotifyEventArgs args)
-            {
-                if (args.ProgressEventType==ProgressEventType.Error)
-                    throw new ApplicationException(args.Message);
-            }
-
-            public void OnProgress(object sender, ProgressEventArgs args)
-            {
-            }
-        }
-
         class QRService : DicomService, IDicomServiceProvider, IDicomCFindProvider, IDicomCEchoProvider,
             IDicomCMoveProvider
         {
@@ -85,7 +72,6 @@ namespace Rdmp.Dicom.Tests.Unit
             }
         }
 
-        private static readonly NopProgressListener Listener = new NopProgressListener();
         private IDicomServer _ourPacs;
 
         [OneTimeSetUp]
@@ -124,7 +110,7 @@ namespace Rdmp.Dicom.Tests.Unit
                 new Item("patientId","studyUid","seriesUid","sopInstanceUid1"),
                 new Item("patientId","studyUid","seriesUid","sopInstanceUid2")
             };
-            var hbo=new HierarchyBasedOrder(new DateTime(2020,1,1),new DateTime(2020,12,31),PlacementMode.PlaceThenFill,OrderLevel.Study,Listener);
+            var hbo=new HierarchyBasedOrder(new DateTime(2020,1,1),new DateTime(2020,12,31),PlacementMode.PlaceThenFill,OrderLevel.Study,new ThrowImmediatelyDataLoadEventListener());
             hbo.Place(target[0]);
             hbo.Place(target[1]);
 
