@@ -6,6 +6,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Add local stub PACS in test package to enable further testing in future
+- Point existing Orthanc unit test at public PACS server for better coverage
+- Add unit tests to reproduce fixed issue below
+
+### Fixed
+
+- Handle duplicate object delivery better, to support retry scenario
+
+### Added
+
+- Added new command `CompareImagingSchemas` accessible from the Catalogue right click context menu.  The command shows differences between a live database table and the template used to create it.
+- Added new command `AddTag` which adds a given dicom tag or typed column to the provided Catalogue (change is synced with RDMP and any `_Archive` tables)
+
 ## [2.1.7] 2020-08-17
 
 ### Fixed
@@ -197,7 +210,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial commit from private repo
 
-[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v2.1.7...develop
+[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v2.1.8...develop
+[2.1.8]: https://github.com/HicServices/RdmpDicom/compare/v2.1.7...v2.1.8
 [2.1.7]: https://github.com/HicServices/RdmpDicom/compare/v2.1.6...v2.1.7
 [2.1.6]: https://github.com/HicServices/RdmpDicom/compare/v2.1.5...v2.1.6
 [2.1.5]: https://github.com/HicServices/RdmpDicom/compare/v2.1.4...v2.1.5

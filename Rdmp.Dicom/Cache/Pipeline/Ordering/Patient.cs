@@ -40,10 +40,7 @@ namespace Rdmp.Dicom.Cache.Pipeline.Ordering
             if (!Studies.ContainsKey(studyUid))
             {
                 if (PlacementMode == PlacementMode.PlaceThenFill)
-                {
-                    Listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Error, "DicomRetriever.Order.Order Attempt to fill order prior to placement" + studyUid + "-" + seriesUid + "-" + sopInstance));
-                    return;
-                }
+                    Listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning, "DicomRetriever.Order.Order Attempt to fill order prior to placement" + studyUid + "-" + seriesUid + "-" + sopInstance));
                 Studies.Add(studyUid, new Study(studyUid, seriesUid, sopInstance, PlacementMode, OrderLevel,Listener));
             }
             Studies[studyUid].Fill(seriesUid, sopInstance);
