@@ -210,7 +210,9 @@ namespace Rdmp.Dicom.Cache.Pipeline
                                     new NotifyEventArgs(ProgressEventType.Debug,
                                         "Request: " + requ.ToString() + "failed to download: " + response.Failures));
                                     
-                                // TODO: retry?
+                                //if we can't get the study don't sit waiting for it to finish!
+                                var uid = requ.Dataset.GetSingleValue<string>(DicomTag.StudyInstanceUID);
+                                studiesToOrder.Remove(uid);
                             }
                         };
                         
@@ -230,7 +232,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
 
                             //if the head is no longer the current then we have finished fetching this study
                             lock(studiesToOrderLock)
-                                currentIsFinished = studiesToOrder.First() != current;
+                                currentIsFinished = studiesToOrder.FirstOrDefault() != current;
                                 
                         }while(!currentIsFinished && !hasTransferTimedOut);
 

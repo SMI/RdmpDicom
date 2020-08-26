@@ -23,7 +23,7 @@ namespace Rdmp.Dicom.CommandExecution
         private BackfillCacheFetchRequest _request;
         private PACSSource _source;
 
-        public ExecuteCommandPacsFetch(IBasicActivateItems activator,string start, string end, string remoteAeUri, int remotePort, string localAeUri, int localPort, string localAeTitle, string outDir):base(activator)
+        public ExecuteCommandPacsFetch(IBasicActivateItems activator,string start, string end, string remoteAeUri, int remotePort,string remoteAeTitle, string localAeUri, int localPort, string localAeTitle, string outDir):base(activator)
         {
             var startDate = DateTime.Parse(start);   
             var endDate =  DateTime.Parse(end);   
@@ -44,6 +44,7 @@ namespace Rdmp.Dicom.CommandExecution
             _source = new PACSSource();
             _source.RemoteAEUri = new Uri("http://"+ remoteAeUri); //<- rly? its not gonna pass without an http!?
             _source.RemoteAEPort = remotePort;
+            _source.RemoteAETitle = remoteAeTitle;
             _source.LocalAEUri = new Uri("http://" + localAeUri);
             _source.LocalAEPort = localPort;
             _source.LocalAETitle = localAeTitle;
