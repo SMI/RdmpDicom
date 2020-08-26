@@ -102,7 +102,8 @@ namespace Rdmp.Dicom.Cache.Pipeline
             List<string> studiesToOrder = new List<string>();
             object studiesToOrderLock = new object();
 
-            var transferTimeOutTimer = new Timer(dicomConfiguration.TransferTimeOutInMilliseconds);
+            //enforce a minimum timeout
+            var transferTimeOutTimer = new Timer(Math.Max(30000,dicomConfiguration.TransferTimeOutInMilliseconds));
             transferTimeOutTimer.Elapsed += (source, eventArgs) =>
             {
                 hasTransferTimedOut = true;
