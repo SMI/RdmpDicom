@@ -99,8 +99,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
                 Layout = cacheLayout
             };
             
-            List<string> studiesToOrder = new List<string>();
-            object studiesToOrderLock = new object();
+            ConcurrentBag<string> studiesToOrder = new ConcurrentBag<string>();
 
             //enforce a minimum timeout
             var transferTimeOutTimer = new Timer(Math.Max(30000,dicomConfiguration.TransferTimeOutInMilliseconds));
@@ -155,14 +154,9 @@ namespace Rdmp.Dicom.Cache.Pipeline
                     var transferStopwatch = new Stopwatch();
 
                     string current;
-                    
-                    lock(studiesToOrderLock)
-                    {
-                        current = studiesToOrder.FirstOrDefault();
-                    }
-                        
+                                            
                     //While we have things to fetch
-                    while( current != null && !hasTransferTimedOut)
+                    while(studiesToOrder.TryTake(out current) && !hasTransferTimedOut)
                     {
                         transferStopwatch.Restart();
                         //delay value in mills
@@ -174,7 +168,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
                             Task.Delay(dicomConfiguration.TransferCooldownInMilliseconds, cancellationToken.AbortToken).Wait(cancellationToken.AbortToken);
                         }
                                                 
-                        int attempt = 1;
+                        bool done = false;
 
                         //Build fetch command that Study
                         var cMoveRequest = CreateCMoveByStudyUid(LocalAETitle,current, listener);
@@ -194,7 +188,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
                                     new NotifyEventArgs(ProgressEventType.Debug,
                                         "Request: " + requ.ToString() + "completed successfully"));
 
-                                MarkDone(requ,studiesToOrder,studiesToOrderLock,listener);
+                                done = true;
                             }
                             else if (response.Status.State == DicomState.Failure)
                             {
@@ -203,7 +197,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
                                         "Request: " + requ.ToString() + "failed to download: " + response.Failures));
                                     
                                 //if we can't get the study don't sit waiting for it to finish!
-                                MarkDone(requ,studiesToOrder,studiesToOrderLock,listener);
+                                done = true;
                             }
                         };
                         
@@ -214,27 +208,17 @@ namespace Rdmp.Dicom.Cache.Pipeline
                         requestSender.ThrottleRequest(cMoveRequest, client, cancellationToken.AbortToken);
                                                 
                         transferTimeOutTimer.Reset();
-                        var currentIsFinished = false;
 
                         do
                         {
                             Task.Delay(Math.Max(100,dicomConfiguration.TransferPollingInMilliseconds), cancellationToken.AbortToken)
                                 .Wait(cancellationToken.AbortToken);
-
-                            //if the head is no longer the current then we have finished fetching this study
-                            lock(studiesToOrderLock)
-                                currentIsFinished = studiesToOrder.FirstOrDefault() != current;
                                 
-                        }while(!currentIsFinished && !hasTransferTimedOut);
+                        }while(!done && !hasTransferTimedOut);
 
                         transferTimeOutTimer.Stop();
                         listener.OnNotify(this,
-                            new NotifyEventArgs(ProgressEventType.Information,CMoveRequestToString(cMoveRequest,attempt)));
-                                            
-                        lock(studiesToOrderLock)
-                        {
-                            current = studiesToOrder.FirstOrDefault();
-                        }
+                            new NotifyEventArgs(ProgressEventType.Information,CMoveRequestToString(cMoveRequest,1)));
                     }
                         
                     #endregion
@@ -247,18 +231,6 @@ namespace Rdmp.Dicom.Cache.Pipeline
 
             transferTimeOutTimer.Dispose();
             return Chunk;
-        }
-
-        private void MarkDone(DicomCMoveRequest request, List<string> studiesToOrder, object studiesToOrderLock, IDataLoadEventListener listener)
-        {
-            //Get the Study UID
-            var uid = request.Dataset.GetSingleValue<string>(DicomTag.StudyInstanceUID);
-            lock(studiesToOrderLock)
-            {
-                //order is done now, remove from list (this will change the head and prompt the next study to be fetched)
-                if(!studiesToOrder.Remove(uid))
-                    listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Warning,$"Unexpected StudyInstanceUID in OnEndProcessingCStoreRequest event handler, studies order list did not contain UID {uid} (we did not order it or we got it acknowledged twice)"));
-            }
         }
 
         private DicomCMoveRequest CreateCMoveByStudyUid(string destination, string studyUid, IDataLoadEventListener listener)
