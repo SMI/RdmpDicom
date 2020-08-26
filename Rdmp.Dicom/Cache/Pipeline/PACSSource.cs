@@ -162,7 +162,6 @@ namespace Rdmp.Dicom.Cache.Pipeline
                     #region Retrieval
 
                     var transferStopwatch = new Stopwatch();
-                    int transferTimerPollingPeriods = 0;
 
                     string current;
                     
