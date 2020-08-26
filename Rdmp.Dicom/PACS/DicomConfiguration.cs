@@ -29,9 +29,7 @@ namespace Rdmp.Dicom.PACS
         public string RemoteAetTitle { get; set; }
         public Uri LocalAetUri { get; set; }
         public string LocalAetTitle { get; set; }
-        public double RequestDelayFactor { get; set; }
         public int RequestCooldownInMilliseconds { get; set; }
-        public double TransferDelayFactor { get; set; }
         public int TransferCooldownInMilliseconds { get; set; }
         public int TransferPollingInMilliseconds { get; set; }
         public int TransferTimeOutInMilliseconds { get; set; }
