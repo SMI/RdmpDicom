@@ -114,21 +114,12 @@ namespace Rdmp.Dicom.Cache.Pipeline
 
             CachingSCP.OnEndProcessingCStoreRequest = (storeRequest, storeResponse) =>
             {
-                //Get the Study UID
-                var uid = storeRequest.Dataset.GetSingleValue<string>(DicomTag.StudyInstanceUID);
                 transferTimeOutTimer.Reset();
                 
                 SaveSopInstance(storeRequest,cacheLayout,listener);
                 listener.OnNotify(this,
                     new NotifyEventArgs(ProgressEventType.Debug,
                         "Stored sopInstance" + storeRequest.SOPInstanceUID.UID));
-
-                lock(studiesToOrderLock)
-                {
-                    //order is done now, remove from list (this will change the head and prompt the next study to be fetched)
-                    if(!studiesToOrder.Remove(uid))
-                        listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Warning,$"Unexpected StudyInstanceUID in OnEndProcessingCStoreRequest event handler, studies order list did not contain UID {uid} (we did not order it or we got it acknowledged twice)"));
-                }
             };
 
             //helps with tyding up resources if we abort or through an exception and neatly avoids ->  Access to disposed closure
@@ -202,6 +193,8 @@ namespace Rdmp.Dicom.Cache.Pipeline
                                 listener.OnNotify(this,
                                     new NotifyEventArgs(ProgressEventType.Debug,
                                         "Request: " + requ.ToString() + "completed successfully"));
+
+                                MarkDone(requ,studiesToOrder,studiesToOrderLock,listener);
                             }
                             else if (response.Status.State == DicomState.Failure)
                             {
@@ -210,8 +203,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
                                         "Request: " + requ.ToString() + "failed to download: " + response.Failures));
                                     
                                 //if we can't get the study don't sit waiting for it to finish!
-                                var uid = requ.Dataset.GetSingleValue<string>(DicomTag.StudyInstanceUID);
-                                studiesToOrder.Remove(uid);
+                                MarkDone(requ,studiesToOrder,studiesToOrderLock,listener);
                             }
                         };
                         
@@ -256,6 +248,19 @@ namespace Rdmp.Dicom.Cache.Pipeline
             transferTimeOutTimer.Dispose();
             return Chunk;
         }
+
+        private void MarkDone(DicomCMoveRequest request, List<string> studiesToOrder, object studiesToOrderLock, IDataLoadEventListener listener)
+        {
+            //Get the Study UID
+            var uid = request.Dataset.GetSingleValue<string>(DicomTag.StudyInstanceUID);
+            lock(studiesToOrderLock)
+            {
+                //order is done now, remove from list (this will change the head and prompt the next study to be fetched)
+                if(!studiesToOrder.Remove(uid))
+                    listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Warning,$"Unexpected StudyInstanceUID in OnEndProcessingCStoreRequest event handler, studies order list did not contain UID {uid} (we did not order it or we got it acknowledged twice)"));
+            }
+        }
+
         private DicomCMoveRequest CreateCMoveByStudyUid(string destination, string studyUid, IDataLoadEventListener listener)
         {
             var request = new DicomCMoveRequest(destination, studyUid);
