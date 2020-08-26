@@ -130,7 +130,9 @@ namespace Rdmp.Dicom.Cache.Pipeline
 
                 lock(studiesToOrderLock)
                 {
-                    studiesToOrder.Remove(uid);
+                    //order is done now, remove from list (this will change the head and prompt the next study to be fetched)
+                    if(!studiesToOrder.Remove(uid))
+                        listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Warning,$"Unexpected StudyInstanceUID in OnEndProcessingCStoreRequest event handler, studies order list did not contain UID {uid} (we did not order it or we got it acknowledged twice)"));
                 }
             };
 
