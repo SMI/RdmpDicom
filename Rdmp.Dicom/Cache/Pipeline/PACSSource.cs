@@ -49,14 +49,8 @@ namespace Rdmp.Dicom.Cache.Pipeline
         [DemandsInitialization("The port to listen on for responses", defaultValue: 2104, mandatory: true)]
         public int LocalAEPort { get; set; }
 
-        [DemandsInitialization("Delay factor after a successful request", defaultValue: 1, mandatory: true)]
-        public double RequestDelayFactor { get; set; }
-
         [DemandsInitialization("Cooldown (in seconds) after a successful request", defaultValue: 60, mandatory: true)]
         public int RequestCooldownInSeconds { get; set; }
-
-        [DemandsInitialization("Delay factor after a successful transfer", defaultValue: 1, mandatory: true)]
-        public double TransferDelayFactor { get; set; }
 
         [DemandsInitialization("Cooldown (in seconds) after a successful transfer", defaultValue: 120, mandatory: true)]
         public int TransferCooldownInSeconds { get; set; }
@@ -167,7 +161,6 @@ namespace Rdmp.Dicom.Cache.Pipeline
                     #region Retrieval
 
                     var transferStopwatch = new Stopwatch();
-                    int delay = 0;
                     int transferTimerPollingPeriods = 0;
 
                     string current;
@@ -182,12 +175,12 @@ namespace Rdmp.Dicom.Cache.Pipeline
                     {
                         transferStopwatch.Restart();
                         //delay value in mills
-                        if (delay != 0)
+                        if (dicomConfiguration.TransferCooldownInMilliseconds != 0)
                         {
                             listener.OnNotify(this,
                                 new NotifyEventArgs(ProgressEventType.Information,
-                                    "Transfers sleeping for " + delay / 1000 + "seconds"));
-                            Task.Delay(delay, cancellationToken.AbortToken).Wait(cancellationToken.AbortToken);
+                                    "Transfers sleeping for " + dicomConfiguration.TransferCooldownInMilliseconds / 1000 + "seconds"));
+                            Task.Delay(dicomConfiguration.TransferCooldownInMilliseconds, cancellationToken.AbortToken).Wait(cancellationToken.AbortToken);
                         }
                                                 
                         int attempt = 1;
@@ -225,9 +218,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
                         //do not use requestSender.ThrottleRequest(cMoveRequest, cancellationToken);
                         //TODO is there any need to throtttle this request given its lifetime
                         requestSender.ThrottleRequest(cMoveRequest, client, cancellationToken.AbortToken);
-                        
-                        transferTimerPollingPeriods = 0;
-                        
+                                                
                         transferTimeOutTimer.Reset();
                         var currentIsFinished = false;
 
@@ -235,7 +226,6 @@ namespace Rdmp.Dicom.Cache.Pipeline
                         {
                             Task.Delay(Math.Max(100,dicomConfiguration.TransferPollingInMilliseconds), cancellationToken.AbortToken)
                                 .Wait(cancellationToken.AbortToken);
-                            transferTimerPollingPeriods++;
 
                             //if the head is no longer the current then we have finished fetching this study
                             lock(studiesToOrderLock)
@@ -246,12 +236,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
                         transferTimeOutTimer.Stop();
                         listener.OnNotify(this,
                             new NotifyEventArgs(ProgressEventType.Information,CMoveRequestToString(cMoveRequest,attempt)));
-
-                        //update the delay
-                        delay = (int)(dicomConfiguration.TransferDelayFactor 
-                        * transferTimerPollingPeriods 
-                        * dicomConfiguration.TransferPollingInMilliseconds) + dicomConfiguration.TransferCooldownInMilliseconds;
-                    
+                                            
                         lock(studiesToOrderLock)
                         {
                             current = studiesToOrder.FirstOrDefault();
@@ -410,9 +395,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
                 LocalAetUri = DicomConfiguration.MakeUriUsePort(LocalAEUri, LocalAEPort),
                 RemoteAetTitle = RemoteAETitle,
                 RemoteAetUri = DicomConfiguration.MakeUriUsePort(RemoteAEUri, RemoteAEPort),
-                RequestDelayFactor = RequestDelayFactor,
                 RequestCooldownInMilliseconds = 1000 * RequestCooldownInSeconds,
-                TransferDelayFactor = TransferDelayFactor,
                 TransferCooldownInMilliseconds = 1000 * TransferCooldownInSeconds,
                 TransferPollingInMilliseconds = 1000 * TransferPollingInSeconds,
                 TransferTimeOutInMilliseconds = 1000 * TransferTimeOutInSeconds,
