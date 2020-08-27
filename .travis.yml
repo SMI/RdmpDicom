@@ -75,8 +75,8 @@ script:
     cd Plugin/net461
     dotnet publish --runtime win-x64 -c Release --self-contained false
     cd ../netcoreapp2.2
-    dotnet publish --runtime win-x64 -c Release --self-contained false
-    dotnet publish --runtime linux-x64 -c Release --self-contained false
+    dotnet publish --runtime win-x64 -c Release --self-contained false -o bin/Release/netcoreapp2.2/win-x64/publish
+    dotnet publish --runtime linux-x64 -c Release --self-contained false -o bin/Release/netcoreapp2.2/linux-x64/publish
     cd ../..
     nuget pack ./Rdmp.Dicom.nuspec -Properties Configuration=Release -IncludeReferencedProjects -Symbols -Version ${RDVERSION}
     nuget pack ./Rdmp.Dicom.Library.nuspec -Properties Configuration=Release -IncludeReferencedProjects -Symbols -Version ${RDVERSION}
