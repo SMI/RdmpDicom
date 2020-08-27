@@ -60,8 +60,6 @@ install:
     echo "ServerName: localhost" > Rdmp.Dicom.Tests/TestDatabases.txt
     echo "Prefix: TEST_" >> Rdmp.Dicom.Tests/TestDatabases.txt
     choco install sql-server-2017
-    choco install dotnetcore --version=2.2.2
-    choco install dotnetcore-sdk
     choco install nuget.commandline
     $HOME/rdmp-cli/rdmp.exe install localhost TEST_
   fi
