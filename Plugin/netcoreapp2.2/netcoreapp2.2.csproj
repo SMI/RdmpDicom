@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{2C29B565-F0B0-4E5B-B17E-106456933001}</ProjectGuid>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyTitle>Rdmp.Dicom.Plugin</AssemblyTitle>
     <Product>Rdmp.Dicom.Plugin</Product>
     <Copyright>Copyright ©  2019</Copyright>

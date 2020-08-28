@@ -12,7 +12,6 @@ using ReusableLibraryCode.DataAccess;
 using ReusableLibraryCode.Progress;
 using Rdmp.Dicom.Cache.Pipeline.Dicom;
 using Rdmp.Dicom.PACS;
-using Rdmp.Dicom.Cache.Pipeline.Ordering;
 using Timer = System.Timers.Timer;
 using Rdmp.Core.Curation.Data;
 using Rdmp.Core.Caching.Pipeline.Sources;
@@ -21,6 +20,8 @@ using Rdmp.Core.DataFlowPipeline;
 using Rdmp.Core.Curation;
 using Rdmp.Core.QueryBuilding;
 using DicomClient = Dicom.Network.Client.DicomClient;
+using System.Collections.Concurrent;
+using System.Linq;
 
 namespace Rdmp.Dicom.Cache.Pipeline
 {
@@ -48,14 +49,8 @@ namespace Rdmp.Dicom.Cache.Pipeline
         [DemandsInitialization("The port to listen on for responses", defaultValue: 2104, mandatory: true)]
         public int LocalAEPort { get; set; }
 
-        [DemandsInitialization("Delay factor after a successful request", defaultValue: 1, mandatory: true)]
-        public double RequestDelayFactor { get; set; }
-
         [DemandsInitialization("Cooldown (in seconds) after a successful request", defaultValue: 60, mandatory: true)]
         public int RequestCooldownInSeconds { get; set; }
-
-        [DemandsInitialization("Delay factor after a successful transfer", defaultValue: 1, mandatory: true)]
-        public double TransferDelayFactor { get; set; }
 
         [DemandsInitialization("Cooldown (in seconds) after a successful transfer", defaultValue: 120, mandatory: true)]
         public int TransferCooldownInSeconds { get; set; }
@@ -75,12 +70,6 @@ namespace Rdmp.Dicom.Cache.Pipeline
         [DemandsInitialization("Set the DICOM priority (recommended value for NHS transfers is low)", defaultValue: DicomPriority.Low, mandatory: true)]
         public DicomPriority Priority { get; set; }
 
-        [DemandsInitialization("Set the Query Level (Patient, Study, Series, Image) at which to place order", defaultValue: OrderLevel.Image, mandatory: true)]
-        public OrderLevel QueryLevel { get; set; }
-
-        [DemandsInitialization("Set the Order Level (Patient, Study, Series, Image) at which to request moves", defaultValue: OrderLevel.Series, mandatory: true)]
-        public OrderLevel OrderLevel { get; set; }
-
         private HashSet<string> _whitelist;
 
         public override SMIDataChunk DoGetChunk(ICacheFetchRequest cacheRequest, IDataLoadEventListener listener,GracefulCancellationToken cancellationToken)
@@ -88,7 +77,6 @@ namespace Rdmp.Dicom.Cache.Pipeline
             listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,$"PACSSource version is {typeof(PACSSource).Assembly.GetName().Version}.  Assembly is {typeof(PACSSource).Assembly} " ));
             listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,$"Fo-Dicom version is {typeof(DicomClient).Assembly.GetName().Version}.  Assembly is {typeof(DicomClient).Assembly} " ));
 
-            #region assigns
             var dicomConfiguration = GetConfiguration();
             var requestSender = new DicomRequestSender(dicomConfiguration, listener);
             var dateFrom = Request.Start;
@@ -100,23 +88,21 @@ namespace Rdmp.Dicom.Cache.Pipeline
             if (PatientIdWhitelistColumnInfo != null && !IgnoreWhiteList)
                 GetWhitelist(listener);
 
-
             //temp dir
             var cacheDir = new LoadDirectory(Request.CacheProgress.LoadProgress.LoadMetadata.LocationOfFlatFiles).Cache;
             var cacheLayout = new SMICacheLayout(cacheDir, new SMICachePathResolver(Modality));
             
-
             Chunk = new SMIDataChunk(Request)
             {
                 FetchDate = dateFrom,
                 Modality = Modality,
                 Layout = cacheLayout
             };
-            //            IOrder order = new ItemsBasedOrder(dateFrom, dateTo, PlacementMode.PlaceThenFill,OrderLevel, listener);
-            IOrder order = new HierarchyBasedOrder(dateFrom, dateTo, PlacementMode.PlaceThenFill, OrderLevel, listener);
-            IPicker picker = null;
-            var pickerFilled = false;
-            var transferTimeOutTimer = new Timer(dicomConfiguration.TransferTimeOutInMilliseconds);
+            
+            ConcurrentBag<string> studiesToOrder = new ConcurrentBag<string>();
+
+            //enforce a minimum timeout
+            var transferTimeOutTimer = new Timer(Math.Max(30000,dicomConfiguration.TransferTimeOutInMilliseconds));
             transferTimeOutTimer.Elapsed += (source, eventArgs) =>
             {
                 hasTransferTimedOut = true;
@@ -127,193 +113,133 @@ namespace Rdmp.Dicom.Cache.Pipeline
 
             CachingSCP.OnEndProcessingCStoreRequest = (storeRequest, storeResponse) =>
             {
-                var item = new Item(storeRequest);
                 transferTimeOutTimer.Reset();
-                if (picker != null)
-                {
-                    picker.Fill(item);
-                    pickerFilled = picker.IsFilled();
-                }
+                
                 SaveSopInstance(storeRequest,cacheLayout,listener);
                 listener.OnNotify(this,
                     new NotifyEventArgs(ProgressEventType.Debug,
                         "Stored sopInstance" + storeRequest.SOPInstanceUID.UID));
             };
-            #endregion
 
             //helps with tyding up resources if we abort or through an exception and neatly avoids ->  Access to disposed closure
             using (var server = (DicomServer<CachingSCP>) DicomServer.Create<CachingSCP>(dicomConfiguration.LocalAetUri.Port))
             {
-                    DicomClient client = new DicomClient(dicomConfiguration.RemoteAetUri.Host, dicomConfiguration.RemoteAetUri.Port, false, dicomConfiguration.LocalAetTitle, dicomConfiguration.RemoteAetTitle);
+                DicomClient client = new DicomClient(dicomConfiguration.RemoteAetUri.Host, dicomConfiguration.RemoteAetUri.Port, false, dicomConfiguration.LocalAetTitle, dicomConfiguration.RemoteAetTitle);
                 
-                    try
+                try
+                {
+                    // Find a list of studies
+                    #region Query
+
+                    listener.OnNotify(this,
+                        new NotifyEventArgs(ProgressEventType.Information,
+                            "Requesting Studies from " + dateFrom + " to " + dateTo));
+                        
+                    var request = CreateStudyRequestByDateRangeForModality(dateFrom, dateTo, Modality);
+                    request.OnResponseReceived += (req, response) =>
                     {
-                        // Find a list of studies
-                        #region Query
+                        if (Filter(_whitelist, response))
+                            studiesToOrder.Add(response.Dataset.GetSingleValue<string>(DicomTag.StudyInstanceUID));
 
-                        listener.OnNotify(this,
-                            new NotifyEventArgs(ProgressEventType.Information,
-                                "Requesting Studies from " + dateFrom + " to " + dateTo));
-                        var studyUids = new List<string>();
-                        var request = CreateStudyRequestByDateRangeForModality(dateFrom, dateTo, Modality);
-                        request.OnResponseReceived += (req, response) =>
-                        {
-                            if (Filter(_whitelist, response))
-                                studyUids.Add(response.Dataset.GetSingleValue<string>(DicomTag.StudyInstanceUID));
-
-                        };
-                        requestSender.ThrottleRequest(request,client, cancellationToken.AbortToken);
-                        listener.OnNotify(this,
-                            new NotifyEventArgs(ProgressEventType.Debug,
-                                "Total filtered studies for " + dateFrom + " to " + dateTo +"is " + studyUids.Count));
-                        foreach (var studyUid in studyUids)
-                        {
-                            listener.OnNotify(this,
-                                new NotifyEventArgs(ProgressEventType.Debug,
-                                    "Sending series query for study" + studyUid));
-                            var seriesUids = new List<string>();
-                            request = CreateSeriesRequestByStudyUid(studyUid);
-                            request.OnResponseReceived += (req, response) =>
-                            {
-                                if (response.Dataset == null)
-                                    return;
-                                var seriesInstanceUID = response.Dataset.GetSingleValue<string>(DicomTag.SeriesInstanceUID);
-                                if (seriesInstanceUID != null)
-                                    seriesUids.Add(seriesInstanceUID);
-                            };
-                            requestSender.ThrottleRequest(request,client, cancellationToken.AbortToken);
-                            listener.OnNotify(this,
-                                new NotifyEventArgs(ProgressEventType.Debug,
-                                    "Total series for " + studyUid + "is " + seriesUids.Count));
-                            foreach (var seriesUid in seriesUids)
-                            {
-                                listener.OnNotify(this,
-                                    new NotifyEventArgs(ProgressEventType.Debug,
-                                        "Sending image query for series" + seriesUid));
-                                request = CreateSopRequestBySeriesUid(seriesUid);
-                                int imageCount = 0;
-                                request.OnResponseReceived += (req, response) =>
-                                {
-                                    if (response.Dataset == null)
-                                        return;
-
-                                    var sopUid = response.Dataset.GetSingleValue<string>(DicomTag.SOPInstanceUID);
-                                    var patientId = response.Dataset.GetSingleValue<string>(DicomTag.PatientID);
-
-                                    if (sopUid != null && patientId != null)
-                                    {
-                                    //Place order
-                                    order.Place(patientId, studyUid, seriesUid, sopUid);
-                                        imageCount++;
-                                    }
-                                };
-                                requestSender.ThrottleRequest(request,client, cancellationToken.AbortToken);
-                                listener.OnNotify(this,
-                                    new NotifyEventArgs(ProgressEventType.Debug,
-                                        "Successfully finished image query for " + seriesUid + " Total images in series = " +imageCount));
-                            }
-                        listener.OnNotify(this,
-                                new NotifyEventArgs(ProgressEventType.Debug,
-                                    "Successfully finished series query for " + studyUid));
-                        }
-                        listener.OnNotify(this,
-                            new NotifyEventArgs(ProgressEventType.Debug,
-                                "Successfully finished query phase"));
-
+                    };
+                    requestSender.ThrottleRequest(request,client, cancellationToken.AbortToken);
+                    listener.OnNotify(this,
+                        new NotifyEventArgs(ProgressEventType.Debug,
+                            "Total filtered studies for " + dateFrom + " to " + dateTo +"is " + studiesToOrder.Count));
                     #endregion
+
                     //go and get them
                     #region Retrieval
 
                     var transferStopwatch = new Stopwatch();
-                        //start building request to fill orders 
-                        //get the picker - the for loop avoids sleeping after all the transfers have finished and attempting dequeue on empty queue
-                        for (int delay = 0, transferTimerPollingPeriods;
-                            order.HasNextPicker() && !hasTransferTimedOut;
-                            delay = (int)(dicomConfiguration.TransferDelayFactor * transferTimerPollingPeriods * dicomConfiguration.TransferPollingInMilliseconds) 
-                                    + dicomConfiguration.TransferCooldownInMilliseconds
-                            )
+
+                    string current;
+                                            
+                    //While we have things to fetch
+                    while(studiesToOrder.TryTake(out current) && !hasTransferTimedOut)
+                    {
+                        transferStopwatch.Restart();
+                        //delay value in mills
+                        if (dicomConfiguration.TransferCooldownInMilliseconds != 0)
                         {
-                            transferStopwatch.Restart();
-                            //delay value in mills
-                            if (delay != 0)
+                            listener.OnNotify(this,
+                                new NotifyEventArgs(ProgressEventType.Information,
+                                    "Transfers sleeping for " + dicomConfiguration.TransferCooldownInMilliseconds / 1000 + "seconds"));
+                            Task.Delay(dicomConfiguration.TransferCooldownInMilliseconds, cancellationToken.AbortToken).Wait(cancellationToken.AbortToken);
+                        }
+                                                
+                        bool done = false;
+
+                        //Build fetch command that Study
+                        var cMoveRequest = CreateCMoveByStudyUid(LocalAETitle,current, listener);
+
+                        //Register callbacks
+                        cMoveRequest.OnResponseReceived += (requ, response) =>
+                        {
+                            if (response.Status.State == DicomState.Pending)
                             {
                                 listener.OnNotify(this,
-                                    new NotifyEventArgs(ProgressEventType.Information,
-                                        "Transfers sleeping for " + delay / 1000 + "seconds"));
-                                Task.Delay(delay, cancellationToken.AbortToken).Wait(cancellationToken.AbortToken);
+                                    new NotifyEventArgs(ProgressEventType.Debug,
+                                        "Request: " + requ.ToString() + "items remaining: " + response.Remaining));
                             }
-
-                            //set this here prior to request
-                            pickerFilled = false;
-                            transferTimerPollingPeriods = 0;
-                            //get next picker
-                            picker = order.NextPicker();
-                            int attempt;
-                            //  A CMove will be performed if the storescp exists and this storescp is known to the QRSCP:
-                            var cMoveRequest = picker.GetDicomCMoveRequest(LocalAETitle, out attempt);
-                            /* this won't work which means we cannot enforce (low) priority
-                            cMoveRequest.Priority=DicomPriority.Low;*/
-
-                            cMoveRequest.OnResponseReceived += (requ, response) =>
+                            else if (response.Status.State == DicomState.Success)
                             {
-                                if (response.Status.State == DicomState.Pending)
-                                {
-                                    listener.OnNotify(this,
-                                        new NotifyEventArgs(ProgressEventType.Debug,
-                                            "Request: " + requ.ToString() + "items remaining: " + response.Remaining));
-                                }
-                                else if (response.Status.State == DicomState.Success)
-                                {
-                                    listener.OnNotify(this,
-                                        new NotifyEventArgs(ProgressEventType.Debug,
-                                            "Request: " + requ.ToString() + "completed successfully"));
-                                }
-                                else if (response.Status.State == DicomState.Failure)
-                                {
-                                    listener.OnNotify(this,
-                                        new NotifyEventArgs(ProgressEventType.Debug,
-                                            "Request: " + requ.ToString() + "failed to download: " + response.Failures));
+                                listener.OnNotify(this,
+                                    new NotifyEventArgs(ProgressEventType.Debug,
+                                        "Request: " + requ.ToString() + "completed successfully"));
 
-                                    // Empty the picker of items
-                                    picker.RetryOnce();
-                                    pickerFilled = picker.IsFilled();
-                                }
-                            };
-                            
-                            listener.OnProgress(this,
-                                new ProgressEventArgs(CMoveRequestToString(cMoveRequest,attempt),
-                                    new ProgressMeasurement(picker.Filled(), ProgressType.Records, picker.Total()),
-                                    transferStopwatch.Elapsed));
-                             //do not use requestSender.ThrottleRequest(cMoveRequest, cancellationToken);
-                            //TODO is there any need to throtttle this request given its lifetime
-                            
-                            requestSender.ThrottleRequest(cMoveRequest, client, cancellationToken.AbortToken);
-                            transferTimeOutTimer.Reset();
-                            while (!pickerFilled && !hasTransferTimedOut)
-                            {
-                                Task.Delay(dicomConfiguration.TransferPollingInMilliseconds, cancellationToken.AbortToken)
-                                    .Wait(cancellationToken.AbortToken);
-                                transferTimerPollingPeriods++;
+                                done = true;
                             }
-                            transferTimeOutTimer.Stop();
-                            listener.OnProgress(this,
-                                new ProgressEventArgs(CMoveRequestToString(cMoveRequest,attempt),
-                                    new ProgressMeasurement(picker.Filled(), ProgressType.Records, picker.Total()),
-                                    transferStopwatch.Elapsed));
-                        }
+                            else if (response.Status.State == DicomState.Failure)
+                            {
+                                listener.OnNotify(this,
+                                    new NotifyEventArgs(ProgressEventType.Debug,
+                                        "Request: " + requ.ToString() + "failed to download: " + response.Failures));
+                                    
+                                //if we can't get the study don't sit waiting for it to finish!
+                                done = true;
+                            }
+                        };
                         
-                        #endregion
+                        //send the command to the server
+
+                        //do not use requestSender.ThrottleRequest(cMoveRequest, cancellationToken);
+                        //TODO is there any need to throtttle this request given its lifetime
+                        requestSender.ThrottleRequest(cMoveRequest, client, cancellationToken.AbortToken);
+                                                
+                        transferTimeOutTimer.Reset();
+
+                        do
+                        {
+                            Task.Delay(Math.Max(100,dicomConfiguration.TransferPollingInMilliseconds), cancellationToken.AbortToken)
+                                .Wait(cancellationToken.AbortToken);
+                                
+                        }while(!done && !hasTransferTimedOut);
+
+                        transferTimeOutTimer.Stop();
+                        listener.OnNotify(this,
+                            new NotifyEventArgs(ProgressEventType.Information,CMoveRequestToString(cMoveRequest,1)));
                     }
-                    finally
-                    {
-                        server.Stop();
-                    }
+                        
+                    #endregion
+                }
+                finally
+                {
+                    server.Stop();
+                }
             }
 
             transferTimeOutTimer.Dispose();
             return Chunk;
         }
 
+        private DicomCMoveRequest CreateCMoveByStudyUid(string destination, string studyUid, IDataLoadEventListener listener)
+        {
+            var request = new DicomCMoveRequest(destination, studyUid);
+            listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information, "DicomRetriever.CreateCMoveByStudyUid created request for: " + studyUid));
+            // no more dicomtags have to be set
+            return request;
+        }
         public override void Dispose(IDataLoadEventListener listener, Exception pipelineFailureExceptionIfAny)
         {
         }
@@ -448,9 +374,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
                 LocalAetUri = DicomConfiguration.MakeUriUsePort(LocalAEUri, LocalAEPort),
                 RemoteAetTitle = RemoteAETitle,
                 RemoteAetUri = DicomConfiguration.MakeUriUsePort(RemoteAEUri, RemoteAEPort),
-                RequestDelayFactor = RequestDelayFactor,
                 RequestCooldownInMilliseconds = 1000 * RequestCooldownInSeconds,
-                TransferDelayFactor = TransferDelayFactor,
                 TransferCooldownInMilliseconds = 1000 * TransferCooldownInSeconds,
                 TransferPollingInMilliseconds = 1000 * TransferPollingInSeconds,
                 TransferTimeOutInMilliseconds = 1000 * TransferTimeOutInSeconds,
