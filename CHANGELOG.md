@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
+## [2.1.9] 2020-08-28
+
+- Refactor PACS fetch code with simpler queue handling
+- Run integration test against RDMP 4.1.8 not 4.1.0 due to API changes
+- Build plugin targetting .Net Standard 2.0 rather than deprecated Core 2.2
+
 ## [2.1.8] 2020-08-25
 
 - Add local stub PACS in test package to enable further testing in future
@@ -214,7 +220,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial commit from private repo
 
-[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v2.1.8...develop
+[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v2.1.9...develop
+[2.1.9]: https://github.com/HicServices/RdmpDicom/compare/v2.1.8...v2.1.9
 [2.1.8]: https://github.com/HicServices/RdmpDicom/compare/v2.1.7...v2.1.8
 [2.1.7]: https://github.com/HicServices/RdmpDicom/compare/v2.1.6...v2.1.7
 [2.1.6]: https://github.com/HicServices/RdmpDicom/compare/v2.1.5...v2.1.6
