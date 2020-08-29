@@ -81,7 +81,6 @@ namespace Rdmp.Dicom.Cache.Pipeline
             var requestSender = new DicomRequestSender(dicomConfiguration, listener);
             var dateFrom = Request.Start;
             var dateTo = Request.End;
-            var hasTransferTimedOut = false;
             CachingSCP.LocalAet = LocalAETitle;
             CachingSCP.Listener = listener;
 
@@ -101,20 +100,8 @@ namespace Rdmp.Dicom.Cache.Pipeline
             
             ConcurrentBag<string> studiesToOrder = new ConcurrentBag<string>();
 
-            //enforce a minimum timeout
-            var transferTimeOutTimer = new Timer(Math.Max(30000,dicomConfiguration.TransferTimeOutInMilliseconds));
-            transferTimeOutTimer.Elapsed += (source, eventArgs) =>
-            {
-                hasTransferTimedOut = true;
-                listener.OnNotify(this,
-                new NotifyEventArgs(ProgressEventType.Information, "Transfer Timeout Exception Generated"));
-                throw new TimeoutException("Transfer Timeout Exception");
-            };
-
             CachingSCP.OnEndProcessingCStoreRequest = (storeRequest, storeResponse) =>
-            {
-                transferTimeOutTimer.Reset();
-                
+            {                
                 SaveSopInstance(storeRequest,cacheLayout,listener);
                 listener.OnNotify(this,
                     new NotifyEventArgs(ProgressEventType.Debug,
@@ -156,7 +143,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
                     string current;
                                             
                     //While we have things to fetch
-                    while(studiesToOrder.TryTake(out current) && !hasTransferTimedOut)
+                    while(studiesToOrder.TryTake(out current))
                     {
                         transferStopwatch.Restart();
                         //delay value in mills
@@ -176,28 +163,23 @@ namespace Rdmp.Dicom.Cache.Pipeline
                         //Register callbacks
                         cMoveRequest.OnResponseReceived += (requ, response) =>
                         {
-                            if (response.Status.State == DicomState.Pending)
-                            {
-                                listener.OnNotify(this,
-                                    new NotifyEventArgs(ProgressEventType.Debug,
-                                        "Request: " + requ.ToString() + "items remaining: " + response.Remaining));
-                            }
-                            else if (response.Status.State == DicomState.Success)
-                            {
-                                listener.OnNotify(this,
-                                    new NotifyEventArgs(ProgressEventType.Debug,
-                                        "Request: " + requ.ToString() + "completed successfully"));
+                            listener.OnNotify(this,
+                                new NotifyEventArgs(ProgressEventType.Debug,
+                                $"Got {response.Status.State} response for {requ}.  Items remaining {response.Remaining}"));
 
-                                done = true;
-                            }
-                            else if (response.Status.State == DicomState.Failure)
+                            switch(response.Status.State)
                             {
-                                listener.OnNotify(this,
-                                    new NotifyEventArgs(ProgressEventType.Debug,
-                                        "Request: " + requ.ToString() + "failed to download: " + response.Failures));
-                                    
-                                //if we can't get the study don't sit waiting for it to finish!
-                                done = true;
+                                case DicomState.Pending : 
+                                case DicomState.Warning : 
+                                        // ignore
+                                        break;
+                                case DicomState.Success :                                 
+                                case DicomState.Cancel : 
+                                case DicomState.Failure :
+
+                                    // final state
+                                    done = true;
+                                    break;
                             }
                         };
                         
@@ -207,18 +189,24 @@ namespace Rdmp.Dicom.Cache.Pipeline
                         //TODO is there any need to throtttle this request given its lifetime
                         requestSender.ThrottleRequest(cMoveRequest, client, cancellationToken.AbortToken);
                                                 
-                        transferTimeOutTimer.Reset();
+                        
+                        //enforce a minimum timeout
+                        var swStudyTransfer = Stopwatch.StartNew();
+                        bool hasTransferTimedOut = false;
 
                         do
                         {
                             Task.Delay(Math.Max(100,dicomConfiguration.TransferPollingInMilliseconds), cancellationToken.AbortToken)
                                 .Wait(cancellationToken.AbortToken);
+                            
+                           hasTransferTimedOut = swStudyTransfer.ElapsedMilliseconds > dicomConfiguration.TransferTimeOutInMilliseconds;
                                 
                         }while(!done && !hasTransferTimedOut);
 
-                        transferTimeOutTimer.Stop();
-                        listener.OnNotify(this,
-                            new NotifyEventArgs(ProgressEventType.Information,CMoveRequestToString(cMoveRequest,1)));
+                        if(hasTransferTimedOut)
+                            listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,"Abandonning fetch of study " + current));
+                        else
+                            listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,CMoveRequestToString(cMoveRequest,1)));
                     }
                         
                     #endregion
@@ -229,7 +217,6 @@ namespace Rdmp.Dicom.Cache.Pipeline
                 }
             }
 
-            transferTimeOutTimer.Dispose();
             return Chunk;
         }
 
