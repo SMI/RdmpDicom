@@ -141,6 +141,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
                     var transferStopwatch = new Stopwatch();
 
                     string current;
+                    int consecutiveFailures = 0;
                                             
                     //While we have things to fetch
                     while(studiesToOrder.TryTake(out current))
@@ -172,12 +173,16 @@ namespace Rdmp.Dicom.Cache.Pipeline
                                 case DicomState.Pending : 
                                 case DicomState.Warning : 
                                         // ignore
-                                        break;
-                                case DicomState.Success :                                 
+                                        break;                                 
                                 case DicomState.Cancel : 
                                 case DicomState.Failure :
-
+                                    consecutiveFailures++;
                                     // final state
+                                    done = true;
+                                    break;
+                                case DicomState.Success :
+                                    // final state
+                                    consecutiveFailures = 0;
                                     done = true;
                                     break;
                             }
@@ -203,10 +208,26 @@ namespace Rdmp.Dicom.Cache.Pipeline
                                 
                         }while(!done && !hasTransferTimedOut);
 
+                        // Study has finished being fetched (or timed out)
+                        
                         if(hasTransferTimedOut)
                             listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,"Abandonning fetch of study " + current));
                         else
                             listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,CMoveRequestToString(cMoveRequest,1)));
+                        
+                        if(consecutiveFailures > 5)
+                            throw new Exception("Too many consecutive failures, giving up");
+
+                        // 1 failure = study not available, 2 failures = system is having a bad day?
+                        if(consecutiveFailures > 1)
+                        {
+                            //wait 4 minutes then 6 minutes then 8 minutes, eventually server will start responding again?
+                            int sleepFor = consecutiveFailures * 2 * 60_000;
+                            listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Warning,$"Sleeping for {sleepFor}ms due to {consecutiveFailures} consecutive failures"));
+
+                            Task.Delay( sleepFor, cancellationToken.AbortToken)
+                                .Wait(cancellationToken.AbortToken);
+                        }
                     }
                         
                     #endregion

@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
+## Added
+
+- Consecutively failing requests now result in delaying the fetch (incase server is busy with something)
+
 ## Fixed
 
 - In PACSSource TransferTimeOutInSeconds now applies only to the current study being fetched (not the whole hour)
