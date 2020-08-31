@@ -184,7 +184,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
                                 case DicomState.Failure :
                                     consecutiveFailures++;
                                     
-                                    if(MaxRetries < current.RetryCount)
+                                    if(current.RetryCount < MaxRetries)
                                     {
                                         // put it back in the bag with a increased retry count
                                         current.RetryCount++;
