@@ -67,8 +67,8 @@ namespace Rdmp.Dicom.Cache.Pipeline
         [DemandsInitialization("Ignore whitelist of patient identifiers",defaultValue: false, mandatory: true)]
         public bool IgnoreWhiteList { get; set; }
 
-        [DemandsInitialization("Set the DICOM priority (recommended value for NHS transfers is low)", defaultValue: DicomPriority.Low, mandatory: true)]
-        public DicomPriority Priority { get; set; }
+        [DemandsInitialization("Maximum number of times to re-request a Study when a Failure is encountered",defaultValue:3 , mandatory: true)]
+        public int MaxRetries { get; set; } = 3;
 
         private HashSet<string> _whitelist;
 
@@ -76,7 +76,6 @@ namespace Rdmp.Dicom.Cache.Pipeline
         /// The maximum number of tries to fetch a given Study from the PACS.  Note that retries requests might not be issued immediately after
         /// a failure.
         /// </summary>
-        const int MaxRetries = 3;
 
         public override SMIDataChunk DoGetChunk(ICacheFetchRequest cacheRequest, IDataLoadEventListener listener,GracefulCancellationToken cancellationToken)
         {
@@ -400,8 +399,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
                 RequestCooldownInMilliseconds = 1000 * RequestCooldownInSeconds,
                 TransferCooldownInMilliseconds = 1000 * TransferCooldownInSeconds,
                 TransferPollingInMilliseconds = 1000 * TransferPollingInSeconds,
-                TransferTimeOutInMilliseconds = 1000 * TransferTimeOutInSeconds,
-                Priority = Priority,
+                TransferTimeOutInMilliseconds = 1000 * TransferTimeOutInSeconds
             };
         }
         #endregion

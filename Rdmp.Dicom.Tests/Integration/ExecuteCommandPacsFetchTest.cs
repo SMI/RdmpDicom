@@ -15,7 +15,7 @@ namespace Rdmp.Dicom.Tests.Integration
         public void TestLocal()
         {
             
-            var cmd = new ExecuteCommandPacsFetch(new ConsoleInputManager(RepositoryLocator, new ThrowImmediatelyCheckNotifier()){DisallowInput= true},"2010-01-01","2020-01-01","www.dicomserver.co.uk",104,"you","localhost",23,"me",TestContext.CurrentContext.WorkDirectory);
+            var cmd = new ExecuteCommandPacsFetch(new ConsoleInputManager(RepositoryLocator, new ThrowImmediatelyCheckNotifier()){DisallowInput= true},"2010-01-01","2020-01-01","www.dicomserver.co.uk",104,"you","localhost",23,"me",TestContext.CurrentContext.WorkDirectory,0);
             cmd.Execute();
         }
     }

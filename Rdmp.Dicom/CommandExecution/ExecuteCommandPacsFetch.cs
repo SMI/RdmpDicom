@@ -23,7 +23,7 @@ namespace Rdmp.Dicom.CommandExecution
         private BackfillCacheFetchRequest _request;
         private PACSSource _source;
 
-        public ExecuteCommandPacsFetch(IBasicActivateItems activator,string start, string end, string remoteAeUri, int remotePort,string remoteAeTitle, string localAeUri, int localPort, string localAeTitle, string outDir):base(activator)
+        public ExecuteCommandPacsFetch(IBasicActivateItems activator,string start, string end, string remoteAeUri, int remotePort,string remoteAeTitle, string localAeUri, int localPort, string localAeTitle, string outDir, int maxRetries):base(activator)
         {
             var startDate = DateTime.Parse(start);   
             var endDate =  DateTime.Parse(end);   
@@ -50,6 +50,7 @@ namespace Rdmp.Dicom.CommandExecution
             _source.LocalAETitle = localAeTitle;
             _source.TransferTimeOutInSeconds = 50000;
             _source.Modality = "ALL";
+            _source.MaxRetries = maxRetries;
 
             _request = new BackfillCacheFetchRequest(BasicActivator.RepositoryLocator.CatalogueRepository,startDate);
             _request.ChunkPeriod = endDate.Subtract(startDate);
