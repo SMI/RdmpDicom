@@ -72,6 +72,12 @@ namespace Rdmp.Dicom.Cache.Pipeline
 
         private HashSet<string> _whitelist;
 
+        /// <summary>
+        /// The maximum number of tries to fetch a given Study from the PACS.  Note that retries requests might not be issued immediately after
+        /// a failure.
+        /// </summary>
+        const int MaxRetries = 3;
+
         public override SMIDataChunk DoGetChunk(ICacheFetchRequest cacheRequest, IDataLoadEventListener listener,GracefulCancellationToken cancellationToken)
         {
             listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,$"PACSSource version is {typeof(PACSSource).Assembly.GetName().Version}.  Assembly is {typeof(PACSSource).Assembly} " ));
@@ -98,7 +104,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
                 Layout = cacheLayout
             };
             
-            ConcurrentBag<string> studiesToOrder = new ConcurrentBag<string>();
+            ConcurrentBag<StudyToFetch> studiesToOrder = new ConcurrentBag<StudyToFetch>();
 
             CachingSCP.OnEndProcessingCStoreRequest = (storeRequest, storeResponse) =>
             {                
@@ -126,7 +132,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
                     request.OnResponseReceived += (req, response) =>
                     {
                         if (Filter(_whitelist, response))
-                            studiesToOrder.Add(response.Dataset.GetSingleValue<string>(DicomTag.StudyInstanceUID));
+                            studiesToOrder.Add(new StudyToFetch(response.Dataset.GetSingleValue<string>(DicomTag.StudyInstanceUID)));
 
                     };
                     requestSender.ThrottleRequest(request,client, cancellationToken.AbortToken);
@@ -140,7 +146,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
 
                     var transferStopwatch = new Stopwatch();
 
-                    string current;
+                    StudyToFetch current;
                     int consecutiveFailures = 0;
                                             
                     //While we have things to fetch
@@ -159,7 +165,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
                         bool done = false;
 
                         //Build fetch command that Study
-                        var cMoveRequest = CreateCMoveByStudyUid(LocalAETitle,current, listener);
+                        var cMoveRequest = CreateCMoveByStudyUid(LocalAETitle,current.StudyUid, listener);
 
                         //Register callbacks
                         cMoveRequest.OnResponseReceived += (requ, response) =>
@@ -177,6 +183,14 @@ namespace Rdmp.Dicom.Cache.Pipeline
                                 case DicomState.Cancel : 
                                 case DicomState.Failure :
                                     consecutiveFailures++;
+                                    
+                                    if(MaxRetries < current.RetryCount)
+                                    {
+                                        // put it back in the bag with a increased retry count
+                                        current.RetryCount++;
+                                        studiesToOrder.Add(current);
+                                    }
+
                                     // final state
                                     done = true;
                                     break;
@@ -189,6 +203,9 @@ namespace Rdmp.Dicom.Cache.Pipeline
                         };
                         
                         //send the command to the server
+                        
+                        //tell user what we are sending
+                        listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,CMoveRequestToString(cMoveRequest,current.RetryCount +1)));
 
                         //do not use requestSender.ThrottleRequest(cMoveRequest, cancellationToken);
                         //TODO is there any need to throtttle this request given its lifetime
@@ -211,9 +228,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
                         // Study has finished being fetched (or timed out)
                         
                         if(hasTransferTimedOut)
-                            listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,"Abandonning fetch of study " + current));
-                        else
-                            listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,CMoveRequestToString(cMoveRequest,1)));
+                            listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,"Abandonning fetch of study " + current.StudyUid));
                         
                         if(consecutiveFailures > 5)
                             throw new Exception("Too many consecutive failures, giving up");
