@@ -8,6 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
+## Added
+
+- Consecutively failing requests now result in delaying the fetch (incase server is busy with something)
+- Added retry on failure/warning when fetching from PACS
+
+## Fixed
+
+- In PACSSource TransferTimeOutInSeconds now applies only to the current study being fetched (not the whole hour)
+- Properly reported Warning and Cancel statuses in fetch request responses in PACSSource
+
 ## [2.1.9] 2020-08-28
 
 - Refactor PACS fetch code with simpler queue handling
