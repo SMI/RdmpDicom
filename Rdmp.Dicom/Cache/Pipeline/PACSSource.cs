@@ -66,16 +66,16 @@ namespace Rdmp.Dicom.Cache.Pipeline
 
         [DemandsInitialization("Ignore whitelist of patient identifiers",defaultValue: false, mandatory: true)]
         public bool IgnoreWhiteList { get; set; }
-
+        
+        /// <summary>
+        /// The maximum number of tries to fetch a given Study from the PACS.  Note that retries requests might not be issued immediately after
+        /// a failure.
+        /// </summary>
         [DemandsInitialization("Maximum number of times to re-request a Study when a Failure is encountered",defaultValue:3 , mandatory: true)]
         public int MaxRetries { get; set; } = 3;
 
         private HashSet<string> _whitelist;
 
-        /// <summary>
-        /// The maximum number of tries to fetch a given Study from the PACS.  Note that retries requests might not be issued immediately after
-        /// a failure.
-        /// </summary>
 
         public override SMIDataChunk DoGetChunk(ICacheFetchRequest cacheRequest, IDataLoadEventListener listener,GracefulCancellationToken cancellationToken)
         {
