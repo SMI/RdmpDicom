@@ -31,6 +31,9 @@ namespace Rdmp.Dicom.PipelineComponents
         
         [DemandsInitialization("Database in which to put _Isolation tables.",Mandatory=true)]
         public ExternalDatabaseServer IsolationDatabase { get; set; }
+
+        [DemandsInitialization("Timeout for each individual sql command, measured in seconds",Mandatory=true, DefaultValue = 30)]
+        public int TimeoutInSeconds {get;set;}
         
         private List<JoinInfo> _joins;
         private DiscoveredDatabase _raw;
@@ -306,6 +309,7 @@ namespace Rdmp.Dicom.PipelineComponents
                 var p = cmdSelect.CreateParameter();
                 p.ParameterName = "@val";
                 cmdSelect.Parameters.Add(p);
+                cmdSelect.CommandTimeout = TimeoutInSeconds;
 
                 foreach (var d in deleteValue)
                 {
@@ -350,6 +354,7 @@ namespace Rdmp.Dicom.PipelineComponents
                 var p = cmdSelect.CreateParameter();
                 p.ParameterName = "@val";
                 cmdSelect.Parameters.Add(p);
+                cmdSelect.CommandTimeout = TimeoutInSeconds;
 
                 foreach (var value in deleteValues)
                 {
@@ -391,6 +396,7 @@ namespace Rdmp.Dicom.PipelineComponents
                 var p2 = cmdDelete.CreateParameter();
                 p2.ParameterName = "@val";
                 cmdDelete.Parameters.Add(p2);
+                cmdDelete.CommandTimeout = TimeoutInSeconds;
 
                 foreach (var d in deleteValues)
                 {
@@ -486,6 +492,8 @@ namespace Rdmp.Dicom.PipelineComponents
                 con.Open();
                 using(var cmd = _raw.Server.GetCommand(primaryKeysColliding, con))
                 {
+                    cmd.CommandTimeout = TimeoutInSeconds;
+
                     using(var r = cmd.ExecuteReader())
                         while (r.Read())
                             yield return r[pkColName];
