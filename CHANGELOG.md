@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Consecutively failing requests now result in delaying the fetch (incase server is busy with something)
 - Added retry on failure/warning when fetching from PACS
+- Added TimeoutInSeconds property to `PrimaryKeyCollisionIsolationMutilation` DLE module
 
 ## Fixed
 
