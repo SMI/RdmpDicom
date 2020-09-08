@@ -52,7 +52,7 @@ namespace Rdmp.Dicom.Tests
             source.PreInitialize(new PermissionWindow(cp.CatalogueRepository),new ThrowImmediatelyDataLoadEventListener());
             
             var toMem = new ToMemoryDataLoadEventListener(true);
-            var fork = new ForkDataLoadEventListener(toMem,new ThrowImmediatelyDataLoadEventListener(){WriteToConsole = true});
+            var fork = new ForkDataLoadEventListener(toMem,new ThrowImmediatelyDataLoadEventListener {WriteToConsole = true});
 
             source.GetChunk(fork,new GracefulCancellationToken());
 

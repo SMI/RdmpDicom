@@ -145,11 +145,10 @@ namespace Rdmp.Dicom.Cache.Pipeline
 
                     var transferStopwatch = new Stopwatch();
 
-                    StudyToFetch current;
                     int consecutiveFailures = 0;
                                             
                     //While we have things to fetch
-                    while(studiesToOrder.TryTake(out current))
+                    while(studiesToOrder.TryTake(out var current))
                     {
                         transferStopwatch.Restart();
                         //delay value in mills
@@ -469,7 +468,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
         #region CMoveRequestToString
         private string CMoveRequestToString(DicomCMoveRequest cMoveRequest, int attempt)
         {
-            var stub = "Retrieving " + cMoveRequest.Level.ToString() + $" (attempt {attempt}) : ";
+            var stub = $"Retrieving {cMoveRequest.Level} (attempt {attempt}) : ";
             switch (cMoveRequest.Level)
             {
                 case DicomQueryRetrieveLevel.Patient:
@@ -481,7 +480,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
                 case DicomQueryRetrieveLevel.Image:
                     return stub + cMoveRequest.Dataset.GetSingleValue<string>(DicomTag.SOPInstanceUID);
                 default:
-                    return stub + DicomQueryRetrieveLevel.NotApplicable.ToString();
+                    return stub + DicomQueryRetrieveLevel.NotApplicable;
             }
         }
 

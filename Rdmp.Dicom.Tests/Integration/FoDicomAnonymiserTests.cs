@@ -64,7 +64,7 @@ namespace Rdmp.Dicom.Tests.Integration
             var eds = new ExternalDatabaseServer(CatalogueRepository, "eds", patcher);
             eds.SetProperties(uidMapDb);
             
-            Dictionary<DicomTag,string> thingThatShouldDisappear = new Dictionary<DicomTag, string>()
+            Dictionary<DicomTag,string> thingThatShouldDisappear = new Dictionary<DicomTag, string>
             {
                 //Things we would want to disappear
                 {DicomTag.PatientName,"Moscow"},

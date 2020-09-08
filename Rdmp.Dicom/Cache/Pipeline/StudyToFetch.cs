@@ -7,7 +7,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
         /// <summary>
         /// The unique UID of the study that is to be fetched
         /// </summary>
-        public string StudyUid {get;private set; }
+        public string StudyUid {get; }
 
         /// <summary>
         /// The number of times this study has been reported as unavailable or errors have manifested downloading it during

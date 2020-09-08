@@ -256,10 +256,7 @@ namespace Rdmp.Dicom.PipelineComponents
                 }
 
                 //pull all records that we must isolate in all joined tables
-                Dictionary<TableInfo,DataTable> toPush = new Dictionary<TableInfo, DataTable>();
-
-                foreach (TableInfo tableInfo in TablesToIsolate)
-                    toPush.Add(tableInfo, PullTable(tableInfo,con, deleteOnColumnName, deleteValues));
+                Dictionary<TableInfo,DataTable> toPush = TablesToIsolate.ToDictionary(tableInfo => tableInfo, tableInfo => PullTable(tableInfo, con, deleteOnColumnName, deleteValues));
 
                 //push the results to isolation
                 foreach (KeyValuePair<TableInfo, DataTable> kvp in toPush)
@@ -417,56 +414,54 @@ namespace Rdmp.Dicom.PipelineComponents
                 return
                     $"DELETE FROM {syntax.EnsureWrapped(toDelete.GetRuntimeName(LoadBubble.Raw, _namer))} WHERE {deleteOnColumnName} = @val";
             }
-            else
-            {
 
-                var sb = new StringBuilder();
+            var sb = new StringBuilder();
 
-                // 1 join per pair of tables
+            // 1 join per pair of tables
                 
-                if(_joins.Count != TablesToIsolate.Length -1)
-                    throw new Exception($"Unexpected join count, expected {(TablesToIsolate.Length -1)} but found {_joins.Count}");
+            if(_joins.Count != TablesToIsolate.Length -1)
+                throw new Exception($"Unexpected join count, expected {(TablesToIsolate.Length -1)} but found {_joins.Count}");
 
-                // Imagine a 3 table query (2 joins)
-                // if we are index 2 (child)
-                   // we want all joins
-                // if we are index 1 (middle)
-                   // we want first join only
-                // if we are index 0 (parent)
-                   // we want no joins at all
+            // Imagine a 3 table query (2 joins)
+            // if we are index 2 (child)
+            // we want all joins
+            // if we are index 1 (middle)
+            // we want first join only
+            // if we are index 0 (parent)
+            // we want no joins at all
 
-                var idx = Array.IndexOf(TablesToIsolate,toDelete);
-                var usings = new HashSet<TableInfo>();
+            var idx = Array.IndexOf(TablesToIsolate,toDelete);
+            var usings = new HashSet<TableInfo>();
 
-                foreach(var j in _joins)
-                {
-                    //MIMIC a LEFT join
-                    if(idx <= 0)
-                        continue;
+            foreach(var j in _joins)
+            {
+                //MIMIC a LEFT join
+                if(idx <= 0)
+                    continue;
                     
-                    idx--;
+                idx--;
 
-                    sb.Append(syntax.EnsureWrapped(j.PrimaryKey.TableInfo.GetRuntimeName(LoadBubble.Raw,_namer)));
-                    sb.Append(".");
-                    sb.Append(syntax.EnsureWrapped(j.PrimaryKey.GetRuntimeName(LoadStage.AdjustRaw)));
+                sb.Append(syntax.EnsureWrapped(j.PrimaryKey.TableInfo.GetRuntimeName(LoadBubble.Raw,_namer)));
+                sb.Append(".");
+                sb.Append(syntax.EnsureWrapped(j.PrimaryKey.GetRuntimeName(LoadStage.AdjustRaw)));
                     
-                    sb.Append("=");
+                sb.Append("=");
                     
-                    sb.Append(syntax.EnsureWrapped(j.ForeignKey.TableInfo.GetRuntimeName(LoadBubble.Raw,_namer)));
-                    sb.Append(".");
-                    sb.Append(syntax.EnsureWrapped(j.ForeignKey.GetRuntimeName(LoadStage.AdjustRaw)));
+                sb.Append(syntax.EnsureWrapped(j.ForeignKey.TableInfo.GetRuntimeName(LoadBubble.Raw,_namer)));
+                sb.Append(".");
+                sb.Append(syntax.EnsureWrapped(j.ForeignKey.GetRuntimeName(LoadStage.AdjustRaw)));
 
-                    sb.Append(" AND ");
+                sb.Append(" AND ");
 
-                    usings.Add(j.ForeignKey.TableInfo);
-                    usings.Add(j.PrimaryKey.TableInfo);
-                }
-
-                var usingsStr = string.Join(",",usings.Except(new []{toDelete}).Select(t=>syntax.EnsureWrapped(t.GetRuntimeName(LoadBubble.Raw,_namer))));
-
-                return
-                    $"DELETE FROM {syntax.EnsureWrapped(toDelete.GetRuntimeName(LoadBubble.Raw, _namer))} {(string.IsNullOrWhiteSpace(usingsStr) ? "" : " USING " + usingsStr)} WHERE {sb} {deleteOnColumnName} = @val";
+                usings.Add(j.ForeignKey.TableInfo);
+                usings.Add(j.PrimaryKey.TableInfo);
             }
+
+            var delTable = syntax.EnsureWrapped(toDelete.GetRuntimeName(LoadBubble.Raw, _namer));
+            var usingsStr = string.Join(",",usings.Except(new []{toDelete}).Select(t=>syntax.EnsureWrapped(t.GetRuntimeName(LoadBubble.Raw,_namer))));
+            usingsStr = string.IsNullOrWhiteSpace(usingsStr) ? "" : " USING " + usingsStr;
+
+            return $"DELETE FROM {delTable} {usingsStr} WHERE {sb} {deleteOnColumnName} = @val";
         }
 
         private IEnumerable<object> DetectCollisions(ColumnInfo pkCol,TableInfo tableInfo)

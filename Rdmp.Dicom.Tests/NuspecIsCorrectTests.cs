@@ -17,7 +17,7 @@ namespace Rdmp.Dicom.Tests
     /// </summary>
     class NuspecIsCorrectTests
     {
-        static readonly string[] Analyzers = new string[] { "SecurityCodeScan" };
+        static readonly string[] Analyzers = { "SecurityCodeScan" };
 
         [TestCase("../../../../Rdmp.Dicom/Rdmp.Dicom.csproj", "../../../../Rdmp.Dicom.Library.nuspec", "../../../../Packages.md")]
         public void TestDependencyCorrect(string csproj, string nuspec, string packagesMarkdown)

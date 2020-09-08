@@ -34,17 +34,18 @@ namespace Rdmp.Dicom.UI
                 return GetMenuArray(new ExecuteCommandCreateNewImagingDataset(ItemActivator));
             }
 
-            if (databaseEntity is Catalogue c)
-                return GetMenuArray(
-                    new ExecuteCommandCreateNewImagingDataset(ItemActivator),
-                    new ExecuteCommandPromoteNewTag(ItemActivator).SetTarget(databaseEntity),
-                    new ExecuteCommandCompareImagingSchemas(ItemActivator,c));
-
-            if (databaseEntity is ProcessTask pt)
-                return GetMenuArray(new ExecuteCommandReviewIsolations(ItemActivator, pt));
-
-            if (databaseEntity is TableInfo)
-                return GetMenuArray(new ExecuteCommandPromoteNewTag(ItemActivator).SetTarget(databaseEntity));
+            switch (databaseEntity)
+            {
+                case Catalogue c:
+                    return GetMenuArray(
+                        new ExecuteCommandCreateNewImagingDataset(ItemActivator),
+                        new ExecuteCommandPromoteNewTag(ItemActivator).SetTarget(databaseEntity),
+                        new ExecuteCommandCompareImagingSchemas(ItemActivator,c));
+                case ProcessTask pt:
+                    return GetMenuArray(new ExecuteCommandReviewIsolations(ItemActivator, pt));
+                case TableInfo _:
+                    return GetMenuArray(new ExecuteCommandPromoteNewTag(ItemActivator).SetTarget(databaseEntity));
+            }
 
             if (o is AllExternalServersNode)
                 return GetMenuArray(new ExecuteCommandCreateNewExternalDatabaseServer(ItemActivator,new SMIDatabasePatcher(),PermissableDefaults.None));

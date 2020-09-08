@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using System.Linq;
 
 namespace Rdmp.Dicom.Tests
 {
@@ -58,15 +59,7 @@ namespace Rdmp.Dicom.Tests
 
             foreach (DataRow row in dataTable.Rows)
             {
-                bool matched = true;
-                for (int i = 0; i < expectedRow.Length; i++)
-                {
-                    if (!expectedRow[i].Equals(row[i]))
-                    {
-                        matched = false;
-                        break;
-                    }
-                }
+                bool matched = !expectedRow.Where((t, i) => !t.Equals(row[i])).Any();
                 if (matched) return true;
             }
             return false;
