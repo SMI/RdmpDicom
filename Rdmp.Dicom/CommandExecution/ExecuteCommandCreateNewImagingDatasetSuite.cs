@@ -220,9 +220,8 @@ namespace Rdmp.Dicom.CommandExecution
 
                 StringBuilder regexPattern = new StringBuilder();
 
-                foreach (var tbl in tablesCreated)
-                    if(!tbl.DiscoverColumns().Any(c=>c.GetRuntimeName().Equals("SOPInstanceUID",StringComparison.CurrentCultureIgnoreCase)))
-                        regexPattern.Append("(" + tbl.GetRuntimeName() +")|");
+                foreach (var tbl in tablesCreated.Where(tbl => !tbl.DiscoverColumns().Any(c=>c.GetRuntimeName().Equals("SOPInstanceUID",StringComparison.CurrentCultureIgnoreCase))))
+                    regexPattern.Append("(" + tbl.GetRuntimeName() +")|");
                 
 
                 var coalArgs = coalescer.CreateArgumentsForClassIfNotExists<Coalescer>();

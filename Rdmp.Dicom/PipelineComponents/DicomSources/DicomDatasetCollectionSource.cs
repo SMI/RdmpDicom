@@ -59,10 +59,7 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
             _sw.Stop();
             listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information, "GetChunk cumulative total time is " + _sw.ElapsedMilliseconds + "ms"));
 
-            if (dt.Rows.Count > 0)
-                return dt;
-
-            return null;
+            return dt.Rows.Count > 0 ? dt : null;
         }
 
         public override DataTable TryGetPreview()

@@ -84,7 +84,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
         public void OnReceiveAbort(DicomAbortSource source, DicomAbortReason reason)
         {
             var msg = "Received abort from " + source + "for " + reason;
-            Logger.Warn(msg, new object[] {source, reason});
+            Logger.Warn(msg, source, reason);
             Listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Warning, "Aborted: "+msg));
         }
         #endregion

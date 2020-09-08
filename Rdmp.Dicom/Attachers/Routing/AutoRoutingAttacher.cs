@@ -258,22 +258,20 @@ This Grouping will be used to extract the Modality code when deciding which tabl
                 foreach (DataColumn column in toProcess.Columns)
                 {
                     //if there is a destination for that DataTable
-                    if(_columnNameToTargetTablesDictionary.ContainsKey(column.ColumnName))
+                    if (!_columnNameToTargetTablesDictionary.ContainsKey(column.ColumnName)) continue;
+                    //there is a matching destination column in one or more destination tables in RAW
+                    foreach (var destinationTable in _columnNameToTargetTablesDictionary[column.ColumnName])
                     {
-                        //there is a matching destination column in one or more destination tables in RAW
-                        foreach (var destinationTable in _columnNameToTargetTablesDictionary[column.ColumnName])
-                        {
-                            //if we are mapping modalities to tables and this table isn't an ALL table
-                            if (_modalityMap != null && !_modalityMap[destinationTable].Equals("ALL",StringComparison.CurrentCultureIgnoreCase))
-                                if(!string.Equals(_modalityMap[destinationTable], modality,StringComparison.CurrentCultureIgnoreCase))
-                                    continue; //skip it
+                        //if we are mapping modalities to tables and this table isn't an ALL table
+                        if (_modalityMap != null && !_modalityMap[destinationTable].Equals("ALL",StringComparison.CurrentCultureIgnoreCase))
+                            if(!string.Equals(_modalityMap[destinationTable], modality,StringComparison.CurrentCultureIgnoreCase))
+                                continue; //skip it
 
-                            AddCellValue(inputRow, column, destinationTable, newDestinationRows);
-                            addedToAtLeastOneTable = true;
-                        }
-
-                        _columnNamesRoutedSuccesfully[column.ColumnName] = true;
+                        AddCellValue(inputRow, column, destinationTable, newDestinationRows);
+                        addedToAtLeastOneTable = true;
                     }
+
+                    _columnNamesRoutedSuccesfully[column.ColumnName] = true;
                 }
 
                 //we didn't add the row to any tables yet
@@ -281,21 +279,15 @@ This Grouping will be used to extract the Modality code when deciding which tabl
                 {
                     //Try again but put it in OTHER
                     foreach (DataColumn column in toProcess.Columns)
-                    { 
-                        if (_columnNameToTargetTablesDictionary.ContainsKey(column.ColumnName))
+                    {
+                        if (!_columnNameToTargetTablesDictionary.ContainsKey(column.ColumnName)) continue;
+                        //there is a matching destination column in one or more destination tables in RAW
+                        foreach (var destinationTable in _columnNameToTargetTablesDictionary[column.ColumnName].Where(destinationTable => _modalityMap[destinationTable].Equals("OTHER",StringComparison.CurrentCultureIgnoreCase)))
                         {
-                            //there is a matching destination column in one or more destination tables in RAW
-                            foreach (var destinationTable in _columnNameToTargetTablesDictionary[column.ColumnName])
-                            {
-                                //if we are mapping modalities to tables and this table isn't an ALL table
-                                if(!_modalityMap[destinationTable].Equals("OTHER",StringComparison.CurrentCultureIgnoreCase))
-                                    continue;
-
-                                AddCellValue(inputRow, column, destinationTable, newDestinationRows);
-                                addedToAtLeastOneTable = true;
-                            }
-                            _columnNamesRoutedSuccesfully[column.ColumnName] = true;
+                            AddCellValue(inputRow, column, destinationTable, newDestinationRows);
+                            addedToAtLeastOneTable = true;
                         }
+                        _columnNamesRoutedSuccesfully[column.ColumnName] = true;
                     }
                 }
 
@@ -322,10 +314,10 @@ This Grouping will be used to extract the Modality code when deciding which tabl
 
         private void DisposeUploaders(Exception exception)
         {
-            foreach (var dataTableUploadDestination in _uploaders.Values)
+            foreach (var (item1, item2) in _uploaders.Values)
             {
-                dataTableUploadDestination.Item1.Dispose(new ThrowImmediatelyDataLoadEventListener(), exception);
-                dataTableUploadDestination.Item2.CloseAndArchive();
+                item1.Dispose(new ThrowImmediatelyDataLoadEventListener(), exception);
+                item2.CloseAndArchive();
             }
             
             foreach (var dt in _columnNameToTargetTablesDictionary.SelectMany(v => v.Value).Distinct())

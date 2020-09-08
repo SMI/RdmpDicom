@@ -230,11 +230,9 @@ namespace Rdmp.Dicom.PipelineComponents
 
                 var allCollisions = DetectCollisions(pkCol, tableInfo).Distinct().ToArray();
 
-                if (allCollisions.Any())
-                {
-                    _job.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information, $"Found duplication in column '{pkCol}', duplicate values were '{string.Join(",",allCollisions)}'"));
-                    MigrateRecords(pkCol, allCollisions);
-                }            
+                if (!allCollisions.Any()) continue;
+                _job.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information, $"Found duplication in column '{pkCol}', duplicate values were '{string.Join(",",allCollisions)}'"));
+                MigrateRecords(pkCol, allCollisions);
             }
 
             return ExitCodeType.Success;
@@ -433,12 +431,8 @@ namespace Rdmp.Dicom.PipelineComponents
             var idx = Array.IndexOf(TablesToIsolate,toDelete);
             var usings = new HashSet<TableInfo>();
 
-            foreach(var j in _joins)
+            foreach (var j in _joins.Where(j => idx > 0))
             {
-                //MIMIC a LEFT join
-                if(idx <= 0)
-                    continue;
-                    
                 idx--;
 
                 sb.Append(syntax.EnsureWrapped(j.PrimaryKey.TableInfo.GetRuntimeName(LoadBubble.Raw,_namer)));

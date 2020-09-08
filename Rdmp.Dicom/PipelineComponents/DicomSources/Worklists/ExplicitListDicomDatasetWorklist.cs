@@ -33,12 +33,7 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources.Worklists
             otherValuesToStoreInRow = _otherValuesToStoreInRow;
             filename = _filenameToPretend;
 
-            if (index >= _datasets.Length)
-            {
-                return null;
-            }
-
-            return _datasets[index++];
+            return index >= _datasets.Length ? null : _datasets[index++];
         }
 
         public void MarkCorrupt(DicomDataset ds)

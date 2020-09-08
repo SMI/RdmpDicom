@@ -43,13 +43,11 @@ namespace Rdmp.Dicom.UI
         {
             var diff = _currentDiffs?.FirstOrDefault(d => d.RowIndex == e.RowIndex);
 
-            if (diff != null && !diff.IsMaster && _currentDataTable != null)
-            {
-                var colName = _currentDataTable.Columns[e.ColumnIndex].ColumnName;
+            if (diff == null || diff.IsMaster || _currentDataTable == null) return;
+            var colName = _currentDataTable.Columns[e.ColumnIndex].ColumnName;
                 
-                if(diff.ConflictingColumns.Contains(colName))
-                    e.CellStyle.BackColor = Color.LightCyan;
-            }
+            if(diff.ConflictingColumns.Contains(colName))
+                e.CellStyle.BackColor = Color.LightCyan;
         }
 
         private void tbTimeout_Click(object sender, EventArgs e)

@@ -3,10 +3,8 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Dicom.Network;
-using Dicom.Network.Client;
 using ReusableLibraryCode.Progress;
 using Rdmp.Dicom.PACS;
-using Rdmp.Core.DataFlowPipeline;
 using DicomClient = Dicom.Network.Client.DicomClient;
 
 namespace Rdmp.Dicom.Cache.Pipeline.Dicom
@@ -71,11 +69,9 @@ namespace Rdmp.Dicom.Cache.Pipeline.Dicom
             transferTimer.Stop();
             //valuein mills
             var delay =  _dicomConfiguration.RequestCooldownInMilliseconds;
-            if (delay > 0)
-            {
-                _listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information, "Requests sleeping for " + delay / 1000 + "seconds"));
-                Task.Delay(delay, cancellationToken).Wait(cancellationToken);
-            }
+            if (delay <= 0) return;
+            _listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information, "Requests sleeping for " + delay / 1000 + "seconds"));
+            Task.Delay(delay, cancellationToken).Wait(cancellationToken);
         }
         #endregion
 
@@ -85,6 +81,8 @@ namespace Rdmp.Dicom.Cache.Pipeline.Dicom
         ///     Only the timeout is applied no Throtelling
         /// </summary>
         /// <param name="dicomRequest"></param>
+        /// <param name="token"></param>
+
         #region SendRequest
         private void SendRequest(DicomRequest dicomRequest, CancellationToken token)
         {
@@ -100,6 +98,7 @@ namespace Rdmp.Dicom.Cache.Pipeline.Dicom
         /// </summary>
         /// <param name="dicomRequest"></param>
         /// <param name="client"></param>
+        /// <param name="token"></param>
 
         #region SendRequest
         public void SendRequest(DicomRequest dicomRequest, DicomClient client,CancellationToken token)

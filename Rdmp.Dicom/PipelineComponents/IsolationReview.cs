@@ -52,11 +52,9 @@ namespace Rdmp.Dicom.PipelineComponents
                 Error = "No tables configured on Isolation task";
                 return;
             }
-            if (IsolationDatabase == null)
-            {
-                Error = "No isolation database configured on Isolation task";
-                return;
-            }
+
+            if (IsolationDatabase != null) return;
+            Error = "No isolation database configured on Isolation task";
         }
 
         public Dictionary<TableInfo,DiscoveredTable> GetIsolationTables()
@@ -164,19 +162,17 @@ namespace Rdmp.Dicom.PipelineComponents
                         }
 
                         //happens for the very first row (loop iteration) only
-                        if (masterRow != currentRow)
-                        {
-                            differencesDt.ImportRow(currentRow);
-                            var diff = new IsolationDifference(differencesDt.Rows.Count - 1, masterRow[sortOn].ToString(), false);
-                            differences.Add(diff);
-                            differencesDtIdx++;
+                        if (masterRow == currentRow) continue;
+                        differencesDt.ImportRow(currentRow);
+                        var diff = new IsolationDifference(differencesDt.Rows.Count - 1, masterRow[sortOn].ToString(), false);
+                        differences.Add(diff);
+                        differencesDtIdx++;
 
-                            //record the columns that differed
-                            foreach (DataColumn dc in dt.Columns)
-                            {
-                                if(AreDifferent(masterRow[dc],currentRow[dc]))
-                                    diff.ConflictingColumns.Add(dc.ColumnName);
-                            }
+                        //record the columns that differed
+                        foreach (DataColumn dc in dt.Columns)
+                        {
+                            if(AreDifferent(masterRow[dc],currentRow[dc]))
+                                diff.ConflictingColumns.Add(dc.ColumnName);
                         }
                     }
                     else

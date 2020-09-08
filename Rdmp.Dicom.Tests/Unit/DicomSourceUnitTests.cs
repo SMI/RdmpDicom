@@ -136,9 +136,7 @@ namespace Rdmp.Dicom.Tests.Unit
   </TagElevationRequest>
 </TagElevationRequestCollection>";
 
-            /// <summary>
-            /// Invalid because the pathway should be sequence->non sequence
-            /// </summary>
+            // Invalid because the pathway should be sequence->non sequence
             const string invalidXml =
                 @"<TagElevationRequestCollection>
   <TagElevationRequest>
@@ -170,24 +168,24 @@ namespace Rdmp.Dicom.Tests.Unit
             Assert.AreEqual("CodeValueCol",source.LoadElevationRequestsFile().Requests.Single().ColumnName);
             
             //Setting the xml property will override the file xml
-            source.TagElevationConfigurationXml = new DicomSource.TagElevationXml(){xml= "<lolz>" };
+            source.TagElevationConfigurationXml = new DicomSource.TagElevationXml {xml= "<lolz>" };
 
             var ex3 = Assert.Throws<XmlException>(() => source.LoadElevationRequestsFile());
             StringAssert.Contains("Unexpected end of file", ex3.Message);
 
-            source.TagElevationConfigurationXml = new DicomSource.TagElevationXml() { xml = invalidXml };
+            source.TagElevationConfigurationXml = new DicomSource.TagElevationXml { xml = invalidXml };
             var ex4 = Assert.Throws<TagNavigationException>(() => source.LoadElevationRequestsFile());
             StringAssert.Contains("Navigation Token CodeValue was not the final token in the pathway", ex4.Message);
 
-            source.TagElevationConfigurationXml = new DicomSource.TagElevationXml() { xml = validXml2 };
+            source.TagElevationConfigurationXml = new DicomSource.TagElevationXml { xml = validXml2 };
             Assert.AreEqual("CodeValueCol2", source.LoadElevationRequestsFile().Requests.Single().ColumnName);
             
             //now we go back to the file one (by setting the xml one to null)
             source.TagElevationConfigurationXml = null;
             Assert.AreEqual("CodeValueCol", source.LoadElevationRequestsFile().Requests.Single().ColumnName);
-            source.TagElevationConfigurationXml = new DicomSource.TagElevationXml(){xml = "" };
+            source.TagElevationConfigurationXml = new DicomSource.TagElevationXml {xml = "" };
             Assert.AreEqual("CodeValueCol", source.LoadElevationRequestsFile().Requests.Single().ColumnName);
-            source.TagElevationConfigurationXml = new DicomSource.TagElevationXml() { xml = "  \r\n  " };
+            source.TagElevationConfigurationXml = new DicomSource.TagElevationXml { xml = "  \r\n  " };
             Assert.AreEqual("CodeValueCol", source.LoadElevationRequestsFile().Requests.Single().ColumnName);
         }
     }

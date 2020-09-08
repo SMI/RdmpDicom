@@ -47,10 +47,7 @@ namespace Rdmp.Dicom.UI
                     return GetMenuArray(new ExecuteCommandPromoteNewTag(ItemActivator).SetTarget(databaseEntity));
             }
 
-            if (o is AllExternalServersNode)
-                return GetMenuArray(new ExecuteCommandCreateNewExternalDatabaseServer(ItemActivator,new SMIDatabasePatcher(),PermissableDefaults.None));
-
-            return null;
+            return o is AllExternalServersNode ? GetMenuArray(new ExecuteCommandCreateNewExternalDatabaseServer(ItemActivator,new SMIDatabasePatcher(),PermissableDefaults.None)) : null;
         }
 
         public override object[] GetChildren(object model)

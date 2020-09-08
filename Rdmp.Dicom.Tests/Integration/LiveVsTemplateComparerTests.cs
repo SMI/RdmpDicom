@@ -66,7 +66,7 @@ namespace Rdmp.Dicom.Tests.Integration
             importer.DoImport(out TableInfo ti,out _);
 
             // compare the live with the template
-            var comparer = new LiveVsTemplateComparer(ti,new ImageTableTemplateCollection(){ DatabaseType = type,Tables = new List<ImageTableTemplate>{ template } });
+            var comparer = new LiveVsTemplateComparer(ti,new ImageTableTemplateCollection { DatabaseType = type,Tables = new List<ImageTableTemplate>{ template } });
 
             // should be no differences
             Assert.AreEqual(comparer.TemplateSql,comparer.LiveSql);
@@ -75,7 +75,7 @@ namespace Rdmp.Dicom.Tests.Integration
             tbl.DropColumn(tbl.DiscoverColumn("EchoTime"));
                
             //now comparer should see a difference
-            comparer = new LiveVsTemplateComparer(ti,new ImageTableTemplateCollection(){ DatabaseType = type,Tables = new List<ImageTableTemplate>{ template } });
+            comparer = new LiveVsTemplateComparer(ti,new ImageTableTemplateCollection { DatabaseType = type,Tables = new List<ImageTableTemplate>{ template } });
             Assert.AreNotEqual(comparer.TemplateSql,comparer.LiveSql);
 
             tbl.Drop();

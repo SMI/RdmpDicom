@@ -95,7 +95,7 @@ namespace Rdmp.Dicom.UI
 
         public ICustomUIDrivenClass GetFinalStateOfUnderlyingObject()
         {
-            return new DicomSource.TagElevationXml() { xml = queryEditor.Text};
+            return new DicomSource.TagElevationXml { xml = queryEditor.Text};
         }
 
         public void SetGenericUnderlyingObjectTo(ICustomUIDrivenClass value)

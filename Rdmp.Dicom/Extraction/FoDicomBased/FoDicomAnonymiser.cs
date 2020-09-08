@@ -82,7 +82,7 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
                         DicomAnonymizer.SecurityProfileOptions.RetainUIDs;
 
             if (RetainDates)
-              flags = flags | DicomAnonymizer.SecurityProfileOptions.RetainLongFullDates;
+              flags |= DicomAnonymizer.SecurityProfileOptions.RetainLongFullDates;
 
             var profile = DicomAnonymizer.SecurityProfile.LoadProfile(null,flags);
             
@@ -142,17 +142,15 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
                         var value = ds.GetValue<string>(kvp.Key, 0);
 
                         //if it has a value for this UID
-                        if(value != null)
-                        {
-                            var releaseValue = mappingServer.GetOrAllocateMapping(value, projectNumber, kvp.Value);
+                        if (value == null) continue;
+                        var releaseValue = mappingServer.GetOrAllocateMapping(value, projectNumber, kvp.Value);
 
-                            //change value in dataset
-                            ds.AddOrUpdate(kvp.Key, releaseValue);
+                        //change value in dataset
+                        ds.AddOrUpdate(kvp.Key, releaseValue);
 
-                            //and change value in DataTable
-                            if (toProcess.Columns.Contains(kvp.Key.DictionaryEntry.Keyword))
-                                row[kvp.Key.DictionaryEntry.Keyword] = releaseValue;
-                        }
+                        //and change value in DataTable
+                        if (toProcess.Columns.Contains(kvp.Key.DictionaryEntry.Keyword))
+                            row[kvp.Key.DictionaryEntry.Keyword] = releaseValue;
                     }
                     
                     var newPath = _putter.WriteOutDataset(destinationDirectory,releaseId,ds);

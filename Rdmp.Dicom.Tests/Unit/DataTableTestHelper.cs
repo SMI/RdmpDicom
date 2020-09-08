@@ -55,14 +55,7 @@ namespace Rdmp.Dicom.Tests
         /// </returns>
         public static bool ContainsRow(DataTable dataTable, object[] expectedRow)
         {
-            if (expectedRow.Length != dataTable.Columns.Count) return false;
-
-            foreach (DataRow row in dataTable.Rows)
-            {
-                bool matched = !expectedRow.Where((t, i) => !t.Equals(row[i])).Any();
-                if (matched) return true;
-            }
-            return false;
+            return expectedRow.Length == dataTable.Columns.Count && (from DataRow row in dataTable.Rows select !expectedRow.Where((t, i) => !t.Equals(row[i])).Any()).Any(matched => matched);
         }
     }
 }

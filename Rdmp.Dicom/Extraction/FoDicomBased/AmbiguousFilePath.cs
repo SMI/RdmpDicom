@@ -120,10 +120,7 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
 
         private bool IsDicomReference(string fullPath)
         {
-            if(string.IsNullOrWhiteSpace(fullPath))
-                return false;
-
-            return fullPath.EndsWith(".dcm", StringComparison.CurrentCultureIgnoreCase);
+            return !string.IsNullOrWhiteSpace(fullPath) && fullPath.EndsWith(".dcm", StringComparison.CurrentCultureIgnoreCase);
         }
 
         public static bool IsZipReference(string path)
@@ -138,10 +135,7 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
 
         private bool IsAbsolute(string path)
         {
-            if (string.IsNullOrWhiteSpace(path))
-                return false;
-
-            return Path.IsPathRooted(path);
+            return !string.IsNullOrWhiteSpace(path) && Path.IsPathRooted(path);
         }
     }
 }

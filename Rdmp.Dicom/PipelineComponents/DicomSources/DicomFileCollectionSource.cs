@@ -135,11 +135,9 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
                             corruptedEntries++;
                             RecordError("Zip entry '" + f.FullName +"'",e);
 
-                            if (corruptedEntries > 3)
-                            {
-                                listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning, "Skipping the rest of '" + f.FullName + "'", e));
-                                break;
-                            }
+                            if (corruptedEntries <= 3) continue;
+                            listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning, "Skipping the rest of '" + f.FullName + "'", e));
+                            break;
                         }
                     }
             }
