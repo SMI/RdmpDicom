@@ -4,22 +4,18 @@ using DicomClient = Dicom.Network.Client.DicomClient;
 
 namespace Rdmp.Dicom.Tests.Unit
 {
-    [Ignore("Requires orthanc dicom server to be running")]
-    class OrthancTest
+    internal class PublicPacsTest
     {
         private const string LocalAetTitle = "STORESCP";
         public const string RemoteAetTitle = "ORTHANC";
 
 
-        [TestCase("127.0.0.1", 4242)]
-        [TestCase("localhost", 4242)]
-        public void EchoOrthancTest(string host, int port)
+        [TestCase("www.dicomserver.co.uk", 104)]
+        public void EchoTest(string host, int port)
         {
-            bool success = false;
-            NetworkManager.CreateNetworkStream("localhost", 4242, false, true, true);
-            
+            var success = false;
             var client = new DicomClient(host,port,false,LocalAetTitle,RemoteAetTitle);
-            client.AddRequestAsync(new DicomCEchoRequest()
+            client.AddRequestAsync(new DicomCEchoRequest
             {
                 OnResponseReceived = (req,res) => {
                     success = true;
