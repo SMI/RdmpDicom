@@ -34,7 +34,7 @@ namespace Rdmp.Dicom.CommandExecution
         private readonly IRDMPPlatformRepositoryServiceLocator _repositoryLocator;
         private readonly ICatalogueRepository _catalogueRepository;
 
-        public readonly List<Catalogue> NewCataloguesCreated;
+        public List<Catalogue> NewCataloguesCreated { get; }
         public LoadMetadata NewLoadMetadata { get; private set; }
         
         /// <summary>
