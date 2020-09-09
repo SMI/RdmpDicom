@@ -11,10 +11,6 @@
     <Compile Include="..\..\SharedAssemblyInfo.cs" Link="SharedAssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="HIC.DicomTypeTranslation" Version="2.3.1" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\..\Rdmp.Dicom.UI\Rdmp.Dicom.UI.csproj" />
-    <ProjectReference Include="..\..\Rdmp.Dicom\Rdmp.Dicom.csproj" />
   </ItemGroup>
 </Project>
