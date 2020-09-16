@@ -2,9 +2,6 @@
 using Rdmp.Core.CommandLine.Interactive;
 using Rdmp.Dicom.CommandExecution;
 using ReusableLibraryCode.Checks;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using Tests.Common;
 
 namespace Rdmp.Dicom.Tests.Integration

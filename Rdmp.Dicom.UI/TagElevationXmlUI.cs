@@ -4,7 +4,6 @@ using DicomTypeTranslation.Elevation.Serialization;
 using Rdmp.Core.Curation.Data.DataLoad;
 using Rdmp.Core.Repositories;
 using Rdmp.Dicom.PipelineComponents.DicomSources;
-using Rdmp.UI.Icons.IconProvision;
 using ReusableLibraryCode.Checks;
 using ScintillaNET;
 using System;
@@ -17,7 +16,7 @@ namespace Rdmp.Dicom.UI
 {
     public partial class TagElevationXmlUI : Form,ICustomUI<DicomSource.TagElevationXml>
     {
-        private Scintilla queryEditor;
+        private readonly Scintilla queryEditor;
 
 
         public const string ExampleElevationFile
@@ -56,9 +55,8 @@ namespace Rdmp.Dicom.UI
             pEditor.Controls.Add(queryEditor);
 
 
-            var autoComplete = new AutocompleteMenu();
+            var autoComplete = new AutocompleteMenu {ImageList = new ImageList()};
 
-            autoComplete.ImageList = new ImageList();
             autoComplete.ImageList.Images.Add(CatalogueIcons.File);
             autoComplete.MaximumSize = new System.Drawing.Size(300,500);
             
@@ -97,7 +95,7 @@ namespace Rdmp.Dicom.UI
 
         public ICustomUIDrivenClass GetFinalStateOfUnderlyingObject()
         {
-            return new DicomSource.TagElevationXml() { xml = queryEditor.Text};
+            return new DicomSource.TagElevationXml { xml = queryEditor.Text};
         }
 
         public void SetGenericUnderlyingObjectTo(ICustomUIDrivenClass value)
@@ -107,7 +105,7 @@ namespace Rdmp.Dicom.UI
 
         public void SetUnderlyingObjectTo(DicomSource.TagElevationXml value)
         {
-            if(value != null && value.xml != null)
+            if(value?.xml != null)
             {
                 queryEditor.Text = value.xml;
                 RunChecks();

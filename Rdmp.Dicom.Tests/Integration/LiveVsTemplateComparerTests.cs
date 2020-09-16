@@ -4,9 +4,7 @@ using NUnit.Framework;
 using Rdmp.Core.Curation;
 using Rdmp.Core.Curation.Data;
 using Rdmp.Dicom.CommandExecution;
-using System;
 using System.Collections.Generic;
-using System.Text;
 using Tests.Common;
 
 namespace Rdmp.Dicom.Tests.Integration
@@ -21,18 +19,38 @@ namespace Rdmp.Dicom.Tests.Integration
             var db = GetCleanedServer(type);
 
             // Create a nice template with lots of columns
-            var template = new ImageTableTemplate();
-            template.TableName = "Fish";
-            template.Columns = new[]
+            var template = new ImageTableTemplate
             {
-                new ImageColumnTemplate {IsPrimaryKey = true, AllowNulls = true,ColumnName = "RelativeFileArchiveURI"},
-                new ImageColumnTemplate {IsPrimaryKey = false,AllowNulls = true, ColumnName = "SeriesInstanceUID"},
-                new ImageColumnTemplate {IsPrimaryKey = false,AllowNulls = true, ColumnName = "StudyDate"},
-                new ImageColumnTemplate {IsPrimaryKey = false,AllowNulls = true, ColumnName = "StudyInstanceUID"},
-                new ImageColumnTemplate {IsPrimaryKey = false,AllowNulls = true, ColumnName = "StudyDescription"},
-                new ImageColumnTemplate {IsPrimaryKey = false,AllowNulls = true, ColumnName = "EchoTime"},
-                new ImageColumnTemplate {IsPrimaryKey = false,AllowNulls = true, ColumnName = "RepetitionTime"},
-                new ImageColumnTemplate {IsPrimaryKey = false,AllowNulls = true, ColumnName = "PatientAge"},
+                TableName = "Fish",
+                Columns = new[]
+                {
+                    new ImageColumnTemplate
+                    {
+                        IsPrimaryKey = true, AllowNulls = true, ColumnName = "RelativeFileArchiveURI"
+                    },
+                    new ImageColumnTemplate
+                    {
+                        IsPrimaryKey = false, AllowNulls = true, ColumnName = "SeriesInstanceUID"
+                    },
+                    new ImageColumnTemplate {IsPrimaryKey = false, AllowNulls = true, ColumnName = "StudyDate"},
+                    new ImageColumnTemplate
+                    {
+                        IsPrimaryKey = false, AllowNulls = true, ColumnName = "StudyInstanceUID"
+                    },
+                    new ImageColumnTemplate
+                    {
+                        IsPrimaryKey = false, AllowNulls = true, ColumnName = "StudyDescription"
+                    },
+                    new ImageColumnTemplate {IsPrimaryKey = false, AllowNulls = true, ColumnName = "EchoTime"},
+                    new ImageColumnTemplate
+                    {
+                        IsPrimaryKey = false, AllowNulls = true, ColumnName = "RepetitionTime"
+                    },
+                    new ImageColumnTemplate
+                    {
+                        IsPrimaryKey = false, AllowNulls = true, ColumnName = "PatientAge"
+                    },
+                }
             };
 
             // use it to create a table
@@ -48,7 +66,7 @@ namespace Rdmp.Dicom.Tests.Integration
             importer.DoImport(out TableInfo ti,out _);
 
             // compare the live with the template
-            var comparer = new LiveVsTemplateComparer(ti,new ImageTableTemplateCollection(){ DatabaseType = type,Tables = new List<ImageTableTemplate>{ template } });
+            var comparer = new LiveVsTemplateComparer(ti,new ImageTableTemplateCollection { DatabaseType = type,Tables = new List<ImageTableTemplate>{ template } });
 
             // should be no differences
             Assert.AreEqual(comparer.TemplateSql,comparer.LiveSql);
@@ -57,7 +75,7 @@ namespace Rdmp.Dicom.Tests.Integration
             tbl.DropColumn(tbl.DiscoverColumn("EchoTime"));
                
             //now comparer should see a difference
-            comparer = new LiveVsTemplateComparer(ti,new ImageTableTemplateCollection(){ DatabaseType = type,Tables = new List<ImageTableTemplate>{ template } });
+            comparer = new LiveVsTemplateComparer(ti,new ImageTableTemplateCollection { DatabaseType = type,Tables = new List<ImageTableTemplate>{ template } });
             Assert.AreNotEqual(comparer.TemplateSql,comparer.LiveSql);
 
             tbl.Drop();

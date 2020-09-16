@@ -6,7 +6,6 @@ using Dicom;
 using Dicom.Log;
 using Dicom.Network;
 using NUnit.Framework;
-using ReusableLibraryCode.Progress;
 using DicomClient = Dicom.Network.Client.DicomClient;
 
 namespace Rdmp.Dicom.Tests.Unit

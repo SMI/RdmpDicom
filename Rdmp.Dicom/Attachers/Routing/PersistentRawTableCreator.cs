@@ -18,12 +18,12 @@ namespace Rdmp.Dicom.Attachers.Routing
     /// </summary>
     public class PersistentRawTableCreator : IDisposeAfterDataLoad
     {
-        List<DiscoveredTable> _rawTables = new List<DiscoveredTable>();
+        readonly List<DiscoveredTable> _rawTables = new List<DiscoveredTable>();
 
         public void CreateRAWTablesInDatabase(DiscoveredDatabase rawDb, IDataLoadJob job)
         {
             var namer = job.Configuration.DatabaseNamer;
-            foreach (TableInfo tableInfo in job.RegularTablesToLoad)
+            foreach (ITableInfo tableInfo in job.RegularTablesToLoad)
             {
                 var liveTable = tableInfo.Discover(DataAccessContext.DataLoad);
 
@@ -62,7 +62,8 @@ namespace Rdmp.Dicom.Attachers.Routing
 
         private void AddColumnToTable(DiscoveredTable table, string desiredColumnName, string desiredColumnType, IDataLoadEventListener listener)
         {
-            listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information, string.Format("Adding column '{0}' with datatype '{1}' to table '{2}'", desiredColumnName, desiredColumnType, table.GetFullyQualifiedName())));
+            listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information,
+                $"Adding column '{desiredColumnName}' with datatype '{desiredColumnType}' to table '{table.GetFullyQualifiedName()}'"));
             table.AddColumn(desiredColumnName, desiredColumnType, true, 500);
         }
 

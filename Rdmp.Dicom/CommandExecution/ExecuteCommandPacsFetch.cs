@@ -1,5 +1,4 @@
-﻿using MongoDB.Bson;
-using Rdmp.Core.Caching.Requests;
+﻿using Rdmp.Core.Caching.Requests;
 using Rdmp.Core.Caching.Requests.FetchRequestProvider;
 using Rdmp.Core.CommandExecution;
 using Rdmp.Core.Curation;
@@ -9,12 +8,9 @@ using Rdmp.Core.Curation.Data.DataLoad;
 using Rdmp.Core.DataFlowPipeline;
 using Rdmp.Core.Repositories;
 using Rdmp.Dicom.Cache.Pipeline;
-using ReusableLibraryCode.Checks;
 using ReusableLibraryCode.Progress;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
 
 namespace Rdmp.Dicom.CommandExecution
 {
@@ -41,24 +37,28 @@ namespace Rdmp.Dicom.CommandExecution
             var cp = new CacheProgress(memory,lp);
 
             //Create the source component only and a valid request range to fetch
-            _source = new PACSSource();
-            _source.RemoteAEUri = new Uri("http://"+ remoteAeUri); //<- rly? its not gonna pass without an http!?
-            _source.RemoteAEPort = remotePort;
-            _source.RemoteAETitle = remoteAeTitle;
-            _source.LocalAEUri = new Uri("http://" + localAeUri);
-            _source.LocalAEPort = localPort;
-            _source.LocalAETitle = localAeTitle;
-            _source.TransferTimeOutInSeconds = 50000;
-            _source.Modality = "ALL";
-            _source.MaxRetries = maxRetries;
+            _source = new PACSSource
+            {
+                RemoteAEUri = new Uri("http://" + remoteAeUri),
+                RemoteAEPort = remotePort,
+                RemoteAETitle = remoteAeTitle,
+                LocalAEUri = new Uri("http://" + localAeUri),
+                LocalAEPort = localPort,
+                LocalAETitle = localAeTitle,
+                TransferTimeOutInSeconds = 50000,
+                Modality = "ALL",
+                MaxRetries = maxRetries
+            };
+            //<- rly? its not gonna pass without an http!?
 
-            _request = new BackfillCacheFetchRequest(BasicActivator.RepositoryLocator.CatalogueRepository,startDate);
-            _request.ChunkPeriod = endDate.Subtract(startDate);
-            _request.CacheProgress = cp;
-            
+            _request = new BackfillCacheFetchRequest(BasicActivator.RepositoryLocator.CatalogueRepository, startDate)
+            {
+                ChunkPeriod = endDate.Subtract(startDate), CacheProgress = cp
+            };
+
             //Initialize it
-            _source.PreInitialize(BasicActivator.RepositoryLocator.CatalogueRepository, new ThrowImmediatelyDataLoadEventListener(){WriteToConsole=true });
-            _source.PreInitialize(this,new ThrowImmediatelyDataLoadEventListener(){WriteToConsole=true});
+            _source.PreInitialize(BasicActivator.RepositoryLocator.CatalogueRepository, new ThrowImmediatelyDataLoadEventListener {WriteToConsole=true });
+            _source.PreInitialize(this,new ThrowImmediatelyDataLoadEventListener {WriteToConsole=true});
 
         }
 
@@ -67,7 +67,7 @@ namespace Rdmp.Dicom.CommandExecution
         {
             base.Execute();
 
-            _source.GetChunk(new ThrowImmediatelyDataLoadEventListener(){WriteToConsole = true},new GracefulCancellationToken());
+            _source.GetChunk(new ThrowImmediatelyDataLoadEventListener {WriteToConsole = true},new GracefulCancellationToken());
 
         }
         public ICacheFetchRequest Current => _request;

@@ -12,7 +12,7 @@ namespace Rdmp.Dicom.Extraction
         public UIDType UIDType { get; set; }
         public bool IsExternalReference { get; set; }
 
-        public static Dictionary<DicomTag, UIDType> SupportedTags = new Dictionary<DicomTag, UIDType>()
+        public static Dictionary<DicomTag, UIDType> SupportedTags = new Dictionary<DicomTag, UIDType>
         {
             {DicomTag.SOPInstanceUID,UIDType.SOPInstanceUID},
             {DicomTag.SeriesInstanceUID,UIDType.SeriesInstanceUID},

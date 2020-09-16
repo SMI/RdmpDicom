@@ -92,8 +92,7 @@ namespace Rdmp.Dicom.Cache
         {
             var nameWithoutExtension = fileInfo.Name.Substring(0, fileInfo.Name.Length - fileInfo.Extension.Length);
 
-            DateTime dt;
-            if (!DateTime.TryParseExact(nameWithoutExtension, DateFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+            if (!DateTime.TryParseExact(nameWithoutExtension, DateFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out var dt))
                 throw new Exception("Dodgy file in cache. Could not parse '" + nameWithoutExtension + "' using DateFormat=" + DateFormat + " : " + fileInfo.FullName);
 
             return dt;

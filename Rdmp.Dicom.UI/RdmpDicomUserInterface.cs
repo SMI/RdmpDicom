@@ -29,27 +29,25 @@ namespace Rdmp.Dicom.UI
             var databaseEntity = o as DatabaseEntity;
 
             //allow clicking in Catalogue collection whitespace
-            if (o is RDMPCollection && ((RDMPCollection)o) == RDMPCollection.Catalogue)
+            if (o is RDMPCollection collection && collection == RDMPCollection.Catalogue)
             {
                 return GetMenuArray(new ExecuteCommandCreateNewImagingDataset(ItemActivator));
             }
 
-            if (databaseEntity is Catalogue c)
-                return GetMenuArray(
-                    new ExecuteCommandCreateNewImagingDataset(ItemActivator),
-                    new ExecuteCommandPromoteNewTag(ItemActivator).SetTarget(databaseEntity),
-                    new ExecuteCommandCompareImagingSchemas(ItemActivator,c));
+            switch (databaseEntity)
+            {
+                case Catalogue c:
+                    return GetMenuArray(
+                        new ExecuteCommandCreateNewImagingDataset(ItemActivator),
+                        new ExecuteCommandPromoteNewTag(ItemActivator).SetTarget(databaseEntity),
+                        new ExecuteCommandCompareImagingSchemas(ItemActivator,c));
+                case ProcessTask pt:
+                    return GetMenuArray(new ExecuteCommandReviewIsolations(ItemActivator, pt));
+                case TableInfo _:
+                    return GetMenuArray(new ExecuteCommandPromoteNewTag(ItemActivator).SetTarget(databaseEntity));
+            }
 
-            if (databaseEntity is ProcessTask pt)
-                return GetMenuArray(new ExecuteCommandReviewIsolations(ItemActivator, pt));
-
-            if (databaseEntity is TableInfo)
-                return GetMenuArray(new ExecuteCommandPromoteNewTag(ItemActivator).SetTarget(databaseEntity));
-
-            if (o is AllExternalServersNode)
-                return GetMenuArray(new ExecuteCommandCreateNewExternalDatabaseServer(ItemActivator,new SMIDatabasePatcher(),PermissableDefaults.None));
-
-            return null;
+            return o is AllExternalServersNode ? GetMenuArray(new ExecuteCommandCreateNewExternalDatabaseServer(ItemActivator,new SMIDatabasePatcher(),PermissableDefaults.None)) : null;
         }
 
         public override object[] GetChildren(object model)

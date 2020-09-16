@@ -3,9 +3,7 @@ using Rdmp.Core.Curation.Data;
 using Rdmp.Dicom.TagPromotionSchema;
 using ReusableLibraryCode.Checks;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Rdmp.Dicom.CommandExecution
 {
@@ -14,7 +12,7 @@ namespace Rdmp.Dicom.CommandExecution
     /// </summary>
     public class ExecuteCommandAddTag : BasicCommandExecution
     {
-        private TagColumnAdder _adder;
+        private readonly TagColumnAdder _adder;
 
         public ExecuteCommandAddTag(BasicActivateItems activator,Catalogue catalogue, 
             [DemandsInitialization("Name of the new column you want created.")]
@@ -32,7 +30,7 @@ namespace Rdmp.Dicom.CommandExecution
 
             if(string.IsNullOrWhiteSpace(column))
             {
-                SetImpossible($"Column name must be supplied");
+                SetImpossible("Column name must be supplied");
                 return;
             }
                 

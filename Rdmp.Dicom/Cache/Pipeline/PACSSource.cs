@@ -5,7 +5,6 @@ using System.IO;
 using System.Threading.Tasks;
 using Dicom;
 using Dicom.Network;
-using Dicom.Network.Client;
 using MapsDirectlyToDatabaseTable;
 using ReusableLibraryCode.Checks;
 using ReusableLibraryCode.DataAccess;
@@ -21,7 +20,6 @@ using Rdmp.Core.Curation;
 using Rdmp.Core.QueryBuilding;
 using DicomClient = Dicom.Network.Client.DicomClient;
 using System.Collections.Concurrent;
-using System.Linq;
 
 namespace Rdmp.Dicom.Cache.Pipeline
 {
@@ -113,7 +111,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
                         "Stored sopInstance" + storeRequest.SOPInstanceUID.UID));
             };
 
-            //helps with tyding up resources if we abort or through an exception and neatly avoids ->  Access to disposed closure
+            //helps with tidying up resources if we abort or through an exception and neatly avoids ->  Access to disposed closure
             using (var server = (DicomServer<CachingSCP>) DicomServer.Create<CachingSCP>(dicomConfiguration.LocalAetUri.Port))
             {
                 DicomClient client = new DicomClient(dicomConfiguration.RemoteAetUri.Host, dicomConfiguration.RemoteAetUri.Port, false, dicomConfiguration.LocalAetTitle, dicomConfiguration.RemoteAetTitle);
@@ -145,11 +143,10 @@ namespace Rdmp.Dicom.Cache.Pipeline
 
                     var transferStopwatch = new Stopwatch();
 
-                    StudyToFetch current;
                     int consecutiveFailures = 0;
                                             
                     //While we have things to fetch
-                    while(studiesToOrder.TryTake(out current))
+                    while(studiesToOrder.TryTake(out var current))
                     {
                         transferStopwatch.Restart();
                         //delay value in mills
@@ -233,15 +230,13 @@ namespace Rdmp.Dicom.Cache.Pipeline
                             throw new Exception("Too many consecutive failures, giving up");
 
                         // 1 failure = study not available, 2 failures = system is having a bad day?
-                        if(consecutiveFailures > 1)
-                        {
-                            //wait 4 minutes then 6 minutes then 8 minutes, eventually server will start responding again?
-                            int sleepFor = consecutiveFailures * 2 * 60_000;
-                            listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Warning,$"Sleeping for {sleepFor}ms due to {consecutiveFailures} consecutive failures"));
+                        if (consecutiveFailures <= 1) continue;
+                        //wait 4 minutes then 6 minutes then 8 minutes, eventually server will start responding again?
+                        int sleepFor = consecutiveFailures * 2 * 60_000;
+                        listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Warning,$"Sleeping for {sleepFor}ms due to {consecutiveFailures} consecutive failures"));
 
-                            Task.Delay( sleepFor, cancellationToken.AbortToken)
-                                .Wait(cancellationToken.AbortToken);
-                        }
+                        Task.Delay( sleepFor, cancellationToken.AbortToken)
+                            .Wait(cancellationToken.AbortToken);
                     }
                         
                     #endregion
@@ -282,7 +277,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
             // ping configured remote PACS with a C-ECHO request
             //use a new requestSender
             var echoRequestSender = new DicomRequestSender(GetConfiguration(), new FromCheckNotifierToDataLoadEventListener(notifier));
-            echoRequestSender.OnRequestException += (ex) =>
+            echoRequestSender.OnRequestException += ex =>
             {
                 notifier.OnCheckPerformed(new CheckEventArgs("Error sending ECHO", CheckResult.Fail, ex));
             };
@@ -449,19 +444,14 @@ namespace Rdmp.Dicom.Cache.Pipeline
                 return false;
 
             //if there is a whitelist
-            if (whitelistIfAny != null)
-            {
-                //get the response dataset patientId
-                var patientId = dataset.GetSingleValue<string>(DicomTag.PatientID);
+            if (whitelistIfAny == null) return true;
+            //get the response dataset patientId
+            var patientId = dataset.GetSingleValue<string>(DicomTag.PatientID);
 
-                //if the patientId is empty or not on our whitelist
-                if (patientId == null)
-                    return false;
+            //if the patientId is empty or not on our whitelist
+            return patientId != null && whitelistIfAny.Contains(patientId.Trim());
 
-                return whitelistIfAny.Contains(patientId.Trim());
-            }
             //No WhiteList just add
-            return true;
         }
         #endregion
  
@@ -469,7 +459,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
         #region CMoveRequestToString
         private string CMoveRequestToString(DicomCMoveRequest cMoveRequest, int attempt)
         {
-            var stub = "Retrieving " + cMoveRequest.Level.ToString() + $" (attempt {attempt}) : ";
+            var stub = $"Retrieving {cMoveRequest.Level} (attempt {attempt}) : ";
             switch (cMoveRequest.Level)
             {
                 case DicomQueryRetrieveLevel.Patient:
@@ -481,7 +471,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
                 case DicomQueryRetrieveLevel.Image:
                     return stub + cMoveRequest.Dataset.GetSingleValue<string>(DicomTag.SOPInstanceUID);
                 default:
-                    return stub + DicomQueryRetrieveLevel.NotApplicable.ToString();
+                    return stub + DicomQueryRetrieveLevel.NotApplicable;
             }
         }
 

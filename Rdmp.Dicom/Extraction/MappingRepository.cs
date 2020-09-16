@@ -172,26 +172,25 @@ namespace Rdmp.Dicom.Extraction
 
                 var result = cmd.ExecuteScalar();
 
-                if (result == DBNull.Value || result == null)
+                if (result != DBNull.Value && result != null) return result.ToString();
+                var m = new UIDMapping
                 {
-                    var m = new UIDMapping();
-                    m.UIDType = uidType;
-                    m.ProjectNumber = projectNumber;
-                    m.PrivateUID = value;
-                    m.ReleaseUID = GetKindaUid();
-                    m.IsExternalReference = false;
+                    UIDType = uidType,
+                    ProjectNumber = projectNumber,
+                    PrivateUID = value,
+                    ReleaseUID = GetKindaUid(),
+                    IsExternalReference = false
+                };
 
-                    InsertMapping(m);
+                InsertMapping(m);
 
-                    return m.ReleaseUID;
-                }
+                return m.ReleaseUID;
 
-                return result.ToString();
             }
             
         }
 
-        static Random r = new Random();
+        static readonly Random r = new Random();
         
         private string GetKindaUid()
         {

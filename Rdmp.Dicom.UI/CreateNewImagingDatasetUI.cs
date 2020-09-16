@@ -37,14 +37,10 @@ namespace Rdmp.Dicom.UI
                 return false;
             }
 
-            if (!db.Exists())
-            {
-                if (MessageBox.Show("Create database '" + db + "'", "Create", MessageBoxButtons.YesNo) ==
-                    DialogResult.Yes)
-                    db.Create();
-                else
-                    return false;
-            }
+            if (db.Exists()) return true;
+            if (MessageBox.Show("Create database '" + db + "'", "Create", MessageBoxButtons.YesNo) != DialogResult.Yes)
+                return false;
+            db.Create();
 
             return true;
         }
@@ -52,7 +48,7 @@ namespace Rdmp.Dicom.UI
         private void btnCreateSuiteWithTemplate_Click(object sender, EventArgs e)
         {
             string filename;
-            using (OpenFileDialog ofd = new OpenFileDialog()
+            using (OpenFileDialog ofd = new OpenFileDialog
             {
                 Filter = "Imaging Template|*.it"
             })
@@ -83,7 +79,8 @@ namespace Rdmp.Dicom.UI
 
 
             DirectoryInfo dir = null;
-            using (FolderBrowserDialog dialog = new FolderBrowserDialog() {
+            using (FolderBrowserDialog dialog = new FolderBrowserDialog
+            {
                 Description = "Select Project Directory (For Sql scripts/Executables etc)"
             })
             {
@@ -95,12 +92,16 @@ namespace Rdmp.Dicom.UI
                         return;
             }
 
-            var cmd = new ExecuteCommandCreateNewImagingDatasetSuite(_activator.RepositoryLocator, db,dir);
-            cmd.DicomSourceType = rbJsonSources.Checked ? typeof(DicomDatasetCollectionSource) : typeof(DicomFileCollectionSource);
-            cmd.CreateCoalescer = cbMergeNullability.Checked;
-            cmd.CreateLoad = cbCreateLoad.Checked;
-            cmd.TablePrefix = tbPrefix.Text;
-            cmd.Template = template;
+            var cmd = new ExecuteCommandCreateNewImagingDatasetSuite(_activator.RepositoryLocator, db, dir)
+            {
+                DicomSourceType = rbJsonSources.Checked
+                    ? typeof(DicomDatasetCollectionSource)
+                    : typeof(DicomFileCollectionSource),
+                CreateCoalescer = cbMergeNullability.Checked,
+                CreateLoad = cbCreateLoad.Checked,
+                TablePrefix = tbPrefix.Text,
+                Template = template
+            };
 
             cmd.Execute();
 

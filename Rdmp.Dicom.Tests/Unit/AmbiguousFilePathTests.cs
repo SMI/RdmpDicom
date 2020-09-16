@@ -44,18 +44,18 @@ namespace Rdmp.Dicom.Tests.Unit
             
             
 
-           //give it some linux style paths
-           var b = new AmbiguousFilePath(@"/temp/my.dcm");
-           Assert.AreEqual(@"/temp/my.dcm", b.FullPath);
+            //give it some linux style paths
+            var b = new AmbiguousFilePath(@"/temp/my.dcm");
+            Assert.AreEqual(@"/temp/my.dcm", b.FullPath);
 
-           b = new AmbiguousFilePath(@"/temp",@"/temp/my.dcm");
-           Assert.AreEqual(@"/temp/my.dcm", b.FullPath);
+            b = new AmbiguousFilePath(@"/temp",@"/temp/my.dcm");
+            Assert.AreEqual(@"/temp/my.dcm", b.FullPath);
 
-           b = new AmbiguousFilePath(@"/temp", @"/temp/myzip.zip!my.dcm");
-           Assert.AreEqual(@"/temp/myzip.zip!my.dcm", b.FullPath);
+            b = new AmbiguousFilePath(@"/temp", @"/temp/myzip.zip!my.dcm");
+            Assert.AreEqual(@"/temp/myzip.zip!my.dcm", b.FullPath);
 
-           b = new AmbiguousFilePath(@"/temp/", @"./myzip.zip!my.dcm");
-           Assert.AreEqual(@"/temp/./myzip.zip!my.dcm", b.FullPath);
+            b = new AmbiguousFilePath(@"/temp/", @"./myzip.zip!my.dcm");
+            Assert.AreEqual(@"/temp/./myzip.zip!my.dcm", b.FullPath);
         }
         
 
@@ -117,8 +117,8 @@ namespace Rdmp.Dicom.Tests.Unit
                 for (int i = 0; i < 1500; i++)
                 {
                     var entry = z.CreateEntry("test" + i + ".dcm");
-                    using (Stream s = entry.Open())
-                        s.Write(bytes, 0, bytes.Length);
+                    using Stream s = entry.Open();
+                    s.Write(bytes, 0, bytes.Length);
                 }
 
             //we want to read one out of the middle

@@ -8,7 +8,6 @@ using Rdmp.UI.ItemActivation;
 using Rdmp.Core.Curation.Data;
 using Rdmp.Core.Icons.IconProvision;
 using Rdmp.UI.ChecksUI;
-using Rdmp.UI.Icons.IconProvision;
 
 namespace Rdmp.Dicom.UI.CommandExecution.AtomicCommands
 {
@@ -34,41 +33,35 @@ namespace Rdmp.Dicom.UI.CommandExecution.AtomicCommands
 
             var ui = new TagColumnAdderUI(_tableInfo);
 
-            if(ui.ShowDialog() == DialogResult.OK)
-            {
-                var checks = new PopupChecksUI("Adding Column", false);
+            if (ui.ShowDialog() != DialogResult.OK) return;
+            var checks = new PopupChecksUI("Adding Column", false);
                 
-                var columnAdder = new TagColumnAdder(ui.ColumnName, ui.ColumnDataType, _tableInfo, checks);
+            var columnAdder = new TagColumnAdder(ui.ColumnName, ui.ColumnDataType, _tableInfo, checks);
 
-                columnAdder.Execute();
-                Publish(_tableInfo);
+            columnAdder.Execute();
+            Publish(_tableInfo);
 
-                //Checks have likely been popped up as a non modal dialogue by the execute action (allowing the user to review the events)
-                if(checks.Visible)
-                    checks.FormClosed += (s,e)=>
-                    {
-                        //schedule disposal of the control for when the user closes it
-                        if(!checks.IsDisposed)
-                            checks.Dispose();
-                    };                        
-                else
-                    checks.Dispose(); // for some reason the checks were not spawned so explicitly dispose of the resources
-            }
+            //Checks have likely been popped up as a non modal dialogue by the execute action (allowing the user to review the events)
+            if(checks.Visible)
+                checks.FormClosed += (s,e)=>
+                {
+                    //schedule disposal of the control for when the user closes it
+                    if(!checks.IsDisposed)
+                        checks.Dispose();
+                };                        
+            else
+                checks.Dispose(); // for some reason the checks were not spawned so explicitly dispose of the resources
         }
 
         public IAtomicCommandWithTarget SetTarget(DatabaseEntity target)
         {
             _tableInfo = target as TableInfo;
 
-            var catalogue = target as Catalogue;
+            if (!(target is Catalogue catalogue)) return this;
+            var tables = catalogue.GetTableInfoList(false);
 
-            if(catalogue != null)
-            {
-                var tables = catalogue.GetTableInfoList(false);
-
-                if (tables.Length == 1)
-                    _tableInfo = (TableInfo)tables[0];
-            }
+            if (tables.Length == 1)
+                _tableInfo = (TableInfo)tables[0];
 
             return this;
         }

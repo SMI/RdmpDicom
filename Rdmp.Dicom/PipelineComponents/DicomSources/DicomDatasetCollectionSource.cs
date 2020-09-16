@@ -15,7 +15,7 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
 
         private const int BatchSize = 50000;
 
-        Stopwatch _sw = new Stopwatch();
+        readonly Stopwatch _sw = new Stopwatch();
 
         public void PreInitialize(IDicomWorklist value, IDataLoadEventListener listener)
         {
@@ -42,14 +42,11 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
             }
 
             var currentBatch = BatchSize;
-            DicomDataset ds = null;
+            DicomDataset ds;
             
             var dt = GetDataTable();
 
-            string filename;
-            Dictionary<string, string> otherValuesToStoreInRow;
-            
-            while (currentBatch > 0 && (ds = _datasetListWorklist.GetNextDatasetToProcess(out filename,out otherValuesToStoreInRow)) != null)
+            while (currentBatch > 0 && (ds = _datasetListWorklist.GetNextDatasetToProcess(out var filename,out var otherValuesToStoreInRow)) != null)
             {
                 string filename1 = filename;
                 Dictionary<string, string> row = otherValuesToStoreInRow;
@@ -62,10 +59,7 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
             _sw.Stop();
             listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information, "GetChunk cumulative total time is " + _sw.ElapsedMilliseconds + "ms"));
 
-            if (dt.Rows.Count > 0)
-                return dt;
-
-            return null;
+            return dt.Rows.Count > 0 ? dt : null;
         }
 
         public override DataTable TryGetPreview()

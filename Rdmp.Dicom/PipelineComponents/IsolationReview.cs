@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.Common;
 using System.Linq;
 using FAnsi.Discovery;
 using FAnsi.Discovery.QuerySyntax;
 using Rdmp.Core.Curation.Data;
 using Rdmp.Core.Curation.Data.DataLoad;
-using Rdmp.Core.Curation.Data.Spontaneous;
-using Rdmp.Core.QueryBuilding;
 using ReusableLibraryCode.DataAccess;
 
 namespace Rdmp.Dicom.PipelineComponents
@@ -55,11 +52,9 @@ namespace Rdmp.Dicom.PipelineComponents
                 Error = "No tables configured on Isolation task";
                 return;
             }
-            if (IsolationDatabase == null)
-            {
-                Error = "No isolation database configured on Isolation task";
-                return;
-            }
+
+            if (IsolationDatabase != null) return;
+            Error = "No isolation database configured on Isolation task";
         }
 
         public Dictionary<TableInfo,DiscoveredTable> GetIsolationTables()
@@ -138,7 +133,7 @@ namespace Rdmp.Dicom.PipelineComponents
 
                 differences = new List<IsolationDifference>();
                 
-                //if theres only 1 row in the table then there are no differences!
+                //if there's only 1 row in the table then there are no differences!
                 if (dt.Rows.Count < 2)
                 {
                     dt.Rows.Clear();
@@ -167,19 +162,17 @@ namespace Rdmp.Dicom.PipelineComponents
                         }
 
                         //happens for the very first row (loop iteration) only
-                        if (masterRow != currentRow)
-                        {
-                            differencesDt.ImportRow(currentRow);
-                            var diff = new IsolationDifference(differencesDt.Rows.Count - 1, masterRow[sortOn].ToString(), false);
-                            differences.Add(diff);
-                            differencesDtIdx++;
+                        if (masterRow == currentRow) continue;
+                        differencesDt.ImportRow(currentRow);
+                        var diff = new IsolationDifference(differencesDt.Rows.Count - 1, masterRow[sortOn].ToString(), false);
+                        differences.Add(diff);
+                        differencesDtIdx++;
 
-                            //record the columns that differed
-                            foreach (DataColumn dc in dt.Columns)
-                            {
-                                if(AreDifferent(masterRow[dc],currentRow[dc]))
-                                    diff.ConflictingColumns.Add(dc.ColumnName);
-                            }
+                        //record the columns that differed
+                        foreach (DataColumn dc in dt.Columns)
+                        {
+                            if(AreDifferent(masterRow[dc],currentRow[dc]))
+                                diff.ConflictingColumns.Add(dc.ColumnName);
                         }
                     }
                     else

@@ -9,8 +9,6 @@ using Rdmp.Core.DataLoad.Triggers.Implementations;
 using Rdmp.Dicom.CommandExecution;
 using ReusableLibraryCode.Checks;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using Tests.Common;
 
 namespace Rdmp.Dicom.Tests.Integration
@@ -24,13 +22,21 @@ namespace Rdmp.Dicom.Tests.Integration
             var db = GetCleanedServer(type);
 
             // Create a nice template with lots of columns
-            var template = new ImageTableTemplate();
-            template.TableName = "Fish";
-            template.Columns = new[]
+            var template = new ImageTableTemplate
             {
-                new ImageColumnTemplate {IsPrimaryKey = true, AllowNulls = true,ColumnName = "RelativeFileArchiveURI"},
-                new ImageColumnTemplate {IsPrimaryKey = false,AllowNulls = true, ColumnName = "SeriesInstanceUID"},
-                new ImageColumnTemplate {IsPrimaryKey = false,AllowNulls = true, ColumnName = "StudyDate"},
+                TableName = "Fish",
+                Columns = new[]
+                {
+                    new ImageColumnTemplate
+                    {
+                        IsPrimaryKey = true, AllowNulls = true, ColumnName = "RelativeFileArchiveURI"
+                    },
+                    new ImageColumnTemplate
+                    {
+                        IsPrimaryKey = false, AllowNulls = true, ColumnName = "SeriesInstanceUID"
+                    },
+                    new ImageColumnTemplate {IsPrimaryKey = false, AllowNulls = true, ColumnName = "StudyDate"},
+                }
             };
 
             // use it to create a table

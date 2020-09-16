@@ -108,9 +108,9 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
                 notifier.OnCheckPerformed(new CheckEventArgs("Could not deserialize TagElevationConfigurationFile", CheckResult.Fail, e));
             }
 
-            if (!string.IsNullOrWhiteSpace(ArchiveRoot))
-                if (!Path.IsPathRooted(ArchiveRoot))
-                    notifier.OnCheckPerformed(new CheckEventArgs("ArchiveRoot is not rooted, it must be an absolute path e.g. c:\\temp\\MyImages\\", CheckResult.Fail));
+            if (string.IsNullOrWhiteSpace(ArchiveRoot)) return;
+            if (!Path.IsPathRooted(ArchiveRoot))
+                notifier.OnCheckPerformed(new CheckEventArgs("ArchiveRoot is not rooted, it must be an absolute path e.g. c:\\temp\\MyImages\\", CheckResult.Fail));
 
         }
 
@@ -199,8 +199,8 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
                         throw new ArgumentOutOfRangeException();
                 }
 
-                if (value is string && DataTooLongHandlingStrategy != DataTooWideHandling.None)
-                    if (!IsValidLength(listener, item.Tag, (string)value))
+                if (value is string s && DataTooLongHandlingStrategy != DataTooWideHandling.None)
+                    if (!IsValidLength(listener, item.Tag, s))
                     {
 
                         //the string is too long!
@@ -209,7 +209,7 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
                             case DataTooWideHandling.TruncateAndWarn:
                                 lock (_oDictLock)
                                 {
-                                    value = ((string)value).Substring(0, _maxTagLengths[item.Tag]);
+                                    value = s.Substring(0, _maxTagLengths[item.Tag]);
                                 }
                                 break;
                             case DataTooWideHandling.MarkCorrupt:
@@ -312,14 +312,9 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
                     return true; //skip it
 
             //if there is an explict mapping to follow
-            if (FieldMapTableIfAny != null || UseAllTableInfoInLoadAsFieldMap != null)
-            {
-                //if we don't have the tag in our schema ignore it
-                if (!dt.Columns.Contains(tag.DictionaryEntry.Keyword))
-                    return true;
-            }
-
-            return false;
+            if (FieldMapTableIfAny == null && UseAllTableInfoInLoadAsFieldMap == null) return false;
+            //if we don't have the tag in our schema ignore it
+            return !dt.Columns.Contains(tag.DictionaryEntry.Keyword);
         }
 
         private bool IsValidLength(IDataLoadEventListener listener, DicomTag tag, string value)
@@ -379,9 +374,9 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
             filename = StandardisePath(filename);
 
             //if it is relative to ArchiveRoot then express only the subsection with "./" at start
-            if (!string.IsNullOrWhiteSpace(ArchiveRoot))
-                if (filename.StartsWith(ArchiveRoot, StringComparison.CurrentCultureIgnoreCase))
-                    return "./" + filename.Substring(ArchiveRoot.Length).TrimStart('/');
+            if (string.IsNullOrWhiteSpace(ArchiveRoot)) return filename;
+            if (filename.StartsWith(ArchiveRoot, StringComparison.CurrentCultureIgnoreCase))
+                return "./" + filename.Substring(ArchiveRoot.Length).TrimStart('/');
 
             //otherwise return the original
             return filename;
@@ -403,11 +398,9 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
                 return new TagElevationRequestCollection(TagElevationConfigurationXml.xml);
 
             //if tag elevation is specified in a file
-            if (TagElevationConfigurationFile != null)
-                return new TagElevationRequestCollection(File.ReadAllText(TagElevationConfigurationFile.FullName));
+            return TagElevationConfigurationFile != null ? new TagElevationRequestCollection(File.ReadAllText(TagElevationConfigurationFile.FullName)) : null;
             
             //there is no tag elevation
-            return null;
         }
 
         public abstract DataTable GetChunk(IDataLoadEventListener listener, GracefulCancellationToken cancellationToken);

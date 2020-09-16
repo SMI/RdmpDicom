@@ -3,7 +3,6 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using Dicom;
-using Rdmp.Core.Startup;
 using Rdmp.Dicom.PACS;
 
 namespace Rdmp.Dicom.Extraction.FoDicomBased
@@ -35,7 +34,7 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
         public AmbiguousFilePath(string fullPath)
         {
             if(!IsAbsolute(fullPath))
-                throw new ArgumentException("Relative path was encountered without specifying a root, if you want to process relative paths you will need to provide a root path too.  fullPath was '" + fullPath + "'","fullPath");
+                throw new ArgumentException("Relative path was encountered without specifying a root, if you want to process relative paths you will need to provide a root path too.  fullPath was '" + fullPath + "'",nameof(fullPath));
 
             FullPath = fullPath;
         }
@@ -44,7 +43,7 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
         {
             //if root is provided but is not absolute
             if(!string.IsNullOrWhiteSpace(root) && !IsAbsolute(root))
-                throw new ArgumentException("Specified root path '" + root + "' was not IsAbsolute", "root");
+                throw new ArgumentException("Specified root path '" + root + "' was not IsAbsolute", nameof(root));
 
             FullPath = Combine(root, path);
         }
@@ -121,10 +120,7 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
 
         private bool IsDicomReference(string fullPath)
         {
-            if(string.IsNullOrWhiteSpace(fullPath))
-                return false;
-
-            return fullPath.EndsWith(".dcm", StringComparison.CurrentCultureIgnoreCase);
+            return !string.IsNullOrWhiteSpace(fullPath) && fullPath.EndsWith(".dcm", StringComparison.CurrentCultureIgnoreCase);
         }
 
         public static bool IsZipReference(string path)
@@ -139,10 +135,7 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
 
         private bool IsAbsolute(string path)
         {
-            if (string.IsNullOrWhiteSpace(path))
-                return false;
-
-            return Path.IsPathRooted(path);
+            return !string.IsNullOrWhiteSpace(path) && Path.IsPathRooted(path);
         }
     }
 }
