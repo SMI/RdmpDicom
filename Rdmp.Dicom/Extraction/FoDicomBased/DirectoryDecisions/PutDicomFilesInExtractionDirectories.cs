@@ -11,7 +11,7 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased.DirectoryDecisions
         public string WriteOutDataset(DirectoryInfo outputDirectory, string releaseIdentifier, DicomDataset dicomDataset)
         {
             if(dicomDataset == null)
-                throw new ArgumentNullException("dicomDataset");
+                throw new ArgumentNullException(nameof(dicomDataset));
 
             if(!outputDirectory.Exists)
                 outputDirectory.Create();

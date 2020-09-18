@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using System.Linq;
 
 namespace Rdmp.Dicom.Tests
 {
@@ -15,7 +16,7 @@ namespace Rdmp.Dicom.Tests
         /// <returns>
         /// A DataTable containing the specified data.
         /// </returns>
-        static public DataTable CreateDataTable(
+        public static DataTable CreateDataTable(
             string[] columnNames,
             string[,] data
             )
@@ -24,9 +25,7 @@ namespace Rdmp.Dicom.Tests
 
             for (int i = 0; i < columnNames.Length; i++)
             {
-                DataColumn column = new DataColumn();
-                column.DataType = data[0, i].GetType();
-                column.ColumnName = columnNames[i];
+                DataColumn column = new DataColumn {DataType = data[0, i].GetType(), ColumnName = columnNames[i]};
                 result.Columns.Add(column);
             }
 
@@ -54,24 +53,9 @@ namespace Rdmp.Dicom.Tests
         /// <returns>
         /// true if the data table contains the specified row, false otherwise
         /// </returns>
-        static public bool ContainsRow(DataTable dataTable, object[] expectedRow)
+        public static bool ContainsRow(DataTable dataTable, object[] expectedRow)
         {
-            if (expectedRow.Length != dataTable.Columns.Count) return false;
-
-            foreach (DataRow row in dataTable.Rows)
-            {
-                bool matched = true;
-                for (int i = 0; i < expectedRow.Length; i++)
-                {
-                    if (!expectedRow[i].Equals(row[i]))
-                    {
-                        matched = false;
-                        break;
-                    }
-                }
-                if (matched) return true;
-            }
-            return false;
+            return expectedRow.Length == dataTable.Columns.Count && (from DataRow row in dataTable.Rows select !expectedRow.Where((t, i) => !t.Equals(row[i])).Any()).Any(matched => matched);
         }
     }
 }

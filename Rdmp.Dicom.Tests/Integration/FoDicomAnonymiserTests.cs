@@ -40,19 +40,12 @@ namespace Rdmp.Dicom.Tests.Integration
         private void TidyUpImages()
         {
             var imagesDir = new DirectoryInfo(Path.Combine(TestContext.CurrentContext.WorkDirectory, "Images"));
-        if (imagesDir.Exists)
-        {
-            var children = imagesDir.GetDirectories();
-            foreach (var directory in children)
-            {
+            if (imagesDir.Exists)
                 imagesDir.Delete(true);
-            }
-        }
-
         }
 
         // The following commented tests will fail due to underlying system limits on paths
-        // there is no reliable method to get maximum path length (apprently?)
+        // there is no reliable method to get maximum path length (apparently?)
         //        [TestCase(typeof(PutInUidStudySeriesFolders))]
         [TestCase(typeof(PutInUidSeriesFolders),true)]
         [TestCase(typeof(PutInUidSeriesFolders),false)]
@@ -71,7 +64,7 @@ namespace Rdmp.Dicom.Tests.Integration
             var eds = new ExternalDatabaseServer(CatalogueRepository, "eds", patcher);
             eds.SetProperties(uidMapDb);
             
-            Dictionary<DicomTag,string> thingThatShouldDisappear = new Dictionary<DicomTag, string>()
+            Dictionary<DicomTag,string> thingThatShouldDisappear = new Dictionary<DicomTag, string>
             {
                 //Things we would want to disappear
                 {DicomTag.PatientName,"Moscow"},
@@ -81,13 +74,13 @@ namespace Rdmp.Dicom.Tests.Integration
                 {DicomTag.StudyDate,"2002-01-01"},
             };
 
-            Dictionary<DicomTag,string> thingsThatShouldRemain = new Dictionary<DicomTag, string>()
+            Dictionary<DicomTag,string> thingsThatShouldRemain = new Dictionary<DicomTag, string>
             {
                 //Things we would want to remain
                 //{DicomTag.SmokingStatus,"YES"},
             };
             
-            var dicom = new DicomDataset()
+            var dicom = new DicomDataset
             {
                 {DicomTag.SOPInstanceUID, "123.4.4"},
                 {DicomTag.SeriesInstanceUID, "123.4.5"},
@@ -95,11 +88,11 @@ namespace Rdmp.Dicom.Tests.Integration
                 {DicomTag.SOPClassUID,"1"},
             };
 
-            foreach (var kvp in thingThatShouldDisappear)
-                dicom.AddOrUpdate(kvp.Key, kvp.Value);
+            foreach (var (key, value) in thingThatShouldDisappear)
+                dicom.AddOrUpdate(key, value);
             
-            foreach (var kvp in thingsThatShouldRemain)
-                dicom.AddOrUpdate(kvp.Key, kvp.Value);
+            foreach (var (key, value) in thingsThatShouldRemain)
+                dicom.AddOrUpdate(key, value);
 
             dicom.AddOrUpdate(DicomTag.StudyDate, new DateTime(2002 , 01 , 01));
 
@@ -116,7 +109,7 @@ namespace Rdmp.Dicom.Tests.Integration
             dt.Columns.Add("Pat");
             //note we don't have series
 
-            dt.Rows.Add(new[] {fi.Name, "123.4.4","123.4.5", "123.4.6", "Hank"});
+            dt.Rows.Add(fi.Name, "123.4.4", "123.4.5", "123.4.6", "Hank");
 
             var anonymiser = new FoDicomAnonymiser();
 
@@ -166,16 +159,16 @@ namespace Rdmp.Dicom.Tests.Integration
             Assert.AreEqual(anoDt.Rows[0]["StudyInstanceUID"], anoDicom.Dataset.GetValue<string>(DicomTag.StudyInstanceUID, 0));
 
 
-            foreach (KeyValuePair<DicomTag, string> kvp in thingThatShouldDisappear)
+            foreach (var (key, _) in thingThatShouldDisappear)
             {
                 //if it chopped out the entire tag
-                if(!anoDicom.Dataset.Contains(kvp.Key))
+                if(!anoDicom.Dataset.Contains(key))
                     continue;
                 
-                if (anoDicom.Dataset.GetValueCount(kvp.Key) == 0)
+                if (anoDicom.Dataset.GetValueCount(key) == 0)
                     continue;
                 
-                var value = anoDicom.Dataset.GetSingleValue<string>(kvp.Key);
+                var value = anoDicom.Dataset.GetSingleValue<string>(key);
                 switch (value)
                 {
                     //allowed values
@@ -188,34 +181,28 @@ namespace Rdmp.Dicom.Tests.Integration
                         continue;
 
 
-                    default: Assert.Fail("Unexpected value for " + kvp.Key + ":" + value);
+                    default: Assert.Fail("Unexpected value for " + key + ":" + value);
                         break;
                 }
             }
 
-            foreach (KeyValuePair<DicomTag, string> kvp in thingsThatShouldRemain)
-                Assert.AreEqual(kvp.Value, anoDicom.Dataset.GetValue<string>(kvp.Key, 0));
+            foreach (var (key, value) in thingsThatShouldRemain)
+                Assert.AreEqual(value, anoDicom.Dataset.GetValue<string>(key, 0));
         }
 
         // The following commented tests will fail due to underlying system limits on paths
-        // there is no reliable method to get maximum path length (apprently?)
+        // there is no reliable method to get maximum path length (apparently?)
         //        [TestCase(typeof(PutInUidStudySeriesFolders))]
         [TestCase(typeof(PutInReleaseIdentifierSubfolders))]
         [TestCase(typeof(PutInUidSeriesFolders))]
         [TestCase(typeof(PutInRoot))]
         public void TestPutDicomFilesInExtractionDirectories(Type putterType)
         {
-
-
-
             var outputDirectory = new DirectoryInfo(Path.Combine(TestContext.CurrentContext.WorkDirectory, "Images"));
-            
-            var releaseIdentifier = "Hank";
-
-
+            const string releaseIdentifier = "Hank";
             var putter = (IPutDicomFilesInExtractionDirectories) new ObjectConstructor().Construct(putterType);
-
-          var dicomDataset = new DicomDataset()
+            
+            var dicomDataset = new DicomDataset
             {
                 {DicomTag.SOPInstanceUID, "123.4.4"},
                 {DicomTag.SeriesInstanceUID, "123.4.5"},
@@ -263,7 +250,7 @@ namespace Rdmp.Dicom.Tests.Integration
             
             //mock the prochi/release id columnvar cohort = MockRepository.GenerateMock<IExtractableCohort>();
             var queryBuilder = Mock.Of<ISqlQueryBuilder>(q=>
-            q.SelectColumns == new List<QueryTimeColumn>() { new QueryTimeColumn(new SpontaneouslyInventedColumn(new MemoryRepository(), "Pat","[db]..[tb].[Pat]"){IsExtractionIdentifier = true}) });
+            q.SelectColumns == new List<QueryTimeColumn> { new QueryTimeColumn(new SpontaneouslyInventedColumn(new MemoryRepository(), "Pat","[db]..[tb].[Pat]"){IsExtractionIdentifier = true}) });
                        
             
             //mock the extraction directory

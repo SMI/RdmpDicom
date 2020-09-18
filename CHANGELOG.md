@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
+## [2.1.11] 2020-09-18
+
+## Added
+
+- Added TimeoutInSeconds property to `PrimaryKeyCollisionIsolationMutilation` DLE module
+
 ## [2.1.10] 2020-09-01
 
 ## Added
@@ -232,7 +238,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial commit from private repo
 
-[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v2.1.10...develop
+[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v2.1.11...develop
+[2.1.11]: https://github.com/HicServices/RdmpDicom/compare/v2.1.10...v2.1.11
 [2.1.10]: https://github.com/HicServices/RdmpDicom/compare/v2.1.9...v2.1.10
 [2.1.9]: https://github.com/HicServices/RdmpDicom/compare/v2.1.8...v2.1.9
 [2.1.8]: https://github.com/HicServices/RdmpDicom/compare/v2.1.7...v2.1.8

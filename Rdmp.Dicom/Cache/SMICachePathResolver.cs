@@ -5,7 +5,7 @@ namespace Rdmp.Dicom.Cache
 {
     public class SMICachePathResolver : ILoadCachePathResolver
     {
-        public string Modality { get; private set; }
+        public string Modality { get; }
 
         public SMICachePathResolver(string modality)
         {

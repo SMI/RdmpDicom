@@ -24,12 +24,11 @@ namespace Rdmp.Dicom.UI
             dataGridView1.CellFormatting += DataGridView1OnCellFormatting;
         }
 
-        private void IsolationTableUI_Load(object sender, System.EventArgs e)
+        private void IsolationTableUI_Load(object sender, EventArgs e)
         {
             foreach (var kvp in _reviewer.GetIsolationTables())
             {
-                var btn = new Button();
-                btn.Text = kvp.Value.GetRuntimeName();
+                var btn = new Button {Text = kvp.Value.GetRuntimeName()};
                 btn.Click += (a, b) => HandleClick(kvp);
                 flpTables.Controls.Add(btn);
             }
@@ -44,25 +43,20 @@ namespace Rdmp.Dicom.UI
         {
             var diff = _currentDiffs?.FirstOrDefault(d => d.RowIndex == e.RowIndex);
 
-            if (diff != null && !diff.IsMaster && _currentDataTable != null)
-            {
-                var colName = _currentDataTable.Columns[e.ColumnIndex].ColumnName;
+            if (diff == null || diff.IsMaster || _currentDataTable == null) return;
+            var colName = _currentDataTable.Columns[e.ColumnIndex].ColumnName;
                 
-                if(diff.ConflictingColumns.Contains(colName))
-                    e.CellStyle.BackColor = Color.LightCyan;
-            }
+            if(diff.ConflictingColumns.Contains(colName))
+                e.CellStyle.BackColor = Color.LightCyan;
         }
 
-        private void tbTimeout_Click(object sender, System.EventArgs e)
+        private void tbTimeout_Click(object sender, EventArgs e)
         {
             tbTimeout.ForeColor = Color.Black;
 
             try
             {
-                if (string.IsNullOrWhiteSpace(tbTimeout.TextBox.Text))
-                    _reviewer.Timeout = 0;
-                else
-                    _reviewer.Timeout = int.Parse(tbTimeout.TextBox.Text);
+                _reviewer.Timeout = string.IsNullOrWhiteSpace(tbTimeout.TextBox?.Text) ? 0 : int.Parse(tbTimeout.TextBox.Text);
             }
             catch (Exception)
             {
@@ -70,17 +64,14 @@ namespace Rdmp.Dicom.UI
             }
         }
 
-        private void tbTop_Click(object sender, System.EventArgs e)
+        private void tbTop_Click(object sender, EventArgs e)
         {
             
             tbTop.ForeColor = Color.Black;
 
             try
             {
-                if (string.IsNullOrWhiteSpace(tbTop.TextBox.Text))
-                    _reviewer.Top = 0;
-                else
-                    _reviewer.Top = int.Parse(tbTop.TextBox.Text);
+                _reviewer.Top = string.IsNullOrWhiteSpace(tbTop.TextBox?.Text) ? 0 : int.Parse(tbTop.TextBox.Text);
             }
             catch (Exception)
             {

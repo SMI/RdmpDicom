@@ -8,7 +8,7 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources.Worklists
         private readonly DicomDataset[] _datasets;
         private readonly string _filenameToPretend;
         private int index = 0;
-        private Dictionary<string, string> _otherValuesToStoreInRow;
+        private readonly Dictionary<string, string> _otherValuesToStoreInRow;
 
 
         public HashSet<DicomDataset> CorruptMessages = new HashSet<DicomDataset>();
@@ -33,12 +33,7 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources.Worklists
             otherValuesToStoreInRow = _otherValuesToStoreInRow;
             filename = _filenameToPretend;
 
-            if (index >= _datasets.Length)
-            {
-                return null;
-            }
-
-            return _datasets[index++];
+            return index >= _datasets.Length ? null : _datasets[index++];
         }
 
         public void MarkCorrupt(DicomDataset ds)

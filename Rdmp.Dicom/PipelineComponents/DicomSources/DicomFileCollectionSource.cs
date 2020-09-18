@@ -54,14 +54,11 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
 
             _stopwatch.Start();
             
-            var dt = base.GetDataTable();
+            var dt = GetDataTable();
 
             try
             {
-                AmbiguousFilePath file;
-                DirectoryInfo directory;
-                
-                if (!_fileWorklist.GetNextFileOrDirectoryToProcess(out directory, out file))
+                if (!_fileWorklist.GetNextFileOrDirectoryToProcess(out var directory, out var file))
                     return null;
 
                 // Exactly one of file/directory must be null:
@@ -71,7 +68,7 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
                 if (file != null)
                 {
                     dt.TableName = QuerySyntaxHelper.MakeHeaderNameSensible(Path.GetFileNameWithoutExtension(file.FullPath));
-                    if (file.FullPath.EndsWith(".zip"))
+                    if (file.FullPath!=null && file.FullPath.EndsWith(".zip"))
                     {
                         //Input is a single zip file
                         ProcessZipArchive(dt, listener, file.FullPath);
@@ -125,12 +122,11 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
                             skippedEntries++;
                             continue;
                         }
-                        byte[] buffer = null;
-                    
+
                         try
                         {
-                            buffer = ByteStreamHelper.ReadFully(f.Open());
-                            
+                            var buffer = ByteStreamHelper.ReadFully(f.Open());
+
                             using (var memoryStream = new MemoryStream(buffer))
                                     ProcessFile(memoryStream, dt, zipFileName + "!" + f.FullName, listener);
                         }
@@ -139,11 +135,9 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
                             corruptedEntries++;
                             RecordError("Zip entry '" + f.FullName +"'",e);
 
-                            if (corruptedEntries > 3)
-                            {
-                                listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning, "Skipping the rest of '" + f.FullName + "'", e));
-                                break;
-                            }
+                            if (corruptedEntries <= 3) continue;
+                            listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning, "Skipping the rest of '" + f.FullName + "'", e));
+                            break;
                         }
                     }
             }
@@ -169,7 +163,7 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
 
 
         List<Task>  tasks = new List<Task>();
-        object oTasksLock = new object();
+        readonly object oTasksLock = new object();
         
         
         private void ProcessDirectoryAsync(DataTable dt,DirectoryInfo directoryInfo, IDataLoadEventListener listener)
@@ -245,10 +239,9 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
 
         private void ProcessFile(Stream stream, DataTable dt, string filename, IDataLoadEventListener listener)
         {
-            DicomFile file;
-            
             try
             {
+                DicomFile file;
                 try
                 {
                     Interlocked.Increment(ref _filesProcessedSoFar);

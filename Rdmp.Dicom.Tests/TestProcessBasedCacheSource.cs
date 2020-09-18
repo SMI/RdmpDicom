@@ -1,20 +1,14 @@
-﻿using MapsDirectlyToDatabaseTable;
-using NUnit.Framework;
-using Rdmp.Core.Caching.Requests;
+﻿using NUnit.Framework;
 using Rdmp.Core.Caching.Requests.FetchRequestProvider;
 using Rdmp.Core.Curation;
 using Rdmp.Core.Curation.Data;
 using Rdmp.Core.Curation.Data.Cache;
 using Rdmp.Core.DataFlowPipeline;
-using Rdmp.Core.Startup;
 using Rdmp.Dicom.Cache.Pipeline;
-using ReusableLibraryCode.Checks;
 using ReusableLibraryCode.Progress;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using Tests.Common;
 
 namespace Rdmp.Dicom.Tests
@@ -58,7 +52,7 @@ namespace Rdmp.Dicom.Tests
             source.PreInitialize(new PermissionWindow(cp.CatalogueRepository),new ThrowImmediatelyDataLoadEventListener());
             
             var toMem = new ToMemoryDataLoadEventListener(true);
-            var fork = new ForkDataLoadEventListener(toMem,new ThrowImmediatelyDataLoadEventListener(){WriteToConsole = true});
+            var fork = new ForkDataLoadEventListener(toMem,new ThrowImmediatelyDataLoadEventListener {WriteToConsole = true});
 
             source.GetChunk(fork,new GracefulCancellationToken());
 
