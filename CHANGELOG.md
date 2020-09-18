@@ -8,13 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
+## Added
+
+- Added TimeoutInSeconds property to `PrimaryKeyCollisionIsolationMutilation` DLE module
+
 ## [2.1.10] 2020-09-01
 
 ## Added
 
 - Consecutively failing requests now result in delaying the fetch (incase server is busy with something)
 - Added retry on failure/warning when fetching from PACS
-- Added TimeoutInSeconds property to `PrimaryKeyCollisionIsolationMutilation` DLE module
 
 ## Fixed
 
