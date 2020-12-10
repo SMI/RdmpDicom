@@ -137,7 +137,7 @@ namespace Rdmp.Dicom.PipelineComponents
             var from = tableInfo.Discover(DataAccessContext.DataLoad);
 
             //create a RAW table schema called TableName_Isolation
-            var cloner = new TableInfoCloneOperation(null,null,LoadBubble.Live);
+            var cloner = new TableInfoCloneOperation(null,null,LoadBubble.Live,_job);
             cloner.CloneTable(from.Database, toCreate.Database, from, toCreate.GetRuntimeName(), true, true, true, tableInfo.PreLoadDiscardedColumns);
             
             if(!toCreate.Exists())
