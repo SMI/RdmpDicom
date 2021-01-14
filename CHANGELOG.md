@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
+## [2.2.1] 2021-01-14
+
+Updated to be compatible with RDMP 4.2
+
 ## [2.1.11] 2020-09-18
 
 ## Added
@@ -238,7 +242,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial commit from private repo
 
-[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v2.1.11...develop
+[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v2.2.1...develop
+[2.2.1]: https://github.com/HicServices/RdmpDicom/compare/v2.1.11...v2.2.1
 [2.1.11]: https://github.com/HicServices/RdmpDicom/compare/v2.1.10...v2.1.11
 [2.1.10]: https://github.com/HicServices/RdmpDicom/compare/v2.1.9...v2.1.10
 [2.1.9]: https://github.com/HicServices/RdmpDicom/compare/v2.1.8...v2.1.9
