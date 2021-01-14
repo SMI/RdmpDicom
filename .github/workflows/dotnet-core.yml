@@ -20,7 +20,7 @@ jobs:
         id: version
         shell: cmd
         run: |
-          for /f tokens^=1^,2^ delims^=^" %i in (SharedAssemblyInfo.cs) do @if "%i"=="[assembly: AssemblyVersion(" echo ::set-output name=version::%j
+          for /f tokens^=1^,2^ delims^=^" %%i in (SharedAssemblyInfo.cs) do @if "%%i"=="[assembly: AssemblyVersion(" echo ::set-output name=version::%%j
       - name: Report version
         run: echo ${{ steps.version.outputs.version }}
       - name: Build
