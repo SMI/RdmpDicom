@@ -16,6 +16,7 @@ jobs:
       - uses: actions/setup-dotnet@v1
         with:
           dotnet-version: 3.1.301
+      - run: choco install dotnet4.6.1-devpack
       - name: Get version
         id: version
         shell: cmd
