@@ -15,7 +15,7 @@ namespace Rdmp.Dicom.CommandExecution
         private readonly IRDMPPlatformRepositoryServiceLocator _repositoryLocator;
         private readonly DiscoveredTable _expectedTable;
         
-        public Catalogue NewCatalogueCreated { get; private set; }
+        public ICatalogue NewCatalogueCreated { get; private set; }
         
         public ExecuteCommandCreateNewImagingDataset(IRDMPPlatformRepositoryServiceLocator repositoryLocator, DiscoveredTable expectedTable, ImageTableTemplate tableTemplate)
         {
