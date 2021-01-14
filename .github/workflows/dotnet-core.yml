@@ -21,7 +21,7 @@ jobs:
           for /f tokens^=1^,2^ delims^=^" %i in (SharedAssemblyInfo.cs) do @if "%i"=="[assembly: AssemblyVersion(" echo ::set-output name=version::%j
       - name: Report version
         run: echo ${{ steps.package.outputs.version }}
-      - Build
+      - name: Build
         run: |
           cd Plugin/net461
           dotnet publish --runtime win-x64 -c Release --self-contained false
