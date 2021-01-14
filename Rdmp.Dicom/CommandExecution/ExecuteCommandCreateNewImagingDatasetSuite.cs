@@ -34,7 +34,7 @@ namespace Rdmp.Dicom.CommandExecution
         private readonly IRDMPPlatformRepositoryServiceLocator _repositoryLocator;
         private readonly ICatalogueRepository _catalogueRepository;
 
-        public List<Catalogue> NewCataloguesCreated { get; }
+        public List<ICatalogue> NewCataloguesCreated { get; }
         public LoadMetadata NewLoadMetadata { get; private set; }
         
         /// <summary>
@@ -78,7 +78,7 @@ namespace Rdmp.Dicom.CommandExecution
             _catalogueRepository = repositoryLocator.CatalogueRepository;
             _databaseToCreateInto = databaseToCreateInto;
             _projectDirectory = projectDirectory;
-            NewCataloguesCreated = new List<Catalogue>();
+            NewCataloguesCreated = new List<ICatalogue>();
 
             _loggingServer = _catalogueRepository.GetServerDefaults().GetDefaultFor(PermissableDefaults.LiveLoggingServer_ID);
 

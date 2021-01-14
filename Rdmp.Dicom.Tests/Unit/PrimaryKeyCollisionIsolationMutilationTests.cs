@@ -56,10 +56,10 @@ namespace Rdmp.Dicom.Tests.Unit
             mutilator.Check(new ThrowImmediatelyCheckNotifier());
         }
 
-        private PrimaryKeyCollisionIsolationMutilation GetMutilator(DiscoveredDatabase db, params TableInfo[] tableInfoCreated)
+        private PrimaryKeyCollisionIsolationMutilation GetMutilator(DiscoveredDatabase db, params ITableInfo[] tableInfoCreated)
         {
             //tell the mutilator to resolve the primary key collision on column A by isolating the rows 
-            var mutilation = new PrimaryKeyCollisionIsolationMutilation {TablesToIsolate = tableInfoCreated};
+            var mutilation = new PrimaryKeyCollisionIsolationMutilation {TablesToIsolate = tableInfoCreated.Cast<TableInfo>().ToArray()};
 
             //tell the mutilator to set up isolation into the provided database
             var serverPointer = new ExternalDatabaseServer(CatalogueRepository, "Isolation Db",null);

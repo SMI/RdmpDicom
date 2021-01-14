@@ -36,7 +36,7 @@ namespace Rdmp.Dicom.Attachers.Routing
 
                 var discardedColumns = tableInfo.PreLoadDiscardedColumns.Where(c => c.Destination == DiscardedColumnDestination.Dilute).ToArray();
 
-                var clone = new TableInfoCloneOperation(null,null,LoadBubble.Raw);
+                var clone = new TableInfoCloneOperation(null,null,LoadBubble.Raw,job);
                 
                 clone.CloneTable(liveTable.Database, rawDb, tableInfo.Discover(DataAccessContext.DataLoad), rawTableName, true,true, true, discardedColumns);
                 
