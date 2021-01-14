@@ -24,9 +24,11 @@ jobs:
           for /f tokens^=2^,4^ delims^=^" %%i in (Rdmp.Dicom/Rdmp.Dicom.csproj) do @if "%%i"=="HIC.RDMP.Plugin" echo ::set-output name=rdmpversion::%%j
       - name: Set up database
         run: |
-          choco install sql-server-2019
+          echo choco install sql-server-2019
           Invoke-WebRequest -Uri https://github.com/HicServices/RDMP/releases/download/v${{ steps.version.outputs.rdmpversion }}/rdmp-cli-linux-x64.zip -OutFile rdmp.zip
           Expand-Archive -Path rdmp.zip -DestinationPath .\rdmp-cli
+          cmd.exe "dir"
+          cmd.exe "rdmp-cli"
           cmd.exe /c "rdmp-cli\rdmp.exe install localhost TEST_"
       - name: Test
         run: dotnet test
