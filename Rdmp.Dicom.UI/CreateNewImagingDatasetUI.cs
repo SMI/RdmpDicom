@@ -107,7 +107,7 @@ namespace Rdmp.Dicom.UI
 
             var firstCata = cmd.NewCataloguesCreated.First();
             if (firstCata != null)
-                _activator.RefreshBus.Publish(this, new RefreshObjectEventArgs(firstCata));
+                _activator.Publish(firstCata);
 
             MessageBox.Show("Create Suite Completed");
         }

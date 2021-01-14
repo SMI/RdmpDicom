@@ -49,10 +49,10 @@ namespace Rdmp.Dicom.Tests.Integration
 
             // import RDMP reference to the table
             var importer = new TableInfoImporter(CatalogueRepository,tbl);
-            importer.DoImport(out TableInfo ti,out ColumnInfo[] cols);
+            importer.DoImport(out var ti,out ColumnInfo[] cols);
             
             var forward = new ForwardEngineerCatalogue(ti,cols);
-            forward.ExecuteForwardEngineering(out Catalogue catalogue,out _,out _);
+            forward.ExecuteForwardEngineering(out var catalogue,out _,out _);
 
             // Create an archive table and backup trigger like we would have if this were the target of a data load
             var triggerImplementerFactory = new TriggerImplementerFactory(type);

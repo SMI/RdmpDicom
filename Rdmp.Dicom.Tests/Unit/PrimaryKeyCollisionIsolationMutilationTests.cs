@@ -56,10 +56,10 @@ namespace Rdmp.Dicom.Tests.Unit
             mutilator.Check(new ThrowImmediatelyCheckNotifier());
         }
 
-        private PrimaryKeyCollisionIsolationMutilation GetMutilator(DiscoveredDatabase db, params TableInfo[] tableInfoCreated)
+        private PrimaryKeyCollisionIsolationMutilation GetMutilator(DiscoveredDatabase db, params ITableInfo[] tableInfoCreated)
         {
             //tell the mutilator to resolve the primary key collision on column A by isolating the rows 
-            var mutilation = new PrimaryKeyCollisionIsolationMutilation {TablesToIsolate = tableInfoCreated};
+            var mutilation = new PrimaryKeyCollisionIsolationMutilation {TablesToIsolate = tableInfoCreated.Cast<TableInfo>().ToArray()};
 
             //tell the mutilator to set up isolation into the provided database
             var serverPointer = new ExternalDatabaseServer(CatalogueRepository, "Isolation Db",null);
@@ -114,6 +114,69 @@ namespace Rdmp.Dicom.Tests.Unit
             Assert.AreEqual(3, dtIsolation.Rows.Count); 
         }
 
+        
+        [TestCase(".[dbo].",true)]
+        [TestCase(".[dbo].",false)]
+        [TestCase(".dbo.",true)]
+        [TestCase(".dbo.",false)]
+        [TestCase("..",true)]
+        [TestCase("..",false)]
+        public void Test_IsolateSingleTableWithSchema_Duplication(string schemaExpression,bool includeQualifiers)
+        {
+            var db = GetCleanedServer(DatabaseType.MicrosoftSQLServer);
+
+            //Create a table in 'RAW' (has no constraints)
+            var dt = new DataTable();
+            dt.Columns.Add("A");
+            dt.Columns.Add("B");
+
+            dt.Rows.Add("Fish", 1);
+            dt.Rows.Add("Fish", 2);
+            dt.Rows.Add("Fish", 3);
+            dt.Rows.Add("Frank", 2);
+            dt.Rows.Add("Candy", 2);
+
+            var tbl = db.CreateTable("MyCoolTable2", dt);
+
+            //import the table and make A look like a primary key to the metadata layer (and A would be pk in LIVE but not in RAW ofc)
+            Import(tbl, out var tableInfoCreated, out var columnInfosCreated);
+            
+            var syntax = db.Server.GetQuerySyntaxHelper();
+
+            tableInfoCreated.Name = 
+                (includeQualifiers  ?  syntax.EnsureWrapped(db.GetRuntimeName()) : db.GetRuntimeName())
+                + schemaExpression + 
+                (includeQualifiers  ?  syntax.EnsureWrapped(tbl.GetRuntimeName()) : tbl.GetRuntimeName());
+
+            tableInfoCreated.SaveToDatabase();
+
+            foreach (ColumnInfo column in columnInfosCreated)
+            {
+                column.Name = tableInfoCreated.Name + "." +
+                    (includeQualifiers ?  syntax.EnsureWrapped(column.GetRuntimeName()) : column.GetRuntimeName());
+                column.SaveToDatabase();
+            }
+
+            //lie about the primary key status
+            var a = columnInfosCreated.Single(c => c.GetRuntimeName().Equals("A"));
+            a.IsPrimaryKey = true;
+            a.SaveToDatabase();
+
+            var mutilator = GetMutilator(db, tableInfoCreated);
+            mutilator.Check(new AcceptAllCheckNotifier());
+
+            var config = new HICDatabaseConfiguration(db.Server,RdmpMockFactory.Mock_INameDatabasesAndTablesDuringLoads(db, "MyCoolTable2"));
+            var job = new ThrowImmediatelyDataLoadJob(config,tableInfoCreated);
+                                    
+            mutilator.Initialize(db,LoadStage.AdjustRaw);
+            mutilator.Mutilate(job);
+
+            dt = tbl.GetDataTable();
+            Assert.AreEqual(2,dt.Rows.Count); 
+
+            var dtIsolation = tbl.Database.ExpectTable("MyCoolTable2_Isolation").GetDataTable();
+            Assert.AreEqual(3, dtIsolation.Rows.Count); 
+        }
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         [TestCase(DatabaseType.MySql)]
         [TestCase(DatabaseType.PostgreSql)]

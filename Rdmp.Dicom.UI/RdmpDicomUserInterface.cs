@@ -11,6 +11,8 @@ using Rdmp.UI.Collections;
 using Rdmp.UI.CommandExecution.AtomicCommands;
 using Rdmp.Core.Providers.Nodes;
 using Rdmp.Core.Curation.Data.Defaults;
+using Rdmp.Core;
+using Rdmp.Core.CommandExecution.AtomicCommands;
 
 namespace Rdmp.Dicom.UI
 {

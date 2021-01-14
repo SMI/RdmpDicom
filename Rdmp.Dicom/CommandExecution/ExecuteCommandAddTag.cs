@@ -14,7 +14,7 @@ namespace Rdmp.Dicom.CommandExecution
     {
         private readonly TagColumnAdder _adder;
 
-        public ExecuteCommandAddTag(BasicActivateItems activator,Catalogue catalogue, 
+        public ExecuteCommandAddTag(BasicActivateItems activator,ICatalogue catalogue, 
             [DemandsInitialization("Name of the new column you want created.")]
             string column, 
             [DemandsInitialization("Optional when column is the name of a Dicom Tag e.g. StudyInstanceUID")]

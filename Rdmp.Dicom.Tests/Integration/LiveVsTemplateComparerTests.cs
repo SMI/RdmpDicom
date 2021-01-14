@@ -63,7 +63,7 @@ namespace Rdmp.Dicom.Tests.Integration
 
             // import RDMP reference to the table
             var importer = new TableInfoImporter(CatalogueRepository,tbl);
-            importer.DoImport(out TableInfo ti,out _);
+            importer.DoImport(out var ti,out _);
 
             // compare the live with the template
             var comparer = new LiveVsTemplateComparer(ti,new ImageTableTemplateCollection { DatabaseType = type,Tables = new List<ImageTableTemplate>{ template } });
