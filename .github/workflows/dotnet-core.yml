@@ -17,10 +17,11 @@ jobs:
         with:
           dotnet-version: 3.1.301
       - name: Get version
+        id: version
         run: |
           for /f tokens^=1^,2^ delims^=^" %i in (SharedAssemblyInfo.cs) do @if "%i"=="[assembly: AssemblyVersion(" echo ::set-output name=version::%j
       - name: Report version
-        run: echo ${{ steps.package.outputs.version }}
+        run: echo ${{ steps.version.outputs.version }}
       - name: Build
         run: |
           cd Plugin/net461
@@ -29,9 +30,9 @@ jobs:
           dotnet publish --runtime win-x64 -c Release --self-contained false
           dotnet publish --runtime linux-x64 -c Release --self-contained false
           cd ../..
-          echo nuget pack ./Rdmp.Dicom.nuspec -Properties Configuration=Release -IncludeReferencedProjects -Symbols -Version ${{ steps.package.outputs.version }}
-          echo nuget pack ./Rdmp.Dicom.Library.nuspec -Properties Configuration=Release -IncludeReferencedProjects -Symbols -Version ${{ steps.package.outputs.version }}
-          echo nuget push HIC.Rdmp.Dicom.${{ steps.package.outputs.version }}.nupkg -Source https://api.nuget.org/v3/index.json -ApiKey ${{ secrets.NUGET_KEY }}
+          echo nuget pack ./Rdmp.Dicom.nuspec -Properties Configuration=Release -IncludeReferencedProjects -Symbols -Version ${{ steps.version.outputs.version }}
+          echo nuget pack ./Rdmp.Dicom.Library.nuspec -Properties Configuration=Release -IncludeReferencedProjects -Symbols -Version ${{ steps.version.outputs.version }}
+          echo nuget push HIC.Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg -Source https://api.nuget.org/v3/index.json -ApiKey ${{ secrets.NUGET_KEY }}
   build:
     runs-on: ubuntu-18.04
     steps:
