@@ -12,6 +12,7 @@ using Rdmp.Core.Curation.Data;
 using Rdmp.Core.Curation.Data.DataLoad;
 using Rdmp.Core.Curation.Data.EntityNaming;
 using Rdmp.Core.DataLoad;
+using Rdmp.Core.DataLoad.Engine.DatabaseManagement.EntityNaming;
 using Rdmp.Core.DataLoad.Engine.DatabaseManagement.Operations;
 using Rdmp.Core.DataLoad.Engine.Job;
 using Rdmp.Core.DataLoad.Engine.Mutilators;
@@ -137,7 +138,7 @@ namespace Rdmp.Dicom.PipelineComponents
             var from = tableInfo.Discover(DataAccessContext.DataLoad);
 
             //create a RAW table schema called TableName_Isolation
-            var cloner = new TableInfoCloneOperation(null,null,LoadBubble.Live,_job);
+            var cloner = new TableInfoCloneOperation(new HICDatabaseConfiguration(toCreate.Database.Server),tableInfo,LoadBubble.Live,_job ?? (IDataLoadEventListener)new ThrowImmediatelyDataLoadEventListener());
             cloner.CloneTable(from.Database, toCreate.Database, from, toCreate.GetRuntimeName(), true, true, true, tableInfo.PreLoadDiscardedColumns);
             
             if(!toCreate.Exists())

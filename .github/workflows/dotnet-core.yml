@@ -1,4 +1,4 @@
-name: .NET Core
+name: Build, test and package
 
 on:
   pull_request
@@ -17,10 +17,19 @@ jobs:
         with:
           dotnet-version: 3.1.301
       - name: Get version
+        id: version
+        shell: cmd
         run: |
-          for /f tokens^=1^,2^ delims^=^" %i in (SharedAssemblyInfo.cs) do @if "%i"=="[assembly: AssemblyVersion(" echo ::set-output name=version::%j
-      - name: Report version
-        run: echo ${{ steps.package.outputs.version }}
+          for /f tokens^=1^,2^ delims^=^" %%i in (SharedAssemblyInfo.cs) do @if "%%i"=="[assembly: AssemblyVersion(" echo ::set-output name=version::%%j
+          for /f tokens^=2^,4^ delims^=^" %%i in (Rdmp.Dicom/Rdmp.Dicom.csproj) do @if "%%i"=="HIC.RDMP.Plugin" echo ::set-output name=rdmpversion::%%j
+      - name: Set up database
+        run: |
+          choco install sql-server-2019
+          Invoke-WebRequest -Uri https://github.com/HicServices/RDMP/releases/download/v${{ steps.version.outputs.rdmpversion }}/rdmp-cli-win-x64.zip -OutFile rdmp.zip
+          Expand-Archive -Path rdmp.zip -DestinationPath .\rdmpcli
+          cmd.exe /c rdmpcli\rdmp.exe install localhost TEST_
+      - name: Test
+        run: dotnet test
       - name: Build
         run: |
           cd Plugin/net461
@@ -29,33 +38,23 @@ jobs:
           dotnet publish --runtime win-x64 -c Release --self-contained false
           dotnet publish --runtime linux-x64 -c Release --self-contained false
           cd ../..
-          echo nuget pack ./Rdmp.Dicom.nuspec -Properties Configuration=Release -IncludeReferencedProjects -Symbols -Version ${{ steps.package.outputs.version }}
-          echo nuget pack ./Rdmp.Dicom.Library.nuspec -Properties Configuration=Release -IncludeReferencedProjects -Symbols -Version ${{ steps.package.outputs.version }}
-          echo nuget push HIC.Rdmp.Dicom.${{ steps.package.outputs.version }}.nupkg -Source https://api.nuget.org/v3/index.json -ApiKey ${{ secrets.NUGET_KEY }}
-  build:
-    runs-on: ubuntu-18.04
-    steps:
-    - uses: actions/checkout@v2
-    - name: Setup .NET Core
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 3.1.301
-    - name: Add MSFT code signing key
-      run: wget -qO- https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
-    - name: Add MSFT package repo
-      run: sudo add-apt-repository "$(wget -qO- https://packages.microsoft.com/config/ubuntu/18.04/mssql-server-2019.list)"
-    - name: MySQL
-      run: |
-        sudo mkdir -p /var/run/mysqld
-        sudo chown mysql:mysql /var/run/mysqld
-        sudo mysqld_safe --port=3306 --skip-grant-tables &
-    - name: Install Sql Server
-      run: sudo apt-get install -y --no-install-recommends postgresql mssql-tools mssql-server
-    - name: Configure Sql Server
-      run: sudo -E /opt/mssql/bin/mssql-conf -n setup accept-eula
-    - name: Install dependencies
-      run: dotnet restore
-    - name: Build
-      run: dotnet build --configuration Release --no-restore
-    - name: Test
-      run: dotnet test --no-restore --verbosity normal
+          nuget pack ./Rdmp.Dicom.nuspec -Properties Configuration=Release -IncludeReferencedProjects -Symbols -Version ${{ steps.version.outputs.version }}
+          nuget pack ./Rdmp.Dicom.Library.nuspec -Properties Configuration=Release -IncludeReferencedProjects -Symbols -Version ${{ steps.version.outputs.version }}
+          cmd /c rdmpcli\rdmp.exe pack --file Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg --servername localhost --cataloguedatabasename TEST_Catalogue --dataexportdatabasename TEST_DataExport
+          cmd /c rdmpcli\rdmp.exe cmd listsupportedcommands --servername localhost --cataloguedatabasename TEST_Catalogue --dataexportdatabasename TEST_DataExport
+          cmd /c rdmpcli\rdmp.exe cmd describecommand CreateNewImagingDatasetSuite --servername localhost --cataloguedatabasename TEST_Catalogue --dataexportdatabasename TEST_DataExport
+      - name: Nuget push
+        if: contains(github.ref,'refs/tags/')
+        run: nuget push HIC.Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg -Source https://api.nuget.org/v3/index.json -ApiKey ${{ secrets.NUGET_KEY }}
+      - name: Store created nupkg files
+        uses: actions/upload-artifact@v2
+        with:
+          path: ./*.nupkg
+          retention-days: 1
+      - name: Upload release binaries
+        if: contains(github.ref,'refs/tags/')
+        uses: alexellis/upload-assets@0.2.2
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          asset_paths: '["./Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg"]'
