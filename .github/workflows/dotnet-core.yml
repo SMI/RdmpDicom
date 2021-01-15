@@ -1,7 +1,6 @@
-name: .NET Core
+name: Test and package
 
-on:
-  pull_request
+on: [push, pull_request]
 
 env:
   MSSQL_SA_PASSWORD: "YourStrong!Passw0rd"
