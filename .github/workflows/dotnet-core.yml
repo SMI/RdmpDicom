@@ -49,7 +49,7 @@ jobs:
       - name: Store created nupkg files
         uses: actions/upload-artifact@v2
         with:
-          path: *.nupkg
+          path: ./*.nupkg
           retention-days: 1
       - name: Upload release binaries
         if: contains(github.ref,'refs/tags/')
