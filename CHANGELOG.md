@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
+## Fixed
+
+- Fixed bug with `AutoRoutingAttacherWithPersistentRaw` data load module when used with RDMP 4.2.1 API
+
+
 ## [2.2.1] 2021-01-14
 
 Updated to be compatible with RDMP 4.2

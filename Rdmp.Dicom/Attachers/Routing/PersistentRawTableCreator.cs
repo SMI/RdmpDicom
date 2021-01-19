@@ -10,6 +10,7 @@ using Rdmp.Core.Curation.Data;
 using Rdmp.Core.Curation.Data.DataLoad;
 using Rdmp.Core.DataLoad;
 using Rdmp.Core.DataLoad.Engine.DatabaseManagement.Operations;
+using Rdmp.Core.DataLoad.Engine.DatabaseManagement.EntityNaming;
 
 namespace Rdmp.Dicom.Attachers.Routing
 {
@@ -36,7 +37,7 @@ namespace Rdmp.Dicom.Attachers.Routing
 
                 var discardedColumns = tableInfo.PreLoadDiscardedColumns.Where(c => c.Destination == DiscardedColumnDestination.Dilute).ToArray();
 
-                var clone = new TableInfoCloneOperation(null,null,LoadBubble.Raw,job);
+                var clone = new TableInfoCloneOperation(job.Configuration,(TableInfo)tableInfo,LoadBubble.Raw,job);
                 
                 clone.CloneTable(liveTable.Database, rawDb, tableInfo.Discover(DataAccessContext.DataLoad), rawTableName, true,true, true, discardedColumns);
                 
