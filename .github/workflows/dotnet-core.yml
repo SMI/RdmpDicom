@@ -56,4 +56,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         with:
-          asset_paths: '["./Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg"]'
+          asset_paths: '["Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg"]'
