@@ -28,7 +28,9 @@ jobs:
           Expand-Archive -Path rdmp.zip -DestinationPath .\rdmpcli
           cmd.exe /c rdmpcli\rdmp.exe install localhost TEST_
       - name: Test
-        run: dotnet test
+        run: |
+          nuget restore
+          dotnet test
       - name: Build
         run: |
           cd Plugin/net461
