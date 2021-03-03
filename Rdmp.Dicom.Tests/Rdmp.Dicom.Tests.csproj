@@ -36,6 +36,8 @@
     <ProjectReference Include="..\Rdmp.Dicom\Rdmp.Dicom.csproj" />
   </ItemGroup>
   <ItemGroup>
+	  <!-- TEMPORARY workaround for diamond dependency in BadMedicine and BM.DICOM - remove when .DICOM is post-0.0.8 -->
+	  <PackageReference Include="MathNet.Numerics" Version="4.15.0" />
     <PackageReference Include="HIC.BadMedicine.Dicom" Version="0.0.8" />
     <PackageReference Include="HIC.RDMP.Plugin.Test" Version="4.2.4" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.9.1" />
