@@ -2,6 +2,7 @@
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Dicom;
 using Rdmp.Dicom.PACS;
 
@@ -30,6 +31,8 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
     public class AmbiguousFilePath
     {
         public string FullPath { get; private set; }
+        
+        private static readonly Regex _regexDigitsAndDotsOnly = new Regex(@"^[0-9\.]*$");
 
         public AmbiguousFilePath(string fullPath)
         {
@@ -118,9 +121,21 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
             return DicomFile.Open(FullPath);
         }
 
-        private bool IsDicomReference(string fullPath)
+        public static bool IsDicomReference(string fullPath)
         {
-            return !string.IsNullOrWhiteSpace(fullPath) && fullPath.EndsWith(".dcm", StringComparison.CurrentCultureIgnoreCase);
+            if(string.IsNullOrWhiteSpace(fullPath))
+                return false;
+
+            var extension = Path.GetExtension(fullPath);
+
+
+            return 
+                string.IsNullOrWhiteSpace(extension) || 
+
+                // The following is a valid dicom file name but looks like it has an extension .5323
+                // 123.3221.23123.5325
+                _regexDigitsAndDotsOnly.IsMatch(extension) ||
+                extension.Equals(".dcm", StringComparison.CurrentCultureIgnoreCase);
         }
 
         public static bool IsZipReference(string path)

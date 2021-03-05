@@ -187,5 +187,16 @@ namespace Rdmp.Dicom.Tests.Unit
             var existsRelativeWithLeadingBackSlashInSubdir = new AmbiguousFilePath(zipFile.DirectoryName,"my.zip!\\subdir\\file2.dcm"); 
             Assert.IsNotNull(existsRelativeWithLeadingBackSlashInSubdir.GetDataset());
         }
+
+        [TestCase(@"c:\temp\fff.dcm",true)]
+        [TestCase(@"c:\temp\fff",true)]
+        [TestCase(@"c:\temp\12.123.213.4214.15.dcm",true)]
+        [TestCase(@"c:\temp\12.123.213.4214.15",true)]
+        [TestCase(@"c:\temp\ff.zip",false)]
+        [TestCase(@"c:\temp\ff.tar",false)]
+        public void TestIsDicomReference(string input, bool expected)
+        {
+            Assert.AreEqual(expected,AmbiguousFilePath.IsDicomReference(input));
+        }
     }
 }

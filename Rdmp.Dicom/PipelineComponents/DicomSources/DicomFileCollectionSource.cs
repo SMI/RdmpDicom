@@ -117,7 +117,7 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
                     foreach (var f in archive.Entries)
                     {
                         //it's not a dicom file!
-                        if(!f.FullName.EndsWith(".dcm",StringComparison.CurrentCultureIgnoreCase))
+                        if(!AmbiguousFilePath.IsDicomReference(f.FullName))
                         {
                             skippedEntries++;
                             continue;
