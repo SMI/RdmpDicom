@@ -68,10 +68,10 @@ namespace Rdmp.Dicom.Tests.Integration
             {
                 //Things we would want to disappear
                 {DicomTag.PatientName,"Moscow"},
-                {DicomTag.PatientBirthDate,"2001-01-01"},
+                {DicomTag.PatientBirthDate,"20010101"},
                 {DicomTag.StudyDescription,"Frank has lots of problems, he lives at 60 Pancake road"},
                 {DicomTag.SeriesDescription,"Coconuts"},
-                {DicomTag.StudyDate,"2002-01-01"},
+                {DicomTag.StudyDate,"20020101"},
             };
 
             Dictionary<DicomTag,string> thingsThatShouldRemain = new Dictionary<DicomTag, string>
@@ -208,7 +208,7 @@ namespace Rdmp.Dicom.Tests.Integration
                 {DicomTag.SeriesInstanceUID, "123.4.5"},
                 {DicomTag.StudyInstanceUID, "123.4.6"},
                 {DicomTag.SOPClassUID,"1"},
-                {DicomTag.StudyDate,"2002-01-01"},
+                {DicomTag.StudyDate,"20020101"},
             };
             //the actual work
             putter.WriteOutDataset(outputDirectory, releaseIdentifier, dicomDataset);
