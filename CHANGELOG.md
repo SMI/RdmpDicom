@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bump HIC.RDMP.Plugin from 4.2.1 to 4.2.3
 - Bump HIC.DicomTypeTranslation from 2.3.1 to 2.3.2
 
+## Fixed
+
+- DLE now happily loads files on disk that are missing an extension e.g. USm123.213.432.234 (in the dicom standard the extension is optional)
+
 ## [2.2.2] 2021-01-19
 
 ## Fixed
