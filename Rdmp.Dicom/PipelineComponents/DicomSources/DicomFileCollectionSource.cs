@@ -210,7 +210,7 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
 
             try
             {
-                dicomFiles = directoryInfo.EnumerateFiles("*.dcm").ToArray();
+                dicomFiles = directoryInfo.EnumerateFiles().Where(f=>AmbiguousFilePath.IsDicomReference(f.FullName)).ToArray();
                 zipFiles = directoryInfo.EnumerateFiles("*.zip").ToArray();
             }
             catch (Exception e)
