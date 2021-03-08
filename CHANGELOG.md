@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 
+## [2.2.4] 2021-03-08
+
+
+## Fixed
+
+- Fixed DLE not not loading files that are missing extensions when processing directory entries
+
 ## [2.2.3] 2021-03-05
 
 ### Changed
@@ -259,7 +266,8 @@ Updated to be compatible with RDMP 4.2
 
 - Initial commit from private repo
 
-[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v2.2.3...develop
+[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v2.2.4...develop
+[2.2.4: https://github.com/HicServices/RdmpDicom/compare/v2.2.3...v2.2.4
 [2.2.3]: https://github.com/HicServices/RdmpDicom/compare/v2.2.2...v2.2.3
 [2.2.2]: https://github.com/HicServices/RdmpDicom/compare/v2.2.1...v2.2.2
 [2.2.1]: https://github.com/HicServices/RdmpDicom/compare/v2.1.11...v2.2.1
