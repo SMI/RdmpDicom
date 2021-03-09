@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.2.4] 2021-03-08
 
+### Changed
+
+- When creating new imaging loads `UseAllTableInfoInLoadAsFieldMap` is enabled by default (improves load performance and stability)
 
 ## Fixed
 

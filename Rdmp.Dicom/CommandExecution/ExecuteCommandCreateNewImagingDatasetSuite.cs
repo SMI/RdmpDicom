@@ -171,6 +171,15 @@ namespace Rdmp.Dicom.CommandExecution
             var pipe = new Pipeline(_catalogueRepository, GetNameWithPrefixInBracketsIfAny("Image Loading Pipe"));
             DicomSourcePipelineComponent = new PipelineComponent(_catalogueRepository, pipe, DicomSourceType, 0, DicomSourceType.Name);
             DicomSourcePipelineComponent.CreateArgumentsForClassIfNotExists(DicomSourceType);
+
+            // Set the argument for only populating tags who appear in the end tables of the load (no need for source to read all the tags only those we are actually loading)
+            var arg = DicomSourcePipelineComponent.GetAllArguments().FirstOrDefault(a=>a.Name.Equals(nameof(DicomSource.UseAllTableInfoInLoadAsFieldMap)));
+            if(arg != null)
+            {
+                arg.SetValue(NewLoadMetadata);
+                arg.SaveToDatabase();
+            }
+            
             pipe.SourcePipelineComponent_ID = DicomSourcePipelineComponent.ID;
             pipe.SaveToDatabase();
             
