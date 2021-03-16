@@ -238,7 +238,29 @@ namespace Rdmp.Dicom.Tests.Integration
 
         }
 
+        
+        [Test]
+        public void TestUIDTableExists()
+        {
+            var db = GetCleanedServer(DatabaseType.MicrosoftSQLServer);
 
+            // set it to an empty database
+            var eds = new ExternalDatabaseServer(CatalogueRepository,"UID server",null);
+            eds.SetProperties(db);
+
+            var anon = new FoDicomAnonymiser();
+            anon.UIDMappingServer = eds;
+
+            var ex = Assert.Throws<Exception>(()=>anon.Check(new ThrowImmediatelyCheckNotifier() { ThrowOnWarning = true }));
+
+            StringAssert.AreEqualIgnoringCase("UIDMappingServer is not set up yet", ex.Message);
+
+            anon.Check(new AcceptAllCheckNotifier());
+
+            // no warnings after it has been created
+            Assert.DoesNotThrow(() => anon.Check(new ThrowImmediatelyCheckNotifier() { ThrowOnWarning = true }));
+
+        }
 
         private IExtractDatasetCommand MockExtractionCommand()
         {
@@ -262,5 +284,6 @@ namespace Rdmp.Dicom.Tests.Integration
 
             return cmd;
         }
+
     }
 }

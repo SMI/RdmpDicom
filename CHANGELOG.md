@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 
+## Added
+
+- FoDicomAnonymiser checks now support automatic database creation/patching for UID mapping server
+
 ## [2.2.4] 2021-03-08
 
 ### Changed
