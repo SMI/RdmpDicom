@@ -184,54 +184,55 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
             _extractCommand = value as IExtractDatasetCommand;
         }
 
+        private static object CreateServersOneAtATime = new object();
+
         public void Check(ICheckNotifier notifier)
         {
-            if(UIDMappingServer == null)
+            lock(CreateServersOneAtATime)
             {
-                throw new Exception($"{nameof(UIDMappingServer)} not set, set it existing UID mapping server or to an empty database to create a new one");
-            }
-
-            var patcher = new SMIDatabasePatcher();
-
-            if(!UIDMappingServer.WasCreatedBy(patcher))
-            {
-                if (string.IsNullOrWhiteSpace(UIDMappingServer.CreatedByAssembly))
+                if (UIDMappingServer == null)
                 {
-                    bool create = notifier.OnCheckPerformed(new CheckEventArgs($"{nameof(UIDMappingServer)} is not set up yet", CheckResult.Warning, null, "Attempt to create UID mapping schema"));
+                    throw new Exception($"{nameof(UIDMappingServer)} not set, set it existing UID mapping server or to an empty database to create a new one");
+                }
 
-                    if(create)
+                var patcher = new SMIDatabasePatcher();
+
+                if (!UIDMappingServer.WasCreatedBy(patcher))
+                {
+                    if (string.IsNullOrWhiteSpace(UIDMappingServer.CreatedByAssembly))
                     {
-                        var db = UIDMappingServer.Discover(ReusableLibraryCode.DataAccess.DataAccessContext.DataExport);
+                        bool create = notifier.OnCheckPerformed(new CheckEventArgs($"{nameof(UIDMappingServer)} is not set up yet", CheckResult.Warning, null, "Attempt to create UID mapping schema"));
 
-                        if (!db.Exists())
+                        if (create)
                         {
-                            notifier.OnCheckPerformed(new CheckEventArgs($"About to create {db}", CheckResult.Success));
-                            db.Create();
+                            var db = UIDMappingServer.Discover(ReusableLibraryCode.DataAccess.DataAccessContext.DataExport);
+
+                            if (!db.Exists())
+                            {
+                                notifier.OnCheckPerformed(new CheckEventArgs($"About to create {db}", CheckResult.Success));
+                                db.Create();
+                            }
+
+                            notifier.OnCheckPerformed(new CheckEventArgs($"Creating UID Mapping schema in {db}", CheckResult.Success));
+
+                            var scripter = new MasterDatabaseScriptExecutor(db);
+                            scripter.CreateAndPatchDatabase(patcher, new AcceptAllCheckNotifier());
+
+                            UIDMappingServer.CreatedByAssembly = patcher.Name;
+                            UIDMappingServer.SaveToDatabase();
                         }
-
-                        notifier.OnCheckPerformed(new CheckEventArgs($"Creating UID Mapping schema in {db}", CheckResult.Success));
-
-                        var scripter = new MasterDatabaseScriptExecutor(db);
-                        scripter.CreateAndPatchDatabase(patcher, new AcceptAllCheckNotifier());
-
-                        UIDMappingServer.CreatedByAssembly = patcher.Name;
-                        UIDMappingServer.SaveToDatabase();
+                        else
+                        {
+                            return;
+                        }
                     }
                     else
                     {
+                        notifier.OnCheckPerformed(new CheckEventArgs($"{nameof(UIDMappingServer)} '{UIDMappingServer}' was created by '{UIDMappingServer.CreatedByAssembly}' not a UID patcher.  Try creating a new server reference to a blank database", CheckResult.Fail));
                         return;
                     }
                 }
-                else
-                {
-                    notifier.OnCheckPerformed(new CheckEventArgs($"{nameof(UIDMappingServer)} '{UIDMappingServer}' was created by '{UIDMappingServer.CreatedByAssembly}' not a UID patcher.  Try creating a new server reference to a blank database",CheckResult.Fail));
-                    return;
-                }
             }
-
-
-
-
         }
     }
 }
