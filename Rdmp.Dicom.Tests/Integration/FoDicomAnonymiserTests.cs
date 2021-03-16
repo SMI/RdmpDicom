@@ -249,7 +249,8 @@ namespace Rdmp.Dicom.Tests.Integration
             eds.SetProperties(db);
 
             var anon = new FoDicomAnonymiser();
-            
+            anon.UIDMappingServer = eds;
+
             var ex = Assert.Throws<Exception>(()=>anon.Check(new ThrowImmediatelyCheckNotifier() { ThrowOnWarning = true }));
 
             StringAssert.AreEqualIgnoringCase("UIDMappingServer is not set up yet", ex.Message);
