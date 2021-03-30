@@ -59,7 +59,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
 
             // Create filepath for the results of the C-Find
             var workingDirectory = cacheLayout.GetLoadCacheDirectory(listener);
-            var filename = $"{dateFrom:yyyy-MM-dd}.csv";
+            var filename = $"{dateFrom:yyyyMMddhhmmss}.csv";
             var filepath = Path.Combine(workingDirectory.FullName, filename);
 
             var sw = new StreamWriter(filepath);
