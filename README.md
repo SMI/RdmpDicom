@@ -45,7 +45,7 @@ This plugin adds the following commands to RDMP CLI:
 ```
 ./rdmp cmd CFind 2001-01-01 2020-01-01 www.dicomserver.co.uk 104 you me .
 ```
-_Connects to the given PACS and writes CFInd response for date range into output file_
+_Connects to the given PACS and writes CFind response for date range into output file (note that the . denotes current directory)_
 
 
 ```
