@@ -36,3 +36,20 @@ nuget pack ./Rdmp.Dicom.nuspec -Properties Configuration=Release -IncludeReferen
 ```
 
 This will produce a nupkg file (e.g. Rdmp.Dicom.0.0.1.nupkg) which can be consumed by both the RDMP client and dot net core RDMP CLI.
+
+
+# New CLI Commands
+
+This plugin adds the following commands to RDMP CLI:
+
+```
+./rdmp cmd CFind 2001-01-01 2020-01-01 www.dicomserver.co.uk 104 you me .
+```
+_Connects to the given PACS and writes CFInd response for date range into output file_
+
+
+```
+./rdmp cmd PACSFetch 2001-01-01 2020-01-01 www.dicomserver.co.uk 104 you localhost 104 me . 0
+```
+_Connects to the given PACS and fetches all images between the date ranges (requires firewall allows incomming connections from destination server)_
+
