@@ -15,6 +15,8 @@ namespace Rdmp.Dicom.Cache
         [DemandsInitialization("The modality of the dicom images e.g. CT, this must match the source components modality",Mandatory = true)]
         public string Modality { get; set; }
 
+        [DemandsInitialization("The file extension to look for in fetched data", Mandatory = true, DefaultValue = "*.dcm")]
+        public string Extension { get; set; } 
 
         public SMIDataChunk ProcessPipelineData(SMIDataChunk toProcess, IDataLoadEventListener listener, GracefulCancellationToken cancellationToken)
         {
@@ -26,11 +28,11 @@ namespace Rdmp.Dicom.Cache
             // todo: skip this and stream directly into an archive
             var archiveDate = toProcess.Request.Start;
             listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information, "Creating archive: " + toProcess.Layout.GetArchiveFileInfoForDate(archiveDate, listener).FullName));
-            toProcess.Layout.CreateArchive(archiveDate,listener);
+            toProcess.Layout.CreateArchive(archiveDate,listener, Extension);
 
-            // remove all the .dcm files
+            // remove all the .dcm/.csv files
             var workingDirectory = toProcess.Layout.GetLoadCacheDirectory(listener);
-            foreach (var file in workingDirectory.EnumerateFiles("*.dcm"))
+            foreach (var file in workingDirectory.EnumerateFiles(Extension))
                 file.Delete();
 
 
