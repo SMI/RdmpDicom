@@ -14,31 +14,30 @@ using System.IO;
 
 namespace Rdmp.Dicom.CommandExecution
 {
-
-    class ExecuteCommandPacsFetch : BasicCommandExecution, ICacheFetchRequestProvider
+    class ExecuteCommandCFind : BasicCommandExecution, ICacheFetchRequestProvider
     {
         private BackfillCacheFetchRequest _request;
-        private PACSSource _source;
+        private CFindSource _source;
 
-        public ExecuteCommandPacsFetch(IBasicActivateItems activator,string start, string end, string remoteAeUri, int remotePort,string remoteAeTitle, string localAeUri, int localPort, string localAeTitle, string outDir, int maxRetries):base(activator)
+        public ExecuteCommandCFind(IBasicActivateItems activator, string start, string end, string remoteAeUri, int remotePort, string remoteAeTitle, string localAeUri, int localPort, string localAeTitle, string outDir, int maxRetries) : base(activator)
         {
-            var startDate = DateTime.Parse(start);   
-            var endDate =  DateTime.Parse(end);   
-                        
+            var startDate = DateTime.Parse(start);
+            var endDate = DateTime.Parse(end);
+
             // Make something that kinda looks like a valid DLE load
             var memory = new MemoryCatalogueRepository();
             var lmd = new LoadMetadata(memory);
 
             var dir = Directory.CreateDirectory(outDir);
-            var results = LoadDirectory.CreateDirectoryStructure(dir,"out",true);
+            var results = LoadDirectory.CreateDirectoryStructure(dir, "out", true);
             lmd.LocationOfFlatFiles = results.RootPath.FullName;
             lmd.SaveToDatabase();
 
-            var lp = new LoadProgress(memory,lmd);
-            var cp = new CacheProgress(memory,lp);
+            var lp = new LoadProgress(memory, lmd);
+            var cp = new CacheProgress(memory, lp);
 
             //Create the source component only and a valid request range to fetch
-            _source = new PACSSource
+            _source = new CFindSource
             {
                 RemoteAEUri = new Uri("http://" + remoteAeUri),
                 RemoteAEPort = remotePort,
@@ -47,19 +46,19 @@ namespace Rdmp.Dicom.CommandExecution
                 LocalAEPort = localPort,
                 LocalAETitle = localAeTitle,
                 TransferTimeOutInSeconds = 50000,
-                Modality = "ALL",
-                MaxRetries = maxRetries
+                Modality = "ALL"
             };
             //<- rly? its not gonna pass without an http!?
 
             _request = new BackfillCacheFetchRequest(BasicActivator.RepositoryLocator.CatalogueRepository, startDate)
             {
-                ChunkPeriod = endDate.Subtract(startDate), CacheProgress = cp
+                ChunkPeriod = endDate.Subtract(startDate),
+                CacheProgress = cp
             };
 
             //Initialize it
-            _source.PreInitialize(BasicActivator.RepositoryLocator.CatalogueRepository, new ThrowImmediatelyDataLoadEventListener {WriteToConsole=true });
-            _source.PreInitialize(this,new ThrowImmediatelyDataLoadEventListener {WriteToConsole=true});
+            _source.PreInitialize(BasicActivator.RepositoryLocator.CatalogueRepository, new ThrowImmediatelyDataLoadEventListener { WriteToConsole = true });
+            _source.PreInitialize(this, new ThrowImmediatelyDataLoadEventListener { WriteToConsole = true });
 
         }
 
@@ -68,7 +67,7 @@ namespace Rdmp.Dicom.CommandExecution
         {
             base.Execute();
 
-            _source.GetChunk(new ThrowImmediatelyDataLoadEventListener {WriteToConsole = true},new GracefulCancellationToken());
+            _source.GetChunk(new ThrowImmediatelyDataLoadEventListener { WriteToConsole = true }, new GracefulCancellationToken());
 
         }
         public ICacheFetchRequest Current => _request;
