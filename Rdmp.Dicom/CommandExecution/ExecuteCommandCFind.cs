@@ -19,7 +19,7 @@ namespace Rdmp.Dicom.CommandExecution
         private BackfillCacheFetchRequest _request;
         private CFindSource _source;
 
-        public ExecuteCommandCFind(IBasicActivateItems activator, string start, string end, string remoteAeUri, int remotePort, string remoteAeTitle, string localAeUri, int localPort, string localAeTitle, string outDir, int maxRetries) : base(activator)
+        public ExecuteCommandCFind(IBasicActivateItems activator, string start, string end, string remoteAeUri, int remotePort, string remoteAeTitle, string localAeTitle, string outDir) : base(activator)
         {
             var startDate = DateTime.Parse(start);
             var endDate = DateTime.Parse(end);
@@ -42,8 +42,6 @@ namespace Rdmp.Dicom.CommandExecution
                 RemoteAEUri = new Uri("http://" + remoteAeUri),
                 RemoteAEPort = remotePort,
                 RemoteAETitle = remoteAeTitle,
-                LocalAEUri = new Uri("http://" + localAeUri),
-                LocalAEPort = localPort,
                 LocalAETitle = localAeTitle,
                 TransferTimeOutInSeconds = 50000,
                 Modality = "ALL"

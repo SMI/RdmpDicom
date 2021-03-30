@@ -19,6 +19,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
 
     /// <summary>
     /// Queries a remote PACS and downloads metadata into CSV ready for loading to a relational database.  This component does not fetch actual images
+    /// Combine this with <see cref="SMICacheDestination"/> but make sure to set the <see cref="SMICacheDestination.Extension"/> to "*.csv"
     /// </summary>
     public class CFindSource : SMICacheSource
     {

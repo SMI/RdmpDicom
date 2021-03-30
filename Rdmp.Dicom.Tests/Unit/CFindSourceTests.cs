@@ -25,10 +25,8 @@ namespace Rdmp.Dicom.Tests.Unit
                 "www.dicomserver.co.uk",
                 104,
                 "you",
-                "localhost",
-                23,
                 "me",
-                dir.FullName, 0);
+                dir.FullName);
             cmd.Execute();
 
             // file name is miday on 2010 1st January

@@ -12,6 +12,9 @@ namespace Rdmp.Dicom.PACS
         #region MakeUriUsePort
         public static Uri MakeUriUsePort(Uri uri, int? port)
         {
+            if (uri == null)
+                return null;
+
             //no explicit port specified
             if (!port.HasValue)
                 return uri;
