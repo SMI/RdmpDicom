@@ -19,10 +19,10 @@ namespace Rdmp.Dicom.Cache
             
         }
         
-        public void CreateArchive(DateTime archiveDate,IDataLoadEventListener listener)
+        public void CreateArchive(DateTime archiveDate,IDataLoadEventListener listener, string extension)
         {
             var downloadDirectory = GetLoadCacheDirectory(listener);
-            var dataFiles = downloadDirectory.EnumerateFiles("*.dcm").ToArray();
+            var dataFiles = downloadDirectory.EnumerateFiles(extension).ToArray();
             
             if (!dataFiles.Any())
                 return;
