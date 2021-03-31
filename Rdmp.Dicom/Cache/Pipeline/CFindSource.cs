@@ -92,7 +92,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
                 requestSender.ThrottleRequest(request,client, cancellationToken.AbortToken);
                 listener.OnNotify(this,
                     new NotifyEventArgs(ProgressEventType.Debug,
-                        "Total filtered studies for " + dateFrom + " to " + dateTo +"is " + responses));
+                        "Total filtered studies for " + dateFrom + " to " + dateTo +" is " + responses));
                 #endregion
 
             }
