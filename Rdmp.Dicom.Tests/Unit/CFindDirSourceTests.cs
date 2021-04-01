@@ -49,6 +49,8 @@ someAE	XA\SR	Fluoroscopy upper limb Lt	0102030405	TEXT	1.2.3.4.70	20200416
         Assert.AreEqual("someAE", dt.Rows[0]["RetrieveAETitle"]);
         Assert.AreEqual("someAE", dt.Rows[1]["RetrieveAETitle"]);
         Assert.AreEqual("someAE", dt.Rows[2]["RetrieveAETitle"]);
+
+        Assert.IsNotNull(dt.TableName);
     }
 
 

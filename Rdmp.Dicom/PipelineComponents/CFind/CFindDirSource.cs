@@ -1,6 +1,8 @@
-﻿using Rdmp.Core.Curation.Data;
+﻿using FAnsi.Discovery;
+using Rdmp.Core.Curation.Data;
 using Rdmp.Core.DataFlowPipeline;
 using Rdmp.Core.DataFlowPipeline.Requirements;
+using ReusableLibraryCode;
 using ReusableLibraryCode.Checks;
 using ReusableLibraryCode.Progress;
 using System;
@@ -79,7 +81,13 @@ namespace Rdmp.Dicom
         {
             var dt = new DataTable();
 
-            foreach(var h in HeadersToRead.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+            if (_file != null)
+            {
+                dt.TableName = QuerySyntaxHelper.MakeHeaderNameSensible(_file.File.Name);
+            }
+                
+
+            foreach (var h in HeadersToRead.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
             {
                 dt.Columns.Add(h);
             }
