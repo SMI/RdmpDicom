@@ -7,6 +7,7 @@ using System;
 using System.Data;
 using System.IO;
 using System.Xml;
+using System.Xml.XPath;
 
 namespace Rdmp.Dicom
 {
@@ -115,70 +116,31 @@ namespace Rdmp.Dicom
 
         private void XmlToRows(string file, DataTable dt, IDataLoadEventListener listener)
         {
-            XmlReaderSettings settings = new XmlReaderSettings();
-            settings.IgnoreWhitespace = true;
-
-            using (var fileStream = File.OpenText(file))
-            using (XmlReader reader = XmlReader.Create(fileStream, settings))
+            using (var fileStream = File.Open(file, FileMode.Open))
             {
-                DataRow currentRow = null;
-                int depth = -2;
+                //Load the file and create a navigator object. 
+                var xDoc = new XmlDocument();
+                xDoc.Load(fileStream);
 
-                while (reader.Read())
+                var datasets = xDoc.GetElementsByTagName("data-set");
+
+                foreach(XmlElement d in datasets)
                 {
-                    switch (reader.NodeType)
+                    var row = dt.NewRow();
+
+                    foreach(XmlElement child in d.ChildNodes)
                     {
-                        case XmlNodeType.Element:
-
-                            if (string.Equals(reader.Name, "data-set"))
-                            {
-                                // add old result
-                                if (currentRow != null)
-                                {
-                                    dt.Rows.Add(currentRow);
-                                    depth = -2;
-                                }
-
-                                currentRow = dt.NewRow();
-                                depth = reader.Depth;
-                            }
-
-                            // if it's a dicom element
-                            if (string.Equals(reader.Name, "element") && reader.Depth == depth+1 && reader.HasAttributes)
-                            {
-                                var elementName = reader.GetAttribute("name");
-
-                                // if we want this tag
-                                if (dt.Columns.Contains(elementName))
-                                {
-                                    currentRow[elementName] = reader.ReadElementContentAsString();
-                                }
-                            }
-                            break;
-                        case XmlNodeType.Text:
-                            Console.WriteLine($"Inner Text: {reader.Value}");
-                            break;
-                        case XmlNodeType.EndElement:
-
-
-                            if (string.Equals(reader.Name, "data-set"))
-                            {
-                                if (currentRow != null)
-                                {
-                                    dt.Rows.Add(currentRow);
-                                }
-                            }
-                            break;
-                        default:
-                            Console.WriteLine($"Unknown: {reader.NodeType}");
-                            break;
+                        var name = child.GetAttribute("name");
+                        if(dt.Columns.Contains(name))
+                        {
+                            row[name] = child.InnerText;
+                        }
                     }
+
+                    dt.Rows.Add(row);
                 }
 
-                if (currentRow != null)
-                {
-                    dt.Rows.Add(currentRow);
-                }
+                
             }
         }
 
