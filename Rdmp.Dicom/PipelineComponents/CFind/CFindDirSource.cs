@@ -56,6 +56,8 @@ namespace Rdmp.Dicom
         {
             
         }
+        
+        bool firstTime = true;
 
         public DataTable GetChunk(IDataLoadEventListener listener, GracefulCancellationToken cancellationToken)
         {
@@ -63,6 +65,13 @@ namespace Rdmp.Dicom
                 throw new Exception("File has not been set");
             if (!_file.File.Exists)
                 throw new FileNotFoundException("File did not exist:'" + _file.File.FullName + "'");
+
+            // This is an all at once source, next call returns null (i.e. we are done)
+            if (!firstTime)
+            {
+                return null;
+            }
+                
 
             var dt = GenerateTable();
 
@@ -74,6 +83,7 @@ namespace Rdmp.Dicom
                 ProcessDir(f, dt,listener);
             }
 
+            firstTime = false;
             return dt;
         }
 
