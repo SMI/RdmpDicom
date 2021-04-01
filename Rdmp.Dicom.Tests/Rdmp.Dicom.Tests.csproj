@@ -6,6 +6,7 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="TestData\anonResult.xml" />
     <None Remove="TestData\FileWithLotsOfTags.dcm" />
     <None Remove="TestData\IM-0001-0013.dcm" />
     <None Remove="TestData\IM-0001-0019.dcm" />
@@ -16,6 +17,9 @@
     <Compile Include="..\SharedAssemblyInfo.cs" Link="SharedAssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="TestData\anonResult.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="TestData\FileWithLotsOfTags.dcm">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
