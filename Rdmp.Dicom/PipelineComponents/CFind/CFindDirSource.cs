@@ -7,6 +7,7 @@ using ReusableLibraryCode.Checks;
 using ReusableLibraryCode.Progress;
 using System;
 using System.Data;
+using System.Diagnostics;
 using System.IO;
 using System.Xml;
 using System.Xml.XPath;
@@ -32,6 +33,8 @@ namespace Rdmp.Dicom
         public string HeadersToRead { get; set; } = DefaultHeaders;
         
         int filesRead = 0;
+
+        Stopwatch timer;
 
         public void Abort(IDataLoadEventListener listener)
         {
@@ -73,7 +76,9 @@ namespace Rdmp.Dicom
             {
                 return null;
             }
-                
+
+            timer = Stopwatch.StartNew();
+
 
             var dt = GenerateTable();
 
@@ -134,7 +139,7 @@ namespace Rdmp.Dicom
 
                 if (filesRead++ % 10000 == 0)
                 {
-                    listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information, $"Read {filesRead} files"));
+                    listener.OnProgress(this, new ProgressEventArgs("Reading files", new ProgressMeasurement(filesRead, ProgressType.Records, matches.Length), timer?.Elapsed ?? TimeSpan.Zero));
                 }
             }
         }
