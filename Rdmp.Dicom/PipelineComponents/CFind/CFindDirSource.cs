@@ -30,6 +30,8 @@ namespace Rdmp.Dicom
 
         [DemandsInitialization("Comma seperated list of dicom tags to read from the CFind results", Mandatory = true, DefaultValue = DefaultHeaders)]
         public string HeadersToRead { get; set; } = DefaultHeaders;
+        
+        int filesRead = 0;
 
         public void Abort(IDataLoadEventListener listener)
         {
@@ -129,6 +131,11 @@ namespace Rdmp.Dicom
             foreach(var file in matches)
             {
                 XmlToRows(file, dt,listener);
+
+                if (filesRead++ % 10000 == 0)
+                {
+                    listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information, $"Read {filesRead} files"));
+                }
             }
         }
 
