@@ -24,7 +24,7 @@ jobs:
       - name: Install MS SQL 2019
         uses: crazy-max/ghaction-chocolatey@v1
         with:
-          args: install sql-server-2019
+          args: install sql-server-2019 --params="'/IgnorePendingReboot'"
       - name: Set up database
         run: |
           Invoke-WebRequest -Uri https://github.com/HicServices/RDMP/releases/download/v${{ steps.version.outputs.rdmpversion }}/rdmp-cli-win-x64.zip -OutFile rdmp.zip
