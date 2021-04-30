@@ -14,7 +14,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: 3.1.301
+          dotnet-version: 5.0.200
       - name: Get version
         id: version
         shell: cmd
@@ -24,7 +24,7 @@ jobs:
       - name: Install MS SQL 2019
         uses: crazy-max/ghaction-chocolatey@v1
         with:
-          args: install sql-server-2019
+          args: install sql-server-2019 --params="'/IgnorePendingReboot'"
       - name: Set up database
         run: |
           Invoke-WebRequest -Uri https://github.com/HicServices/RDMP/releases/download/v${{ steps.version.outputs.rdmpversion }}/rdmp-cli-win-x64.zip -OutFile rdmp.zip
@@ -36,9 +36,9 @@ jobs:
           dotnet test
       - name: Build
         run: |
-          cd Plugin/net461
+          cd Plugin/windows
           dotnet publish --runtime win-x64 -c Release --self-contained false
-          cd ../netcoreapp2.2
+          cd ../main
           dotnet publish --runtime win-x64 -c Release --self-contained false
           dotnet publish --runtime linux-x64 -c Release --self-contained false
           cd ../..
