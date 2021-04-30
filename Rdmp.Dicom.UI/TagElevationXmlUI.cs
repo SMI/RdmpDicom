@@ -1,5 +1,4 @@
-﻿using AutocompleteMenuNS;
-using Dicom;
+﻿using Dicom;
 using DicomTypeTranslation.Elevation.Serialization;
 using Rdmp.Core.Curation.Data.DataLoad;
 using Rdmp.Core.Repositories;
@@ -11,6 +10,7 @@ using System.Linq;
 using System.Windows.Forms;
 using Rdmp.Core.Icons.IconProvision;
 using Rdmp.UI.ScintillaHelper;
+using Rdmp.UI.AutoComplete;
 
 namespace Rdmp.Dicom.UI
 {
@@ -53,24 +53,6 @@ namespace Rdmp.Dicom.UI
             var factory = new ScintillaTextEditorFactory();
             queryEditor = factory.Create(null,"xml");
             pEditor.Controls.Add(queryEditor);
-
-
-            var autoComplete = new AutocompleteMenu {ImageList = new ImageList()};
-
-            autoComplete.ImageList.Images.Add(CatalogueIcons.File);
-            autoComplete.MaximumSize = new System.Drawing.Size(300,500);
-            
-            autoComplete.AddItem(new SubstringAutocompleteItem("TagElevationRequest") { ImageIndex = 0 });
-            autoComplete.AddItem(new SubstringAutocompleteItem("ColumnName") { ImageIndex = 0 });
-            autoComplete.AddItem(new SubstringAutocompleteItem("ElevationPathway") { ImageIndex = 0 });
-            autoComplete.AddItem(new SubstringAutocompleteItem("Conditional") { ImageIndex = 0 });
-            autoComplete.AddItem(new SubstringAutocompleteItem("ConditionalPathway"){ ImageIndex = 0 });
-            autoComplete.AddItem(new SubstringAutocompleteItem("ConditionalRegex"){ImageIndex = 0 });
-
-            foreach (string keyword in DicomDictionary.Default.Select(e => e.Keyword).Distinct())
-                autoComplete.AddItem(new SubstringAutocompleteItem(keyword));
-
-            autoComplete.TargetControlWrapper = new ScintillaWrapper(queryEditor);
 
             btnRunChecks.Click += (s,e)=>RunChecks();
 
