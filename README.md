@@ -26,9 +26,9 @@ Building requires MSBuild 15 or later (or Visual Studio 2017 or later).  You wil
 You can build Rdmp.Dicom as a plugin for RDMP by running the following (use the Version number in [SharedAssemblyInfo.cs](SharedAssemblyInfo.cs) in place of 0.0.1)
 
 ```bash
-cd Plugin/net461
+cd Plugin/windows
 dotnet publish --runtime win-x64 -c Release --self-contained false
-cd ../netcoreapp2.2
+cd ../main
 dotnet publish --runtime win-x64 -c Release --self-contained false
 dotnet publish --runtime linux-x64 -c Release --self-contained false
 cd ../..
