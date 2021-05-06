@@ -18,8 +18,8 @@
         </dependencies>
     </metadata>
   <files>
-    <file src="Rdmp.Dicom\bin\$configuration$\netstandard2.0\*.dll" target="lib\netstandard2.0" exclude="bin\$configuration$\netstandard2.0\Plugin.dll" />
-    <file src="Rdmp.Dicom\bin\$configuration$\netstandard2.0\*.pdb" target="lib\netstandard2.0" exclude="bin\$configuration$\netstandard2.0\Plugin.pdb" />
-    <file src="Rdmp.Dicom\bin\$configuration$\netstandard2.0\*.xml" target="lib\netstandard2.0" exclude="bin\$configuration$\netstandard2.0\Plugin.xml" />
+    <file src="Rdmp.Dicom\bin\$configuration$\net5.0\*.dll" target="lib\netstandard2.0" exclude="bin\$configuration$\net5.0\Plugin.dll" />
+    <file src="Rdmp.Dicom\bin\$configuration$\net5.0\*.pdb" target="lib\netstandard2.0" exclude="bin\$configuration$\net5.0\Plugin.pdb" />
+    <file src="Rdmp.Dicom\bin\$configuration$\net5.0\*.xml" target="lib\netstandard2.0" exclude="bin\$configuration$\net5.0\Plugin.xml" />
   </files>
 </package>
