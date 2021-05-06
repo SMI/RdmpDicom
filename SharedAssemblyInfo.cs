@@ -8,7 +8,7 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyCulture("")]
 
 // These should be replaced with correct values by the release process
-[assembly: AssemblyVersion("2.2.4")]
-[assembly: AssemblyFileVersion("2.2.4")]
-[assembly: AssemblyInformationalVersion("2.2.4")]
+[assembly: AssemblyVersion("3.0.0")]
+[assembly: AssemblyFileVersion("3.0.0")]
+[assembly: AssemblyInformationalVersion("3.0.0")]
 [assembly: InternalsVisibleTo("Rdmp.Dicom.Tests")]
