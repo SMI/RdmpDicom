@@ -6,7 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Bump NunitXml.TestLogger from 3.0.97 to 3.0.107
+
 ...
+
 
 ## [3.0.0] 2021-06-05
 
