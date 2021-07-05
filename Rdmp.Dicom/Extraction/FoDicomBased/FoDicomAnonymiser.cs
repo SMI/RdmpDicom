@@ -13,6 +13,7 @@ using Rdmp.Core.DataFlowPipeline.Requirements;
 using Rdmp.Core.DataFlowPipeline;
 using Rdmp.Core.Repositories.Construction;
 using MapsDirectlyToDatabaseTable.Versioning;
+using System.Collections.Generic;
 
 namespace Rdmp.Dicom.Extraction.FoDicomBased
 {
@@ -41,6 +42,9 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
 
         [DemandsInitialization("The number of errors (e.g. failed to find/anonymise file) to allow before abandoning the extraction",DefaultValue = 100)]
         public int ErrorThreshold {get; set; }
+
+        [DemandsInitialization("Comma separated list of top level tags that you want deleted from the dicom dataset of files being extracted.  This field exists to cover any anonymisation gaps e.g. ditching ReferencedImageSequence")]
+        public string DeleteTags { get; set; }
 
         private IPutDicomFilesInExtractionDirectories _putter;
 
@@ -88,6 +92,8 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
             var profile = DicomAnonymizer.SecurityProfile.LoadProfile(null,flags);
             
             var anonymiser = new DicomAnonymizer(profile);
+
+            var deleteTags = GetDeleteTags();
 
             using (var pool = new ZipPool())
             {
@@ -154,6 +160,14 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
                             row[kvp.Key.DictionaryEntry.Keyword] = releaseValue;
                     }
                     
+                    foreach(var tag in deleteTags)
+                    {
+                        if (ds.Contains(tag))
+                        {
+                            ds.Remove(tag);
+                        }   
+                    }
+
                     var newPath = _putter.WriteOutDataset(destinationDirectory,releaseId,ds);
                     row[RelativeArchiveColumnName] = newPath;
 
@@ -167,6 +181,26 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
             }
             
             return toProcess;
+        }
+
+        private IEnumerable<DicomTag> GetDeleteTags()
+        {
+            List<DicomTag> toReturn = new List<DicomTag>();
+            var alsoDelete = DeleteTags?.Split(",", StringSplitOptions.RemoveEmptyEntries) ?? new string[0];
+
+            foreach(var s in alsoDelete)
+            {
+                try
+                {
+                    toReturn.Add(DicomDictionary.Default[s]);
+                }
+                catch (Exception)
+                {
+                    throw new Exception($"Could not find a tag called '{s}' when resolving {nameof(DeleteTags)} property.  All names must exactly match DicomTags");
+                }
+            }
+
+            return toReturn;
         }
 
         public void Dispose(IDataLoadEventListener listener, Exception pipelineFailureExceptionIfAny)
@@ -188,6 +222,16 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
 
         public void Check(ICheckNotifier notifier)
         {
+            try
+            {
+                GetDeleteTags();
+            }
+            catch (Exception ex)
+            {
+                notifier.OnCheckPerformed(new CheckEventArgs($"Error processing {nameof(DeleteTags)}",CheckResult.Fail, ex));
+            }
+            
+
             lock(CreateServersOneAtATime)
             {
                 if (UIDMappingServer == null)

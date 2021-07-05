@@ -71,6 +71,7 @@ namespace Rdmp.Dicom.Tests.Integration
                 {DicomTag.PatientBirthDate,"20010101"},
                 {DicomTag.StudyDescription,"Frank has lots of problems, he lives at 60 Pancake road"},
                 {DicomTag.SeriesDescription,"Coconuts"},
+                {DicomTag.AlgorithmName,"Chessnuts"},
                 {DicomTag.StudyDate,"20020101"},
             };
 
