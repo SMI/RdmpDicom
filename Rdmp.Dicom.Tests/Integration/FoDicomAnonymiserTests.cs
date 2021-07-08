@@ -71,6 +71,7 @@ namespace Rdmp.Dicom.Tests.Integration
                 {DicomTag.PatientBirthDate,"20010101"},
                 {DicomTag.StudyDescription,"Frank has lots of problems, he lives at 60 Pancake road"},
                 {DicomTag.SeriesDescription,"Coconuts"},
+                {DicomTag.AlgorithmName,"Chessnuts"}, // would not normally be dropped by anonymisation
                 {DicomTag.StudyDate,"20020101"},
             };
 
@@ -123,7 +124,8 @@ namespace Rdmp.Dicom.Tests.Integration
             anonymiser.RelativeArchiveColumnName = "Filepath";
             anonymiser.UIDMappingServer = eds;
             anonymiser.RetainDates = keepDates;
-            
+            anonymiser.DeleteTags = "AlgorithmName";
+
             var anoDt = anonymiser.ProcessPipelineData(dt,new ThrowImmediatelyDataLoadEventListener(),new GracefulCancellationToken());
 
             Assert.AreEqual(1,anoDt.Rows.Count);
