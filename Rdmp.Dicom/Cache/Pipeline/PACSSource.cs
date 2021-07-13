@@ -28,17 +28,17 @@ namespace Rdmp.Dicom.Cache.Pipeline
         public int MaxRetries { get; set; } = 3;
 
         [DemandsInitialization("The timeout (in ms) to wait for an association response after sending an association release request.  Defaults to 50ms if not specified")]
-        public int? AssociationLingerTimeoutInMs { get; private set; }
+        public int? AssociationLingerTimeoutInMs { get; set; }
 
         /// 
         [DemandsInitialization("The timeout (in ms) to wait for an association response after sending an association request.  Defaults to 10000ms if not specified")]
-        public int? AssociationReleaseTimeoutInMs { get; private set; }
+        public int? AssociationReleaseTimeoutInMs { get; set; }
 
         [DemandsInitialization("The timeout (in ms) that associations need to be held open after all requests have been processed.  Defaults to 5000ms if not specified")]
-        public int? AssociationRequestTimeoutInMs { get; private set; }
+        public int? AssociationRequestTimeoutInMs { get; set; }
 
         [DemandsInitialization("The maximum number of DICOM requests that are allowed to be sent over one single association.  When this limit is reached, the DICOM client will wait for pending requests to complete, and then open a new association to send the remaining requests, if any.  If not provided then int.MaxValue is used (i.e. keep reusing association)")]
-        public int? MaximumNumberOfRequestsPerAssociation { get; private set; }
+        public int? MaximumNumberOfRequestsPerAssociation { get; set; }
 
         public override SMIDataChunk DoGetChunk(ICacheFetchRequest cacheRequest, IDataLoadEventListener listener,GracefulCancellationToken cancellationToken)
         {
