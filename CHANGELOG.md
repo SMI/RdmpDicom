@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
+### Changed
+
+- Bump NunitXml.TestLogger from 3.0.97 to 3.0.107
+- Bump HIC.RDMP.Plugin from 5.0.0 to 5.0.3
+
 ## Added
 
 - Added support for customising `DicomClient` client settings in PACSSource caching component (e.g. `AssociationLingerTimeoutInMs`)
