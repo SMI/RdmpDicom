@@ -81,16 +81,16 @@ namespace Rdmp.Dicom.Cache.Pipeline
             {
                 DicomClient client = new DicomClient(dicomConfiguration.RemoteAetUri.Host, dicomConfiguration.RemoteAetUri.Port, false, dicomConfiguration.LocalAetTitle, dicomConfiguration.RemoteAetTitle);
 
-                if(AssociationLingerTimeoutInMs != null)
+                if(AssociationLingerTimeoutInMs != null && AssociationLingerTimeoutInMs > 0)
                     client.AssociationLingerTimeoutInMs = AssociationLingerTimeoutInMs.Value;
 
-                if(AssociationReleaseTimeoutInMs != null)
+                if(AssociationReleaseTimeoutInMs != null && AssociationReleaseTimeoutInMs > 0)
                     client.AssociationReleaseTimeoutInMs = AssociationReleaseTimeoutInMs.Value;
 
-                if(AssociationRequestTimeoutInMs != null)
+                if(AssociationRequestTimeoutInMs != null && AssociationRequestTimeoutInMs > 0)
                     client.AssociationRequestTimeoutInMs = AssociationRequestTimeoutInMs.Value;
 
-                if(MaximumNumberOfRequestsPerAssociation != null)
+                if(MaximumNumberOfRequestsPerAssociation != null && MaximumNumberOfRequestsPerAssociation > 0)
                     client.MaximumNumberOfRequestsPerAssociation = MaximumNumberOfRequestsPerAssociation.Value;
 
                 try
