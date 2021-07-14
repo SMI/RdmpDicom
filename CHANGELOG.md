@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
+## [3.0.1] 2021-07-14
+
 ### Changed
 
 - Bump NunitXml.TestLogger from 3.0.97 to 3.0.107
@@ -289,7 +291,8 @@ Updated to be compatible with RDMP 4.2
 
 - Initial commit from private repo
 
-[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v3.0.0...develop
+[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v3.0.1...develop
+[3.0.1]: https://github.com/HicServices/RdmpDicom/compare/v3.0.0...v3.0.1
 [3.0.0]: https://github.com/HicServices/RdmpDicom/compare/v2.2.4...v3.0.0
 [2.2.4]: https://github.com/HicServices/RdmpDicom/compare/v2.2.3...v2.2.4
 [2.2.3]: https://github.com/HicServices/RdmpDicom/compare/v2.2.2...v2.2.3
