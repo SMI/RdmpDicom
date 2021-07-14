@@ -30,8 +30,7 @@ jobs:
           cmd.exe /c rdmpcli\rdmp.exe install localhost TEST_
       - name: Test
         run: |
-          nuget restore
-          dotnet test
+          dotnet test -c Release
       - name: Build
         run: |
           cd Plugin/windows
@@ -47,7 +46,7 @@ jobs:
           cmd /c rdmpcli\rdmp.exe cmd describecommand CreateNewImagingDatasetSuite --servername localhost --cataloguedatabasename TEST_Catalogue --dataexportdatabasename TEST_DataExport
       - name: Nuget push
         if: contains(github.ref,'refs/tags/')
-        run: nuget push HIC.Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg -Source https://api.nuget.org/v3/index.json -ApiKey ${{ secrets.NUGET_KEY }}
+        run: nuget push HIC.Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg -Source https://api.nuget.org/v3/index.json -ApiKey ${{ secrets.NUGET_KEY }} -SkipDuplicate
       - name: Store created nupkg files
         uses: actions/upload-artifact@v2
         with:
