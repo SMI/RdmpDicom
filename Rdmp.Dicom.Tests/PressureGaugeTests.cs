@@ -12,7 +12,7 @@ namespace Rdmp.Dicom.Tests
     class PressureGaugeTests
     {
         [Test]
-        public void TestGuage_NotReached()
+        public void TestGauge_NotReached()
         {
             bool someFact = false;
 
@@ -22,7 +22,7 @@ namespace Rdmp.Dicom.Tests
             Assert.IsFalse(someFact);
         }
         [Test]
-        public void TestGuage_NotReached_OverTime()
+        public void TestGauge_NotReached_OverTime()
         {
             bool someFact = false;
 
@@ -38,7 +38,7 @@ namespace Rdmp.Dicom.Tests
             Assert.IsFalse(someFact);
         }
         [Test]
-        public void TestGuage_Reached()
+        public void TestGauge_Reached()
         {
             bool someFact = false;
 
@@ -57,7 +57,7 @@ namespace Rdmp.Dicom.Tests
         }
 
         [Test]
-        public void TestGuage_Reached_OverTime()
+        public void TestGauge_Reached_OverTime()
         {
             bool someFact = false;
 
@@ -69,7 +69,7 @@ namespace Rdmp.Dicom.Tests
             Assert.IsTrue(someFact);
         }
         [Test]
-        public void TestGuage_Reached_OverTime_Boundary()
+        public void TestGauge_Reached_OverTime_Boundary()
         {
             bool someFact = false;
 
