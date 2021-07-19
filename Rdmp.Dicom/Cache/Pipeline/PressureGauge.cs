@@ -16,6 +16,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
         public long ThresholdBeatsPerMinute { get; set; }
 
         List<DateTime> collection = new List<DateTime>();
+        object oLock = new object();
 
         public PressureGauge()
         {
@@ -39,12 +40,18 @@ namespace Rdmp.Dicom.Cache.Pipeline
         /// <param name="pressureTooHigh">Delegate to invoke if <see cref="ThresholdBeatsPerMinute"/> is exceeded</param>
         public void Tick(DateTime eventDate, IDataLoadEventListener listener, Action pressureTooHigh)
         {
-            // filter collection to only recent events
-            collection = collection.Where(c => eventDate.Subtract(c) < TimeSpan.FromMinutes(1)).ToList() ;
+            bool exceeded = false;
+            lock (oLock)
+            {
+                // filter collection to only recent events
+                collection = collection.Where(c => eventDate.Subtract(c) < TimeSpan.FromMinutes(1)).ToList();
 
-            collection.Add(eventDate);
+                collection.Add(eventDate);
 
-            if(collection.Count > ThresholdBeatsPerMinute)
+                exceeded = collection.Count > ThresholdBeatsPerMinute;
+            }
+            
+            if(exceeded)
             {
                 // Important to use log level Information here and not Error in case the listener breaks flow control e.g. ThrowImmediately listener
                 listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information, "ThresholdBeatsPerMinute exceeded, invoking delegate"));
