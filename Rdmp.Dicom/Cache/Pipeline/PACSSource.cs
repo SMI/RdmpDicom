@@ -40,8 +40,15 @@ namespace Rdmp.Dicom.Cache.Pipeline
         [DemandsInitialization("The maximum number of DICOM requests that are allowed to be sent over one single association.  When this limit is reached, the DICOM client will wait for pending requests to complete, and then open a new association to send the remaining requests, if any.  If not provided then int.MaxValue is used (i.e. keep reusing association)")]
         public int? MaximumNumberOfRequestsPerAssociation { get; set; }
 
+        [DemandsInitialization("The maximum number of Association related events that can be permitted per minute before the system exits",DefaultValue = 30)]
+        public int MaximumAllowableAssociationEventsPerMinute { get; set; } = 30;
+
+        public static PressureGauge gauge = new PressureGauge() { ThresholdBeatsPerMinute = 30 };
+
         public override SMIDataChunk DoGetChunk(ICacheFetchRequest cacheRequest, IDataLoadEventListener listener,GracefulCancellationToken cancellationToken)
         {
+            gauge.ThresholdBeatsPerMinute = MaximumAllowableAssociationEventsPerMinute;
+
             listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,$"PACSSource version is {typeof(PACSSource).Assembly.GetName().Version}.  Assembly is {typeof(PACSSource).Assembly} " ));
             listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,$"Fo-Dicom version is {typeof(DicomClient).Assembly.GetName().Version}.  Assembly is {typeof(DicomClient).Assembly} " ));
 
@@ -80,8 +87,21 @@ namespace Rdmp.Dicom.Cache.Pipeline
             using (var server = (DicomServer<CachingSCP>) DicomServer.Create<CachingSCP>(dicomConfiguration.LocalAetUri.Port))
             {
                 DicomClient client = new DicomClient(dicomConfiguration.RemoteAetUri.Host, dicomConfiguration.RemoteAetUri.Port, false, dicomConfiguration.LocalAetTitle, dicomConfiguration.RemoteAetTitle);
+                client.AssociationAccepted += (s, e) => {
+                    gauge.Tick(listener, () => Process.GetCurrentProcess().Kill());
+                    listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Trace, "AssociationAccepted"));
+                    };
+                client.AssociationReleased += (s, e) => {
+                    gauge.Tick(listener, () => Process.GetCurrentProcess().Kill());
+                    listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Trace, $"AssociationReleased"));
+                    };
+                client.AssociationRejected += (s, e) =>
+                {
+                    gauge.Tick(listener,()=>Process.GetCurrentProcess().Kill());
+                    listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Trace, $"AssociationRejected"));
+                };
 
-                if(AssociationLingerTimeoutInMs != null && AssociationLingerTimeoutInMs > 0)
+                if (AssociationLingerTimeoutInMs != null && AssociationLingerTimeoutInMs > 0)
                     client.AssociationLingerTimeoutInMs = AssociationLingerTimeoutInMs.Value;
 
                 if(AssociationReleaseTimeoutInMs != null && AssociationReleaseTimeoutInMs > 0)
