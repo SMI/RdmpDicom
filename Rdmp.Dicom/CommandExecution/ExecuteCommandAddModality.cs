@@ -34,19 +34,19 @@ namespace Rdmp.Dicom.CommandExecution
             {
                 _live = lmd.GetDistinctLiveDatabaseServer().GetCurrentDatabase();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 SetImpossible($"Could not get single live server from the LoadMetadata {lmd} :" + ex);
                 return;
             }
 
-            if(_live == null || !_live.Exists())
+            if (_live == null || !_live.Exists())
             {
                 SetImpossible($"Live database for {lmd} was null or did not exist, cannot update it for a new modality");
                 return;
             }
 
-            if(modality.EndsWith("_"))
+            if (modality.EndsWith("_"))
             {
                 _prefix = modality;
             }
@@ -54,7 +54,7 @@ namespace Rdmp.Dicom.CommandExecution
             {
                 _prefix = modality + "_";
             }
-            
+
             // the underlying command that does most of the work (creating tables), the rest is tinkering (join creation for study/series/image etc)
             _schemaCreationCommand = new ExecuteCommandCreateNewImagingDatasetSuite(activator.RepositoryLocator, _live, null, null, _prefix, template, false, false);
 
@@ -69,20 +69,26 @@ namespace Rdmp.Dicom.CommandExecution
 
         private void ValidateTemplate(ImageTableTemplateCollection template)
         {
-            if(template.Tables.Count != 3)
+            if (template.Tables.Count != 3)
             {
                 SetImpossible("Expected template to contain exactly 3 tables (StudyTable, SeriesTable and ImageTable)");
                 return;
             }
 
-            foreach(var n in new[] { StudyTable,SeriesTable,ImageTable})
+            foreach (var n in new[] { StudyTable, SeriesTable, ImageTable })
             {
                 if (template.Tables.Any(t => t.TableName.Equals(n)))
                 {
-                    SetImpossible($"Template did not contain an expected table name: {n}.  Table names in template were {string.Join(",",template.Tables.Select(t=>t.TableName))}");
+                    SetImpossible($"Template did not contain an expected table name: {n}.  Table names in template were {string.Join(",", template.Tables.Select(t => t.TableName))}");
                     return;
                 }
             }
+
+            var study = template.Tables.Single(t => t.TableName.Equals(StudyTable));
+            var series = template.Tables.Single(t => t.TableName.Equals(SeriesTable));
+            var image = template.Tables.Single(t => t.TableName.Equals(ImageTable));
+
+            // TODO: validate schemas more
         }
 
         public override void Execute()
@@ -91,7 +97,7 @@ namespace Rdmp.Dicom.CommandExecution
 
             _schemaCreationCommand.Execute();
 
-            var studyCata = (Catalogue) _schemaCreationCommand.NewCataloguesCreated.Single(c => c.Name.Contains(StudyTable));
+            var studyCata = (Catalogue)_schemaCreationCommand.NewCataloguesCreated.Single(c => c.Name.Contains(StudyTable));
             var seriesCata = (Catalogue)_schemaCreationCommand.NewCataloguesCreated.Single(c => c.Name.Contains(SeriesTable));
             var imageCata = (Catalogue)_schemaCreationCommand.NewCataloguesCreated.Single(c => c.Name.Contains(ImageTable));
 
