@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
-using System.Data.SqlClient;
 using System.Text;
 using ReusableLibraryCode;
 using FAnsi.Discovery;
+using Microsoft.Data.SqlClient;
 using Rdmp.Core.Curation.Data;
 
 namespace Rdmp.Dicom.Extraction
@@ -103,6 +103,7 @@ namespace Rdmp.Dicom.Extraction
                 using (var conn = (SqlConnection)_server.GetConnection())
                 {
                     conn.Open();
+                    
                     using (var da = new SqlDataAdapter(table.GetTopXSql(0), conn))
                         da.Fill(dt);
                 }
