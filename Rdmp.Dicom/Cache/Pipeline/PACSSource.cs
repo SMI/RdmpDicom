@@ -43,7 +43,11 @@ namespace Rdmp.Dicom.Cache.Pipeline
         [DemandsInitialization("The maximum number of Association related events that can be permitted per minute before the system exits",DefaultValue = 30)]
         public int MaximumAllowableAssociationEventsPerMinute { get; set; } = 30;
 
+        [DemandsInitialization("True to log individual file fetch messages for each study requested at Info level.  False to log at Trace level.", DefaultValue = true)]
+        public bool Verbose { get; set; }
+
         public static PressureGauge gauge = new PressureGauge() { ThresholdBeatsPerMinute = 30 };
+
 
         public override SMIDataChunk DoGetChunk(ICacheFetchRequest cacheRequest, IDataLoadEventListener listener,GracefulCancellationToken cancellationToken)
         {
@@ -53,11 +57,12 @@ namespace Rdmp.Dicom.Cache.Pipeline
             listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,$"Fo-Dicom version is {typeof(DicomClient).Assembly.GetName().Version}.  Assembly is {typeof(DicomClient).Assembly} " ));
 
             var dicomConfiguration = GetConfiguration();
-            var requestSender = new DicomRequestSender(dicomConfiguration, listener);
+            var requestSender = new DicomRequestSender(dicomConfiguration, listener,Verbose);
             var dateFrom = Request.Start;
             var dateTo = Request.End;
             CachingSCP.LocalAet = LocalAETitle;
             CachingSCP.Listener = listener;
+            CachingSCP.Verbose = Verbose;
 
             if (PatientIdWhitelistColumnInfo != null && !IgnoreWhiteList)
                 GetWhitelist(listener);
@@ -119,7 +124,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
                     #region Query
 
                     listener.OnNotify(this,
-                        new NotifyEventArgs(ProgressEventType.Information,
+                        new NotifyEventArgs( ProgressEventType.Information,
                             "Requesting Studies from " + dateFrom + " to " + dateTo));
                         
                     var request = CreateStudyRequestByDateRangeForModality(dateFrom, dateTo, Modality);
@@ -150,7 +155,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
                         if (dicomConfiguration.TransferCooldownInMilliseconds != 0)
                         {
                             listener.OnNotify(this,
-                                new NotifyEventArgs(ProgressEventType.Information,
+                                new NotifyEventArgs(Verbose ? ProgressEventType.Information : ProgressEventType.Trace,
                                     "Transfers sleeping for " + dicomConfiguration.TransferCooldownInMilliseconds / 1000 + "seconds"));
                             Task.Delay(dicomConfiguration.TransferCooldownInMilliseconds, cancellationToken.AbortToken).Wait(cancellationToken.AbortToken);
                         }
@@ -198,7 +203,9 @@ namespace Rdmp.Dicom.Cache.Pipeline
                         //send the command to the server
                         
                         //tell user what we are sending
-                        listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,CMoveRequestToString(cMoveRequest,current.RetryCount +1)));
+                        listener.OnNotify(this,new NotifyEventArgs(
+                            Verbose ? ProgressEventType.Information : ProgressEventType.Trace,
+                            CMoveRequestToString(cMoveRequest,current.RetryCount +1)));
 
                         //do not use requestSender.ThrottleRequest(cMoveRequest, cancellationToken);
                         //TODO is there any need to throtttle this request given its lifetime

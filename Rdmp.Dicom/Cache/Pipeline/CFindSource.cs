@@ -38,11 +38,12 @@ namespace Rdmp.Dicom.Cache.Pipeline
             listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,$"Fo-Dicom version is {typeof(DicomClient).Assembly.GetName().Version}.  Assembly is {typeof(DicomClient).Assembly} " ));
 
             var dicomConfiguration = GetConfiguration();
-            var requestSender = new DicomRequestSender(dicomConfiguration, listener);
+            var requestSender = new DicomRequestSender(dicomConfiguration, listener,true);
             var dateFrom = Request.Start;
             var dateTo = Request.End;
             CachingSCP.LocalAet = LocalAETitle;
             CachingSCP.Listener = listener;
+
 
             if (PatientIdWhitelistColumnInfo != null && !IgnoreWhiteList)
                 GetWhitelist(listener);
