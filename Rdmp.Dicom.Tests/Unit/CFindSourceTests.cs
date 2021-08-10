@@ -20,8 +20,8 @@ namespace Rdmp.Dicom.Tests.Unit
 
             var cmd = new ExecuteCommandCFind(
                 new ConsoleInputManager(RepositoryLocator, new ThrowImmediatelyCheckNotifier()) { DisallowInput = true },
-                "2013-01-01",
-                "2014-01-01",
+                "2001-01-01",
+                "2002-01-01",
                 "www.dicomserver.co.uk",
                 104,
                 "you",
