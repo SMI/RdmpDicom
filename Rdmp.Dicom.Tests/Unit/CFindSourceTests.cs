@@ -29,8 +29,8 @@ namespace Rdmp.Dicom.Tests.Unit
                 dir.FullName);
             cmd.Execute();
 
-            // file name is miday on 2010 1st January
-            var f = Path.Combine(dir.FullName, @"out/Data/Cache/ALL/20130101120000.csv");
+            // file name is miday on 2001 1st January
+            var f = Path.Combine(dir.FullName, @"out/Data/Cache/ALL/20010101120000.csv");
             FileAssert.Exists(f);
             
             var result = File.ReadAllLines(f);
