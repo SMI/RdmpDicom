@@ -69,7 +69,7 @@ namespace Rdmp.Dicom.Cache.Pipeline.Dicom
             transferTimer.Start();
             SendRequest(client,cancellationToken);
             transferTimer.Stop();
-            //valuein mills
+            // value in mills
             var delay =  _dicomConfiguration.RequestCooldownInMilliseconds;
             if (delay <= 0) return;
             _listener.OnNotify(this, new NotifyEventArgs(
