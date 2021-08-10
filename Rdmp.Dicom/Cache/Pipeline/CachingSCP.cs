@@ -53,6 +53,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
 
         public static string LocalAet { get; set; }
         public static IDataLoadEventListener Listener { get; set; }
+        public static bool Verbose { get; set; } = true;
         public static Action<DicomCStoreRequest, DicomCStoreResponse> OnEndProcessingCStoreRequest;
         private String CalledAE = String.Empty;
         private String CallingAE = String.Empty;
@@ -95,14 +96,14 @@ namespace Rdmp.Dicom.Cache.Pipeline
             var msg = "Connection closed";
             if (e != null) msg += e.Message + e.StackTrace;
             Logger.Info(msg, e);
-            Listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information, "ConnectionClosed: "+ msg)); 
+            Listener.OnNotify(this,new NotifyEventArgs(Verbose ? ProgressEventType.Information : ProgressEventType.Trace, "ConnectionClosed: "+ msg)); 
         }
         #endregion
 
         #region OnCStoreRequest
         public DicomCStoreResponse OnCStoreRequest(DicomCStoreRequest request)
         {
-            Listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information, "Received CStore Request: " + request.SOPInstanceUID));
+            Listener.OnNotify(this, new NotifyEventArgs(Verbose ? ProgressEventType.Information : ProgressEventType.Trace, "Received CStore Request: " + request.SOPInstanceUID));
             DicomCStoreResponse response;
             try
             {
@@ -114,7 +115,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
                 Listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Error, "Failed CStore: " + request.SOPInstanceUID, e));
                 response = new DicomCStoreResponse(request, DicomStatus.ProcessingFailure);
             }
-            Listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information, "Sending CStore Response: " + response.Status + " from AET: " + CalledAE + " to AET:" + CallingAE));
+            Listener.OnNotify(this, new NotifyEventArgs(Verbose ? ProgressEventType.Information : ProgressEventType.Trace, "Sending CStore Response: " + response.Status + " from AET: " + CalledAE + " to AET:" + CallingAE));
             return response;
         }
         #endregion

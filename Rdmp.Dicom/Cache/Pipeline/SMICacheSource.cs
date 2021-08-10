@@ -88,7 +88,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
         {
             // ping configured remote PACS with a C-ECHO request
             //use a new requestSender
-            var echoRequestSender = new DicomRequestSender(GetConfiguration(), new FromCheckNotifierToDataLoadEventListener(notifier));
+            var echoRequestSender = new DicomRequestSender(GetConfiguration(), new FromCheckNotifierToDataLoadEventListener(notifier),true);
             echoRequestSender.OnRequestException += ex =>
             {
                 notifier.OnCheckPerformed(new CheckEventArgs("Error sending ECHO", CheckResult.Fail, ex));

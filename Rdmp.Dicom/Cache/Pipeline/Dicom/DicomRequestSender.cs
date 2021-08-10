@@ -15,6 +15,7 @@ namespace Rdmp.Dicom.Cache.Pipeline.Dicom
 
         private readonly DicomConfiguration _dicomConfiguration;
         private readonly IDataLoadEventListener _listener;
+        private readonly bool verbose;
         private readonly Stopwatch _moveRequestTimer = new Stopwatch();
         public delegate void OnCheckExceptionDelegate(Exception ex);
         public delegate void OnCheckTimeoutDelegate();
@@ -24,10 +25,11 @@ namespace Rdmp.Dicom.Cache.Pipeline.Dicom
         public OnCheckTimeoutDelegate OnRequestTimeout;
         public OnCheckSucessDelegate OnRequestSucess;
 
-        public DicomRequestSender(DicomConfiguration dicomConfiguration, IDataLoadEventListener listener)
+        public DicomRequestSender(DicomConfiguration dicomConfiguration, IDataLoadEventListener listener,bool verbose)
         {
             _dicomConfiguration = dicomConfiguration;
             _listener = listener;
+            this.verbose = verbose;
         }
 
         /// <summary>
@@ -70,7 +72,9 @@ namespace Rdmp.Dicom.Cache.Pipeline.Dicom
             //valuein mills
             var delay =  _dicomConfiguration.RequestCooldownInMilliseconds;
             if (delay <= 0) return;
-            _listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information, "Requests sleeping for " + delay / 1000 + "seconds"));
+            _listener.OnNotify(this, new NotifyEventArgs(
+                verbose ? ProgressEventType.Information : ProgressEventType.Trace,
+                "Requests sleeping for " + delay / 1000 + "seconds"));
             Task.Delay(delay, cancellationToken).Wait(cancellationToken);
         }
         #endregion
@@ -118,7 +122,9 @@ namespace Rdmp.Dicom.Cache.Pipeline.Dicom
         #region SendRequest
         public void SendRequest(DicomClient client,CancellationToken token)
         {
-            _listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information, "Sending request to " + _dicomConfiguration.RemoteAetTitle + " at " + _dicomConfiguration.RemoteAetUri.Host + ":" + _dicomConfiguration.RemoteAetUri.Port));
+            _listener.OnNotify(this, new NotifyEventArgs(
+                verbose ? ProgressEventType.Information : ProgressEventType.Trace,
+                "Sending request to " + _dicomConfiguration.RemoteAetTitle + " at " + _dicomConfiguration.RemoteAetUri.Host + ":" + _dicomConfiguration.RemoteAetUri.Port));
             bool completed;
             try
             {
