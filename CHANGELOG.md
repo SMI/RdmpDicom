@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-...
+- Bump HIC.RDMP.Plugin from 6.0.0 to 6.0.1
 
 ## [4.0.0] 2021-07-29
 
