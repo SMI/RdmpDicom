@@ -6,7 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.0.2] 2021-08-17
+
 - Bump HIC.RDMP.Plugin from 6.0.0 to 6.0.1
+- Added Verbose flag to PACSSource to cut down on logging
 
 ## [4.0.0] 2021-07-29
 
@@ -297,7 +300,8 @@ Updated to be compatible with RDMP 4.2
 
 - Initial commit from private repo
 
-[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v4.0.0...develop
+[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v4.0.2...develop
+[4.0.2]: https://github.com/HicServices/RdmpDicom/compare/v4.0.0...v4.0.2
 [4.0.0]: https://github.com/HicServices/RdmpDicom/compare/v3.0.1...v4.0.0
 [3.0.1]: https://github.com/HicServices/RdmpDicom/compare/v3.0.0...v3.0.1
 [3.0.0]: https://github.com/HicServices/RdmpDicom/compare/v2.2.4...v3.0.0
