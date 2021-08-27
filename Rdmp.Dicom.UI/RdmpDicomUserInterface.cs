@@ -13,6 +13,8 @@ using Rdmp.Core.Providers.Nodes;
 using Rdmp.Core.Curation.Data.Defaults;
 using Rdmp.Core;
 using Rdmp.Core.CommandExecution.AtomicCommands;
+using Rdmp.Core.Curation.Data.Aggregation;
+using Rdmp.Dicom.ExternalApis;
 
 namespace Rdmp.Dicom.UI
 {
@@ -42,7 +44,9 @@ namespace Rdmp.Dicom.UI
                     return GetMenuArray(
                         new ExecuteCommandCreateNewImagingDataset(ItemActivator),
                         new ExecuteCommandPromoteNewTag(ItemActivator).SetTarget(databaseEntity),
+                        new Rdmp.Dicom.CommandExecution.ExecuteCommandCreateNewSemEHRCatalogue(ItemActivator),
                         new ExecuteCommandCompareImagingSchemas(ItemActivator,c));
+                        
                 case ProcessTask pt:
                     return GetMenuArray(new ExecuteCommandReviewIsolations(ItemActivator, pt));
                 case TableInfo _:
@@ -65,6 +69,20 @@ namespace Rdmp.Dicom.UI
         public void RefreshBus_RefreshObject(object sender, RefreshObjectEventArgs e)
         {
             
+        }
+
+        public override bool CustomActivate(AggregateConfiguration ac)
+        {
+            var api = new SemEHRApiCaller();
+            
+            if(api.ShouldRun(ac))
+            {
+                var ui = new SemEHRUI(ItemActivator, api, ac);
+                ui.ShowDialog();
+                return true;
+            }
+
+            return base.CustomActivate(ac);
         }
     }
 }
