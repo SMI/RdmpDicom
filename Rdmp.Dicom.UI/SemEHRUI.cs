@@ -24,12 +24,20 @@ namespace Rdmp.Dicom.UI
             InitializeComponent();
             _configuration = SemEHRConfiguration.LoadFrom(aggregate);
             Aggregate = aggregate;
+
+            tbUrl.Text = _configuration.Url;
         }
 
         private void btnSave_Click(object sender, EventArgs e)
         {
+            // copy values from controls into config
+            _configuration.Url = tbUrl.Text;
+
+            // save the config to the database
             Aggregate.Description = _configuration.Serialize();
             Aggregate.SaveToDatabase();
+
+            Close();
         }
 
         private void btnCancel_Click(object sender, EventArgs e)
