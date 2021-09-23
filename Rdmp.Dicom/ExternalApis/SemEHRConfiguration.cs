@@ -2,13 +2,85 @@
 using System;
 using System.Collections.Generic;
 using YamlDotNet.Serialization;
+using Newtonsoft.Json.Linq;
 
 namespace Rdmp.Dicom.ExternalApis
 {
     public class SemEHRConfiguration
     {
-        public string Url { get; set; } = "http://127.0.0.1:80/";
-        public List<string> Terms { get; set; }  = new List<string>();
+        //API Settings
+        /// <summary>
+        /// The URL used to connect to the API
+        /// </summary>
+        public string Url { get; set; } = "http://localhost:3000/testApi/get";
+
+        /// <summary>
+        /// The date format for the API start date and end date filter
+        /// </summary>
+        public string StartEndDateFormat { get; set; } = "yyyy-MM-dd";
+
+        //API Search
+        /// <summary>
+        /// Free text or comma-separated list of CUIs
+        /// </summary>
+        public string Query { get; set; } = "";
+
+        /// <summary>
+        /// Limit the query expansion to depth N if searching CUIs
+        /// </summary>
+        public int QDepth { get; set; } = -1;
+
+        /// <summary>
+        /// Remove CUIs from the expanded list (e.g. C12345)
+        /// </summary>
+        public string QStop { get; set; } = "";
+
+        /// <summary>
+        /// Whether the comment was made regarding "Recent" or "historical" or "hypothetical"
+        /// </summary>
+        public List<string> Temporality { get; set; } = new List<string>();
+
+        /// <summary>
+        /// Whether the comment was a confrimation or negation of the presence/absence of the search term - "Any" or "Negated" or "Affirmed"
+        /// </summary>
+        public string Negation { get; set; } = "";
+
+        /// <summary>
+        /// Who experianced the condition - "Patient" or "Other"
+        /// </summary>
+        public string Experiencer { get; set; } = "";
+
+        //API Filter
+        /// <summary>
+        /// Determines whether to use the start date in the filter
+        /// </summary>
+        public bool UseStartDate { get; set; } = false;
+
+        /// <summary>
+        /// Filter the returned values to only include those FROM this date
+        /// </summary>
+        public DateTime StartDate { get; set; } = DateTime.Now;
+
+        /// <summary>
+        /// Determines whether to use the end date in the filter
+        /// </summary>
+        public bool UseEndDate { get; set; } = false;
+
+        /// <summary>
+        /// Filter the returned values to only include those TO this date
+        /// </summary>
+        public DateTime EndDate { get; set; } = DateTime.Now;
+
+        /// <summary>
+        /// Filter to only include specific modalities - e.g. "CT", "MR", "US", "PT", "CR", "OT", "XA", "RF", "DX", "MG", "PR", "NM"
+        /// </summary>
+        public List<string> Modalities { get; set; } = new List<string>();
+
+        //API Return Fields
+        /// <summary>
+        /// The list of fields that should be returned - "SOPInstanceUID", "SeriesInstanceUID", "StudyInstanceUID" 
+        /// </summary>
+        public List<string> ReturnFields { get; set; } = new List<string>();
 
         public static SemEHRConfiguration LoadFrom(AggregateConfiguration aggregate)
         {
@@ -46,15 +118,98 @@ namespace Rdmp.Dicom.ExternalApis
         /// <returns></returns>
         private SemEHRConfiguration OverrideWith(SemEHRConfiguration over)
         {
-            // if Url is defined in the Catalogue then we should use that value
-            if(!string.IsNullOrWhiteSpace(over.Url))
+            // The settings/values are defined in the Catalogue then we should use that value
+
+            // API Settings
+            if (!string.IsNullOrWhiteSpace(over.Url))
             {
                 Url = over.Url;
             }
+            if (!string.IsNullOrWhiteSpace(over.StartEndDateFormat))
+            {
+                StartEndDateFormat = over.StartEndDateFormat;
+            }
+
+            //API Query
+            if (!string.IsNullOrWhiteSpace(over.Query))
+            {
+                Query = over.Query;
+            }
+            if (over.QDepth > -1)
+            {
+                QDepth = over.QDepth;
+            }
+            if (!string.IsNullOrWhiteSpace(over.QStop))
+            {
+                QStop = over.QStop;
+            }
+            if (!string.IsNullOrWhiteSpace(over.Negation))
+            {
+                Negation = over.Negation;
+            }
+            if (!string.IsNullOrWhiteSpace(over.Experiencer))
+            {
+                Experiencer = over.Experiencer;
+            }
+            if (over.Temporality.Count > 0)
+            {
+                Temporality = over.Temporality;
+            }
+            UseStartDate = over.UseStartDate;
+            StartDate = over.StartDate;
+            UseEndDate = over.UseEndDate;
+            EndDate = over.EndDate;
+            if (over.Modalities.Count > 0)
+            {
+                Modalities = over.Modalities;
+            }
+            if (over.ReturnFields.Count > 0)
+            {
+                ReturnFields = over.ReturnFields;
+            }
 
             // TODO: For terms do you want Catalogue ones + Aggregate Set ones or just to use the Aggregate Set ones
-
             return this;
+        }
+
+        public JObject GetQueryJson()
+        {           
+            //Set the terms
+            dynamic termsObj = new JObject();
+            if (!string.IsNullOrWhiteSpace(Query))
+                termsObj.q = Query;
+            if(QDepth > -1)
+                termsObj.qdepth = QDepth;
+            if(!string.IsNullOrWhiteSpace(QStop))
+                termsObj.qstop = QStop;
+            if (!string.IsNullOrWhiteSpace(Negation))
+                termsObj.negation = Negation;
+            if (!string.IsNullOrWhiteSpace(Experiencer))
+                termsObj.experiencer = Experiencer;
+            if (Temporality.Count > 0)
+                termsObj.temporality = new JArray(Temporality);
+
+            //Add terms to terms array
+            JArray termsArray = new JArray();
+            termsArray.Add(termsObj);
+
+            //Set the filter
+            dynamic filterObj = new JObject();
+            if (UseStartDate)
+                filterObj.start_date = StartDate.ToString(StartEndDateFormat);
+            if (UseEndDate)
+                filterObj.end_date = EndDate.ToString(StartEndDateFormat);
+            if (Modalities.Count > 0)
+                filterObj.modalities = new JArray(Modalities);
+
+            //Create API JSON
+            dynamic apiCallJson = new JObject();
+            apiCallJson.terms = termsArray;
+            apiCallJson.filter = filterObj;
+            if (ReturnFields.Count > 0)
+                apiCallJson.returnFields = new JArray(ReturnFields);
+
+            return apiCallJson;
         }
     }
 }
