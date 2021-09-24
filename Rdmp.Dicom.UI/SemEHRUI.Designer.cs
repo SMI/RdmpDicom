@@ -111,10 +111,6 @@ namespace Rdmp.Dicom.UI
             // cblTemporality
             // 
             this.cblTemporality.FormattingEnabled = true;
-            this.cblTemporality.Items.AddRange(new object[] {
-            "Recent",
-            "Historical",
-            "Hypothetical"});
             this.cblTemporality.Location = new System.Drawing.Point(17, 89);
             this.cblTemporality.Name = "cblTemporality";
             this.cblTemporality.Size = new System.Drawing.Size(406, 58);
@@ -123,10 +119,6 @@ namespace Rdmp.Dicom.UI
             // cbNegation
             // 
             this.cbNegation.FormattingEnabled = true;
-            this.cbNegation.Items.AddRange(new object[] {
-            "Any",
-            "Negated",
-            "Affirmed"});
             this.cbNegation.Location = new System.Drawing.Point(17, 181);
             this.cbNegation.Name = "cbNegation";
             this.cbNegation.Size = new System.Drawing.Size(406, 23);
@@ -205,10 +197,6 @@ namespace Rdmp.Dicom.UI
             // cblReturnFields
             // 
             this.cblReturnFields.FormattingEnabled = true;
-            this.cblReturnFields.Items.AddRange(new object[] {
-            "SOPInstanceUID",
-            "SeriesInstanceUID",
-            "StudyInstanceUID"});
             this.cblReturnFields.Location = new System.Drawing.Point(17, 537);
             this.cblReturnFields.Name = "cblReturnFields";
             this.cblReturnFields.Size = new System.Drawing.Size(406, 58);
@@ -264,19 +252,6 @@ namespace Rdmp.Dicom.UI
             // cblModalities
             // 
             this.cblModalities.FormattingEnabled = true;
-            this.cblModalities.Items.AddRange(new object[] {
-            "CR - Computed Radiography",
-            "CT - Computed Tomography",
-            "DX - Digital Radiography",
-            "MG - Mammography",
-            "MR - Magnetic Resonance",
-            "NM - Nuclear Medicine",
-            "OT - Other",
-            "PR - Presentation State",
-            "PT - Positron emission tomography (PET)",
-            "RF - Radio Fluoroscopy",
-            "US - Ultrasound",
-            "XA - X-Ray Angiography"});
             this.cblModalities.Location = new System.Drawing.Point(16, 291);
             this.cblModalities.Name = "cblModalities";
             this.cblModalities.Size = new System.Drawing.Size(407, 220);

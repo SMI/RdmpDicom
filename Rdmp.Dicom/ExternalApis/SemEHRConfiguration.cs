@@ -8,11 +8,13 @@ namespace Rdmp.Dicom.ExternalApis
 {
     public class SemEHRConfiguration
     {
+
+
         //API Settings
         /// <summary>
         /// The URL used to connect to the API
         /// </summary>
-        public string Url { get; set; } = "http://localhost:3000/testApi/get";
+        public string Url { get; set; } = "http://localhost:3000/testApi/search";
 
         /// <summary>
         /// The date format for the API start date and end date filter
