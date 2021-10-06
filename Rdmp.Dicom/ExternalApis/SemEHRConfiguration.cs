@@ -3,18 +3,18 @@ using System;
 using System.Collections.Generic;
 using YamlDotNet.Serialization;
 using Newtonsoft.Json.Linq;
+using System.Text.RegularExpressions;
+using System.Web;
 
 namespace Rdmp.Dicom.ExternalApis
 {
     public class SemEHRConfiguration
     {
-
-
         //API Settings
         /// <summary>
         /// The URL used to connect to the API
         /// </summary>
-        public string Url { get; set; } = "http://localhost:3000/testApi/search";
+        public string Url { get; set; } = "http://picturesdevab.uksouth.cloudapp.azure.com:8485/api/search_anns/myQuery/";
 
         /// <summary>
         /// The date format for the API start date and end date filter
@@ -82,7 +82,13 @@ namespace Rdmp.Dicom.ExternalApis
         /// <summary>
         /// The list of fields that should be returned - "SOPInstanceUID", "SeriesInstanceUID", "StudyInstanceUID" 
         /// </summary>
-        public List<string> ReturnFields { get; set; } = new List<string>();
+        //public List<string> ReturnFields { get; set; } = new List<string>();
+
+        //API Return Fields
+        /// <summary>
+        /// The list of fields that should be returned - "SOPInstanceUID", "SeriesInstanceUID", "StudyInstanceUID" 
+        /// </summary>
+        public string ReturnField { get; set; } = "";
 
         public static SemEHRConfiguration LoadFrom(AggregateConfiguration aggregate)
         {
@@ -165,9 +171,13 @@ namespace Rdmp.Dicom.ExternalApis
             {
                 Modalities = over.Modalities;
             }
-            if (over.ReturnFields.Count > 0)
+            /*if (over.ReturnFields.Count > 0)
             {
                 ReturnFields = over.ReturnFields;
+            }*/
+            if (!string.IsNullOrWhiteSpace(over.ReturnField))
+            {
+                ReturnField = over.ReturnField;
             }
 
             // TODO: For terms do you want Catalogue ones + Aggregate Set ones or just to use the Aggregate Set ones
@@ -179,11 +189,11 @@ namespace Rdmp.Dicom.ExternalApis
             //Set the terms
             dynamic termsObj = new JObject();
             if (!string.IsNullOrWhiteSpace(Query))
-                termsObj.q = Query;
+                termsObj.q = HttpUtility.UrlEncode(Query);
             if(QDepth > -1)
                 termsObj.qdepth = QDepth;
             if(!string.IsNullOrWhiteSpace(QStop))
-                termsObj.qstop = QStop;
+                termsObj.qstop = QStop; 
             if (!string.IsNullOrWhiteSpace(Negation))
                 termsObj.negation = Negation;
             if (!string.IsNullOrWhiteSpace(Experiencer))
@@ -208,10 +218,23 @@ namespace Rdmp.Dicom.ExternalApis
             dynamic apiCallJson = new JObject();
             apiCallJson.terms = termsArray;
             apiCallJson.filter = filterObj;
-            if (ReturnFields.Count > 0)
-                apiCallJson.returnFields = new JArray(ReturnFields);
+            /*if (ReturnFields.Count > 0)
+                apiCallJson.returnFields = new JArray(ReturnFields);*/
+            if (!string.IsNullOrWhiteSpace(ReturnField))
+                apiCallJson.returnFields = new JArray(ReturnField);
 
             return apiCallJson;
+        }
+
+        public string GetQueryJsonAsString()
+        {
+            return (Regex.Replace(GetQueryJson().ToString(), @"\s+", ""));
+            
+        }
+
+        public string GetUrlWithQuerystring()
+        {
+            return (this.Url + "?j=" + GetQueryJsonAsString());
         }
     }
 }

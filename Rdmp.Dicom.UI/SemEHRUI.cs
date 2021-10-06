@@ -20,16 +20,16 @@ namespace Rdmp.Dicom.UI
 
         public List<KeyValuePair<string, string>> TemporalityOptions = new List<KeyValuePair<string, string>>()
         {
-            new KeyValuePair<string, string>("Recent", "recent"),
-            new KeyValuePair<string, string>("Historical", "historical"),
-            new KeyValuePair<string, string>("Hypothetical", "hypothetical"),
+            new KeyValuePair<string, string>("Recent", "Recent"),
+            new KeyValuePair<string, string>("Historical", "Historical"),
+            new KeyValuePair<string, string>("Hypothetical", "Hypothetical"),
         };
 
         public List<KeyValuePair<string, string>> NegationOptions = new List<KeyValuePair<string, string>>()
         {
-            new KeyValuePair<string, string>("Any", "any"),
-            new KeyValuePair<string, string>("Negated - The query term is mentioned in terms of absence.", "negated"),
-            new KeyValuePair<string, string>("Affirmed - The query term is confirmed to be present.", "affirmed"),
+            new KeyValuePair<string, string>("Any", "Any"),
+            new KeyValuePair<string, string>("Negated - The query term is mentioned in terms of absence.", "Negated"),
+            new KeyValuePair<string, string>("Affirmed - The query term is confirmed to be present.", "Affirmed"),
         };
 
         public List<KeyValuePair<string, string>> ModalityOptions = new List<KeyValuePair<string, string>>()
@@ -50,9 +50,9 @@ namespace Rdmp.Dicom.UI
 
         public List<KeyValuePair<string, string>> ReturnFieldOptions = new List<KeyValuePair<string, string>>()
         {
-            new KeyValuePair<string, string>("SOP Instance UID", "sopinstanceuid"),
-            new KeyValuePair<string, string>("Series Instance UID", "seriesInstanceuid"),
-            new KeyValuePair<string, string>("Study Instance UID", "studyInstanceuid"),
+            new KeyValuePair<string, string>("SOPInstanceUID", "SOPInstanceUID"),
+            new KeyValuePair<string, string>("SeriesInstanceUID", "SeriesInstanceUID"),
+            new KeyValuePair<string, string>("StudyInstanceUID", "StudyInstanceUID"),
         };
 
         public SemEHRUI(IActivateItems activator, SemEHRApiCaller api, AggregateConfiguration aggregate)
@@ -74,9 +74,13 @@ namespace Rdmp.Dicom.UI
             ((ListBox)cblModalities).DisplayMember = "Key";
             ((ListBox)cblModalities).ValueMember = "Value";
 
-            ((ListBox)cblReturnFields).DataSource = ReturnFieldOptions;
+            /*((ListBox)cblReturnFields).DataSource = ReturnFieldOptions;
             ((ListBox)cblReturnFields).DisplayMember = "Key";
-            ((ListBox)cblReturnFields).ValueMember = "Value";
+            ((ListBox)cblReturnFields).ValueMember = "Value";*/
+
+            cbReturnFeild.DataSource = ReturnFieldOptions;
+            cbReturnFeild.DisplayMember = "Key";
+            cbReturnFeild.ValueMember = "Value";
 
             //Set stored values
             tbUrl.Text = _configuration.Url;
@@ -89,7 +93,8 @@ namespace Rdmp.Dicom.UI
             cbUseEndDate.Checked = _configuration.UseEndDate;
             dtpEndDate.Value = _configuration.EndDate;
             SetCheckedListBox(cblModalities, _configuration.Modalities);
-            SetCheckedListBox(cblReturnFields, _configuration.ReturnFields);
+            //SetCheckedListBox(cblReturnFields, _configuration.ReturnFeilds);
+            cbReturnFeild.SelectedIndex = cbReturnFeild.FindString(_configuration.ReturnField);
         }
 
         private void SetCheckedListBox(CheckedListBox clb, List<string> checkedItems)
@@ -133,10 +138,16 @@ namespace Rdmp.Dicom.UI
                 _configuration.Modalities.Add(item.Value);
             }
 
-            _configuration.ReturnFields = new List<string>();
+            /*_configuration.ReturnFields = new List<string>();
             foreach (KeyValuePair<string, string> item in cblReturnFields.CheckedItems)
             {
                 _configuration.ReturnFields.Add(item.Value);
+            }*/
+
+            _configuration.ReturnField = "";
+            if (cbReturnFeild.SelectedItem != null)
+            {
+                _configuration.ReturnField = ((KeyValuePair<string, string>)cbReturnFeild.SelectedItem).Value;
             }
 
             // save the config to the database

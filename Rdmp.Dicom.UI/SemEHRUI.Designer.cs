@@ -42,7 +42,7 @@ namespace Rdmp.Dicom.UI
             this.tbQuery = new System.Windows.Forms.TextBox();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.cblReturnFields = new System.Windows.Forms.CheckedListBox();
+            this.cbReturnFeild = new System.Windows.Forms.ComboBox();
             this.label9 = new System.Windows.Forms.Label();
             this.cbUseEndDate = new System.Windows.Forms.CheckBox();
             this.cbUseStartDate = new System.Windows.Forms.CheckBox();
@@ -170,7 +170,7 @@ namespace Rdmp.Dicom.UI
             // 
             // tabPage1
             // 
-            this.tabPage1.Controls.Add(this.cblReturnFields);
+            this.tabPage1.Controls.Add(this.cbReturnFeild);
             this.tabPage1.Controls.Add(this.label9);
             this.tabPage1.Controls.Add(this.cbUseEndDate);
             this.tabPage1.Controls.Add(this.cbUseStartDate);
@@ -194,22 +194,22 @@ namespace Rdmp.Dicom.UI
             this.tabPage1.Text = "Query";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
-            // cblReturnFields
+            // cbReturnFeild
             // 
-            this.cblReturnFields.FormattingEnabled = true;
-            this.cblReturnFields.Location = new System.Drawing.Point(17, 537);
-            this.cblReturnFields.Name = "cblReturnFields";
-            this.cblReturnFields.Size = new System.Drawing.Size(406, 58);
-            this.cblReturnFields.TabIndex = 19;
+            this.cbReturnFeild.FormattingEnabled = true;
+            this.cbReturnFeild.Location = new System.Drawing.Point(16, 537);
+            this.cbReturnFeild.Name = "cbReturnFeild";
+            this.cbReturnFeild.Size = new System.Drawing.Size(407, 23);
+            this.cbReturnFeild.TabIndex = 21;
             // 
             // label9
             // 
             this.label9.AutoSize = true;
             this.label9.Location = new System.Drawing.Point(16, 519);
             this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(78, 15);
+            this.label9.Size = new System.Drawing.Size(73, 15);
             this.label9.TabIndex = 20;
-            this.label9.Text = "Return Fields:";
+            this.label9.Text = "Return Field:";
             // 
             // cbUseEndDate
             // 
@@ -358,7 +358,7 @@ namespace Rdmp.Dicom.UI
         private BrightIdeasSoftware.CheckStateRenderer checkStateRenderer1;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.TextBox tbStartEndDateFormat;
-        private System.Windows.Forms.CheckedListBox cblReturnFields;
         private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.ComboBox cbReturnFeild;
     }
 }
