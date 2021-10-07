@@ -10,6 +10,47 @@ namespace Rdmp.Dicom.ExternalApis
 {
     public class SemEHRConfiguration
     {
+        [YamlIgnore]
+        public Dictionary<string, string> TemporalityOptions = new Dictionary<string, string>
+        {
+             {"Recent", "Recent" },
+            { "Historical", "Historical" },
+            { "Hypothetical", "Hypothetical" }
+        };
+
+        [YamlIgnore]
+        public Dictionary<string, string> NegationOptions = new Dictionary<string, string>
+        {
+            { "Any", "Any" },
+            { "Negated - The query term is mentioned in terms of absence.", "Negated" },
+            { "Affirmed - The query term is confirmed to be present.", "Affirmed" }
+        };
+
+        [YamlIgnore]
+        public Dictionary<string, string> ModalityOptions = new Dictionary<string, string>
+        {
+            { "CR - Computed Radiography", "CR" },
+            { "CT - Computed Tomography", "CT" },
+            { "DX - Digital Radiography", "DX" },
+            { "MG - Mammography", "MG" },
+            { "MR - Magnetic Resonance", "MR" },
+            { "NM - Nuclear Medicine", "NM" },
+            { "OT - Other", "OT" },
+            { "PR - Presentation State", "PR" },
+            { "PT - Positron emission tomography (PET)", "PT" },
+            { "RF - Radio Fluoroscopy", "RF" },
+            { "US - Ultrasound", "US" },
+            { "XA - X-Ray Angiography", "XA" }
+        };
+
+        [YamlIgnore]
+        public Dictionary<string, string> ReturnFieldOptions = new Dictionary<string, string>
+        {
+            { "SOPInstanceUID", "SOPInstanceUID" },
+            { "SeriesInstanceUID", "SeriesInstanceUID" },
+            { "StudyInstanceUID", "StudyInstanceUID" }
+        };
+
         //API Settings
         /// <summary>
         /// The URL used to connect to the API

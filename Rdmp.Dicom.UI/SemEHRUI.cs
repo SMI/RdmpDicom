@@ -18,43 +18,6 @@ namespace Rdmp.Dicom.UI
         private readonly SemEHRConfiguration _configuration;
         public AggregateConfiguration Aggregate { get; }
 
-        public List<KeyValuePair<string, string>> TemporalityOptions = new List<KeyValuePair<string, string>>()
-        {
-            new KeyValuePair<string, string>("Recent", "Recent"),
-            new KeyValuePair<string, string>("Historical", "Historical"),
-            new KeyValuePair<string, string>("Hypothetical", "Hypothetical"),
-        };
-
-        public List<KeyValuePair<string, string>> NegationOptions = new List<KeyValuePair<string, string>>()
-        {
-            new KeyValuePair<string, string>("Any", "Any"),
-            new KeyValuePair<string, string>("Negated - The query term is mentioned in terms of absence.", "Negated"),
-            new KeyValuePair<string, string>("Affirmed - The query term is confirmed to be present.", "Affirmed"),
-        };
-
-        public List<KeyValuePair<string, string>> ModalityOptions = new List<KeyValuePair<string, string>>()
-        {
-            new KeyValuePair<string, string>("CR - Computed Radiography", "CR"),
-            new KeyValuePair<string, string>("CT - Computed Tomography", "CT"),
-            new KeyValuePair<string, string>("DX - Digital Radiography", "DX"),
-            new KeyValuePair<string, string>("MG - Mammography", "MG"),
-            new KeyValuePair<string, string>("MR - Magnetic Resonance", "MR"),
-            new KeyValuePair<string, string>("NM - Nuclear Medicine", "NM"),
-            new KeyValuePair<string, string>("OT - Other", "OT"),
-            new KeyValuePair<string, string>("PR - Presentation State", "PR"),
-            new KeyValuePair<string, string>("PT - Positron emission tomography (PET)", "PT"),
-            new KeyValuePair<string, string>("RF - Radio Fluoroscopy", "RF"),
-            new KeyValuePair<string, string>("US - Ultrasound", "US"),
-            new KeyValuePair<string, string>("XA - X-Ray Angiography", "XA"),
-        };
-
-        public List<KeyValuePair<string, string>> ReturnFieldOptions = new List<KeyValuePair<string, string>>()
-        {
-            new KeyValuePair<string, string>("SOPInstanceUID", "SOPInstanceUID"),
-            new KeyValuePair<string, string>("SeriesInstanceUID", "SeriesInstanceUID"),
-            new KeyValuePair<string, string>("StudyInstanceUID", "StudyInstanceUID"),
-        };
-
         public SemEHRUI(IActivateItems activator, SemEHRApiCaller api, AggregateConfiguration aggregate)
         {
             InitializeComponent();
@@ -62,23 +25,23 @@ namespace Rdmp.Dicom.UI
             Aggregate = aggregate;
 
             // Load list data
-            ((ListBox)cblTemporality).DataSource = TemporalityOptions;
+            ((ListBox)cblTemporality).DataSource = _configuration.TemporalityOptions.ToList();
             ((ListBox)cblTemporality).DisplayMember = "Key";
             ((ListBox)cblTemporality).ValueMember = "Value";
 
-            cbNegation.DataSource = NegationOptions;
+            cbNegation.DataSource = _configuration.NegationOptions.ToList();
             cbNegation.DisplayMember = "Key";
             cbNegation.ValueMember = "Value";
 
-            ((ListBox)cblModalities).DataSource = ModalityOptions;
+            ((ListBox)cblModalities).DataSource = _configuration.ModalityOptions.ToList();
             ((ListBox)cblModalities).DisplayMember = "Key";
             ((ListBox)cblModalities).ValueMember = "Value";
 
-            /*((ListBox)cblReturnFields).DataSource = ReturnFieldOptions;
+            /*((ListBox)cblReturnFields).DataSource = ReturnFieldOptions.ToList();
             ((ListBox)cblReturnFields).DisplayMember = "Key";
             ((ListBox)cblReturnFields).ValueMember = "Value";*/
 
-            cbReturnFeild.DataSource = ReturnFieldOptions;
+            cbReturnFeild.DataSource = _configuration.ReturnFieldOptions.ToList();
             cbReturnFeild.DisplayMember = "Key";
             cbReturnFeild.ValueMember = "Value";
 
@@ -86,13 +49,13 @@ namespace Rdmp.Dicom.UI
             tbUrl.Text = _configuration.Url;
             tbStartEndDateFormat.Text = _configuration.StartEndDateFormat;
             tbQuery.Text = _configuration.Query;
-            SetCheckedListBox(cblTemporality, _configuration.Temporality);
+            SetCheckedListBox(cblTemporality, _configuration.Temporality.ToList());
             cbNegation.SelectedIndex = cbNegation.FindString(_configuration.Negation);
             cbUseStartDate.Checked = _configuration.UseStartDate;
             dtpStartDate.Value = _configuration.StartDate;
             cbUseEndDate.Checked = _configuration.UseEndDate;
             dtpEndDate.Value = _configuration.EndDate;
-            SetCheckedListBox(cblModalities, _configuration.Modalities);
+            SetCheckedListBox(cblModalities, _configuration.Modalities.ToList());
             //SetCheckedListBox(cblReturnFields, _configuration.ReturnFeilds);
             cbReturnFeild.SelectedIndex = cbReturnFeild.FindString(_configuration.ReturnField);
         }
