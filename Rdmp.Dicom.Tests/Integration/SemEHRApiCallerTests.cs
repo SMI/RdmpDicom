@@ -31,6 +31,8 @@ namespace Rdmp.Dicom.Tests.Integration
             return new CachedAggregateConfigurationResultsManager(eds);
         }
 
+
+        [Ignore("Requires a 'test' API to be running")]
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         public void TalkToApi(DatabaseType dbType)
         {
