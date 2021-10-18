@@ -4,7 +4,6 @@ using ReusableLibraryCode.Icons.IconProvision;
 using Rdmp.Dicom.UI.CommandExecution.AtomicCommands;
 using Rdmp.UI.ItemActivation;
 using Rdmp.UI.Refreshing;
-using Rdmp.UI.PluginChildProvision;
 using Rdmp.Core.Curation.Data;
 using Rdmp.Core.Curation.Data.DataLoad;
 using Rdmp.UI.Collections;
@@ -15,18 +14,27 @@ using Rdmp.Core;
 using Rdmp.Core.CommandExecution.AtomicCommands;
 using Rdmp.Core.Curation.Data.Aggregation;
 using Rdmp.Dicom.ExternalApis;
+using Rdmp.Core.CommandExecution;
+using System.Collections.Generic;
+using MapsDirectlyToDatabaseTable;
 
 namespace Rdmp.Dicom.UI
 {
     public class RdmpDicomUserInterface : PluginUserInterface, IRefreshBusSubscriber
     {
-        
-        public RdmpDicomUserInterface(IActivateItems itemActivator) : base(itemActivator)
+        IActivateItems ItemActivator;
+
+        public RdmpDicomUserInterface(IBasicActivateItems itemActivator) : base(itemActivator)
         {
-            ItemActivator.RefreshBus.Subscribe(this);
+            ItemActivator = itemActivator as IActivateItems;
+
+            if(ItemActivator != null)
+            {
+                ItemActivator.RefreshBus.Subscribe(this);
+            }
         }
-        
-        public override ToolStripMenuItem[] GetAdditionalRightClickMenuItems(object o)
+
+        public override IEnumerable<IAtomicCommand> GetAdditionalRightClickMenuItems(object o)
         {
             //IMPORTANT: if you are creating a menu array for a class in your own plugin instead create it as a Menu (See TagPromotionConfigurationMenu)
 
@@ -35,25 +43,26 @@ namespace Rdmp.Dicom.UI
             //allow clicking in Catalogue collection whitespace
             if (o is RDMPCollection collection && collection == RDMPCollection.Catalogue)
             {
-                return GetMenuArray(new ExecuteCommandCreateNewImagingDataset(ItemActivator));
+                return new[] { new ExecuteCommandCreateNewImagingDataset(ItemActivator) };
             }
 
             switch (databaseEntity)
             {
                 case Catalogue c:
-                    return GetMenuArray(
+                    return new IAtomicCommand[] {
                         new ExecuteCommandCreateNewImagingDataset(ItemActivator),
                         new ExecuteCommandPromoteNewTag(ItemActivator).SetTarget(databaseEntity),
                         new Rdmp.Dicom.CommandExecution.ExecuteCommandCreateNewSemEHRCatalogue(ItemActivator),
-                        new ExecuteCommandCompareImagingSchemas(ItemActivator,c));
+                        new ExecuteCommandCompareImagingSchemas(ItemActivator,c)
+                        };
                         
                 case ProcessTask pt:
-                    return GetMenuArray(new ExecuteCommandReviewIsolations(ItemActivator, pt));
+                    return new[] { new ExecuteCommandReviewIsolations(ItemActivator, pt) };
                 case TableInfo _:
-                    return GetMenuArray(new ExecuteCommandPromoteNewTag(ItemActivator).SetTarget(databaseEntity));
+                    return new[] { new ExecuteCommandPromoteNewTag(ItemActivator).SetTarget(databaseEntity) };
             }
 
-            return o is AllExternalServersNode ? GetMenuArray(new ExecuteCommandCreateNewExternalDatabaseServer(ItemActivator,new SMIDatabasePatcher(),PermissableDefaults.None)) : null;
+            return o is AllExternalServersNode ? new[] { new ExecuteCommandCreateNewExternalDatabaseServer(ItemActivator, new SMIDatabasePatcher(), PermissableDefaults.None) } : new IAtomicCommand[0];
         }
 
         public override object[] GetChildren(object model)
@@ -71,18 +80,21 @@ namespace Rdmp.Dicom.UI
             
         }
 
-        public override bool CustomActivate(AggregateConfiguration ac)
+        public override bool CustomActivate(IMapsDirectlyToDatabaseTable o)
         {
-            var api = new SemEHRApiCaller();
-            
-            if(api.ShouldRun(ac))
+            if(o is AggregateConfiguration ac)
             {
-                var ui = new SemEHRUI(ItemActivator, api, ac);
-                ui.ShowDialog();
-                return true;
+                var api = new SemEHRApiCaller();
+
+                if (api.ShouldRun(ac))
+                {
+                    var ui = new SemEHRUI(ItemActivator, api, ac);
+                    ui.ShowDialog();
+                    return true;
+                }
             }
 
-            return base.CustomActivate(ac);
+            return base.CustomActivate(o);
         }
     }
 }
