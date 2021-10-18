@@ -123,11 +123,12 @@ namespace Rdmp.Dicom.ExternalApis
         /// <summary>
         /// The list of fields that should be returned - "SOPInstanceUID", "SeriesInstanceUID", "StudyInstanceUID" 
         /// </summary>
+        //Currently only supporting one return feild which is all we need from an RDMP point of view
         //public List<string> ReturnFields { get; set; } = new List<string>();
 
-        //API Return Fields
+        //API Return Field
         /// <summary>
-        /// The list of fields that should be returned - "SOPInstanceUID", "SeriesInstanceUID", "StudyInstanceUID" 
+        /// The field that should be returned - "SOPInstanceUID", "SeriesInstanceUID", "StudyInstanceUID" 
         /// </summary>
         public string ReturnField { get; set; } = "";
 

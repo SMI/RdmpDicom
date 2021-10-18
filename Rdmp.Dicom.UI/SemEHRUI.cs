@@ -3,12 +3,7 @@ using Rdmp.Dicom.ExternalApis;
 using Rdmp.UI.ItemActivation;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Rdmp.Dicom.UI
@@ -37,6 +32,7 @@ namespace Rdmp.Dicom.UI
             ((ListBox)cblModalities).DisplayMember = "Key";
             ((ListBox)cblModalities).ValueMember = "Value";
 
+            //Not used currently but might be supported in future
             /*((ListBox)cblReturnFields).DataSource = ReturnFieldOptions.ToList();
             ((ListBox)cblReturnFields).DisplayMember = "Key";
             ((ListBox)cblReturnFields).ValueMember = "Value";*/
