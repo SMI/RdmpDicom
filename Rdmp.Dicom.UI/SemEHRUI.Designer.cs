@@ -118,6 +118,7 @@ namespace Rdmp.Dicom.UI
             // 
             // cbNegation
             // 
+            this.cbNegation.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbNegation.FormattingEnabled = true;
             this.cbNegation.Location = new System.Drawing.Point(17, 181);
             this.cbNegation.Name = "cbNegation";
@@ -196,6 +197,7 @@ namespace Rdmp.Dicom.UI
             // 
             // cbReturnFeild
             // 
+            this.cbReturnFeild.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbReturnFeild.FormattingEnabled = true;
             this.cbReturnFeild.Location = new System.Drawing.Point(16, 537);
             this.cbReturnFeild.Name = "cbReturnFeild";
