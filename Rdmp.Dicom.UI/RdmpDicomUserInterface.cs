@@ -1,31 +1,38 @@
 ﻿using System.Drawing;
-using System.Windows.Forms;
 using ReusableLibraryCode.Icons.IconProvision;
 using Rdmp.Dicom.UI.CommandExecution.AtomicCommands;
 using Rdmp.UI.ItemActivation;
 using Rdmp.UI.Refreshing;
-using Rdmp.UI.PluginChildProvision;
 using Rdmp.Core.Curation.Data;
 using Rdmp.Core.Curation.Data.DataLoad;
-using Rdmp.UI.Collections;
-using Rdmp.UI.CommandExecution.AtomicCommands;
 using Rdmp.Core.Providers.Nodes;
 using Rdmp.Core.Curation.Data.Defaults;
 using Rdmp.Core;
 using Rdmp.Core.CommandExecution.AtomicCommands;
+using Rdmp.Core.Curation.Data.Aggregation;
+using Rdmp.Dicom.ExternalApis;
+using Rdmp.Core.CommandExecution;
+using System.Collections.Generic;
+using MapsDirectlyToDatabaseTable;
+using System.Linq;
 
 namespace Rdmp.Dicom.UI
 {
     public class RdmpDicomUserInterface : PluginUserInterface, IRefreshBusSubscriber
     {
-        
-        public RdmpDicomUserInterface(IActivateItems itemActivator) : base(itemActivator)
+        IActivateItems _activator;
+
+        public RdmpDicomUserInterface(IBasicActivateItems itemActivator) : base(itemActivator)
         {
-            ItemActivator.RefreshBus.Subscribe(this);
+            _activator = itemActivator as IActivateItems;
         }
-        
-        public override ToolStripMenuItem[] GetAdditionalRightClickMenuItems(object o)
+
+        public override IEnumerable<IAtomicCommand> GetAdditionalRightClickMenuItems(object o)
         {
+            if(_activator == null)
+            {
+                return Enumerable.Empty<IAtomicCommand>();
+            }
             //IMPORTANT: if you are creating a menu array for a class in your own plugin instead create it as a Menu (See TagPromotionConfigurationMenu)
 
             var databaseEntity = o as DatabaseEntity;
@@ -33,23 +40,26 @@ namespace Rdmp.Dicom.UI
             //allow clicking in Catalogue collection whitespace
             if (o is RDMPCollection collection && collection == RDMPCollection.Catalogue)
             {
-                return GetMenuArray(new ExecuteCommandCreateNewImagingDataset(ItemActivator));
+                return new[] { new ExecuteCommandCreateNewImagingDataset(_activator) };
             }
 
             switch (databaseEntity)
             {
                 case Catalogue c:
-                    return GetMenuArray(
-                        new ExecuteCommandCreateNewImagingDataset(ItemActivator),
-                        new ExecuteCommandPromoteNewTag(ItemActivator).SetTarget(databaseEntity),
-                        new ExecuteCommandCompareImagingSchemas(ItemActivator,c));
+                    return new IAtomicCommand[] {
+                        new ExecuteCommandCreateNewImagingDataset(_activator),
+                        new ExecuteCommandPromoteNewTag(_activator).SetTarget(databaseEntity),
+                        new Rdmp.Dicom.CommandExecution.ExecuteCommandCreateNewSemEHRCatalogue(_activator),
+                        new ExecuteCommandCompareImagingSchemas(_activator,c)
+                        };
+                        
                 case ProcessTask pt:
-                    return GetMenuArray(new ExecuteCommandReviewIsolations(ItemActivator, pt));
+                    return new[] { new ExecuteCommandReviewIsolations(_activator, pt) };
                 case TableInfo _:
-                    return GetMenuArray(new ExecuteCommandPromoteNewTag(ItemActivator).SetTarget(databaseEntity));
+                    return new[] { new ExecuteCommandPromoteNewTag(_activator).SetTarget(databaseEntity) };
             }
 
-            return o is AllExternalServersNode ? GetMenuArray(new ExecuteCommandCreateNewExternalDatabaseServer(ItemActivator,new SMIDatabasePatcher(),PermissableDefaults.None)) : null;
+            return o is AllExternalServersNode ? new[] { new ExecuteCommandCreateNewExternalDatabaseServer(_activator, new SMIDatabasePatcher(), PermissableDefaults.None) } : new IAtomicCommand[0];
         }
 
         public override object[] GetChildren(object model)
@@ -65,6 +75,28 @@ namespace Rdmp.Dicom.UI
         public void RefreshBus_RefreshObject(object sender, RefreshObjectEventArgs e)
         {
             
+        }
+
+        public override bool CustomActivate(IMapsDirectlyToDatabaseTable o)
+        {
+            if(_activator == null)
+            {
+                return false;
+            }
+
+            if(o is AggregateConfiguration ac)
+            {
+                var api = new SemEHRApiCaller();
+
+                if (api.ShouldRun(ac))
+                {
+                    var ui = new SemEHRUI(_activator, api, ac);
+                    ui.ShowDialog();
+                    return true;
+                }
+            }
+
+            return base.CustomActivate(o);
         }
     }
 }
