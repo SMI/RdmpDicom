@@ -55,7 +55,7 @@ namespace Rdmp.Dicom.ExternalApis
         /// <summary>
         /// The URL used to connect to the API
         /// </summary>
-        public string Url { get; set; } = "http://picturesdevab.uksouth.cloudapp.azure.com:8485/api/search_anns/myQuery/";
+        public string Url { get; set; } = "http://localhost:8000/api/search_anns/myQuery/";
 
         /// <summary>
         /// The date format for the API start date and end date filter
