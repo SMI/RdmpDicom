@@ -8,6 +8,7 @@ using Rdmp.Core.Databases;
 using Rdmp.Core.QueryCaching.Aggregation;
 using Rdmp.Dicom.ExternalApis;
 using ReusableLibraryCode.Checks;
+using System;
 using System.Threading;
 using Tests.Common;
 using DatabaseType = FAnsi.DatabaseType;
@@ -31,8 +32,7 @@ namespace Rdmp.Dicom.Tests.Integration
             return new CachedAggregateConfigurationResultsManager(eds);
         }
 
-
-        [Ignore("Requires a 'test' API to be running")]
+        [RequiresSemEHR]
         [TestCase(DatabaseType.MicrosoftSQLServer)]
         public void TalkToApi(DatabaseType dbType)
         {
@@ -46,14 +46,20 @@ namespace Rdmp.Dicom.Tests.Integration
             var ac = new AggregateConfiguration(CatalogueRepository, cata, "blah");
             cic.RootCohortAggregateContainer.AddChild(ac,0);
 
-            caller.Run(ac, cacheMgr, CancellationToken.None);
+            SemEHRConfiguration semEHRConfiguration = new SemEHRConfiguration()
+            {
+                Url = RequiresSemEHR.SemEHRTestUrl + "/api/search_anns/myQuery/",
+                Query = "C0205076"
+            };
+
+            caller.Run(ac, cacheMgr, CancellationToken.None, semEHRConfiguration);
 
             var resultTable = cacheMgr.GetLatestResultsTableUnsafe(ac, AggregateOperation.IndexedExtractionIdentifierList);
 
             Assert.IsNotNull(resultTable);
 
             var tbl = cacheDb.ExpectTable(resultTable.GetRuntimeName());
-            Assert.AreEqual(1, tbl.GetDataTable().Rows.Count);
+            Assert.AreEqual(75, tbl.GetDataTable().Rows.Count);
         }
     }
 }

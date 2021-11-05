@@ -22,9 +22,11 @@ namespace Rdmp.Dicom.ExternalApis
 
         public override void Run(AggregateConfiguration ac, CachedAggregateConfigurationResultsManager cache, CancellationToken token)
         {
-            var config = SemEHRConfiguration.LoadFrom(ac);
+            Run(ac, cache, token, SemEHRConfiguration.LoadFrom(ac));
+        }
 
-
+        internal void Run(AggregateConfiguration ac, CachedAggregateConfigurationResultsManager cache, CancellationToken token, SemEHRConfiguration config)
+        {
             //Get data as post - not currently used
             //In the future we'll enable getting the data with POST maybe. Here for reference
             #region Get data as POST
@@ -49,7 +51,7 @@ namespace Rdmp.Dicom.ExternalApis
 
                 if (semEHRResponse.success == true)
                 {
-                    if(semEHRResponse.results.Count == 0)
+                    if (semEHRResponse.results.Count == 0)
                     {
                         SubmitIdentifierList("NO_RESULTS", new string[] { config.GetUrlWithQuerystring() }, ac, cache);
                     }
@@ -84,15 +86,13 @@ namespace Rdmp.Dicom.ExternalApis
                     //If we failed, get the failing error message
                     throw (new Exception("The SemEHR API has failed: " + semEHRResponse.message));
                 }
-               
+
             }
             else
             {
                 throw (new Exception("The API response returned a HTTP Status Code: (" + (int)response.StatusCode + ") " + response.StatusCode));
             }
             #endregion
-
-
         }
 
         public override bool ShouldRun(ICatalogue catalogue)
