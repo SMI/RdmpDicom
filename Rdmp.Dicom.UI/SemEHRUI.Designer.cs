@@ -56,6 +56,8 @@ namespace Rdmp.Dicom.UI
             this.label8 = new System.Windows.Forms.Label();
             this.tbStartEndDateFormat = new System.Windows.Forms.TextBox();
             this.checkStateRenderer1 = new BrightIdeasSoftware.CheckStateRenderer();
+            this.label10 = new System.Windows.Forms.Label();
+            this.tbPassphrase = new System.Windows.Forms.TextBox();
             this.flowLayoutPanel1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -286,6 +288,8 @@ namespace Rdmp.Dicom.UI
             // 
             // tabPage2
             // 
+            this.tabPage2.Controls.Add(this.label10);
+            this.tabPage2.Controls.Add(this.tbPassphrase);
             this.tabPage2.Controls.Add(this.label8);
             this.tabPage2.Controls.Add(this.tbStartEndDateFormat);
             this.tabPage2.Controls.Add(this.label1);
@@ -301,7 +305,7 @@ namespace Rdmp.Dicom.UI
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(15, 68);
+            this.label8.Location = new System.Drawing.Point(15, 130);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(123, 15);
             this.label8.TabIndex = 13;
@@ -309,10 +313,26 @@ namespace Rdmp.Dicom.UI
             // 
             // tbStartEndDateFormat
             // 
-            this.tbStartEndDateFormat.Location = new System.Drawing.Point(15, 86);
+            this.tbStartEndDateFormat.Location = new System.Drawing.Point(15, 148);
             this.tbStartEndDateFormat.Name = "tbStartEndDateFormat";
             this.tbStartEndDateFormat.Size = new System.Drawing.Size(407, 23);
             this.tbStartEndDateFormat.TabIndex = 14;
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(15, 71);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(89, 15);
+            this.label10.TabIndex = 15;
+            this.label10.Text = "API Passphrase:";
+            // 
+            // tbPassphrase
+            // 
+            this.tbPassphrase.Location = new System.Drawing.Point(15, 89);
+            this.tbPassphrase.Name = "tbPassphrase";
+            this.tbPassphrase.Size = new System.Drawing.Size(407, 23);
+            this.tbPassphrase.TabIndex = 16;
             // 
             // SemEHRUI
             // 
@@ -362,5 +382,7 @@ namespace Rdmp.Dicom.UI
         private System.Windows.Forms.TextBox tbStartEndDateFormat;
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.ComboBox cbReturnFeild;
+        private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.TextBox tbPassphrase;
     }
 }

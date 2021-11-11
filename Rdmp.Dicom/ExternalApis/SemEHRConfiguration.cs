@@ -58,6 +58,11 @@ namespace Rdmp.Dicom.ExternalApis
         public string Url { get; set; } = "http://localhost:8000/api/search_anns/myQuery/";
 
         /// <summary>
+        /// The passphrase, if required, for making API calls to SemEHR API
+        /// </summary>
+        public string Passphrase { get; set; } = "";
+
+        /// <summary>
         /// The date format for the API start date and end date filter
         /// </summary>
         public string StartEndDateFormat { get; set; } = "yyyy-MM-dd";
@@ -175,6 +180,10 @@ namespace Rdmp.Dicom.ExternalApis
             {
                 Url = over.Url;
             }
+            if (!string.IsNullOrWhiteSpace(over.Passphrase))
+            {
+                Passphrase = over.Passphrase;
+            }
             if (!string.IsNullOrWhiteSpace(over.StartEndDateFormat))
             {
                 StartEndDateFormat = over.StartEndDateFormat;
@@ -276,7 +285,12 @@ namespace Rdmp.Dicom.ExternalApis
 
         public string GetUrlWithQuerystring()
         {
-            return (this.Url + "?j=" + GetQueryJsonAsString());
+            string passphraseIfSet = "";
+            if(!string.IsNullOrEmpty(Passphrase))
+            {
+                passphraseIfSet = $"passphrase={Passphrase}&";
+            }
+            return ($"{this.Url}?{passphraseIfSet}j={GetQueryJsonAsString()}");
         }
     }
 }
