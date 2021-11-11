@@ -20,19 +20,28 @@ namespace Rdmp.Dicom.Tests.Integration
 
         public void ApplyToContext(TestExecutionContext context)
         {
+            CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromSeconds(3));
+
             try
             {
-                HttpResponseMessage response = httpClient.GetAsync(SemEHRTestUrl, new CancellationTokenSource(TimeSpan.FromSeconds(3)).Token).Result;
+                HttpResponseMessage response = httpClient.GetAsync(SemEHRTestUrl, cts.Token).Result;
 
                 //Check the status code is 200 success
                 if (response.StatusCode != HttpStatusCode.OK)
                 {
-                    Assert.Ignore($"SemEHR not running: {response.StatusCode}");
+                    Assert.Ignore($"SemEHR did not respond correctly on {SemEHRTestUrl}: {response.StatusCode}");
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                Assert.Ignore("SemEHR not running...");
+                Assert.Ignore($"SemEHR not running on {SemEHRTestUrl}");
+            }
+            finally
+            {
+                if (cts != null)
+                {
+                    cts.Dispose();
+                }
             }
         }
     }
