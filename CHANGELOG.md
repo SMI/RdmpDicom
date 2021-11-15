@@ -6,8 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-- Bump HIC.RDMP.Plugin from 7.0.1 to 7.0.3
+## [5.0.1] 2021-11-15
 
+- Bump HIC.RDMP.Plugin from 7.0.1 to 7.0.3
 - Added retry fields to `FoDicomAnonymiser` for when file system is unstable during extractions
 
 ## [5.0.0] 2021-11-03
@@ -309,7 +310,8 @@ Updated to be compatible with RDMP 4.2
 
 - Initial commit from private repo
 
-[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v5.0.0...develop
+[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v5.0.1...develop
+[5.0.1]: https://github.com/HicServices/RdmpDicom/compare/v5.0.0...v5.0.1
 [5.0.0]: https://github.com/HicServices/RdmpDicom/compare/v4.0.2...v5.0.0
 [4.0.2]: https://github.com/HicServices/RdmpDicom/compare/v4.0.0...v4.0.2
 [4.0.0]: https://github.com/HicServices/RdmpDicom/compare/v3.0.1...v4.0.0
