@@ -81,14 +81,14 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
             {
                 int attempt = 0;
 
-                TryAgain:
+            TryAgain:
 
                 var bits = FullPath.Split('!');
-
-                var zip = pool != null ? pool.OpenRead(bits[0]) : ZipFile.Open(bits[0], ZipArchiveMode.Read);
-
+                ZipArchive zip = null;
                 try
                 {
+                    zip = pool != null ? pool.OpenRead(bits[0]) : ZipFile.Open(bits[0], ZipArchiveMode.Read);
+
                     var entry = zip.GetEntry(bits[1]);
 
                     if (entry == null)
@@ -139,7 +139,9 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
                 finally
                 {
                     if(pool == null)
-                        zip.Dispose();
+                    {
+                        zip?.Dispose();
+                    }
                 }
             }
 
