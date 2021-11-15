@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.0.2] 2021-11-15
+
 - Added periodic disposal in ZipPool to prevent too many open file handles at once.
 
 ## [5.0.1] 2021-11-15
@@ -312,7 +314,8 @@ Updated to be compatible with RDMP 4.2
 
 - Initial commit from private repo
 
-[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v5.0.1...develop
+[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v5.0.2...develop
+[5.0.2]: https://github.com/HicServices/RdmpDicom/compare/v5.0.1...v5.0.2
 [5.0.1]: https://github.com/HicServices/RdmpDicom/compare/v5.0.0...v5.0.1
 [5.0.0]: https://github.com/HicServices/RdmpDicom/compare/v4.0.2...v5.0.0
 [4.0.2]: https://github.com/HicServices/RdmpDicom/compare/v4.0.0...v4.0.2
