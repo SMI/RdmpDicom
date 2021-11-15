@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Added periodic disposal in ZipPool to prevent too many open file handles at once.
+
 ## [5.0.1] 2021-11-15
 
 - Bump HIC.RDMP.Plugin from 7.0.1 to 7.0.3

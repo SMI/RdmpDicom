@@ -13,28 +13,52 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
         public int CacheMisses { get; private set; }
         public int CacheHits { get; private set; }
 
+        object lockDictionary = new object();
         readonly Dictionary<string, ZipArchive> _openZipFiles = new Dictionary<string, ZipArchive>(StringComparer.InvariantCultureIgnoreCase);
+
+        /// <summary>
+        /// The maximum number of zip files to allow to be open at once.  Defaults to 100
+        /// </summary>
+        public int MaxPoolSize { get; set; } = 100;
 
         public void Dispose()
         {
-            foreach (var za in _openZipFiles.Values)
-                za.Dispose();
+            ClearCache();
+        }
+
+        private void ClearCache()
+        {
+            lock(lockDictionary)
+            {
+                foreach (var za in _openZipFiles.Values)
+                    za.Dispose();
+
+                _openZipFiles.Clear();
+            }
         }
 
         public ZipArchive OpenRead(string zipPath)
         {
-            var key = NormalizePath(zipPath);
-
-            if (_openZipFiles.ContainsKey(key))
+            if(_openZipFiles.Count >= MaxPoolSize)
             {
-                CacheHits++;
-                return _openZipFiles[key];
+                ClearCache();
             }
 
-            var v = ZipFile.OpenRead(key);
-            CacheMisses++;
-            _openZipFiles.Add(key,v);
-            return v;
+            lock (lockDictionary)
+            {
+                var key = NormalizePath(zipPath);
+
+                if (_openZipFiles.ContainsKey(key))
+                {
+                    CacheHits++;
+                    return _openZipFiles[key];
+                }
+
+                var v = ZipFile.OpenRead(key);
+                CacheMisses++;
+                _openZipFiles.Add(key, v);
+                return v;
+            }
         }
 
         public static string NormalizePath(string path)
