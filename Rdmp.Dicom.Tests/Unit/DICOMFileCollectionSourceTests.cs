@@ -148,7 +148,7 @@ namespace Rdmp.Dicom.Tests.Unit
                 using (var pool = new ZipPool())
                 {
                     var path = new AmbiguousFilePath(TestContext.CurrentContext.TestDirectory, pathInDbToDicomFile);
-                    Assert.IsNotNull(path.GetDataset(pool));
+                    Assert.IsNotNull(path.GetDataset(0,0,pool));
                 }
             }
 
@@ -265,7 +265,7 @@ namespace Rdmp.Dicom.Tests.Unit
                 using (var pool = new ZipPool())
                 {
                     var path = new AmbiguousFilePath(TestContext.CurrentContext.TestDirectory, pathInDbToDicomFile);
-                    Assert.IsNotNull(path.GetDataset(pool));
+                    Assert.IsNotNull(path.GetDataset(0,0,pool));
                 }
             }
 

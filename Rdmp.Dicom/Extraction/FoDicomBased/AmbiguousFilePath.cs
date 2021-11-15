@@ -79,7 +79,7 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
         {
             if (IsZipReference(FullPath))
             {
-                int attmept = 0;
+                int attempt = 0;
 
                 TryAgain:
 
@@ -125,12 +125,12 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
                 }
                 catch(Exception ex)
                 {
-                    if (attmept < retryCount)
+                    if (attempt < retryCount)
                     {
                         listener?.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning, $"Sleeping for {retryDelay}ms because of encountering Exception", ex));
 
                         Thread.Sleep(retryDelay);
-                        attmept++;
+                        attempt++;
                         goto TryAgain;
                     }
                     else 
