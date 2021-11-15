@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Bump HIC.RDMP.Plugin from 7.0.1 to 7.0.3
 
+- Added retry fields to `FoDicomAnonymiser` for when file system is unstable during extractions
+
 ## [5.0.0] 2021-11-03
 
 - Added SemEHR cohort building prototype

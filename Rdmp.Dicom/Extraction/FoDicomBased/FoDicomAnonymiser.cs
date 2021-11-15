@@ -46,6 +46,15 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
         [DemandsInitialization("Comma separated list of top level tags that you want deleted from the dicom dataset of files being extracted.  This field exists to cover any anonymisation gaps e.g. ditching ReferencedImageSequence")]
         public string DeleteTags { get; set; }
 
+        [DemandsInitialization("Number of times to attempt the read again when encountering an Exception", DefaultValue = 0)]
+        public int RetryCount { get; set; }
+
+        [DemandsInitialization("Number of milliseconds to wait after encountering an Exception reading before trying", DefaultValue = 100)]
+        public int RetryDelay { get; set; }
+
+
+
+
         private IPutDicomFilesInExtractionDirectories _putter;
 
         private int _anonymisedImagesCount = 0;
@@ -112,7 +121,7 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
                     
                     try
                     {
-                        dicomFile = path.GetDataset(pool);
+                        dicomFile = path.GetDataset(RetryCount,RetryDelay,pool, listener);
                     }
                     catch (Exception e)
                     {

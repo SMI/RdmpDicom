@@ -136,7 +136,7 @@ namespace Rdmp.Dicom.Tests.Unit
             using (var pool = new ZipPool())
             {
                 for (int i = 0; i < 1000; i++)
-                    a.GetDataset(pool);
+                    a.GetDataset(0,0,pool);
 
                 Console.WriteLine("With Caching:" + sw.ElapsedMilliseconds + "ms");
 

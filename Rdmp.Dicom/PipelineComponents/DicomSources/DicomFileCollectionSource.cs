@@ -30,6 +30,13 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
         [DemandsInitialization("The number of failed zip/dcm files to skip before throwing an Exception instead of just warnings", defaultValue: 100, mandatory: true)]
         public int ErrorThreshold { get; set; }
 
+        [DemandsInitialization("Number of times to attempt the read again when encountering an Exception", DefaultValue = 0)]
+        public int RetryCount { get; set; }
+
+        [DemandsInitialization("Number of milliseconds to wait after encountering an Exception reading before trying", DefaultValue = 100)]
+        public int RetryDelay { get; set; }
+
+
         private int _filesProcessedSoFar = 0;
         private int _totalErrors = 0;
 
@@ -75,7 +82,7 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
                     }
                     else
                     {
-                        var df = file.GetDataset(_zipPool);
+                        var df = file.GetDataset(RetryCount,RetryDelay, _zipPool,listener);
                         ProcessDataset(file.FullPath, df.Dataset, dt, listener);
                     }
                 }
