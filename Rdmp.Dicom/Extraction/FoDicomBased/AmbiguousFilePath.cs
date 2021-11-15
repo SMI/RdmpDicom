@@ -3,8 +3,10 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
 using Dicom;
 using Rdmp.Dicom.PACS;
+using ReusableLibraryCode.Progress;
 
 namespace Rdmp.Dicom.Extraction.FoDicomBased
 {
@@ -34,6 +36,8 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
         
         private static readonly Regex _regexDigitsAndDotsOnly = new Regex(@"^[0-9\.]*$");
 
+
+
         public AmbiguousFilePath(string fullPath)
         {
             if(!IsAbsolute(fullPath))
@@ -62,12 +66,23 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
             var bits = path.Split('!');
             return Path.Combine(root,bits[0]) + '!' + bits[1];
         }
-        
 
-        public DicomFile GetDataset(ZipPool pool = null)
+        /// <summary>
+        /// Reads the dataset at the referenced path.  Supports limited retries if your file system is unstable
+        /// </summary>
+        /// <param name="retryCount">Number of times to attempt the read again when encountering an Exception</param>
+        /// <param name="retryDelay">Number of milliseconds to wait after encountering an Exception reading before trying</param>
+        /// <param name="pool"></param>
+        /// <param name="listener"></param>
+        /// <returns></returns>
+        public DicomFile GetDataset(int retryCount = 0, int retryDelay=100, ZipPool pool = null, IDataLoadEventListener listener = null)
         {
             if (IsZipReference(FullPath))
             {
+                int attmept = 0;
+
+                TryAgain:
+
                 var bits = FullPath.Split('!');
 
                 var zip = pool != null ? pool.OpenRead(bits[0]) : ZipFile.Open(bits[0], ZipArchiveMode.Read);
@@ -107,6 +122,19 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
                     var memoryStream = new MemoryStream(buffer);
 
                     return DicomFile.Open(memoryStream);
+                }
+                catch(Exception ex)
+                {
+                    if (attmept < retryCount)
+                    {
+                        listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning, $"Sleeping for {retryDelay}ms because of encountering Exception", ex));
+
+                        Thread.Sleep(retryDelay);
+                        attmept++;
+                        goto TryAgain;
+                    }
+                    else 
+                        throw;
                 }
                 finally
                 {
