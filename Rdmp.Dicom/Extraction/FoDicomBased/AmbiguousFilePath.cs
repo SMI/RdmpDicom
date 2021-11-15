@@ -127,7 +127,7 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
                 {
                     if (attmept < retryCount)
                     {
-                        listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning, $"Sleeping for {retryDelay}ms because of encountering Exception", ex));
+                        listener?.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning, $"Sleeping for {retryDelay}ms because of encountering Exception", ex));
 
                         Thread.Sleep(retryDelay);
                         attmept++;
