@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 using ReusableLibraryCode.Icons.IconProvision;
 using Rdmp.Dicom.UI.CommandExecution.AtomicCommands;
 using Rdmp.UI.ItemActivation;
@@ -20,7 +21,7 @@ namespace Rdmp.Dicom.UI
 {
     public class RdmpDicomUserInterface : PluginUserInterface, IRefreshBusSubscriber
     {
-        IActivateItems _activator;
+        readonly IActivateItems _activator;
 
         public RdmpDicomUserInterface(IBasicActivateItems itemActivator) : base(itemActivator)
         {
@@ -39,27 +40,27 @@ namespace Rdmp.Dicom.UI
 
             //allow clicking in Catalogue collection whitespace
             if (o is RDMPCollection collection && collection == RDMPCollection.Catalogue)
-            {
                 return new[] { new ExecuteCommandCreateNewImagingDataset(_activator) };
-            }
-
-            switch (databaseEntity)
-            {
-                case Catalogue c:
-                    return new IAtomicCommand[] {
+            else
+                return databaseEntity switch
+                {
+                    Catalogue c => new IAtomicCommand[]
+                    {
                         new ExecuteCommandCreateNewImagingDataset(_activator),
                         new ExecuteCommandPromoteNewTag(_activator).SetTarget(databaseEntity),
                         new Rdmp.Dicom.CommandExecution.ExecuteCommandCreateNewSemEHRCatalogue(_activator),
-                        new ExecuteCommandCompareImagingSchemas(_activator,c)
-                        };
-                        
-                case ProcessTask pt:
-                    return new[] { new ExecuteCommandReviewIsolations(_activator, pt) };
-                case TableInfo _:
-                    return new[] { new ExecuteCommandPromoteNewTag(_activator).SetTarget(databaseEntity) };
-            }
-
-            return o is AllExternalServersNode ? new[] { new ExecuteCommandCreateNewExternalDatabaseServer(_activator, new SMIDatabasePatcher(), PermissableDefaults.None) } : new IAtomicCommand[0];
+                        new ExecuteCommandCompareImagingSchemas(_activator, c)
+                    },
+                    ProcessTask pt => new[] { new ExecuteCommandReviewIsolations(_activator, pt) },
+                    TableInfo _ => new[] { new ExecuteCommandPromoteNewTag(_activator).SetTarget(databaseEntity) },
+                    _ => o is AllExternalServersNode
+                        ? new[]
+                        {
+                            new ExecuteCommandCreateNewExternalDatabaseServer(_activator, new SMIDatabasePatcher(),
+                                PermissableDefaults.None)
+                        }
+                        : Array.Empty<IAtomicCommand>()
+                };
         }
 
         public override object[] GetChildren(object model)

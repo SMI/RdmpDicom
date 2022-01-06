@@ -1,10 +1,20 @@
-﻿using System;
+﻿using SharpCompress.Archives;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 
 namespace Rdmp.Dicom.Extraction.FoDicomBased
 {
+    internal static class Zip
+    {
+        public static IArchiveEntry GetEntry(this IArchive archive, string name)
+        {
+            return archive.Entries.FirstOrDefault(e => e.Key.Equals(name));
+        }
+    }
+
     /// <summary>
     /// Holds multiple ZipArchive open at once to prevent repeated opening and closing
     /// </summary>
@@ -13,13 +23,13 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
         public int CacheMisses { get; private set; }
         public int CacheHits { get; private set; }
 
-        object lockDictionary = new object();
-        readonly Dictionary<string, ZipArchive> _openZipFiles = new Dictionary<string, ZipArchive>(StringComparer.InvariantCultureIgnoreCase);
+        readonly object _lockDictionary = new();
+        private readonly Dictionary<string, IArchive> _openZipFiles = new();    // No assuming FS is case-insensitive!
 
         /// <summary>
-        /// The maximum number of zip files to allow to be open at once.  Defaults to 100
+        /// The maximum number of zip files to allow to be open at once.  Defaults to 5
         /// </summary>
-        public int MaxPoolSize { get; set; } = 100;
+        public int MaxPoolSize { get; set; } = 5;
 
         public void Dispose()
         {
@@ -28,7 +38,7 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
 
         private void ClearCache()
         {
-            lock(lockDictionary)
+            lock(_lockDictionary)
             {
                 foreach (var za in _openZipFiles.Values)
                     za.Dispose();
@@ -37,14 +47,9 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
             }
         }
 
-        public ZipArchive OpenRead(string zipPath)
+        public IArchive OpenRead(string zipPath)
         {
-            if(_openZipFiles.Count >= MaxPoolSize)
-            {
-                ClearCache();
-            }
-
-            lock (lockDictionary)
+            lock (_lockDictionary)
             {
                 var key = NormalizePath(zipPath);
 
@@ -54,14 +59,19 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
                     return _openZipFiles[key];
                 }
 
-                var v = ZipFile.OpenRead(key);
+                if (_openZipFiles.Count >= MaxPoolSize)
+                {
+                    ClearCache();
+                }
+
+                var v = ArchiveFactory.Open(key);
                 CacheMisses++;
                 _openZipFiles.Add(key, v);
                 return v;
             }
         }
 
-        public static string NormalizePath(string path)
+        private static string NormalizePath(string path)
         {
             return Path.GetFullPath(new Uri(path).LocalPath)
                        .TrimEnd('\\','/');
