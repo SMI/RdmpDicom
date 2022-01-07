@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -8,8 +7,6 @@ using Dicom;
 using Rdmp.Dicom.PACS;
 using ReusableLibraryCode.Progress;
 using SharpCompress.Archives;
-using SharpCompress.Readers;
-using static Rdmp.Dicom.Extraction.FoDicomBased.Zip;
 
 namespace Rdmp.Dicom.Extraction.FoDicomBased
 {
