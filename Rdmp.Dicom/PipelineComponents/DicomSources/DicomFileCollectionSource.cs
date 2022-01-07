@@ -3,19 +3,19 @@ using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dicom;
 using FAnsi.Discovery;
 using ReusableLibraryCode.Progress;
-using Rdmp.Dicom.PACS;
 using Rdmp.Dicom.PipelineComponents.DicomSources.Worklists;
 using Rdmp.Core.Curation.Data;
 using Rdmp.Core.DataFlowPipeline.Requirements;
 using Rdmp.Core.DataFlowPipeline;
 using Rdmp.Dicom.Extraction.FoDicomBased;
+using Rdmp.Dicom.PACS;
+using SharpCompress.Archives;
 
 namespace Rdmp.Dicom.PipelineComponents.DicomSources
 {
@@ -78,7 +78,8 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
                     if (file.FullPath!=null && file.FullPath.EndsWith(".zip"))
                     {
                         //Input is a single zip file
-                        ProcessZipArchive(dt, listener, file.FullPath);
+                        using var fs = File.OpenRead(file.FullPath);
+                        ProcessZipArchive(fs, dt, file.FullPath, listener);
                     }
                     else
                     {
@@ -113,48 +114,49 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
             _listener.OnProgress(this, new ProgressEventArgs("Processing Files", new ProgressMeasurement(_filesProcessedSoFar, ProgressType.Records), _stopwatch.Elapsed));
         }
 
-        private void ProcessZipArchive(DataTable dt, IDataLoadEventListener listener, string zipFileName)
+        private void ProcessZipArchive(Stream arcStream, DataTable dt, string zipFileName, IDataLoadEventListener listener)
         {
             var skippedEntries = 0;
             var corruptedEntries = 0;
             
             try
             {
-                using (var archive = ZipFile.Open(zipFileName, ZipArchiveMode.Read))
-                    foreach (var f in archive.Entries)
+                using var archive = ArchiveFactory.Open(arcStream);
+                foreach (var f in archive.Entries)
+                {
+                    //it's not a dicom file!
+                    if (!AmbiguousFilePath.IsDicomReference(f.Key))
                     {
-                        //it's not a dicom file!
-                        if(!AmbiguousFilePath.IsDicomReference(f.FullName))
-                        {
-                            skippedEntries++;
-                            continue;
-                        }
-
-                        try
-                        {
-                            var buffer = ByteStreamHelper.ReadFully(f.Open());
-
-                            using (var memoryStream = new MemoryStream(buffer))
-                                    ProcessFile(memoryStream, dt, zipFileName + "!" + f.FullName, listener);
-                        }
-                        catch (Exception e)
-                        {
-                            corruptedEntries++;
-                            RecordError("Zip entry '" + f.FullName +"'",e);
-
-                            if (corruptedEntries <= 3) continue;
-                            listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning, "Skipping the rest of '" + f.FullName + "'", e));
-                            break;
-                        }
+                        skippedEntries++;
+                        continue;
                     }
+
+                    try
+                    {
+                        var stream = new MemoryStream(ByteStreamHelper.ReadFully(f.OpenEntryStream()));
+                        ProcessFile(stream, dt, $"{zipFileName}!{f.Key}", listener);
+                    }
+                    catch (Exception e)
+                    {
+                        corruptedEntries++;
+                        RecordError($"Zip entry '{f.Key}'", e);
+
+                        if (corruptedEntries <= 3) continue;
+                        listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning,
+                            $"Skipping the rest of '{f.Key}'", e));
+                        break;
+                    }
+                }
             }
             catch (InvalidDataException e)
             {
-                listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Warning, "Error processing zip file '" + zipFileName + "'", e));
+                listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Warning,
+                    $"Error processing zip file '{zipFileName}'", e));
             }
                 
             if(skippedEntries>0)
-                listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Warning, "Skipped '" + skippedEntries +"' in zip archive '" + zipFileName +"' because they did not have .dcm extensions"));
+                listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Warning,
+                    $"Skipped '{skippedEntries}' in zip archive '{zipFileName}' because they did not have .dcm extensions"));
 
             UpdateProgressListeners();
         }
@@ -162,7 +164,8 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
         private void RecordError(string filenameOrZipEntry, Exception exception)
         {                    
             _totalErrors ++;
-            _listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning, filenameOrZipEntry + " could not be processed", exception));
+            _listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning,
+                $"{filenameOrZipEntry} could not be processed", exception));
 
             if (_totalErrors > ErrorThreshold)
                 throw new Exception("Maximum number of errors reached (ErrorThreshold)", exception);
@@ -180,7 +183,7 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
             lock (oTasksLock)
                 tooManyRunningTasks = tasks.Count(t => !t.IsCompleted) >= ThreadCount;
 
-            //if the maximum number of tasks are alredy executing
+            //if the maximum number of tasks are already executing
             if(tooManyRunningTasks)
                 Task.WaitAll(tasks.ToArray());
             
@@ -210,37 +213,27 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
 
         private void ProcessDirectory(DataTable dt, DirectoryInfo directoryInfo,IDataLoadEventListener listener)
         {
-            listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information, "Started Directory '" + directoryInfo.FullName + "' on Thread " + Thread.CurrentThread.ManagedThreadId));
+            listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information,
+                $"Started Directory '{directoryInfo.FullName}' on Thread {Thread.CurrentThread.ManagedThreadId}"));
 
-            FileInfo[] dicomFiles;
-            FileInfo[] zipFiles;
-
-            try
+            //process all dcm files and archives in current directory
+            foreach (var file in directoryInfo.EnumerateFiles())
             {
-                dicomFiles = directoryInfo.EnumerateFiles().Where(f=>AmbiguousFilePath.IsDicomReference(f.FullName)).ToArray();
-                zipFiles = directoryInfo.EnumerateFiles("*.zip").ToArray();
-            }
-            catch (Exception e)
-            {
-                RecordError(directoryInfo.FullName,e);
-                return;
-            }
-
-            //process all dcm files in current directory
-            foreach (var dcmFile in dicomFiles)
                 try
                 {
-                    using (var fs = dcmFile.OpenRead())
-                        ProcessFile(fs, dt, dcmFile.FullName, listener);
+                    using var fs = file.OpenRead();
+                    if (!AmbiguousFilePath.IsDicomReference(file.FullName))
+                    {
+                        ProcessZipArchive(fs, dt, file.FullName, listener);
+                        continue;
+                    }
+                    ProcessFile(fs,dt,file.FullName,listener);
                 }
                 catch (Exception e)
                 {
-                    RecordError(dcmFile.FullName,e);
+                    RecordError(file.FullName, e);
                 }
-
-            foreach (var zipFile in zipFiles)
-                ProcessZipArchive(dt, listener, zipFile.FullName);
-
+            }
             UpdateProgressListeners();
         }
 
@@ -263,7 +256,8 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
                 if(file == null)
                 {
 
-                    listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning, "Skipping file '" + filename + "' because DicomFile.Open returned null"));
+                    listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning,
+                        $"Skipping file '{filename}' because DicomFile.Open returned null"));
                     return;
                 }
 
@@ -289,7 +283,8 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
             _fileWorklist = value as IDicomFileWorklist;
             
             if(_fileWorklist == null)
-                listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Warning, "Expected IDicomWorklist to be of Type IDicomProcessListProvider (but it was " + value.GetType().Name + ").  This component will be skipped"));
+                listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Warning,
+                    $"Expected IDicomWorklist to be of Type IDicomProcessListProvider (but it was {value.GetType().Name}).  This component will be skipped"));
         }
         
         public override DataTable TryGetPreview()
