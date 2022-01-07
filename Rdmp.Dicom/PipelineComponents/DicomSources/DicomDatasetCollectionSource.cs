@@ -15,7 +15,7 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
 
         private const int BatchSize = 50000;
 
-        readonly Stopwatch _sw = new Stopwatch();
+        readonly Stopwatch _sw = new();
 
         public void PreInitialize(IDicomWorklist value, IDataLoadEventListener listener)
         {

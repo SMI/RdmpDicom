@@ -83,15 +83,15 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
     ConvertToNullAndWarn - Values are set to Null", DefaultValue = DataTooWideHandling.None)]
         public DataTooWideHandling DataTooLongHandlingStrategy { get; set; }
 
-        private readonly object _oDataTableLock = new object();
+        private readonly object _oDataTableLock = new();
         private string _archiveRoot;
 
         /// <summary>
         /// The maximum length supported by the VR / Multiplicity of the tag (this is likely to be the size of the database columns - we would hope!)
         /// </summary>
-        private readonly Dictionary<DicomTag, int> _maxTagLengths = new Dictionary<DicomTag, int>();
+        private readonly Dictionary<DicomTag, int> _maxTagLengths = new();
 
-        private readonly object _oDictLock = new object();
+        private readonly object _oDictLock = new();
 
 
         public void Check(ICheckNotifier notifier)

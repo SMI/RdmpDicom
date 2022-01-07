@@ -43,9 +43,9 @@ This Grouping will be used to extract the Modality code when deciding which tabl
         [DemandsInitialization("This attacher expects multiple flat files that will be loaded this pattern should match them (file pattern not regex e.g. *.csv)")]
         public string ListPattern { get; set; }
         
-        readonly Dictionary<string, bool> _columnNamesRoutedSuccesfully = new Dictionary<string, bool>(StringComparer.CurrentCultureIgnoreCase);
+        readonly Dictionary<string, bool> _columnNamesRoutedSuccesfully = new(StringComparer.CurrentCultureIgnoreCase);
 
-        readonly Stopwatch _sw = new Stopwatch();
+        readonly Stopwatch _sw = new();
         Dictionary<DataTable, string> _modalityMap;
 
         protected AutoRoutingAttacher(bool requestsExternalDatabaseCreation) : base(requestsExternalDatabaseCreation) //Derived classes can change mind about RAW creation

@@ -34,7 +34,7 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
     {
         public string FullPath { get; private set; }
         
-        private static readonly Regex _regexDigitsAndDotsOnly = new Regex(@"^[0-9\.]*$");
+        private static readonly Regex _regexDigitsAndDotsOnly = new(@"^[0-9\.]*$");
 
 
 

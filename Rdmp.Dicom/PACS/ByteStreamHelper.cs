@@ -14,15 +14,13 @@ namespace Rdmp.Dicom.PACS
         public static byte[] ReadFully(Stream stream)
         {
             var buffer = new byte[32768];
-            using (var ms = new MemoryStream())
+            using var ms = new MemoryStream((int)stream.Length);
+            while (true)
             {
-                while (true)
-                {
-                    var read = stream.Read(buffer, 0, buffer.Length);
-                    if (read <= 0)
-                        return ms.ToArray();
-                    ms.Write(buffer, 0, read);
-                }
+                var read = stream.Read(buffer, 0, buffer.Length);
+                if (read <= 0)
+                    return ms.ToArray();
+                ms.Write(buffer, 0, read);
             }
         }
     }

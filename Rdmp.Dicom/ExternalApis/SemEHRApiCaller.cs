@@ -18,7 +18,7 @@ namespace Rdmp.Dicom.ExternalApis
     {
         public const string SemEHRApiPrefix = ApiPrefix + "SemEHR";
 
-        static HttpClient httpClient = new HttpClient();
+        static HttpClient httpClient = new();
 
         public override void Run(AggregateConfiguration ac, CachedAggregateConfigurationResultsManager cache, CancellationToken token)
         {

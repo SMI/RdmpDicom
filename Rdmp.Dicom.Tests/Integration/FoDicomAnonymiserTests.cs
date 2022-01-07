@@ -274,7 +274,7 @@ namespace Rdmp.Dicom.Tests.Integration
             
             //mock the prochi/release id columnvar cohort = MockRepository.GenerateMock<IExtractableCohort>();
             var queryBuilder = Mock.Of<ISqlQueryBuilder>(q=>
-            q.SelectColumns == new List<QueryTimeColumn> { new QueryTimeColumn(new SpontaneouslyInventedColumn(new MemoryRepository(), "Pat","[db]..[tb].[Pat]"){IsExtractionIdentifier = true}) });
+            q.SelectColumns == new List<QueryTimeColumn> { new(new SpontaneouslyInventedColumn(new MemoryRepository(), "Pat","[db]..[tb].[Pat]"){IsExtractionIdentifier = true}) });
                        
             
             //mock the extraction directory

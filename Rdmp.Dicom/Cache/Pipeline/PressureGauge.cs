@@ -15,8 +15,8 @@ namespace Rdmp.Dicom.Cache.Pipeline
         /// </summary>
         public long ThresholdBeatsPerMinute { get; set; }
 
-        List<DateTime> collection = new List<DateTime>();
-        object oLock = new object();
+        List<DateTime> collection = new();
+        object oLock = new();
 
         public PressureGauge()
         {

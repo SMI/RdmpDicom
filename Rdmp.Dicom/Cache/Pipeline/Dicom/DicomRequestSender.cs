@@ -16,7 +16,7 @@ namespace Rdmp.Dicom.Cache.Pipeline.Dicom
         private readonly DicomConfiguration _dicomConfiguration;
         private readonly IDataLoadEventListener _listener;
         private readonly bool verbose;
-        private readonly Stopwatch _moveRequestTimer = new Stopwatch();
+        private readonly Stopwatch _moveRequestTimer = new();
         public delegate void OnCheckExceptionDelegate(Exception ex);
         public delegate void OnCheckTimeoutDelegate();
         public delegate void OnCheckSucessDelegate();

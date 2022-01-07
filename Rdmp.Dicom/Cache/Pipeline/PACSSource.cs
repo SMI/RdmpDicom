@@ -46,7 +46,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
         [DemandsInitialization("True to log individual file fetch messages for each study requested at Info level.  False to log at Trace level.", DefaultValue = true)]
         public bool Verbose { get; set; }
 
-        public static PressureGauge gauge = new PressureGauge() { ThresholdBeatsPerMinute = 30 };
+        public static PressureGauge gauge = new() { ThresholdBeatsPerMinute = 30 };
 
 
         public override SMIDataChunk DoGetChunk(ICacheFetchRequest cacheRequest, IDataLoadEventListener listener,GracefulCancellationToken cancellationToken)

@@ -19,7 +19,7 @@ namespace Rdmp.Dicom.Attachers.Routing
     /// </summary>
     public class PersistentRawTableCreator : IDisposeAfterDataLoad
     {
-        readonly List<DiscoveredTable> _rawTables = new List<DiscoveredTable>();
+        readonly List<DiscoveredTable> _rawTables = new();
 
         public void CreateRAWTablesInDatabase(DiscoveredDatabase rawDb, IDataLoadJob job)
         {

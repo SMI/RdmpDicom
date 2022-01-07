@@ -210,7 +210,7 @@ namespace Rdmp.Dicom.PipelineComponents
         
         public bool IsMaster { get; set; }
 
-        public List<string> ConflictingColumns { get; set; } = new List<string>();
+        public List<string> ConflictingColumns { get; set; } = new();
 
         public IsolationDifference(int rowIndex, string pk , bool isMaster)
         {

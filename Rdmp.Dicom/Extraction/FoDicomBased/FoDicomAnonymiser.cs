@@ -58,7 +58,7 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
         private IPutDicomFilesInExtractionDirectories _putter;
 
         private int _anonymisedImagesCount = 0;
-        readonly Stopwatch _sw = new Stopwatch();
+        readonly Stopwatch _sw = new();
 
         private int _errors = 0;
 
@@ -227,7 +227,7 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
             _extractCommand = value as IExtractDatasetCommand;
         }
 
-        private static object CreateServersOneAtATime = new object();
+        private static object CreateServersOneAtATime = new();
 
         public void Check(ICheckNotifier notifier)
         {
