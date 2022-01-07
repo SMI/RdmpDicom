@@ -48,7 +48,7 @@ This Grouping will be used to extract the Modality code when deciding which tabl
         readonly Stopwatch _sw = new Stopwatch();
         Dictionary<DataTable, string> _modalityMap;
 
-        protected AutoRoutingAttacher(bool requestsExternalDatabaseCreation) : base(requestsExternalDatabaseCreation) //Derrived classes can change mind about RAW creation
+        protected AutoRoutingAttacher(bool requestsExternalDatabaseCreation) : base(requestsExternalDatabaseCreation) //Derived classes can change mind about RAW creation
         {
             
         }
