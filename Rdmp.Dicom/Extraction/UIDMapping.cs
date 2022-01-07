@@ -18,7 +18,7 @@ namespace Rdmp.Dicom.Extraction
             {DicomTag.SeriesInstanceUID,UIDType.SeriesInstanceUID},
             {DicomTag.StudyInstanceUID,UIDType.StudyInstanceUID},
             {DicomTag.FrameOfReferenceUID,UIDType.FrameOfReferenceUID},
-            {DicomTag.MediaStorageSOPInstanceUID,UIDType.MediaStorageSOPInstanceUID},
+            {DicomTag.MediaStorageSOPInstanceUID,UIDType.MediaStorageSOPInstanceUID}
         };
 
         public void SetUIDType(DicomTag tag)

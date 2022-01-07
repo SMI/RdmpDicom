@@ -49,7 +49,7 @@ namespace Rdmp.Dicom.Tests.Integration
                     new ImageColumnTemplate
                     {
                         IsPrimaryKey = false, AllowNulls = true, ColumnName = "PatientAge"
-                    },
+                    }
                 }
             };
 

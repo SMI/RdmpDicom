@@ -35,7 +35,7 @@ namespace Rdmp.Dicom.Tests.Integration
                     {
                         IsPrimaryKey = false, AllowNulls = true, ColumnName = "SeriesInstanceUID"
                     },
-                    new ImageColumnTemplate {IsPrimaryKey = false, AllowNulls = true, ColumnName = "StudyDate"},
+                    new ImageColumnTemplate {IsPrimaryKey = false, AllowNulls = true, ColumnName = "StudyDate"}
                 }
             };
 

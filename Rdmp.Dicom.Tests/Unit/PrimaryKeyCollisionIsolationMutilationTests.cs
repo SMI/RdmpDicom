@@ -215,7 +215,7 @@ namespace Rdmp.Dicom.Tests.Unit
 
             var tblParent = db.CreateTable("Parent", dt, new[]
             {
-                new DatabaseColumnRequest("SeriesInstanceUID",new DatabaseTypeRequest(typeof(string))),
+                new DatabaseColumnRequest("SeriesInstanceUID",new DatabaseTypeRequest(typeof(string)))
             });
             
             var tblChild = db.CreateTable("Child", dt2,new []
