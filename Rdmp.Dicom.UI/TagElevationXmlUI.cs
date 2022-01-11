@@ -51,7 +51,7 @@ namespace Rdmp.Dicom.UI
             btnCancel.Click += Btn_Click;
 
             var factory = new ScintillaTextEditorFactory();
-            queryEditor = factory.Create(null,"xml");
+            queryEditor = factory.Create(null,SyntaxLanguage.XML);
             pEditor.Controls.Add(queryEditor);
 
             btnRunChecks.Click += (s,e)=>RunChecks();
