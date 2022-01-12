@@ -39,7 +39,7 @@ namespace Rdmp.Dicom.Cache
             var yearDirectory = archiveDate.ToString("yyyy");
             var monthDirectory = archiveDate.ToString("MM");
             var dayDirectory = archiveDate.ToString("dd");
-            var filename = archiveDate.ToString(DateFormat) + "." + ArchiveType.ToString().ToLower();
+            var filename = $"{archiveDate.ToString(DateFormat)}.{ArchiveType.ToString().ToLower()}";
 
             return Path.Combine(loadCacheDirectory.FullName, yearDirectory, monthDirectory, dayDirectory, filename);
         }
@@ -82,7 +82,7 @@ namespace Rdmp.Dicom.Cache
             // todo: This enumerates all files in the entire cache! Could be very expensive
 
             // This cache is laid out by <modality>/<year>/<month>/<day>/yyyyMMddHH.<type>
-            var allFiles = GetLoadCacheDirectory(listener).EnumerateFiles("*." + ArchiveType, SearchOption.AllDirectories).ToList();
+            var allFiles = GetLoadCacheDirectory(listener).EnumerateFiles($"*.{ArchiveType}", SearchOption.AllDirectories).ToList();
             var dateTimes = allFiles.Select(ConvertFilenameToDateTime).ToList();
             dateTimes.Sort((a, b) => a.CompareTo(b));
             return new Queue<DateTime>(dateTimes);
@@ -93,7 +93,8 @@ namespace Rdmp.Dicom.Cache
             var nameWithoutExtension = fileInfo.Name.Substring(0, fileInfo.Name.Length - fileInfo.Extension.Length);
 
             if (!DateTime.TryParseExact(nameWithoutExtension, DateFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out var dt))
-                throw new Exception("Dodgy file in cache. Could not parse '" + nameWithoutExtension + "' using DateFormat=" + DateFormat + " : " + fileInfo.FullName);
+                throw new Exception(
+                    $"Dodgy file in cache. Could not parse '{nameWithoutExtension}' using DateFormat={DateFormat} : {fileInfo.FullName}");
 
             return dt;
         }

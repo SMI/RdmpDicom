@@ -39,28 +39,27 @@ namespace Rdmp.Dicom.UI
             var databaseEntity = o as DatabaseEntity;
 
             //allow clicking in Catalogue collection whitespace
-            if (o is RDMPCollection collection && collection == RDMPCollection.Catalogue)
+            if (o is RDMPCollection.Catalogue)
                 return new[] { new ExecuteCommandCreateNewImagingDataset(_activator) };
-            else
-                return databaseEntity switch
+            return databaseEntity switch
+            {
+                Catalogue c => new IAtomicCommand[]
                 {
-                    Catalogue c => new IAtomicCommand[]
+                    new ExecuteCommandCreateNewImagingDataset(_activator),
+                    new ExecuteCommandPromoteNewTag(_activator).SetTarget(databaseEntity),
+                    new Rdmp.Dicom.CommandExecution.ExecuteCommandCreateNewSemEHRCatalogue(_activator),
+                    new ExecuteCommandCompareImagingSchemas(_activator, c)
+                },
+                ProcessTask pt => new[] { new ExecuteCommandReviewIsolations(_activator, pt) },
+                TableInfo => new[] { new ExecuteCommandPromoteNewTag(_activator).SetTarget(databaseEntity) },
+                _ => o is AllExternalServersNode
+                    ? new[]
                     {
-                        new ExecuteCommandCreateNewImagingDataset(_activator),
-                        new ExecuteCommandPromoteNewTag(_activator).SetTarget(databaseEntity),
-                        new Rdmp.Dicom.CommandExecution.ExecuteCommandCreateNewSemEHRCatalogue(_activator),
-                        new ExecuteCommandCompareImagingSchemas(_activator, c)
-                    },
-                    ProcessTask pt => new[] { new ExecuteCommandReviewIsolations(_activator, pt) },
-                    TableInfo _ => new[] { new ExecuteCommandPromoteNewTag(_activator).SetTarget(databaseEntity) },
-                    _ => o is AllExternalServersNode
-                        ? new[]
-                        {
-                            new ExecuteCommandCreateNewExternalDatabaseServer(_activator, new SMIDatabasePatcher(),
-                                PermissableDefaults.None)
-                        }
-                        : Array.Empty<IAtomicCommand>()
-                };
+                        new ExecuteCommandCreateNewExternalDatabaseServer(_activator, new SMIDatabasePatcher(),
+                            PermissableDefaults.None)
+                    }
+                    : Array.Empty<IAtomicCommand>()
+            };
         }
 
         public override object[] GetChildren(object model)
@@ -85,19 +84,14 @@ namespace Rdmp.Dicom.UI
                 return false;
             }
 
-            if(o is AggregateConfiguration ac)
-            {
-                var api = new SemEHRApiCaller();
+            if (o is not AggregateConfiguration ac) return base.CustomActivate(o);
+            var api = new SemEHRApiCaller();
 
-                if (api.ShouldRun(ac))
-                {
-                    var ui = new SemEHRUI(_activator, api, ac);
-                    ui.ShowDialog();
-                    return true;
-                }
-            }
+            if (!api.ShouldRun(ac)) return base.CustomActivate(o);
+            var ui = new SemEHRUI(_activator, api, ac);
+            ui.ShowDialog();
+            return true;
 
-            return base.CustomActivate(o);
         }
     }
 }

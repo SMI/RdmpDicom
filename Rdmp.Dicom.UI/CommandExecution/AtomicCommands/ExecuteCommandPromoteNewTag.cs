@@ -57,7 +57,7 @@ namespace Rdmp.Dicom.UI.CommandExecution.AtomicCommands
         {
             _tableInfo = target as TableInfo;
 
-            if (!(target is Catalogue catalogue)) return this;
+            if (target is not Catalogue catalogue) return this;
             var tables = catalogue.GetTableInfoList(false);
 
             if (tables.Length == 1)

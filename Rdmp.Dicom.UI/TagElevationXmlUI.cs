@@ -1,16 +1,12 @@
-﻿using Dicom;
-using DicomTypeTranslation.Elevation.Serialization;
+﻿using DicomTypeTranslation.Elevation.Serialization;
 using Rdmp.Core.Curation.Data.DataLoad;
 using Rdmp.Core.Repositories;
 using Rdmp.Dicom.PipelineComponents.DicomSources;
 using ReusableLibraryCode.Checks;
 using ScintillaNET;
 using System;
-using System.Linq;
 using System.Windows.Forms;
-using Rdmp.Core.Icons.IconProvision;
 using Rdmp.UI.ScintillaHelper;
-using Rdmp.UI.AutoComplete;
 
 namespace Rdmp.Dicom.UI
 {

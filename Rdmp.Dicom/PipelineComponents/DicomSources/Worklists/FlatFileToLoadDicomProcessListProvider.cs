@@ -18,12 +18,10 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources.Worklists
         {
             _file = file;
             
-            if(file.File == null)
+            if(file.File is not { Extension: ".txt" })
                 return;
                 
             //input is a textual list of files/zips
-            if (file.File.Extension != ".txt") return;
-            if (_lines != null) return;
             _lines = File.ReadAllLines(file.File.FullName).Where(l => !string.IsNullOrWhiteSpace(l)).ToArray();
             _linesCurrent = 0;
 

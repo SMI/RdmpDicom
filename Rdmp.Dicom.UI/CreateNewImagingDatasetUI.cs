@@ -7,7 +7,6 @@ using Rdmp.Dicom.CommandExecution;
 using Rdmp.Dicom.PipelineComponents.DicomSources;
 using Rdmp.UI.ItemActivation;
 using DicomTypeTranslation.TableCreation;
-using Rdmp.UI.Refreshing;
 using Rdmp.UI.SimpleDialogs;
 
 namespace Rdmp.Dicom.UI

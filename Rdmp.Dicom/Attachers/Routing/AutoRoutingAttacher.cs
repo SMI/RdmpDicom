@@ -103,7 +103,7 @@ This Grouping will be used to extract the Modality code when deciding which tabl
             foreach (var t in Job.RegularTablesToLoad)
             {
                 var tblName = t.GetRuntimeName(LoadBubble.Raw,Job.Configuration.DatabaseNamer);
-                var dest = new SqlBulkInsertDestination(_dbInfo,tblName,new String[0]);
+                var dest = new SqlBulkInsertDestination(_dbInfo,tblName,Array.Empty<string>());
 
                 var tli = Job.DataLoadInfo.CreateTableLoadInfo("", tblName, new[] {new DataSource("AutoRoutingAttacher")}, 0);
 

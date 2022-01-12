@@ -125,8 +125,7 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
         /// <param name="otherValuesToStoreInRow"></param>
         protected void ProcessDataset(string filename, DicomDataset ds, DataTable dt, IDataLoadEventListener listener, Dictionary<string, string> otherValuesToStoreInRow = null)
         {
-            if (_elevationRequests == null)
-                _elevationRequests = LoadElevationRequestsFile();
+            _elevationRequests ??= LoadElevationRequestsFile();
 
             filename = ApplyArchiveRootToMakeRelativePath(filename);
 
@@ -286,15 +285,15 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
                 row[FilenameField] = filename;
 
                 if (otherValuesToStoreInRow != null)
-                    foreach (KeyValuePair<string, string> kvp in otherValuesToStoreInRow)
+                    foreach (var (key, value) in otherValuesToStoreInRow)
                     {
-                        if (!dt.Columns.Contains(kvp.Key))
-                            dt.Columns.Add(kvp.Key);
-                        row[kvp.Key] = kvp.Value;
+                        if (!dt.Columns.Contains(key))
+                            dt.Columns.Add(key);
+                        row[key] = value;
                     }
 
-                foreach (KeyValuePair<string, object> keyValuePair in rowValues)
-                    Add(dt, row, keyValuePair.Key, keyValuePair.Value);
+                foreach (var (key, value) in rowValues)
+                    Add(dt, row, key, value);
             }
         }
 

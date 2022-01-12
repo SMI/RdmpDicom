@@ -250,17 +250,19 @@ namespace Rdmp.Dicom.Tests.Integration
             var eds = new ExternalDatabaseServer(CatalogueRepository,"UID server",null);
             eds.SetProperties(db);
 
-            var anon = new FoDicomAnonymiser();
-            anon.UIDMappingServer = eds;
+            var anon = new FoDicomAnonymiser
+            {
+                UIDMappingServer = eds
+            };
 
-            var ex = Assert.Throws<Exception>(()=>anon.Check(new ThrowImmediatelyCheckNotifier() { ThrowOnWarning = true }));
+            var ex = Assert.Throws<Exception>(()=>anon.Check(new ThrowImmediatelyCheckNotifier { ThrowOnWarning = true }));
 
-            StringAssert.AreEqualIgnoringCase("UIDMappingServer is not set up yet", ex.Message);
+            StringAssert.AreEqualIgnoringCase("UIDMappingServer is not set up yet", ex?.Message);
 
             anon.Check(new AcceptAllCheckNotifier());
 
             // no warnings after it has been created
-            Assert.DoesNotThrow(() => anon.Check(new ThrowImmediatelyCheckNotifier() { ThrowOnWarning = true }));
+            Assert.DoesNotThrow(() => anon.Check(new ThrowImmediatelyCheckNotifier { ThrowOnWarning = true }));
 
         }
 

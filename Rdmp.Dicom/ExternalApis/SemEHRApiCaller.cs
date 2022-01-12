@@ -4,11 +4,8 @@ using Rdmp.Core.Curation.Data.Aggregation;
 using Rdmp.Core.QueryCaching.Aggregation;
 using System;
 using System.Threading;
-using Newtonsoft.Json.Linq;
-
 using System.Net;
 using System.Net.Http;
-using System.Web;
 using Newtonsoft.Json;
 using System.Linq;
 
@@ -38,27 +35,27 @@ namespace Rdmp.Dicom.ExternalApis
             #region Get data as GET
 
             //Make the request to the API
-            HttpResponseMessage response = httpClient.GetAsync(config.GetUrlWithQuerystring()).Result;
+            HttpResponseMessage response = httpClient.GetAsync(config.GetUrlWithQuerystring(), token).Result;
 
             //Check the status code is 200 success
             if (response.StatusCode == HttpStatusCode.OK)
             {
                 //Get the result object and use built in DeserializeObject to concert to SemEHRResponse
-                string responseData = response.Content.ReadAsStringAsync().Result;
+                string responseData = response.Content.ReadAsStringAsync(token).Result;
                 SemEHRResponse semEHRResponse = JsonConvert.DeserializeObject<SemEHRResponse>(responseData);
 
-                if (semEHRResponse.success == true)
+                if (semEHRResponse.success)
                 {
                     if(semEHRResponse.results.Count == 0)
                     {
-                        SubmitIdentifierList("NO_RESULTS", new string[] { config.GetUrlWithQuerystring() }, ac, cache);
+                        SubmitIdentifierList("NO_RESULTS", new[] { config.GetUrlWithQuerystring() }, ac, cache);
                     }
                     else
                     {
                         SubmitIdentifierList(config.ReturnField, semEHRResponse.results.ToArray(), ac, cache);
                     }
 
-                    /*If we can cope with the return feild with multiple types this will handle that
+                    /*If we can cope with the return field with multiple types this will handle that
                     /*if (string.IsNullOrEmpty(config.ReturnField))
                     {
                         SubmitIdentifierList("sopinstanceuid", semEHRResponse.GetResultSopUids().ToArray(), ac, cache);
@@ -82,13 +79,14 @@ namespace Rdmp.Dicom.ExternalApis
                 else
                 {
                     //If we failed, get the failing error message
-                    throw (new Exception("The SemEHR API has failed: " + semEHRResponse.message));
+                    throw (new Exception($"The SemEHR API has failed: {semEHRResponse.message}"));
                 }
                
             }
             else
             {
-                throw (new Exception("The API response returned a HTTP Status Code: (" + (int)response.StatusCode + ") " + response.StatusCode));
+                throw (new Exception(
+                    $"The API response returned a HTTP Status Code: ({(int)response.StatusCode}) {response.StatusCode}"));
             }
             #endregion
 

@@ -243,35 +243,33 @@ namespace Rdmp.Dicom.PipelineComponents
         {
             var deleteOnColumnName = GetRAWColumnNameFullyQualified(deleteOn);
 
-            using (var con = _raw.Server.GetConnection())
+            using var con = _raw.Server.GetConnection();
+            con.Open();
+
+            //if we are deleting on a child table we need to look up the primary table primary key (e.g. StudyInstanceUID) we should then migrate that data instead (for all tables)
+            if (!deleteOn.Equals(_primaryTablePk))
             {
-                con.Open();
-
-                //if we are deleting on a child table we need to look up the primary table primary key (e.g. StudyInstanceUID) we should then migrate that data instead (for all tables)
-                if (!deleteOn.Equals(_primaryTablePk))
-                {
-                    deleteValues = GetPrimaryKeyValuesFor(deleteOn, deleteValues, con);
-                    deleteOnColumnName = GetRAWColumnNameFullyQualified(_primaryTablePk);
-                }
-
-                //pull all records that we must isolate in all joined tables
-                Dictionary<TableInfo,DataTable> toPush = TablesToIsolate.ToDictionary(tableInfo => tableInfo, tableInfo => PullTable(tableInfo, con, deleteOnColumnName, deleteValues));
-
-                //push the results to isolation
-                foreach (KeyValuePair<TableInfo, DataTable> kvp in toPush)
-                {
-                    var toDatabase = IsolationDatabase.Discover(DataAccessContext.DataLoad);
-                    var toTable = toDatabase.ExpectTable(GetIsolationTableName(kvp.Key));
-
-                    using (var bulkInsert = toTable.BeginBulkInsert())
-                        bulkInsert.Upload(kvp.Value);
-                }
-
-                foreach (TableInfo t in TablesToIsolate.Reverse())
-                    DeleteRows(t, deleteOnColumnName, deleteValues, con);
-
-                con.Close();
+                deleteValues = GetPrimaryKeyValuesFor(deleteOn, deleteValues, con);
+                deleteOnColumnName = GetRAWColumnNameFullyQualified(_primaryTablePk);
             }
+
+            //pull all records that we must isolate in all joined tables
+            Dictionary<TableInfo,DataTable> toPush = TablesToIsolate.ToDictionary(tableInfo => tableInfo, tableInfo => PullTable(tableInfo, con, deleteOnColumnName, deleteValues));
+
+            //push the results to isolation
+            foreach (var (key, value) in toPush)
+            {
+                var toDatabase = IsolationDatabase.Discover(DataAccessContext.DataLoad);
+                var toTable = toDatabase.ExpectTable(GetIsolationTableName(key));
+
+                using var bulkInsert = toTable.BeginBulkInsert();
+                bulkInsert.Upload(value);
+            }
+
+            foreach (TableInfo t in TablesToIsolate.Reverse())
+                DeleteRows(t, deleteOnColumnName, deleteValues, con);
+
+            con.Close();
         }
 
         /// <summary>
@@ -311,22 +309,20 @@ namespace Rdmp.Dicom.PipelineComponents
                 {
                     p.Value = d;
                     bool readOne = false;
-                    using (var r = cmdSelect.ExecuteReader())
+                    using var r = cmdSelect.ExecuteReader();
+                    while (r.Read())
                     {
-                        while (r.Read())
-                        {
-                            var result = r[0];
+                        var result = r[0];
 
-                            if(result == DBNull.Value || result == null)
-                                throw new Exception("Primary key value not found for " + d + " foreign Key was null");
+                        if(result == DBNull.Value || result == null)
+                            throw new Exception("Primary key value not found for " + d + " foreign Key was null");
 
-                            toReturn.Add(result);
-                            readOne = true;
-                        }
-
-                        if(!readOne)
-                            throw new Exception("Primary key value not found for " + d);
+                        toReturn.Add(result);
+                        readOne = true;
                     }
+
+                    if(!readOne)
+                        throw new Exception("Primary key value not found for " + d);
                 }
 
             }
@@ -346,26 +342,24 @@ namespace Rdmp.Dicom.PipelineComponents
             //fetch all the data (LEFT/RIGHT joins can introduce null records so add not null to WHERE for the table being migrated to avoid full null rows)
             string sqlSelect =
                 $"Select distinct {deleteFromTableName}.* {_fromSql} WHERE {deleteOnColumnName} = @val AND {pkColumnName} is not null";
-            using(var cmdSelect = _raw.Server.GetCommand(sqlSelect, con))
+            using var cmdSelect = _raw.Server.GetCommand(sqlSelect, con);
+            var p = cmdSelect.CreateParameter();
+            p.ParameterName = "@val";
+            cmdSelect.Parameters.Add(p);
+            cmdSelect.CommandTimeout = TimeoutInSeconds;
+
+            foreach (var value in deleteValues)
             {
-                var p = cmdSelect.CreateParameter();
-                p.ParameterName = "@val";
-                cmdSelect.Parameters.Add(p);
-                cmdSelect.CommandTimeout = TimeoutInSeconds;
+                p.Value = value;
 
-                foreach (var value in deleteValues)
-                {
-                    p.Value = value;
-
-                    using(var da = _raw.Server.GetDataAdapter(cmdSelect))
-                        da.Fill(dt);
-                }
-                
-                dt.Columns.Add(SpecialFieldNames.DataLoadRunID, typeof(int));
-                
-                foreach (DataRow row in dt.Rows)
-                    row[SpecialFieldNames.DataLoadRunID] = _dataLoadInfoId;
+                using var da = _raw.Server.GetDataAdapter(cmdSelect);
+                da.Fill(dt);
             }
+                
+            dt.Columns.Add(SpecialFieldNames.DataLoadRunID, typeof(int));
+                
+            foreach (DataRow row in dt.Rows)
+                row[SpecialFieldNames.DataLoadRunID] = _dataLoadInfoId;
 
 
             return dt;
@@ -386,23 +380,21 @@ namespace Rdmp.Dicom.PipelineComponents
 
             _job.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,"Running:" + sqlDelete));
 
-            using(var cmdDelete = _raw.Server.GetCommand(sqlDelete, con))
+            using var cmdDelete = _raw.Server.GetCommand(sqlDelete, con);
+            var p2 = cmdDelete.CreateParameter();
+            p2.ParameterName = "@val";
+            cmdDelete.Parameters.Add(p2);
+            cmdDelete.CommandTimeout = TimeoutInSeconds;
+
+            foreach (var d in deleteValues)
             {
-                var p2 = cmdDelete.CreateParameter();
-                p2.ParameterName = "@val";
-                cmdDelete.Parameters.Add(p2);
-                cmdDelete.CommandTimeout = TimeoutInSeconds;
-
-                foreach (var d in deleteValues)
-                {
-                    p2.Value = d;
+                p2.Value = d;
                     
-                    //then delete it
-                    int affectedRows = cmdDelete.ExecuteNonQuery();
+                //then delete it
+                int affectedRows = cmdDelete.ExecuteNonQuery();
 
-                    _job.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,affectedRows + " affected rows"));
+                _job.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,affectedRows + " affected rows"));
 
-                }
             }
         }
 
@@ -471,18 +463,14 @@ namespace Rdmp.Dicom.PipelineComponents
                 tableNameFullyQualified
                 );
 
-            using (var con = _raw.Server.GetConnection())
-            {
-                con.Open();
-                using(var cmd = _raw.Server.GetCommand(primaryKeysColliding, con))
-                {
-                    cmd.CommandTimeout = TimeoutInSeconds;
+            using var con = _raw.Server.GetConnection();
+            con.Open();
+            using var cmd = _raw.Server.GetCommand(primaryKeysColliding, con);
+            cmd.CommandTimeout = TimeoutInSeconds;
 
-                    using(var r = cmd.ExecuteReader())
-                        while (r.Read())
-                            yield return r[pkColName];
-                }
-            }
+            using var r = cmd.ExecuteReader();
+            while (r.Read())
+                yield return r[pkColName];
         }
     }
 }

@@ -1,18 +1,16 @@
-﻿using FAnsi.Discovery;
-using Rdmp.Core.Curation.Data;
-using Rdmp.Core.DataFlowPipeline;
-using Rdmp.Core.DataFlowPipeline.Requirements;
-using ReusableLibraryCode;
-using ReusableLibraryCode.Checks;
-using ReusableLibraryCode.Progress;
-using System;
+﻿using System;
 using System.Data;
 using System.Diagnostics;
 using System.IO;
 using System.Xml;
-using System.Xml.XPath;
+using FAnsi.Discovery;
+using Rdmp.Core.Curation.Data;
+using Rdmp.Core.DataFlowPipeline;
+using Rdmp.Core.DataFlowPipeline.Requirements;
+using ReusableLibraryCode.Checks;
+using ReusableLibraryCode.Progress;
 
-namespace Rdmp.Dicom
+namespace Rdmp.Dicom.PipelineComponents.CFind
 {
     /// <summary>
     /// Source that reads an 'inventory file' which contains one or more directories. Directories
@@ -45,16 +43,9 @@ namespace Rdmp.Dicom
         {
             var dt = GenerateTable();
 
-            if (dt.Columns.Count <= 0)
-            {
-                notifier.OnCheckPerformed(new CheckEventArgs($"Failed to build table.  Check {nameof(HeadersToRead)}", CheckResult.Fail));
-            }   
-            else
-            {
-                notifier.OnCheckPerformed(new CheckEventArgs($"Built table successfully", CheckResult.Success));
-            }
-
-            
+            notifier.OnCheckPerformed(dt.Columns.Count <= 0
+                ? new CheckEventArgs($"Failed to build table.  Check {nameof(HeadersToRead)}", CheckResult.Fail)
+                : new CheckEventArgs("Built table successfully", CheckResult.Success));
         }
 
         public void Dispose(IDataLoadEventListener listener, Exception pipelineFailureExceptionIfAny)
@@ -146,31 +137,27 @@ namespace Rdmp.Dicom
 
         private void XmlToRows(string file, DataTable dt, IDataLoadEventListener listener)
         {
-            using (var fileStream = File.Open(file, FileMode.Open))
+            using var fileStream = File.Open(file, FileMode.Open);
+            //Load the file and create a navigator object. 
+            var xDoc = new XmlDocument();
+            xDoc.Load(fileStream);
+
+            var datasets = xDoc.GetElementsByTagName("data-set");
+
+            foreach(XmlElement d in datasets)
             {
-                //Load the file and create a navigator object. 
-                var xDoc = new XmlDocument();
-                xDoc.Load(fileStream);
+                var row = dt.NewRow();
 
-                var datasets = xDoc.GetElementsByTagName("data-set");
-
-                foreach(XmlElement d in datasets)
+                foreach(XmlElement child in d.ChildNodes)
                 {
-                    var row = dt.NewRow();
-
-                    foreach(XmlElement child in d.ChildNodes)
+                    var name = child.GetAttribute("name");
+                    if(dt.Columns.Contains(name))
                     {
-                        var name = child.GetAttribute("name");
-                        if(dt.Columns.Contains(name))
-                        {
-                            row[name] = child.InnerText;
-                        }
+                        row[name] = child.InnerText;
                     }
-
-                    dt.Rows.Add(row);
                 }
 
-                
+                dt.Rows.Add(row);
             }
         }
 

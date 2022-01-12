@@ -43,11 +43,11 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
         private IDicomFileWorklist _fileWorklist;
         
         //start recording performance
-        Stopwatch _stopwatch = new Stopwatch();
+        Stopwatch _stopwatch = new();
 
         private IDataLoadEventListener _listener;
 
-        private readonly ZipPool _zipPool = new ZipPool();
+        private readonly ZipPool _zipPool = new();
 
         public override DataTable GetChunk(IDataLoadEventListener listener, GracefulCancellationToken cancellationToken)
         {
@@ -69,13 +69,13 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
                     return null;
 
                 // Exactly one of file/directory must be null:
-                if ((file!=null) == (directory!=null))
+                if (file!=null == (directory!=null))
                     throw new Exception("Expected IDicomProcessListProvider to return either a DirectoryInfo or a FileInfo not both/neither");
 
                 if (file != null)
                 {
                     dt.TableName = QuerySyntaxHelper.MakeHeaderNameSensible(Path.GetFileNameWithoutExtension(file.FullPath));
-                    if (file.FullPath!=null && file.FullPath.EndsWith(".zip"))
+                    if (file.FullPath!=null && !AmbiguousFilePath.IsDicomReference(file.FullPath))
                     {
                         //Input is a single zip file
                         using var fs = File.OpenRead(file.FullPath);
@@ -172,8 +172,8 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
         }
 
 
-        List<Task>  tasks = new List<Task>();
-        readonly object oTasksLock = new object();
+        List<Task>  tasks = new();
+        readonly object oTasksLock = new();
         
         
         private void ProcessDirectoryAsync(DataTable dt,DirectoryInfo directoryInfo, IDataLoadEventListener listener)
@@ -276,7 +276,7 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
             if (value == null)
             {
                 listener.OnNotify(this,
-                    new NotifyEventArgs(ProgressEventType.Warning, "Could not check IDicomProcessListProvider because it's was null (only valid at Design Time)"));
+                    new NotifyEventArgs(ProgressEventType.Warning, "Could not check IDicomProcessListProvider because it was null (only valid at Design Time)"));
                 return;
             }
 

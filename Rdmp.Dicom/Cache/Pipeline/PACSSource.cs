@@ -98,24 +98,24 @@ namespace Rdmp.Dicom.Cache.Pipeline
                     };
                 client.AssociationReleased += (s, e) => {
                     gauge.Tick(listener, () => Process.GetCurrentProcess().Kill());
-                    listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Trace, $"AssociationReleased"));
+                    listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Trace, "AssociationReleased"));
                     };
                 client.AssociationRejected += (s, e) =>
                 {
                     gauge.Tick(listener,()=>Process.GetCurrentProcess().Kill());
-                    listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Trace, $"AssociationRejected"));
+                    listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Trace, "AssociationRejected"));
                 };
 
-                if (AssociationLingerTimeoutInMs != null && AssociationLingerTimeoutInMs > 0)
+                if (AssociationLingerTimeoutInMs is > 0)
                     client.AssociationLingerTimeoutInMs = AssociationLingerTimeoutInMs.Value;
 
-                if(AssociationReleaseTimeoutInMs != null && AssociationReleaseTimeoutInMs > 0)
+                if(AssociationReleaseTimeoutInMs is > 0)
                     client.AssociationReleaseTimeoutInMs = AssociationReleaseTimeoutInMs.Value;
 
-                if(AssociationRequestTimeoutInMs != null && AssociationRequestTimeoutInMs > 0)
+                if(AssociationRequestTimeoutInMs is > 0)
                     client.AssociationRequestTimeoutInMs = AssociationRequestTimeoutInMs.Value;
 
-                if(MaximumNumberOfRequestsPerAssociation != null && MaximumNumberOfRequestsPerAssociation > 0)
+                if(MaximumNumberOfRequestsPerAssociation is > 0)
                     client.MaximumNumberOfRequestsPerAssociation = MaximumNumberOfRequestsPerAssociation.Value;
 
                 try
@@ -214,7 +214,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
                         
                         //enforce a minimum timeout
                         var swStudyTransfer = Stopwatch.StartNew();
-                        bool hasTransferTimedOut = false;
+                        bool hasTransferTimedOut;
 
                         do
                         {
@@ -230,11 +230,15 @@ namespace Rdmp.Dicom.Cache.Pipeline
                         if(hasTransferTimedOut)
                             listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,"Abandonning fetch of study " + current.StudyUid));
                         
-                        if(consecutiveFailures > 5)
-                            throw new Exception("Too many consecutive failures, giving up");
+                        switch (consecutiveFailures)
+                        {
+                            case > 5:
+                                throw new Exception("Too many consecutive failures, giving up");
+                            // 1 failure = study not available, 2 failures = system is having a bad day?
+                            case <= 1:
+                                continue;
+                        }
 
-                        // 1 failure = study not available, 2 failures = system is having a bad day?
-                        if (consecutiveFailures <= 1) continue;
                         //wait 4 minutes then 6 minutes then 8 minutes, eventually server will start responding again?
                         int sleepFor = consecutiveFailures * 2 * 60_000;
                         listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Warning,$"Sleeping for {sleepFor}ms due to {consecutiveFailures} consecutive failures"));
@@ -272,19 +276,19 @@ namespace Rdmp.Dicom.Cache.Pipeline
         private string CMoveRequestToString(DicomCMoveRequest cMoveRequest, int attempt)
         {
             var stub = $"Retrieving {cMoveRequest.Level} (attempt {attempt}) : ";
-            switch (cMoveRequest.Level)
+            return cMoveRequest.Level switch
             {
-                case DicomQueryRetrieveLevel.Patient:
-                    return stub + cMoveRequest.Dataset.GetSingleValue<string>(DicomTag.PatientID);
-                case DicomQueryRetrieveLevel.Study:
-                    return stub + cMoveRequest.Dataset.GetSingleValue<string>(DicomTag.StudyInstanceUID);
-                case DicomQueryRetrieveLevel.Series:
-                    return stub + cMoveRequest.Dataset.GetSingleValue<string>(DicomTag.SeriesInstanceUID);
-                case DicomQueryRetrieveLevel.Image:
-                    return stub + cMoveRequest.Dataset.GetSingleValue<string>(DicomTag.SOPInstanceUID);
-                default:
-                    return stub + DicomQueryRetrieveLevel.NotApplicable;
-            }
+                DicomQueryRetrieveLevel.Patient => stub +
+                                                   cMoveRequest.Dataset.GetSingleValue<string>(DicomTag.PatientID),
+                DicomQueryRetrieveLevel.Study => stub +
+                                                 cMoveRequest.Dataset.GetSingleValue<string>(DicomTag.StudyInstanceUID),
+                DicomQueryRetrieveLevel.Series => stub +
+                                                  cMoveRequest.Dataset.GetSingleValue<string>(
+                                                      DicomTag.SeriesInstanceUID),
+                DicomQueryRetrieveLevel.Image => stub +
+                                                 cMoveRequest.Dataset.GetSingleValue<string>(DicomTag.SOPInstanceUID),
+                _ => stub + DicomQueryRetrieveLevel.NotApplicable
+            };
         }
 
         #endregion

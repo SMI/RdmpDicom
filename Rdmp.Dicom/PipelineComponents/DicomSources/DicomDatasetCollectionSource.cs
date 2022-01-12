@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using Dicom;
@@ -48,11 +47,7 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
 
             while (currentBatch > 0 && (ds = _datasetListWorklist.GetNextDatasetToProcess(out var filename,out var otherValuesToStoreInRow)) != null)
             {
-                string filename1 = filename;
-                Dictionary<string, string> row = otherValuesToStoreInRow;
-                DicomDataset ds1 = ds;
-                
-                ProcessDataset(filename1, ds1, dt, listener, row);
+                ProcessDataset(filename, ds, dt, listener, otherValuesToStoreInRow);
                 currentBatch--;
             }
             

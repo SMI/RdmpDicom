@@ -149,7 +149,7 @@ namespace Rdmp.Dicom.CommandExecution
             NewLoadMetadata = new LoadMetadata(_catalogueRepository, loadName);
 
             //tell all the catalogues that they are part of this load and where to log under the same task
-            foreach (Catalogue c in NewCataloguesCreated)
+            foreach (var c in NewCataloguesCreated)
             {
                 c.LoadMetadata_ID = NewLoadMetadata.ID;
                 c.LoggingDataTask = loadName;

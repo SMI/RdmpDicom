@@ -1,12 +1,8 @@
 ﻿using NUnit.Framework;
 using Rdmp.Core.CommandLine.Interactive;
-using Rdmp.Dicom.Cache.Pipeline;
 using Rdmp.Dicom.CommandExecution;
 using ReusableLibraryCode.Checks;
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using Tests.Common;
 
 namespace Rdmp.Dicom.Tests.Unit
