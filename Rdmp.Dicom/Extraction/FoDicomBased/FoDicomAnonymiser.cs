@@ -52,8 +52,8 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
         [DemandsInitialization("Number of milliseconds to wait after encountering an Exception reading before trying", DefaultValue = 100)]
         public int RetryDelay { get; set; }
 
-
-
+        [DemandsInitialization("Set to true to skip anonymisation process on structured reports (Modality=SR).  PatientID and UID tags will still be anonymised.", DefaultValue = false)]
+        public bool SkipAnonymisationOnStructuredReports { get; set; }
 
         private IPutDicomFilesInExtractionDirectories _putter;
 
@@ -137,7 +137,27 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
 
                     try
                     {
-                        ds = anonymiser.Anonymize(dicomFile.Dataset);
+                        if(SkipAnonymisationOnStructuredReports)
+                        {
+                            // do not anonymise SRs
+
+                            var modality = dicomFile.Dataset.GetSingleValue<string>(DicomTag.Modality);
+                            if (modality == "SR")
+                            {
+                                // its an SR so don't anonymise it
+                                ds = dicomFile.Dataset.Clone();
+                            }
+                            else
+                            {
+                                // its not an SR
+                                ds = anonymiser.Anonymize(dicomFile.Dataset);
+                            }
+                        }
+                        else
+                        {
+                            // anonymise everything
+                            ds = anonymiser.Anonymize(dicomFile.Dataset);
+                        }
                     }
                     catch (Exception e)
                     {
