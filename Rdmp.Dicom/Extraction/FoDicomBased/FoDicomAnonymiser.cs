@@ -14,6 +14,8 @@ using Rdmp.Core.DataFlowPipeline;
 using Rdmp.Core.Repositories.Construction;
 using MapsDirectlyToDatabaseTable.Versioning;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
+using static Dicom.DicomAnonymizer;
 
 namespace Rdmp.Dicom.Extraction.FoDicomBased
 {
@@ -52,8 +54,8 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
         [DemandsInitialization("Number of milliseconds to wait after encountering an Exception reading before trying", DefaultValue = 100)]
         public int RetryDelay { get; set; }
 
-
-
+        [DemandsInitialization("Set to true to skip anonymisation process on structured reports (Modality=SR).  PatientID and UID tags will still be anonymised.", DefaultValue = false)]
+        public bool SkipAnonymisationOnStructuredReports { get; set; }
 
         private IPutDicomFilesInExtractionDirectories _putter;
 
@@ -87,20 +89,6 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
             var destinationDirectory = new DirectoryInfo(Path.Combine(_extractCommand.GetExtractionDirectory().FullName, "Images"));
 
             var releaseCol = _extractCommand.QueryBuilder.SelectColumns.Select(c=>c.IColumn).Single(c=>c.IsExtractionIdentifier);
-
-            // See: ftp://medical.nema.org/medical/dicom/2011/11_15pu.pdf
-
-            var flags = DicomAnonymizer.SecurityProfileOptions.BasicProfile |
-                        DicomAnonymizer.SecurityProfileOptions.CleanStructdCont |
-                        DicomAnonymizer.SecurityProfileOptions.CleanDesc |
-                        DicomAnonymizer.SecurityProfileOptions.RetainUIDs;
-
-            if (RetainDates)
-              flags |= DicomAnonymizer.SecurityProfileOptions.RetainLongFullDates;
-
-            var profile = DicomAnonymizer.SecurityProfile.LoadProfile(null,flags);
-            
-            var anonymiser = new DicomAnonymizer(profile);
 
             var deleteTags = GetDeleteTags();
 
@@ -137,7 +125,39 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
 
                     try
                     {
+                        // do not anonymise SRs if this flag is set
+                        bool skipAnon = SkipAnonymisationOnStructuredReports && dicomFile.Dataset.GetSingleValue<string>(DicomTag.Modality) == "SR";
+                        
+                        // See: ftp://medical.nema.org/medical/dicom/2011/11_15pu.pdf
+                        var flags = skipAnon ?
+                            //dont anonymise
+                            DicomAnonymizer.SecurityProfileOptions.RetainSafePrivate |
+                            DicomAnonymizer.SecurityProfileOptions.RetainDeviceIdent|
+                            DicomAnonymizer.SecurityProfileOptions.RetainInstitutionIdent |
+                            DicomAnonymizer.SecurityProfileOptions.RetainUIDs |
+                            DicomAnonymizer.SecurityProfileOptions.RetainLongFullDates |
+                            DicomAnonymizer.SecurityProfileOptions.RetainPatientChars :
+                            // do anonymise
+                            DicomAnonymizer.SecurityProfileOptions.BasicProfile |
+                            DicomAnonymizer.SecurityProfileOptions.CleanStructdCont |
+                            DicomAnonymizer.SecurityProfileOptions.CleanDesc |
+                            DicomAnonymizer.SecurityProfileOptions.RetainUIDs;
+
+                        if (RetainDates && !skipAnon)
+                            flags |= DicomAnonymizer.SecurityProfileOptions.RetainLongFullDates;
+
+                        var profile = DicomAnonymizer.SecurityProfile.LoadProfile(null, flags);
+
+
+                        // I know we said skip anonymisation but still remove this stuff cmon
+                        if (skipAnon)
+                            RemovePatientNameEtc(profile);
+
+                        var anonymiser = new DicomAnonymizer(profile);
+
+                        
                         ds = anonymiser.Anonymize(dicomFile.Dataset);
+                        
                     }
                     catch (Exception e)
                     {
@@ -190,6 +210,13 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
             }
             
             return toProcess;
+        }
+
+        private void RemovePatientNameEtc(DicomAnonymizer.SecurityProfile profile)
+        {
+            // we still want to remove PatientName, PatientAddress etc see these:
+            // https://dicom.nema.org/medical/dicom/2015c/output/chtml/part03/sect_C.2.3.html
+            profile.Add(new Regex("0010,.*"), SecurityProfileActions.Z);
         }
 
         private IEnumerable<DicomTag> GetDeleteTags()
