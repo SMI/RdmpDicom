@@ -36,7 +36,7 @@ namespace Rdmp.Dicom.Tests.Unit
             var result = File.ReadAllLines(f);
 
             // should be at least 1 image in the public test server
-            Assert.GreaterOrEqual(result.Length,2);
+            Assert.GreaterOrEqual(result.Length,1);
         }
     }
 }
