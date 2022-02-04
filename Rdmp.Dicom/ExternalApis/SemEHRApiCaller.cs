@@ -18,12 +18,10 @@ namespace Rdmp.Dicom.ExternalApis
     {
         public const string SemEHRApiPrefix = ApiPrefix + "SemEHR";
 
-        static HttpClient httpClient = new HttpClient();
-
         public override void Run(AggregateConfiguration ac, CachedAggregateConfigurationResultsManager cache, CancellationToken token)
         {
             var config = SemEHRConfiguration.LoadFrom(ac);
-
+            HttpClientHandler httpClientHandler = new HttpClientHandler();
 
             //Get data as post - not currently used
             //In the future we'll enable getting the data with POST maybe. Here for reference
@@ -36,6 +34,13 @@ namespace Rdmp.Dicom.ExternalApis
             //Get data as querystring
             //Currently the API only support data in the querystring so adding to the URL
             #region Get data as GET
+
+            //If the ValidateServerCert isn't required then set the handeler.ServerCertificateCustomValidationCallback to DangerousAcceptAnyServerCertificateValidator
+            if (!config.ValidateServerCert)
+            {
+                httpClientHandler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+            }
+            HttpClient httpClient = new HttpClient(httpClientHandler);
 
             //Make the request to the API
             HttpResponseMessage response = httpClient.GetAsync(config.GetUrlWithQuerystring()).Result;
@@ -51,7 +56,7 @@ namespace Rdmp.Dicom.ExternalApis
                 {
                     if(semEHRResponse.results.Count == 0)
                     {
-                        SubmitIdentifierList("NO_RESULTS", new string[] { config.GetUrlWithQuerystring() }, ac, cache);
+                        SubmitIdentifierList(config.ReturnField, new string[] { }, ac, cache);
                     }
                     else
                     {
@@ -92,7 +97,8 @@ namespace Rdmp.Dicom.ExternalApis
             }
             #endregion
 
-
+            httpClientHandler.Dispose();
+            httpClient.Dispose();
         }
 
         public override bool ShouldRun(ICatalogue catalogue)
