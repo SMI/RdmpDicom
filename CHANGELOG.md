@@ -6,8 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-- Bump HIC.RDMP.Plugin from 7.0.5 to 7.0.6
 
+## [5.0.4] 2022-02-04
+
+- Bump HIC.RDMP.Plugin from 7.0.5 to 7.0.6
+- Added support for ignoring validation errors in SSL certificates
 
 ## [5.0.3] 2022-01-28
 
@@ -325,7 +328,8 @@ Updated to be compatible with RDMP 4.2
 
 - Initial commit from private repo
 
-[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v5.0.3...develop
+[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v5.0.4...develop
+[5.0.4]: https://github.com/HicServices/RdmpDicom/compare/v5.0.3...v5.0.4
 [5.0.3]: https://github.com/HicServices/RdmpDicom/compare/v5.0.2...v5.0.3
 [5.0.2]: https://github.com/HicServices/RdmpDicom/compare/v5.0.1...v5.0.2
 [5.0.1]: https://github.com/HicServices/RdmpDicom/compare/v5.0.0...v5.0.1
