@@ -51,10 +51,10 @@ namespace Rdmp.Dicom.Tests.Unit
                 foreach (var pc in association.PresentationContexts)
                 {
                     if (pc.AbstractSyntax == DicomUID.Verification
-                    || pc.AbstractSyntax==DicomUID.PatientRootQueryRetrieveInformationModelFIND
-                    || pc.AbstractSyntax==DicomUID.PatientRootQueryRetrieveInformationModelMOVE
-                    || pc.AbstractSyntax==DicomUID.StudyRootQueryRetrieveInformationModelFIND
-                    || pc.AbstractSyntax==DicomUID.StudyRootQueryRetrieveInformationModelMOVE)
+                    || pc.AbstractSyntax==DicomUID.PatientRootQueryRetrieveInformationModelFind
+                    || pc.AbstractSyntax==DicomUID.PatientRootQueryRetrieveInformationModelMove
+                    || pc.AbstractSyntax==DicomUID.StudyRootQueryRetrieveInformationModelFind
+                    || pc.AbstractSyntax==DicomUID.StudyRootQueryRetrieveInformationModelMove)
                     {
                         pc.AcceptTransferSyntaxes(DicomTransferSyntax.ExplicitVRLittleEndian);
                     } else if (pc.AbstractSyntax.StorageCategory != DicomStorageCategory.None)
