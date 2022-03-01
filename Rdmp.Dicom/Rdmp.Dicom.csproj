@@ -26,6 +26,6 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="HIC.DicomTypeTranslation" Version="3.0.0" />
-    <PackageReference Include="HIC.RDMP.Plugin" Version="7.0.6" />
+    <PackageReference Include="HIC.RDMP.Plugin" Version="7.0.7" />
   </ItemGroup>
 </Project>
