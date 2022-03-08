@@ -2,7 +2,7 @@
   <PropertyGroup>
     <RootNamespace>Rdmp.Dicom</RootNamespace>
     <AssemblyName>Rdmp.Dicom</AssemblyName>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
   <ItemGroup>
@@ -26,6 +26,6 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="HIC.DicomTypeTranslation" Version="3.0.0" />
-    <PackageReference Include="HIC.RDMP.Plugin" Version="7.0.6" />
+    <PackageReference Include="HIC.RDMP.Plugin" Version="7.0.8" />
   </ItemGroup>
 </Project>
