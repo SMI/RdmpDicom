@@ -55,7 +55,17 @@ namespace Rdmp.Dicom.ExternalApis
         /// <summary>
         /// The URL used to connect to the API
         /// </summary>
-        public string Url { get; set; } = "http://picturesdevab.uksouth.cloudapp.azure.com:8485/api/search_anns/myQuery/";
+        public string Url { get; set; } = "https://192.168.1.200:8485/api/search_anns/myQuery/";
+
+        /// <summary>
+        /// TRUE if the <see cref="Url">Url</see> fir tge API should check that the certificate and certificate chain are valid
+        /// </summary>
+        public bool ValidateServerCert { get; set; } = true;
+
+        /// <summary>
+        /// The passphrase required to connect to the API
+        /// </summary>
+        public string Passphrase { get; set; } = "";
 
         /// <summary>
         /// The date format for the API start date and end date filter
@@ -175,6 +185,11 @@ namespace Rdmp.Dicom.ExternalApis
             {
                 Url = over.Url;
             }
+            ValidateServerCert = over.ValidateServerCert;
+            if (!string.IsNullOrWhiteSpace(over.Passphrase))
+            {
+                Passphrase = over.Passphrase;
+            }
             if (!string.IsNullOrWhiteSpace(over.StartEndDateFormat))
             {
                 StartEndDateFormat = over.StartEndDateFormat;
@@ -276,7 +291,18 @@ namespace Rdmp.Dicom.ExternalApis
 
         public string GetUrlWithQuerystring()
         {
-            return (this.Url + "?j=" + GetQueryJsonAsString());
+            string fullRequestUrl = Url;
+            string queryJsonForUrl = "j=" + GetQueryJsonAsString();
+
+            if (!string.IsNullOrEmpty(Passphrase))
+            {
+                fullRequestUrl += "?passphrase=" + Passphrase + "&" + queryJsonForUrl;
+            }
+            else
+            {
+                fullRequestUrl += "?" + queryJsonForUrl;
+            }
+            return (fullRequestUrl);
         }
     }
 }

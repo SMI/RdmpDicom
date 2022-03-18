@@ -2,7 +2,7 @@
   <PropertyGroup>
     <RootNamespace>Rdmp.Dicom.Tests</RootNamespace>
     <AssemblyName>Rdmp.Dicom.Tests</AssemblyName>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
   <ItemGroup>
@@ -40,11 +40,11 @@
     <ProjectReference Include="..\Rdmp.Dicom\Rdmp.Dicom.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="HIC.BadMedicine.Dicom" Version="0.0.9" />
-    <PackageReference Include="HIC.RDMP.Plugin.Test" Version="7.0.5" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.0.0" />
+    <PackageReference Include="HIC.BadMedicine.Dicom" Version="0.0.10" />
+    <PackageReference Include="HIC.RDMP.Plugin.Test" Version="7.0.8" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.1.0" />
     <PackageReference Include="NUnit" Version="3.13.2" />
-    <PackageReference Include="NUnit3TestAdapter" Version="4.2.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.2.1" />
     <PackageReference Include="NunitXml.TestLogger" Version="3.0.117" />
   </ItemGroup>
   <ItemGroup>

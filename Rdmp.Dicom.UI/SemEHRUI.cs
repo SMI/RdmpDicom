@@ -43,6 +43,8 @@ namespace Rdmp.Dicom.UI
 
             //Set stored values
             tbUrl.Text = _configuration.Url;
+            cbValidateServerCert.Checked = _configuration.ValidateServerCert;
+            tbPassphrase.Text = _configuration.Passphrase;
             tbStartEndDateFormat.Text = _configuration.StartEndDateFormat;
             tbQuery.Text = _configuration.Query;
             SetCheckedListBox(cblTemporality, _configuration.Temporality.ToList());
@@ -71,6 +73,8 @@ namespace Rdmp.Dicom.UI
         {
             // copy values from controls into config
             _configuration.Url = tbUrl.Text;
+            _configuration.ValidateServerCert = cbValidateServerCert.Checked;
+            _configuration.Passphrase = tbPassphrase.Text;
             _configuration.StartEndDateFormat = tbStartEndDateFormat.Text;
             _configuration.Query = tbQuery.Text;
 

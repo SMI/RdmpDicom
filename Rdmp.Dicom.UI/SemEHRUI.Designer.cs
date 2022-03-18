@@ -29,6 +29,7 @@ namespace Rdmp.Dicom.UI
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.label1 = new System.Windows.Forms.Label();
             this.tbUrl = new System.Windows.Forms.TextBox();
             this.btnSave = new System.Windows.Forms.Button();
@@ -53,9 +54,13 @@ namespace Rdmp.Dicom.UI
             this.dtpEndDate = new System.Windows.Forms.DateTimePicker();
             this.dtpStartDate = new System.Windows.Forms.DateTimePicker();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.cbValidateServerCert = new System.Windows.Forms.CheckBox();
             this.label8 = new System.Windows.Forms.Label();
             this.tbStartEndDateFormat = new System.Windows.Forms.TextBox();
             this.checkStateRenderer1 = new BrightIdeasSoftware.CheckStateRenderer();
+            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.label10 = new System.Windows.Forms.Label();
+            this.tbPassphrase = new System.Windows.Forms.TextBox();
             this.flowLayoutPanel1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -286,6 +291,9 @@ namespace Rdmp.Dicom.UI
             // 
             // tabPage2
             // 
+            this.tabPage2.Controls.Add(this.tbPassphrase);
+            this.tabPage2.Controls.Add(this.label10);
+            this.tabPage2.Controls.Add(this.cbValidateServerCert);
             this.tabPage2.Controls.Add(this.label8);
             this.tabPage2.Controls.Add(this.tbStartEndDateFormat);
             this.tabPage2.Controls.Add(this.label1);
@@ -298,10 +306,23 @@ namespace Rdmp.Dicom.UI
             this.tabPage2.Text = "Settings";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
+            // cbValidateServerCert
+            // 
+            this.cbValidateServerCert.AutoSize = true;
+            this.cbValidateServerCert.Location = new System.Drawing.Point(263, 11);
+            this.cbValidateServerCert.Name = "cbValidateServerCert";
+            this.cbValidateServerCert.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
+            this.cbValidateServerCert.Size = new System.Drawing.Size(159, 19);
+            this.cbValidateServerCert.TabIndex = 15;
+            this.cbValidateServerCert.Text = "Validate Server Certificate";
+            this.toolTip1.SetToolTip(this.cbValidateServerCert, "Ensure the certificate trust chain is valid when making a connection to this serv" +
+        "er.");
+            this.cbValidateServerCert.UseVisualStyleBackColor = true;
+            // 
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(15, 68);
+            this.label8.Location = new System.Drawing.Point(15, 121);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(123, 15);
             this.label8.TabIndex = 13;
@@ -309,10 +330,27 @@ namespace Rdmp.Dicom.UI
             // 
             // tbStartEndDateFormat
             // 
-            this.tbStartEndDateFormat.Location = new System.Drawing.Point(15, 86);
+            this.tbStartEndDateFormat.Location = new System.Drawing.Point(15, 139);
             this.tbStartEndDateFormat.Name = "tbStartEndDateFormat";
             this.tbStartEndDateFormat.Size = new System.Drawing.Size(407, 23);
             this.tbStartEndDateFormat.TabIndex = 14;
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(15, 59);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(137, 15);
+            this.label10.TabIndex = 16;
+            this.label10.Text = "API Endpoint Passphrase";
+            // 
+            // tbPassphrase
+            // 
+            this.tbPassphrase.Location = new System.Drawing.Point(15, 77);
+            this.tbPassphrase.Name = "tbPassphrase";
+            this.tbPassphrase.PasswordChar = '*';
+            this.tbPassphrase.Size = new System.Drawing.Size(407, 23);
+            this.tbPassphrase.TabIndex = 17;
             // 
             // SemEHRUI
             // 
@@ -362,5 +400,9 @@ namespace Rdmp.Dicom.UI
         private System.Windows.Forms.TextBox tbStartEndDateFormat;
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.ComboBox cbReturnFeild;
+        private System.Windows.Forms.CheckBox cbValidateServerCert;
+        private System.Windows.Forms.ToolTip toolTip1;
+        private System.Windows.Forms.TextBox tbPassphrase;
+        private System.Windows.Forms.Label label10;
     }
 }
