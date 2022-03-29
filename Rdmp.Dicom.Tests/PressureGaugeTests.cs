@@ -18,7 +18,7 @@ namespace Rdmp.Dicom.Tests
 
             var g = new PressureGauge();
             g.ThresholdBeatsPerMinute = 4;
-            g.Tick(new DateTime(2001, 01, 01, 01, 01, 01), new ThrowImmediatelyDataLoadEventListener(), () => someFact = true);
+            g.Tick(new(2001, 01, 01, 01, 01, 01), new ThrowImmediatelyDataLoadEventListener(), () => someFact = true);
             Assert.IsFalse(someFact);
         }
         [Test]
@@ -30,11 +30,11 @@ namespace Rdmp.Dicom.Tests
             g.ThresholdBeatsPerMinute = 1;
 
             // events are 1 minute appart so does not trigger
-            g.Tick(new DateTime(2001, 01, 01, 01, 01, 01), new ThrowImmediatelyDataLoadEventListener(), () => someFact = true);
+            g.Tick(new(2001, 01, 01, 01, 01, 01), new ThrowImmediatelyDataLoadEventListener(), () => someFact = true);
             Assert.IsFalse(someFact);
-            g.Tick(new DateTime(2001, 01, 01, 01, 02, 01), new ThrowImmediatelyDataLoadEventListener(), () => someFact = true);
+            g.Tick(new(2001, 01, 01, 01, 02, 01), new ThrowImmediatelyDataLoadEventListener(), () => someFact = true);
             Assert.IsFalse(someFact);
-            g.Tick(new DateTime(2001, 01, 01, 01, 03, 01), new ThrowImmediatelyDataLoadEventListener(), () => someFact = true);
+            g.Tick(new(2001, 01, 01, 01, 03, 01), new ThrowImmediatelyDataLoadEventListener(), () => someFact = true);
             Assert.IsFalse(someFact);
         }
         [Test]
@@ -44,15 +44,15 @@ namespace Rdmp.Dicom.Tests
 
             var g = new PressureGauge();
             g.ThresholdBeatsPerMinute = 4;
-            g.Tick(new DateTime(2001, 01, 01, 01, 01, 01), new ThrowImmediatelyDataLoadEventListener(), () => someFact = true);
+            g.Tick(new(2001, 01, 01, 01, 01, 01), new ThrowImmediatelyDataLoadEventListener(), () => someFact = true);
             Assert.IsFalse(someFact);
-            g.Tick(new DateTime(2001, 01, 01, 01, 01, 01), new ThrowImmediatelyDataLoadEventListener(), () => someFact = true);
+            g.Tick(new(2001, 01, 01, 01, 01, 01), new ThrowImmediatelyDataLoadEventListener(), () => someFact = true);
             Assert.IsFalse(someFact);
-            g.Tick(new DateTime(2001, 01, 01, 01, 01, 01), new ThrowImmediatelyDataLoadEventListener(), () => someFact = true);
+            g.Tick(new(2001, 01, 01, 01, 01, 01), new ThrowImmediatelyDataLoadEventListener(), () => someFact = true);
             Assert.IsFalse(someFact);
-            g.Tick(new DateTime(2001, 01, 01, 01, 01, 01), new ThrowImmediatelyDataLoadEventListener(), () => someFact = true);
+            g.Tick(new(2001, 01, 01, 01, 01, 01), new ThrowImmediatelyDataLoadEventListener(), () => someFact = true);
             Assert.IsFalse(someFact);
-            g.Tick(new DateTime(2001, 01, 01, 01, 01, 01), new ThrowImmediatelyDataLoadEventListener(), () => someFact = true);
+            g.Tick(new(2001, 01, 01, 01, 01, 01), new ThrowImmediatelyDataLoadEventListener(), () => someFact = true);
             Assert.IsTrue(someFact);
         }
 
@@ -63,9 +63,9 @@ namespace Rdmp.Dicom.Tests
 
             var g = new PressureGauge();
             g.ThresholdBeatsPerMinute = 1;
-            g.Tick(new DateTime(2001, 01, 01, 01, 01, 01), new ThrowImmediatelyDataLoadEventListener(), () => someFact = true);
+            g.Tick(new(2001, 01, 01, 01, 01, 01), new ThrowImmediatelyDataLoadEventListener(), () => someFact = true);
             Assert.IsFalse(someFact);
-            g.Tick(new DateTime(2001, 01, 01, 01, 01, 30), new ThrowImmediatelyDataLoadEventListener(), () => someFact = true);
+            g.Tick(new(2001, 01, 01, 01, 01, 30), new ThrowImmediatelyDataLoadEventListener(), () => someFact = true);
             Assert.IsTrue(someFact);
         }
         [Test]
@@ -75,9 +75,9 @@ namespace Rdmp.Dicom.Tests
 
             var g = new PressureGauge();
             g.ThresholdBeatsPerMinute = 1;
-            g.Tick(new DateTime(2001, 01, 01, 01, 01, 30), new ThrowImmediatelyDataLoadEventListener(), () => someFact = true);
+            g.Tick(new(2001, 01, 01, 01, 01, 30), new ThrowImmediatelyDataLoadEventListener(), () => someFact = true);
             Assert.IsFalse(someFact);
-            g.Tick(new DateTime(2001, 01, 01, 01, 02, 29), new ThrowImmediatelyDataLoadEventListener(), () => someFact = true);
+            g.Tick(new(2001, 01, 01, 01, 02, 29), new ThrowImmediatelyDataLoadEventListener(), () => someFact = true);
             Assert.IsTrue(someFact);
         }
     }

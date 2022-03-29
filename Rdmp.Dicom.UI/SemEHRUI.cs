@@ -78,7 +78,7 @@ namespace Rdmp.Dicom.UI
             _configuration.StartEndDateFormat = tbStartEndDateFormat.Text;
             _configuration.Query = tbQuery.Text;
 
-            _configuration.Temporality = new List<string>();
+            _configuration.Temporality = new();
             foreach (KeyValuePair<string, string> item in cblTemporality.CheckedItems)
             {
                 _configuration.Temporality.Add(item.Value.ToString());                
@@ -95,7 +95,7 @@ namespace Rdmp.Dicom.UI
             _configuration.UseEndDate = cbUseEndDate.Checked;
             _configuration.EndDate = dtpEndDate.Value;
 
-            _configuration.Modalities = new List<string>();
+            _configuration.Modalities = new();
             foreach (KeyValuePair<string, string> item in cblModalities.CheckedItems)
             {
                 _configuration.Modalities.Add(item.Value);

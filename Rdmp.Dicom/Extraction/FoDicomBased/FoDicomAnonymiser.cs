@@ -3,7 +3,7 @@ using System.Data;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using Dicom;
+using FellowOakDicom;
 using ReusableLibraryCode.Checks;
 using ReusableLibraryCode.Progress;
 using Rdmp.Dicom.Extraction.FoDicomBased.DirectoryDecisions;
@@ -15,7 +15,7 @@ using Rdmp.Core.Repositories.Construction;
 using MapsDirectlyToDatabaseTable.Versioning;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using static Dicom.DicomAnonymizer;
+using static FellowOakDicom.DicomAnonymizer;
 
 namespace Rdmp.Dicom.Extraction.FoDicomBased
 {
@@ -60,7 +60,7 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
         private IPutDicomFilesInExtractionDirectories _putter;
 
         private int _anonymisedImagesCount = 0;
-        readonly Stopwatch _sw = new Stopwatch();
+        readonly Stopwatch _sw = new();
 
         private int _errors = 0;
 
@@ -69,14 +69,15 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
             //Things we ignore, Lookups, SupportingSql etc
             if (_extractCommand == null)
             {
-                listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information, "Ignoring non dataset command "));
+                listener.OnNotify(this, new(ProgressEventType.Information, "Ignoring non dataset command "));
                 return toProcess;
             }
             
             //if it isn't a dicom dataset don't process it
             if (!toProcess.Columns.Contains(RelativeArchiveColumnName))
             {
-                listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Warning, "Dataset " + _extractCommand.DatasetBundle.DataSet + " did not contain field '" + RelativeArchiveColumnName + "' so we will not attempt to extract images"));
+                listener.OnNotify(this,new(ProgressEventType.Warning,
+                    $"Dataset {_extractCommand.DatasetBundle.DataSet} did not contain field '{RelativeArchiveColumnName}' so we will not attempt to extract images"));
                 return toProcess;
             }
 
@@ -92,123 +93,120 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
 
             var deleteTags = GetDeleteTags();
 
-            using (var pool = new ZipPool())
-            {
-                _sw.Start();
+            using var pool = new ZipPool();
+            _sw.Start();
                 
-                foreach (DataRow row in toProcess.Rows)
+            foreach (DataRow row in toProcess.Rows)
+            {
+                if(_errors > 0 && _errors > ErrorThreshold)
+                    throw new($"Number of errors reported ({_errors}) reached the threshold ({ErrorThreshold})");
+
+                cancellationToken.ThrowIfAbortRequested();
+
+                var path = new AmbiguousFilePath(ArchiveRootIfAny, (string)row[RelativeArchiveColumnName]);
+
+                DicomFile dicomFile;
+                    
+                try
                 {
-                    if(_errors > 0 && _errors > ErrorThreshold)
-                        throw new Exception($"Number of errors reported ({_errors}) reached the threshold ({ErrorThreshold})");
-
-                    cancellationToken.ThrowIfAbortRequested();
-
-                    var path = new AmbiguousFilePath(ArchiveRootIfAny, (string)row[RelativeArchiveColumnName]);
-
-                    DicomFile dicomFile;
-                    
-                    try
-                    {
-                        dicomFile = path.GetDataset(RetryCount,RetryDelay,pool, listener);
-                    }
-                    catch (Exception e)
-                    {
-                        listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Error,$"Failed to get image at path '{path.FullPath}'",e));
-                        _errors++;
-                        continue;
-                    }
-
-                    //get the new patient ID
-                    var releaseId = row[releaseCol.GetRuntimeName()].ToString();
-                    
-                    DicomDataset ds;
-
-                    try
-                    {
-                        // do not anonymise SRs if this flag is set
-                        bool skipAnon = SkipAnonymisationOnStructuredReports && dicomFile.Dataset.GetSingleValue<string>(DicomTag.Modality) == "SR";
-                        
-                        // See: ftp://medical.nema.org/medical/dicom/2011/11_15pu.pdf
-                        var flags = skipAnon ?
-                            //dont anonymise
-                            DicomAnonymizer.SecurityProfileOptions.RetainSafePrivate |
-                            DicomAnonymizer.SecurityProfileOptions.RetainDeviceIdent|
-                            DicomAnonymizer.SecurityProfileOptions.RetainInstitutionIdent |
-                            DicomAnonymizer.SecurityProfileOptions.RetainUIDs |
-                            DicomAnonymizer.SecurityProfileOptions.RetainLongFullDates |
-                            DicomAnonymizer.SecurityProfileOptions.RetainPatientChars :
-                            // do anonymise
-                            DicomAnonymizer.SecurityProfileOptions.BasicProfile |
-                            DicomAnonymizer.SecurityProfileOptions.CleanStructdCont |
-                            DicomAnonymizer.SecurityProfileOptions.CleanDesc |
-                            DicomAnonymizer.SecurityProfileOptions.RetainUIDs;
-
-                        if (RetainDates && !skipAnon)
-                            flags |= DicomAnonymizer.SecurityProfileOptions.RetainLongFullDates;
-
-                        var profile = DicomAnonymizer.SecurityProfile.LoadProfile(null, flags);
-
-
-                        // I know we said skip anonymisation but still remove this stuff cmon
-                        if (skipAnon)
-                            RemovePatientNameEtc(profile);
-
-                        var anonymiser = new DicomAnonymizer(profile);
-
-                        
-                        ds = anonymiser.Anonymize(dicomFile.Dataset);
-                        
-                    }
-                    catch (Exception e)
-                    {
-                        listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Error,$"Failed to anonymize image at path '{path.FullPath}'",e));
-                        _errors++;
-                        continue;
-                    }
-
-                    //now we want to explicitly use our own release Id regardless of what FoDicom said
-                    ds.AddOrUpdate(DicomTag.PatientID, releaseId);
-
-                    //rewrite the UIDs
-                    foreach (var kvp in UIDMapping.SupportedTags)
-                    {
-                        if(!ds.Contains(kvp.Key))
-                            continue;
-                        
-                        var value = ds.GetValue<string>(kvp.Key, 0);
-
-                        //if it has a value for this UID
-                        if (value == null) continue;
-                        var releaseValue = mappingServer.GetOrAllocateMapping(value, projectNumber, kvp.Value);
-
-                        //change value in dataset
-                        ds.AddOrUpdate(kvp.Key, releaseValue);
-
-                        //and change value in DataTable
-                        if (toProcess.Columns.Contains(kvp.Key.DictionaryEntry.Keyword))
-                            row[kvp.Key.DictionaryEntry.Keyword] = releaseValue;
-                    }
-                    
-                    foreach(var tag in deleteTags)
-                    {
-                        if (ds.Contains(tag))
-                        {
-                            ds.Remove(tag);
-                        }   
-                    }
-
-                    var newPath = _putter.WriteOutDataset(destinationDirectory,releaseId,ds);
-                    row[RelativeArchiveColumnName] = newPath;
-
-                    _anonymisedImagesCount++;
-
-                    listener.OnProgress(this, new ProgressEventArgs("Writing ANO images", new ProgressMeasurement(_anonymisedImagesCount, ProgressType.Records), _sw.Elapsed));
+                    dicomFile = path.GetDataset(RetryCount,RetryDelay,pool, listener);
+                }
+                catch (Exception e)
+                {
+                    listener.OnNotify(this,new(ProgressEventType.Error,$"Failed to get image at path '{path.FullPath}'",e));
+                    _errors++;
+                    continue;
                 }
 
-                _sw.Stop();
+                //get the new patient ID
+                var releaseId = row[releaseCol.GetRuntimeName()].ToString();
+                    
+                DicomDataset ds;
 
+                try
+                {
+                    // do not anonymise SRs if this flag is set
+                    bool skipAnon = SkipAnonymisationOnStructuredReports && dicomFile.Dataset.GetSingleValue<string>(DicomTag.Modality) == "SR";
+                        
+                    // See: ftp://medical.nema.org/medical/dicom/2011/11_15pu.pdf
+                    var flags = skipAnon ?
+                        //dont anonymise
+                        DicomAnonymizer.SecurityProfileOptions.RetainSafePrivate |
+                        DicomAnonymizer.SecurityProfileOptions.RetainDeviceIdent|
+                        DicomAnonymizer.SecurityProfileOptions.RetainInstitutionIdent |
+                        DicomAnonymizer.SecurityProfileOptions.RetainUIDs |
+                        DicomAnonymizer.SecurityProfileOptions.RetainLongFullDates |
+                        DicomAnonymizer.SecurityProfileOptions.RetainPatientChars :
+                        // do anonymise
+                        DicomAnonymizer.SecurityProfileOptions.BasicProfile |
+                        DicomAnonymizer.SecurityProfileOptions.CleanStructdCont |
+                        DicomAnonymizer.SecurityProfileOptions.CleanDesc |
+                        DicomAnonymizer.SecurityProfileOptions.RetainUIDs;
+
+                    if (RetainDates && !skipAnon)
+                        flags |= DicomAnonymizer.SecurityProfileOptions.RetainLongFullDates;
+
+                    var profile = DicomAnonymizer.SecurityProfile.LoadProfile(null, flags);
+
+
+                    // I know we said skip anonymisation but still remove this stuff cmon
+                    if (skipAnon)
+                        RemovePatientNameEtc(profile);
+
+                    var anonymiser = new DicomAnonymizer(profile);
+
+                        
+                    ds = anonymiser.Anonymize(dicomFile.Dataset);
+                        
+                }
+                catch (Exception e)
+                {
+                    listener.OnNotify(this,new(ProgressEventType.Error,$"Failed to anonymize image at path '{path.FullPath}'",e));
+                    _errors++;
+                    continue;
+                }
+
+                //now we want to explicitly use our own release Id regardless of what FoDicom said
+                ds.AddOrUpdate(DicomTag.PatientID, releaseId);
+
+                //rewrite the UIDs
+                foreach (var kvp in UIDMapping.SupportedTags)
+                {
+                    if(!ds.Contains(kvp.Key))
+                        continue;
+                        
+                    var value = ds.GetValue<string>(kvp.Key, 0);
+
+                    //if it has a value for this UID
+                    if (value == null) continue;
+                    var releaseValue = mappingServer.GetOrAllocateMapping(value, projectNumber, kvp.Value);
+
+                    //change value in dataset
+                    ds.AddOrUpdate(kvp.Key, releaseValue);
+
+                    //and change value in DataTable
+                    if (toProcess.Columns.Contains(kvp.Key.DictionaryEntry.Keyword))
+                        row[kvp.Key.DictionaryEntry.Keyword] = releaseValue;
+                }
+                    
+                foreach(var tag in deleteTags)
+                {
+                    if (ds.Contains(tag))
+                    {
+                        ds.Remove(tag);
+                    }   
+                }
+
+                var newPath = _putter.WriteOutDataset(destinationDirectory,releaseId,ds);
+                row[RelativeArchiveColumnName] = newPath;
+
+                _anonymisedImagesCount++;
+
+                listener.OnProgress(this, new("Writing ANO images", new(_anonymisedImagesCount, ProgressType.Records), _sw.Elapsed));
             }
-            
+
+            _sw.Stop();
+
             return toProcess;
         }
 
@@ -216,13 +214,13 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
         {
             // we still want to remove PatientName, PatientAddress etc see these:
             // https://dicom.nema.org/medical/dicom/2015c/output/chtml/part03/sect_C.2.3.html
-            profile.Add(new Regex("0010,.*"), SecurityProfileActions.Z);
+            profile.Add(new("0010,.*"), SecurityProfileActions.Z);
         }
 
         private IEnumerable<DicomTag> GetDeleteTags()
         {
-            List<DicomTag> toReturn = new List<DicomTag>();
-            var alsoDelete = DeleteTags?.Split(",", StringSplitOptions.RemoveEmptyEntries) ?? new string[0];
+            List<DicomTag> toReturn = new();
+            var alsoDelete = DeleteTags?.Split(",", StringSplitOptions.RemoveEmptyEntries) ?? Array.Empty<string>();
 
             foreach(var s in alsoDelete)
             {
@@ -232,7 +230,7 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
                 }
                 catch (Exception)
                 {
-                    throw new Exception($"Could not find a tag called '{s}' when resolving {nameof(DeleteTags)} property.  All names must exactly match DicomTags");
+                    throw new($"Could not find a tag called '{s}' when resolving {nameof(DeleteTags)} property.  All names must exactly match DicomTags");
                 }
             }
 
@@ -254,7 +252,7 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
             _extractCommand = value as IExtractDatasetCommand;
         }
 
-        private static object CreateServersOneAtATime = new object();
+        private static readonly object CreateServersOneAtATime = new();
 
         public void Check(ICheckNotifier notifier)
         {
@@ -264,7 +262,7 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
             }
             catch (Exception ex)
             {
-                notifier.OnCheckPerformed(new CheckEventArgs($"Error processing {nameof(DeleteTags)}",CheckResult.Fail, ex));
+                notifier.OnCheckPerformed(new($"Error processing {nameof(DeleteTags)}",CheckResult.Fail, ex));
             }
             
 
@@ -272,7 +270,7 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
             {
                 if (UIDMappingServer == null)
                 {
-                    throw new Exception($"{nameof(UIDMappingServer)} not set, set it existing UID mapping server or to an empty database to create a new one");
+                    throw new($"{nameof(UIDMappingServer)} not set, set it existing UID mapping server or to an empty database to create a new one");
                 }
 
                 var patcher = new SMIDatabasePatcher();
@@ -281,7 +279,7 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
                 {
                     if (string.IsNullOrWhiteSpace(UIDMappingServer.CreatedByAssembly))
                     {
-                        bool create = notifier.OnCheckPerformed(new CheckEventArgs($"{nameof(UIDMappingServer)} is not set up yet", CheckResult.Warning, null, "Attempt to create UID mapping schema"));
+                        bool create = notifier.OnCheckPerformed(new($"{nameof(UIDMappingServer)} is not set up yet", CheckResult.Warning, null, "Attempt to create UID mapping schema"));
 
                         if (create)
                         {
@@ -289,11 +287,11 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
 
                             if (!db.Exists())
                             {
-                                notifier.OnCheckPerformed(new CheckEventArgs($"About to create {db}", CheckResult.Success));
+                                notifier.OnCheckPerformed(new($"About to create {db}", CheckResult.Success));
                                 db.Create();
                             }
 
-                            notifier.OnCheckPerformed(new CheckEventArgs($"Creating UID Mapping schema in {db}", CheckResult.Success));
+                            notifier.OnCheckPerformed(new($"Creating UID Mapping schema in {db}", CheckResult.Success));
 
                             var scripter = new MasterDatabaseScriptExecutor(db);
                             scripter.CreateAndPatchDatabase(patcher, new AcceptAllCheckNotifier());
@@ -308,7 +306,7 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
                     }
                     else
                     {
-                        notifier.OnCheckPerformed(new CheckEventArgs($"{nameof(UIDMappingServer)} '{UIDMappingServer}' was created by '{UIDMappingServer.CreatedByAssembly}' not a UID patcher.  Try creating a new server reference to a blank database", CheckResult.Fail));
+                        notifier.OnCheckPerformed(new($"{nameof(UIDMappingServer)} '{UIDMappingServer}' was created by '{UIDMappingServer.CreatedByAssembly}' not a UID patcher.  Try creating a new server reference to a blank database", CheckResult.Fail));
                         return;
                     }
                 }

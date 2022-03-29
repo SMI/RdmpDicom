@@ -32,16 +32,16 @@ namespace Rdmp.Dicom.Tests.Unit
             if (expressRelative)
                 source.ArchiveRoot = TestContext.CurrentContext.TestDirectory;
 
-            var f = new FlatFileToLoad(new FileInfo(Path.Combine(TestContext.CurrentContext.TestDirectory,@"TestData/IM-0001-0013.dcm")));
+            var f = new FlatFileToLoad(new(Path.Combine(TestContext.CurrentContext.TestDirectory,@"TestData/IM-0001-0013.dcm")));
             
             source.PreInitialize(new FlatFileToLoadDicomFileWorklist(f), new ThrowImmediatelyDataLoadEventListener());
 
-            var tbl = source.GetChunk(new ThrowImmediatelyDataLoadEventListener(), new GracefulCancellationToken());
+            var tbl = source.GetChunk(new ThrowImmediatelyDataLoadEventListener(), new());
             var destination = new DataTableUploadDestination();
             
             destination.PreInitialize(db,new ThrowImmediatelyDataLoadEventListener());
             destination.AllowResizingColumnsAtUploadTime = true;
-            destination.ProcessPipelineData(tbl, new ThrowImmediatelyDataLoadEventListener(), new GracefulCancellationToken());
+            destination.ProcessPipelineData(tbl, new ThrowImmediatelyDataLoadEventListener(), new());
             destination.Dispose(new ThrowImmediatelyDataLoadEventListener(), null);
 
             var finalTable = db.ExpectTable(destination.TargetTableName);
@@ -78,10 +78,10 @@ namespace Rdmp.Dicom.Tests.Unit
 
             //generate some random dicoms
             var r = new Random(999);
-            DicomDataGenerator generator = new DicomDataGenerator(r, dirToLoad, "CT") {MaximumImages = 5};
+            DicomDataGenerator generator = new(r, dirToLoad, "CT") {MaximumImages = 5};
             var people = new PersonCollection();
             people.GeneratePeople(1,r);
-            generator.GenerateTestDataFile(people,new FileInfo("./inventory.csv"),1);
+            generator.GenerateTestDataFile(people,new("./inventory.csv"),1);
 
             //This generates
             // Test_ZipFile
@@ -98,7 +98,9 @@ namespace Rdmp.Dicom.Tests.Unit
             StringAssert.IsMatch("\\d{4}",yearDir.Name);
 
             //zip them up
-            FileInfo zip = new FileInfo(Path.Combine(TestContext.CurrentContext.TestDirectory, nameof(Test_ZipFile) + ".zip"));Path.Combine(TestContext.CurrentContext.TestDirectory, nameof(Test_ZipFile) + ".zip");
+            FileInfo zip = new(Path.Combine(TestContext.CurrentContext.TestDirectory,
+                $"{nameof(Test_ZipFile)}.zip"));Path.Combine(TestContext.CurrentContext.TestDirectory,
+                $"{nameof(Test_ZipFile)}.zip");
 
             if(zip.Exists)
                 zip.Delete();
@@ -115,12 +117,12 @@ namespace Rdmp.Dicom.Tests.Unit
 
             source.PreInitialize(new FlatFileToLoadDicomFileWorklist(f), new ThrowImmediatelyDataLoadEventListener());
 
-            var tbl = source.GetChunk(new ThrowImmediatelyDataLoadEventListener(), new GracefulCancellationToken());
+            var tbl = source.GetChunk(new ThrowImmediatelyDataLoadEventListener(), new());
             var destination = new DataTableUploadDestination();
             
             destination.PreInitialize(db,new ThrowImmediatelyDataLoadEventListener());
             destination.AllowResizingColumnsAtUploadTime = true;
-            destination.ProcessPipelineData(tbl, new ThrowImmediatelyDataLoadEventListener(), new GracefulCancellationToken());
+            destination.ProcessPipelineData(tbl, new ThrowImmediatelyDataLoadEventListener(), new());
             destination.Dispose(new ThrowImmediatelyDataLoadEventListener(), null);
 
             var finalTable = db.ExpectTable(destination.TargetTableName);
@@ -173,10 +175,10 @@ namespace Rdmp.Dicom.Tests.Unit
 
             //generate some random dicoms
             var r = new Random(999);
-            DicomDataGenerator generator = new DicomDataGenerator(r, dirToLoad, "CT") {MaximumImages = 5};
+            DicomDataGenerator generator = new(r, dirToLoad, "CT") {MaximumImages = 5};
             var people = new PersonCollection();
             people.GeneratePeople(1,r);
-            generator.GenerateTestDataFile(people,new FileInfo("./inventory.csv"),1);
+            generator.GenerateTestDataFile(people,new("./inventory.csv"),1);
 
             //This generates
             // Test_ZipFile
@@ -202,7 +204,9 @@ namespace Rdmp.Dicom.Tests.Unit
             var relativePathWithinZip2 = dicomFiles[1].FullName.Substring(dirToLoad.FullName.Length);
             
             //zip them up
-            FileInfo zip = new FileInfo(Path.Combine(TestContext.CurrentContext.TestDirectory, nameof(Test_ZipFile) + ".zip"));Path.Combine(TestContext.CurrentContext.TestDirectory, nameof(Test_ZipFile) + ".zip");
+            FileInfo zip = new(Path.Combine(TestContext.CurrentContext.TestDirectory,
+                $"{nameof(Test_ZipFile)}.zip"));Path.Combine(TestContext.CurrentContext.TestDirectory,
+                $"{nameof(Test_ZipFile)}.zip");
 
             if(zip.Exists)
                 zip.Delete();
@@ -210,8 +214,8 @@ namespace Rdmp.Dicom.Tests.Unit
             ZipFile.CreateFromDirectory(dirToLoad.FullName,zip.FullName);
 
             //e.g. E:\RdmpDicom\Rdmp.Dicom.Tests\bin\Debug\netcoreapp2.2\Test_ZipFile.zip!\2015\3\18\2.25.223398837779449245317520567111874824918.dcm
-            string pathToLoad1 = zip.FullName + "!" + relativePathWithinZip1;
-            string pathToLoad2 = zip.FullName + "!" + relativePathWithinZip2;
+            string pathToLoad1 = $"{zip.FullName}!{relativePathWithinZip1}";
+            string pathToLoad2 = $"{zip.FullName}!{relativePathWithinZip2}";
 
             var loadMeTextFile = new FileInfo(Path.Combine(dirToLoad.FullName, "LoadMe.txt"));
 
@@ -238,7 +242,7 @@ namespace Rdmp.Dicom.Tests.Unit
             //run pipeline
             var pipe = new DataFlowPipelineEngine<DataTable>(context,source,destination,new ThrowImmediatelyDataLoadEventListener());
             pipe.Initialize(db,worklist);
-            pipe.ExecutePipeline(new GracefulCancellationToken());
+            pipe.ExecutePipeline(new());
 
             var finalTable = db.ExpectTable(destination.TargetTableName);
             

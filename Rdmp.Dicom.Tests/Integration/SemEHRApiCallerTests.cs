@@ -28,7 +28,7 @@ namespace Rdmp.Dicom.Tests.Integration
             var eds = new ExternalDatabaseServer(CatalogueRepository, "cache", patcher);
             eds.SetProperties(cacheDb);
 
-            return new CachedAggregateConfigurationResultsManager(eds);
+            return new(eds);
         }
 
 
@@ -39,7 +39,7 @@ namespace Rdmp.Dicom.Tests.Integration
             var cacheMgr = SetupCache(dbType, out DiscoveredDatabase cacheDb);
             var caller = new SemEHRApiCaller();
 
-            var cata = new Catalogue(CatalogueRepository, SemEHRApiCaller.ApiPrefix + "cata");
+            var cata = new Catalogue(CatalogueRepository, $"{SemEHRApiCaller.ApiPrefix}cata");
             var cic = new CohortIdentificationConfiguration(CatalogueRepository, "my cic");
             cic.CreateRootContainerIfNotExists();
             

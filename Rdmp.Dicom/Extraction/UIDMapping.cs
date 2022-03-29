@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Dicom;
+using FellowOakDicom;
 
 namespace Rdmp.Dicom.Extraction
 {
@@ -12,7 +12,7 @@ namespace Rdmp.Dicom.Extraction
         public UIDType UIDType { get; set; }
         public bool IsExternalReference { get; set; }
 
-        public static Dictionary<DicomTag, UIDType> SupportedTags = new Dictionary<DicomTag, UIDType>
+        public static Dictionary<DicomTag, UIDType> SupportedTags = new()
         {
             {DicomTag.SOPInstanceUID,UIDType.SOPInstanceUID},
             {DicomTag.SeriesInstanceUID,UIDType.SeriesInstanceUID},
@@ -26,7 +26,8 @@ namespace Rdmp.Dicom.Extraction
             if (SupportedTags.ContainsKey(tag))
                 UIDType = SupportedTags[tag];
             else 
-                throw new InvalidOperationException("UIDMapping does not handle this tag type: " + tag.DictionaryEntry.Keyword);
+                throw new InvalidOperationException(
+                    $"UIDMapping does not handle this tag type: {tag.DictionaryEntry.Keyword}");
         }
     }
 }

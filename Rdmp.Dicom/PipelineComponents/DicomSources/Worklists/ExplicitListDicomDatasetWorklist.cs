@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Dicom;
+using FellowOakDicom;
 
 namespace Rdmp.Dicom.PipelineComponents.DicomSources.Worklists
 {
@@ -11,7 +11,7 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources.Worklists
         private readonly Dictionary<string, string> _otherValuesToStoreInRow;
 
 
-        public HashSet<DicomDataset> CorruptMessages = new HashSet<DicomDataset>();
+        public HashSet<DicomDataset> CorruptMessages = new();
 
 
         /// <summary>

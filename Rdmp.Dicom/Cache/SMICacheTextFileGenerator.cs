@@ -37,7 +37,7 @@ namespace Rdmp.Dicom.Cache
                 return ExitCodeType.OperationNotRequired;
 
             
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
 
             foreach (var file in jobs.Values)
                 sb.AppendLine(file.FullName);

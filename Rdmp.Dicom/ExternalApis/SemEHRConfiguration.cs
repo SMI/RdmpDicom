@@ -11,7 +11,7 @@ namespace Rdmp.Dicom.ExternalApis
     public class SemEHRConfiguration
     {
         [YamlIgnore]
-        public Dictionary<string, string> TemporalityOptions = new Dictionary<string, string>
+        public Dictionary<string, string> TemporalityOptions = new()
         {
              {"Recent", "Recent" },
             { "Historical", "Historical" },
@@ -19,7 +19,7 @@ namespace Rdmp.Dicom.ExternalApis
         };
 
         [YamlIgnore]
-        public Dictionary<string, string> NegationOptions = new Dictionary<string, string>
+        public Dictionary<string, string> NegationOptions = new()
         {
             { "Any", "Any" },
             { "Negated - The query term is mentioned in terms of absence.", "Negated" },
@@ -27,7 +27,7 @@ namespace Rdmp.Dicom.ExternalApis
         };
 
         [YamlIgnore]
-        public Dictionary<string, string> ModalityOptions = new Dictionary<string, string>
+        public Dictionary<string, string> ModalityOptions = new()
         {
             { "CR - Computed Radiography", "CR" },
             { "CT - Computed Tomography", "CT" },
@@ -44,7 +44,7 @@ namespace Rdmp.Dicom.ExternalApis
         };
 
         [YamlIgnore]
-        public Dictionary<string, string> ReturnFieldOptions = new Dictionary<string, string>
+        public Dictionary<string, string> ReturnFieldOptions = new()
         {
             { "SOPInstanceUID", "SOPInstanceUID" },
             { "SeriesInstanceUID", "SeriesInstanceUID" },
@@ -91,7 +91,7 @@ namespace Rdmp.Dicom.ExternalApis
         /// <summary>
         /// Whether the comment was made regarding "Recent" or "historical" or "hypothetical"
         /// </summary>
-        public List<string> Temporality { get; set; } = new List<string>();
+        public List<string> Temporality { get; set; } = new();
 
         /// <summary>
         /// Whether the comment was a confrimation or negation of the presence/absence of the search term - "Any" or "Negated" or "Affirmed"
@@ -127,7 +127,7 @@ namespace Rdmp.Dicom.ExternalApis
         /// <summary>
         /// Filter to only include specific modalities - e.g. "CT", "MR", "US", "PT", "CR", "OT", "XA", "RF", "DX", "MG", "PR", "NM"
         /// </summary>
-        public List<string> Modalities { get; set; } = new List<string>();
+        public List<string> Modalities { get; set; } = new();
 
         //API Return Fields
         /// <summary>
@@ -159,7 +159,7 @@ namespace Rdmp.Dicom.ExternalApis
             string mainYaml = ac.Catalogue.Description;
             string overrideYaml = ac.Description;
 
-            Deserializer d = new Deserializer();
+            Deserializer d = new();
 
             main = string.IsNullOrWhiteSpace(mainYaml) ? null : d.Deserialize<SemEHRConfiguration>(mainYaml);
             over = string.IsNullOrWhiteSpace(overrideYaml) ? null : d.Deserialize<SemEHRConfiguration>(overrideYaml);
@@ -259,7 +259,7 @@ namespace Rdmp.Dicom.ExternalApis
                 termsObj.temporality = new JArray(Temporality);
 
             //Add terms to terms array
-            JArray termsArray = new JArray();
+            JArray termsArray = new();
             termsArray.Add(termsObj);
 
             //Set the filter
@@ -292,15 +292,15 @@ namespace Rdmp.Dicom.ExternalApis
         public string GetUrlWithQuerystring()
         {
             string fullRequestUrl = Url;
-            string queryJsonForUrl = "j=" + GetQueryJsonAsString();
+            string queryJsonForUrl = $"j={GetQueryJsonAsString()}";
 
             if (!string.IsNullOrEmpty(Passphrase))
             {
-                fullRequestUrl += "?passphrase=" + Passphrase + "&" + queryJsonForUrl;
+                fullRequestUrl += $"?passphrase={Passphrase}&{queryJsonForUrl}";
             }
             else
             {
-                fullRequestUrl += "?" + queryJsonForUrl;
+                fullRequestUrl += $"?{queryJsonForUrl}";
             }
             return (fullRequestUrl);
         }

@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
-using Dicom;
-using Dicom.Log;
-using Dicom.Network;
+using FellowOakDicom;
+using FellowOakDicom.Imaging.Codec;
+using FellowOakDicom.Log;
+using FellowOakDicom.Network;
+using FellowOakDicom.Network.Client;
 using NUnit.Framework;
-using DicomClient = Dicom.Network.Client.DicomClient;
 
 namespace Rdmp.Dicom.Tests.Unit
 {
@@ -15,21 +16,21 @@ namespace Rdmp.Dicom.Tests.Unit
         class QRService : DicomService, IDicomServiceProvider, IDicomCFindProvider, IDicomCEchoProvider,
             IDicomCMoveProvider
         {
-            public QRService(INetworkStream stream, Encoding fallbackEncoding, Logger log) : base(stream, fallbackEncoding, log)
+            public QRService(INetworkStream stream, Encoding fallbackEncoding, Logger log) : base(stream, fallbackEncoding, log, new ConsoleLogManager(), new DesktopNetworkManager(), new DefaultTranscoderManager())
             {
             }
 
-            public DicomCEchoResponse OnCEchoRequest(DicomCEchoRequest request)
+            public Task<DicomCEchoResponse> OnCEchoRequestAsync(DicomCEchoRequest request)
+            {
+                return Task.FromResult(new DicomCEchoResponse(request, DicomStatus.Success));
+            }
+
+            public IAsyncEnumerable<DicomCFindResponse> OnCFindRequestAsync(DicomCFindRequest request)
             {
                 throw new NotImplementedException();
             }
 
-            public IEnumerable<DicomCFindResponse> OnCFindRequest(DicomCFindRequest request)
-            {
-                throw new NotImplementedException();
-            }
-
-            public IEnumerable<DicomCMoveResponse> OnCMoveRequest(DicomCMoveRequest request)
+            public IAsyncEnumerable<DicomCMoveResponse> OnCMoveRequestAsync(DicomCMoveRequest request)
             {
                 throw new NotImplementedException();
             }
@@ -75,7 +76,7 @@ namespace Rdmp.Dicom.Tests.Unit
         [OneTimeSetUp]
         public void StartOwnPacs()
         {
-            _ourPacs=DicomServer.Create<QRService>(11112);
+            _ourPacs=new DicomServer<QRService>(new DesktopNetworkManager(),new ConsoleLogManager());
         }
 
         [OneTimeTearDown]
@@ -88,7 +89,7 @@ namespace Rdmp.Dicom.Tests.Unit
         public void EchoTest()
         {
             var success=false;
-            var client = new DicomClient("localhost", 11112, false, "me", "also_me");
+            var client = new DicomClient("localhost", 11112, false, "me", "also_me",new(), new(), new DesktopNetworkManager(), new ConsoleLogManager(), new DefaultTranscoderManager());
             client.AddRequestAsync(new DicomCEchoRequest
                 {
                     OnResponseReceived = (req, res) => {

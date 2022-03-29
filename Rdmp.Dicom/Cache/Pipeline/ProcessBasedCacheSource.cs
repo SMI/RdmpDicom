@@ -45,13 +45,13 @@ Example:. './GetImages.exe ""%s"" ""%e%""'")]
 
         public override SMIDataChunk DoGetChunk(ICacheFetchRequest request, IDataLoadEventListener listener, GracefulCancellationToken cancellationToken)
         {                     
-            listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,$"ProcessBasedCacheSource version is {typeof(ProcessBasedCacheSource).Assembly.GetName().Version}.  Assembly is {typeof(ProcessBasedCacheSource).Assembly} " ));
+            listener.OnNotify(this,new(ProgressEventType.Information,$"ProcessBasedCacheSource version is {typeof(ProcessBasedCacheSource).Assembly.GetName().Version}.  Assembly is {typeof(ProcessBasedCacheSource).Assembly} " ));
             
             // Where we are putting the files
             var cacheDir = new LoadDirectory(Request.CacheProgress.LoadProgress.LoadMetadata.LocationOfFlatFiles).Cache;
-            var cacheLayout = new SMICacheLayout(cacheDir, new SMICachePathResolver("ALL"));
+            var cacheLayout = new SMICacheLayout(cacheDir, new("ALL"));
             
-            Chunk = new SMIDataChunk(Request)
+            Chunk = new(Request)
             {
                 FetchDate = Request.Start,
                 Modality = "ALL",
@@ -60,13 +60,15 @@ Example:. './GetImages.exe ""%s"" ""%e%""'")]
             
             var workingDirectory = cacheLayout.GetLoadCacheDirectory(listener);
 
-            listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,"Working directory is:" + workingDirectory));
-            listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,"Fetch Start is:" + request.Start));
-            listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,"Fetch End is:" + request.End));
+            listener.OnNotify(this,new(ProgressEventType.Information,
+                $"Working directory is:{workingDirectory}"));
+            listener.OnNotify(this,new(ProgressEventType.Information, $"Fetch Start is:{request.Start}"));
+            listener.OnNotify(this,new(ProgressEventType.Information, $"Fetch End is:{request.End}"));
 
-            listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,"Command is:" + Command));
-            listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,"Args template is:" + Args));
-            listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,"Datetime format is:" + TimeFormat));
+            listener.OnNotify(this,new(ProgressEventType.Information, $"Command is:{Command}"));
+            listener.OnNotify(this,new(ProgressEventType.Information, $"Args template is:{Args}"));
+            listener.OnNotify(this,new(ProgressEventType.Information,
+                $"Datetime format is:{TimeFormat}"));
             
 
             string args = Args
@@ -74,7 +76,7 @@ Example:. './GetImages.exe ""%s"" ""%e%""'")]
                 .Replace("%e",request.End.ToString(TimeFormat))
                 .Replace("%d",workingDirectory.FullName);
 
-            listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,"Args resolved is:" + args));
+            listener.OnNotify(this,new(ProgressEventType.Information, $"Args resolved is:{args}"));
 
             using(var p = new Process())
             {
@@ -82,17 +84,18 @@ Example:. './GetImages.exe ""%s"" ""%e%""'")]
                 p.StartInfo.Arguments = args;
                 p.StartInfo.UseShellExecute = false;
                 p.StartInfo.RedirectStandardOutput = true;
-                p.OutputDataReceived += (sender, a) => listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,a.Data));
+                p.OutputDataReceived += (sender, a) => listener.OnNotify(this,new(ProgressEventType.Information,a.Data));
             
                 p.Start();
                 p.BeginOutputReadLine();
 
                 p.WaitForExit();
 
-                listener.OnNotify(this,new NotifyEventArgs( p.ExitCode == 0 ? ProgressEventType.Information : ProgressEventType.Warning , "Process exited with code " + p.ExitCode));
+                listener.OnNotify(this,new( p.ExitCode == 0 ? ProgressEventType.Information : ProgressEventType.Warning ,
+                    $"Process exited with code {p.ExitCode}"));
 
                 if(p.ExitCode != 0 && ThrowOnNonZeroExitCode)
-                    throw new Exception("Process exited with code " + p.ExitCode);
+                    throw new($"Process exited with code {p.ExitCode}");
             }
             
             return Chunk;

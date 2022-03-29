@@ -152,8 +152,8 @@ namespace Rdmp.Dicom.Tests.Unit
 
             foreach (ColumnInfo column in columnInfosCreated)
             {
-                column.Name = tableInfoCreated.Name + "." +
-                    (includeQualifiers ?  syntax.EnsureWrapped(column.GetRuntimeName()) : column.GetRuntimeName());
+                column.Name =
+                    $"{tableInfoCreated.Name}.{(includeQualifiers ? syntax.EnsureWrapped(column.GetRuntimeName()) : column.GetRuntimeName())}";
                 column.SaveToDatabase();
             }
 

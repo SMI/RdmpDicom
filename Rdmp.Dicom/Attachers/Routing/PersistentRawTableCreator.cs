@@ -19,7 +19,7 @@ namespace Rdmp.Dicom.Attachers.Routing
     /// </summary>
     public class PersistentRawTableCreator : IDisposeAfterDataLoad
     {
-        readonly List<DiscoveredTable> _rawTables = new List<DiscoveredTable>();
+        readonly List<DiscoveredTable> _rawTables = new();
 
         public void CreateRAWTablesInDatabase(DiscoveredDatabase rawDb, IDataLoadJob job)
         {
@@ -50,7 +50,8 @@ namespace Rdmp.Dicom.Attachers.Routing
                         continue;
 
                     if (existingColumns.Any(e => e.Equals(preLoadDiscardedColumn.GetRuntimeName(LoadStage.AdjustRaw))))
-                        throw new Exception("There is a column called " + preLoadDiscardedColumn.GetRuntimeName(LoadStage.AdjustRaw) + " as both a PreLoadDiscardedColumn and in the TableInfo (live table), you should either drop the column from the live table or remove it as a PreLoadDiscarded column");
+                        throw new(
+                            $"There is a column called {preLoadDiscardedColumn.GetRuntimeName(LoadStage.AdjustRaw)} as both a PreLoadDiscardedColumn and in the TableInfo (live table), you should either drop the column from the live table or remove it as a PreLoadDiscarded column");
 
                     //add all the preload discarded columns because they could be routed to ANO store or sent to oblivion
                     AddColumnToTable(rawTable, preLoadDiscardedColumn.RuntimeColumnName, preLoadDiscardedColumn.SqlDataType, job);
@@ -63,7 +64,7 @@ namespace Rdmp.Dicom.Attachers.Routing
 
         private void AddColumnToTable(DiscoveredTable table, string desiredColumnName, string desiredColumnType, IDataLoadEventListener listener)
         {
-            listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information,
+            listener.OnNotify(this, new(ProgressEventType.Information,
                 $"Adding column '{desiredColumnName}' with datatype '{desiredColumnType}' to table '{table.GetFullyQualifiedName()}'"));
             table.AddColumn(desiredColumnName, desiredColumnType, true, 500);
         }

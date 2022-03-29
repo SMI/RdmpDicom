@@ -1,9 +1,10 @@
-using Dicom;
-using Dicom.Log;
-using Dicom.Network;
+using FellowOakDicom;
+using FellowOakDicom.Log;
+using FellowOakDicom.Network;
 using System;
 using System.Text;
 using System.Threading.Tasks;
+using FellowOakDicom.Imaging.Codec;
 using ReusableLibraryCode.Progress;
 
 namespace Rdmp.Dicom.Cache.Pipeline
@@ -58,7 +59,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
         private String CalledAE = String.Empty;
         private String CallingAE = String.Empty;
 
-        public CachingSCP(INetworkStream stream, Encoding encoding, Logger logger): base(stream, encoding, logger)
+        public CachingSCP(INetworkStream stream, Encoding encoding, Logger logger): base(stream, encoding, logger, new ConsoleLogManager(),new DesktopNetworkManager(), new DefaultTranscoderManager())
         {
             Options.LogDimseDatasets = false;
             Options.LogDataPDUs = false;
@@ -84,9 +85,9 @@ namespace Rdmp.Dicom.Cache.Pipeline
         #region OnReceiveAbort
         public void OnReceiveAbort(DicomAbortSource source, DicomAbortReason reason)
         {
-            var msg = "Received abort from " + source + "for " + reason;
+            var msg = $"Received abort from {source}for {reason}";
             Logger.Warn(msg, source, reason);
-            Listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Warning, "Aborted: "+msg));
+            Listener.OnNotify(this,new(ProgressEventType.Warning, $"Aborted: {msg}"));
         }
         #endregion
 
@@ -96,44 +97,48 @@ namespace Rdmp.Dicom.Cache.Pipeline
             var msg = "Connection closed";
             if (e != null) msg += e.Message + e.StackTrace;
             Logger.Info(msg, e);
-            Listener.OnNotify(this,new NotifyEventArgs(Verbose ? ProgressEventType.Information : ProgressEventType.Trace, "ConnectionClosed: "+ msg)); 
+            Listener.OnNotify(this,new(Verbose ? ProgressEventType.Information : ProgressEventType.Trace,
+                $"ConnectionClosed: {msg}")); 
         }
         #endregion
 
         #region OnCStoreRequest
-        public DicomCStoreResponse OnCStoreRequest(DicomCStoreRequest request)
+        public Task<DicomCStoreResponse> OnCStoreRequestAsync(DicomCStoreRequest request)
         {
-            Listener.OnNotify(this, new NotifyEventArgs(Verbose ? ProgressEventType.Information : ProgressEventType.Trace, "Received CStore Request: " + request.SOPInstanceUID));
+            Listener.OnNotify(this, new(Verbose ? ProgressEventType.Information : ProgressEventType.Trace,
+                $"Received CStore Request: {request.SOPInstanceUID}"));
             DicomCStoreResponse response;
             try
             {
-                response = new DicomCStoreResponse(request, DicomStatus.Success);
+                response = new(request, DicomStatus.Success);
                 OnEndProcessingCStoreRequest(request, response);
             }
             catch (Exception e)
             {
-                Listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Error, "Failed CStore: " + request.SOPInstanceUID, e));
-                response = new DicomCStoreResponse(request, DicomStatus.ProcessingFailure);
+                Listener.OnNotify(this, new(ProgressEventType.Error,
+                    $"Failed CStore: {request.SOPInstanceUID}", e));
+                response = new(request, DicomStatus.ProcessingFailure);
             }
-            Listener.OnNotify(this, new NotifyEventArgs(Verbose ? ProgressEventType.Information : ProgressEventType.Trace, "Sending CStore Response: " + response.Status + " from AET: " + CalledAE + " to AET:" + CallingAE));
-            return response;
+            Listener.OnNotify(this, new(Verbose ? ProgressEventType.Information : ProgressEventType.Trace,
+                $"Sending CStore Response: {response.Status} from AET: {CalledAE} to AET:{CallingAE}"));
+            return Task.FromResult(response);
         }
         #endregion
 
         #region OnCStoreRequestException
-        public void OnCStoreRequestException(string tempFileName, Exception e)
+        public async Task OnCStoreRequestExceptionAsync(string tempFileName, Exception e)
         {
             var msg = "CStore request exception";
             if (e != null) msg += e.Message + e.StackTrace;
             Logger.Info(msg, e);
-            Listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Error, "CStoreRequest failed", e));
+            await Task.Run(()=>Listener.OnNotify(this, new(ProgressEventType.Error, "CStoreRequest failed", e)));
         }
         #endregion
 
-        #region DicomCEchoResponse
-        public DicomCEchoResponse OnCEchoRequest(DicomCEchoRequest request)
+        #region DicomCEchoRequest
+        public Task<DicomCEchoResponse> OnCEchoRequestAsync(DicomCEchoRequest request)
         {
-            return new DicomCEchoResponse(request, DicomStatus.Success);
+            return Task.FromResult(new DicomCEchoResponse(request, DicomStatus.Success));
         }
         #endregion
 
@@ -142,7 +147,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
         {
             // Client hasn't been configured correctly
             if (string.IsNullOrWhiteSpace(LocalAet))
-                throw new Exception("LocalAet cannot be null");
+                throw new("LocalAet cannot be null");
 
 
             if (!string.Equals(association.CalledAE, LocalAet, StringComparison.CurrentCultureIgnoreCase))
@@ -160,15 +165,18 @@ namespace Rdmp.Dicom.Cache.Pipeline
             }
             CalledAE = association.CalledAE;
             CallingAE = association.CallingAE;
-            Listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Trace, "Max Async OPs invocable = " + association.MaxAsyncOpsInvoked + "performable = " + association.MaxAsyncOpsPerformed));
-            Listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Trace, "Accepted Association Request from "+ CallingAE +" to "+ CalledAE));
+            Listener.OnNotify(this, new(ProgressEventType.Trace,
+                $"Max Async OPs invocable = {association.MaxAsyncOpsInvoked}performable = {association.MaxAsyncOpsPerformed}"));
+            Listener.OnNotify(this, new(ProgressEventType.Trace,
+                $"Accepted Association Request from {CallingAE} to {CalledAE}"));
         }
         #endregion
 
         #region OnReceiveAssociationReleaseRequest
         public void OnReceiveAssociationReleaseRequest()
         {
-            Listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Trace, "Released Association from " + CallingAE + " to " + CalledAE));
+            Listener.OnNotify(this, new(ProgressEventType.Trace,
+                $"Released Association from {CallingAE} to {CalledAE}"));
         }
         #endregion
 

@@ -21,13 +21,15 @@ namespace Rdmp.Dicom.Cache
         public SMIDataChunk ProcessPipelineData(SMIDataChunk toProcess, IDataLoadEventListener listener, GracefulCancellationToken cancellationToken)
         {
             if(!Modality.Equals(toProcess.Modality))
-                throw new Exception("Modality '" + Modality + "' of destination component did not match ICacheChunk toProcess Modality which was '" + toProcess.Modality +"'");
+                throw new(
+                    $"Modality '{Modality}' of destination component did not match ICacheChunk toProcess Modality which was '{toProcess.Modality}'");
 
 
             // next archive the files and remove the temporary dicom files
             // todo: skip this and stream directly into an archive
             var archiveDate = toProcess.Request.Start;
-            listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information, "Creating archive: " + toProcess.Layout.GetArchiveFileInfoForDate(archiveDate, listener).FullName));
+            listener.OnNotify(this, new(ProgressEventType.Information,
+                $"Creating archive: {toProcess.Layout.GetArchiveFileInfoForDate(archiveDate, listener).FullName}"));
             toProcess.Layout.CreateArchive(archiveDate,listener, Extension);
 
             // remove all the .dcm/.csv files
@@ -52,7 +54,7 @@ namespace Rdmp.Dicom.Cache
 
         public override ICacheLayout CreateCacheLayout()
         {
-            return new SMICacheLayout(CacheDirectory, new SMICachePathResolver(Modality));
+            return new SMICacheLayout(CacheDirectory, new(Modality));
         }
 
         public override void Abort(IDataLoadEventListener listener)

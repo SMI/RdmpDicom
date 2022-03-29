@@ -30,8 +30,8 @@ namespace Rdmp.Dicom.UI
                 if (multiplicity == null)
                     lblMultiplicity.Text = "(Multiplicity:None)";
                 else
-                    lblMultiplicity.Text = "(Multiplicity: Min " + multiplicity.Minimum + " Max " + multiplicity.Maximum +
-                                           " M " + multiplicity.Multiplicity + ")";
+                    lblMultiplicity.Text =
+                        $"(Multiplicity: Min {multiplicity.Minimum} Max {multiplicity.Maximum} M {multiplicity.Multiplicity})";
 
                 tbDataType.Text = type;
             }

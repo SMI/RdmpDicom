@@ -11,7 +11,7 @@ namespace Rdmp.Dicom.UI.CommandExecution.AtomicCommands
 
         public ExecuteCommandReviewIsolations(IActivateItems activator, ProcessTask processTask) : base(activator)
         {
-            _reviewer = new IsolationReview(processTask);
+            _reviewer = new(processTask);
 
             if (_reviewer.Error != null) 
                 SetImpossible(_reviewer.Error);

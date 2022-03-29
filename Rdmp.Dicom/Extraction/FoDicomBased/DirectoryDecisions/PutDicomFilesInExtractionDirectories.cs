@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Text;
-using Dicom;
+using FellowOakDicom;
 using FAnsi.Extensions;
 
 namespace Rdmp.Dicom.Extraction.FoDicomBased.DirectoryDecisions
