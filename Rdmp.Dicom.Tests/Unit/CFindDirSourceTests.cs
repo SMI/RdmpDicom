@@ -6,6 +6,7 @@ using ReusableLibraryCode.Checks;
 using ReusableLibraryCode.Progress;
 using System.IO;
 
+namespace Rdmp.Dicom.Tests.Unit;
 public class CFindDirSourceTests
 {
     [Test]
