@@ -51,14 +51,9 @@ namespace Rdmp.Dicom.ExternalApis
 
                 if (semEHRResponse.success)
                 {
-                    if(semEHRResponse.results.Count == 0)
-                    {
-                        SubmitIdentifierList(config.ReturnField, new string[] { }, ac, cache);
-                    }
-                    else
-                    {
-                        SubmitIdentifierList(config.ReturnField, semEHRResponse.results.ToArray(), ac, cache);
-                    }
+                    SubmitIdentifierList(config.ReturnField,
+                        semEHRResponse.results.Count == 0 ? new string[] { } : semEHRResponse.results.ToArray(), ac,
+                        cache);
 
                     /*If we can cope with the return field with multiple types this will handle that
                     /*if (string.IsNullOrEmpty(config.ReturnField))

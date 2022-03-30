@@ -261,10 +261,7 @@ namespace Rdmp.Dicom.CommandExecution
         
         private string GetNameWithPrefixInBracketsIfAny(string name)
         {
-            if (string.IsNullOrWhiteSpace(TablePrefix))
-                return name;
-
-            return $"{name}({TablePrefix.Trim('_')})";
+            return string.IsNullOrWhiteSpace(TablePrefix) ? name : $"{name}({TablePrefix.Trim('_')})";
         }
         private string GetNameWithPrefix(string name)
         {
