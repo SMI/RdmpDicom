@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Support for running CLI `AddTag` command for multiple Catalogues at once
 
 ## [5.0.5] 2022-03-03
 
