@@ -1,6 +1,8 @@
-﻿using Dicom.Network;
+﻿using FellowOakDicom.Imaging.Codec;
+using FellowOakDicom.Log;
+using FellowOakDicom.Network;
+using FellowOakDicom.Network.Client;
 using NUnit.Framework;
-using DicomClient = Dicom.Network.Client.DicomClient;
 
 namespace Rdmp.Dicom.Tests.Unit
 {
@@ -14,7 +16,9 @@ namespace Rdmp.Dicom.Tests.Unit
         public void EchoTest(string host, int port)
         {
             var success = false;
-            var client = new DicomClient(host,port,false,LocalAetTitle,RemoteAetTitle);
+            var client = new DicomClient(host, port, false, LocalAetTitle, RemoteAetTitle, new DicomClientOptions(),
+                new DicomServiceOptions(), new DesktopNetworkManager(), new ConsoleLogManager(),
+                new DefaultTranscoderManager());
             client.AddRequestAsync(new DicomCEchoRequest
             {
                 OnResponseReceived = (req,res) => {

@@ -16,12 +16,12 @@ namespace Rdmp.Dicom.ExternalApis
 {
     public class SemEHRApiCaller : PluginCohortCompiler
     {
-        public const string SemEHRApiPrefix = ApiPrefix + "SemEHR";
+        public const string SemEHRApiPrefix = $"{ApiPrefix}SemEHR";
 
         public override void Run(AggregateConfiguration ac, CachedAggregateConfigurationResultsManager cache, CancellationToken token)
         {
             var config = SemEHRConfiguration.LoadFrom(ac);
-            HttpClientHandler httpClientHandler = new HttpClientHandler();
+            HttpClientHandler httpClientHandler = new();
 
             //Get data as post - not currently used
             //In the future we'll enable getting the data with POST maybe. Here for reference
@@ -40,7 +40,7 @@ namespace Rdmp.Dicom.ExternalApis
             {
                 httpClientHandler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
             }
-            HttpClient httpClient = new HttpClient(httpClientHandler);
+            HttpClient httpClient = new(httpClientHandler);
 
             //Make the request to the API
             HttpResponseMessage response = httpClient.GetAsync(config.GetUrlWithQuerystring()).Result;
@@ -87,13 +87,14 @@ namespace Rdmp.Dicom.ExternalApis
                 else
                 {
                     //If we failed, get the failing error message
-                    throw (new Exception("The SemEHR API has failed: " + semEHRResponse.message));
+                    throw (new($"The SemEHR API has failed: {semEHRResponse.message}"));
                 }
                
             }
             else
             {
-                throw (new Exception("The API response returned a HTTP Status Code: (" + (int)response.StatusCode + ") " + response.StatusCode));
+                throw (new(
+                    $"The API response returned a HTTP Status Code: ({(int)response.StatusCode}) {response.StatusCode}"));
             }
             #endregion
 

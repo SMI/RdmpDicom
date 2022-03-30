@@ -13,8 +13,8 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
         public int CacheMisses { get; private set; }
         public int CacheHits { get; private set; }
 
-        object lockDictionary = new object();
-        readonly Dictionary<string, ZipArchive> _openZipFiles = new Dictionary<string, ZipArchive>(StringComparer.InvariantCultureIgnoreCase);
+        readonly object lockDictionary = new();
+        readonly Dictionary<string, ZipArchive> _openZipFiles = new(StringComparer.InvariantCultureIgnoreCase);
 
         /// <summary>
         /// The maximum number of zip files to allow to be open at once.  Defaults to 100

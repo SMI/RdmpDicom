@@ -47,11 +47,11 @@ namespace Rdmp.Dicom
 
             if (dt.Columns.Count <= 0)
             {
-                notifier.OnCheckPerformed(new CheckEventArgs($"Failed to build table.  Check {nameof(HeadersToRead)}", CheckResult.Fail));
+                notifier.OnCheckPerformed(new($"Failed to build table.  Check {nameof(HeadersToRead)}", CheckResult.Fail));
             }   
             else
             {
-                notifier.OnCheckPerformed(new CheckEventArgs($"Built table successfully", CheckResult.Success));
+                notifier.OnCheckPerformed(new($"Built table successfully", CheckResult.Success));
             }
 
             
@@ -67,9 +67,9 @@ namespace Rdmp.Dicom
         public DataTable GetChunk(IDataLoadEventListener listener, GracefulCancellationToken cancellationToken)
         {
             if (_file == null)
-                throw new Exception("File has not been set");
+                throw new("File has not been set");
             if (!_file.File.Exists)
-                throw new FileNotFoundException("File did not exist:'" + _file.File.FullName + "'");
+                throw new FileNotFoundException($"File did not exist:'{_file.File.FullName}'");
 
             // This is an all at once source, next call returns null (i.e. we are done)
             if (!firstTime)
@@ -114,63 +114,59 @@ namespace Rdmp.Dicom
 
         private void ProcessDir(string dir, DataTable dt, IDataLoadEventListener listener)
         {
-            listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information, $"Starting '{dir}'"));
+            listener.OnNotify(this, new(ProgressEventType.Information, $"Starting '{dir}'"));
 
             if (File.Exists(dir))
             {
                 // the inventory entry is a xml file directly :o
-                XmlToRows(dir, dt, listener);
+                XmlToRows(dir, dt);
                 return;
             }
 
             if (!Directory.Exists(dir))
             {
-                listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Error, $"'{dir}' was not a Directory or File"));
+                listener.OnNotify(this, new(ProgressEventType.Error, $"'{dir}' was not a Directory or File"));
                 return;
             }
 
             var matches = Directory.GetFiles(dir, SearchPattern, SearchOption.AllDirectories);
 
-            listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information, $"Found {matches.Length} CFind files in {dir}"));
+            listener.OnNotify(this, new(ProgressEventType.Information, $"Found {matches.Length} CFind files in {dir}"));
 
             foreach(var file in matches)
             {
-                XmlToRows(file, dt,listener);
+                XmlToRows(file, dt);
 
                 if (filesRead++ % 10000 == 0)
                 {
-                    listener.OnProgress(this, new ProgressEventArgs("Reading files", new ProgressMeasurement(filesRead, ProgressType.Records, matches.Length), timer?.Elapsed ?? TimeSpan.Zero));
+                    listener.OnProgress(this, new("Reading files", new(filesRead, ProgressType.Records, matches.Length), timer?.Elapsed ?? TimeSpan.Zero));
                 }
             }
         }
 
-        private void XmlToRows(string file, DataTable dt, IDataLoadEventListener listener)
+        private void XmlToRows(string file, DataTable dt)
         {
-            using (var fileStream = File.Open(file, FileMode.Open))
+            using var fileStream = File.Open(file, FileMode.Open);
+            //Load the file and create a navigator object. 
+            var xDoc = new XmlDocument();
+            xDoc.Load(fileStream);
+
+            var datasets = xDoc.GetElementsByTagName("data-set");
+
+            foreach(XmlElement d in datasets)
             {
-                //Load the file and create a navigator object. 
-                var xDoc = new XmlDocument();
-                xDoc.Load(fileStream);
+                var row = dt.NewRow();
 
-                var datasets = xDoc.GetElementsByTagName("data-set");
-
-                foreach(XmlElement d in datasets)
+                foreach(XmlElement child in d.ChildNodes)
                 {
-                    var row = dt.NewRow();
-
-                    foreach(XmlElement child in d.ChildNodes)
+                    var name = child.GetAttribute("name");
+                    if(dt.Columns.Contains(name))
                     {
-                        var name = child.GetAttribute("name");
-                        if(dt.Columns.Contains(name))
-                        {
-                            row[name] = child.InnerText;
-                        }
+                        row[name] = child.InnerText;
                     }
-
-                    dt.Rows.Add(row);
                 }
 
-                
+                dt.Rows.Add(row);
             }
         }
 
@@ -181,7 +177,7 @@ namespace Rdmp.Dicom
 
         public DataTable TryGetPreview()
         {
-            return GetChunk(new ThrowImmediatelyDataLoadEventListener(), new GracefulCancellationToken());
+            return GetChunk(new ThrowImmediatelyDataLoadEventListener(), new());
         }
     }
 }

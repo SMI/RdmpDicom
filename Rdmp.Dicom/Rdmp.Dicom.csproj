@@ -25,7 +25,7 @@
     <EmbeddedResource Include="db\up\005_EnsureUIDMapUnique.sql" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="HIC.DicomTypeTranslation" Version="3.0.0" />
+    <PackageReference Include="HIC.DicomTypeTranslation" Version="4.0.0" />
     <PackageReference Include="HIC.RDMP.Plugin" Version="7.0.9" />
   </ItemGroup>
 </Project>

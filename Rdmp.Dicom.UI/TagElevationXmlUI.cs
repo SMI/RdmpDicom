@@ -63,7 +63,7 @@ namespace Rdmp.Dicom.UI
             try
             {
                 _=new TagElevationRequestCollection(queryEditor.Text);
-                RagSmiley1.OnCheckPerformed(new CheckEventArgs("Successfully created elevator",CheckResult.Success));
+                RagSmiley1.OnCheckPerformed(new("Successfully created elevator",CheckResult.Success));
             }
             catch(Exception ex)
             {

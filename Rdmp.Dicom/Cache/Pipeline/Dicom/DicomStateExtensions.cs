@@ -1,5 +1,5 @@
 using System;
-using Dicom.Network;
+using FellowOakDicom.Network;
 using ReusableLibraryCode.Progress;
 
 namespace Rdmp.Dicom.Cache.Pipeline.Dicom
@@ -8,21 +8,15 @@ namespace Rdmp.Dicom.Cache.Pipeline.Dicom
     {
         public static ProgressEventType ToProgressEventType(this DicomStatus status)
         {
-            switch (status.State)
+            return status.State switch
             {
-                case DicomState.Success:
-                    return ProgressEventType.Information;
-                case DicomState.Cancel:
-                    return ProgressEventType.Warning;
-                case DicomState.Pending:
-                    return ProgressEventType.Information;
-                case DicomState.Warning:
-                    return ProgressEventType.Warning;
-                case DicomState.Failure:
-                    return ProgressEventType.Error;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+                DicomState.Success => ProgressEventType.Information,
+                DicomState.Cancel => ProgressEventType.Warning,
+                DicomState.Pending => ProgressEventType.Information,
+                DicomState.Warning => ProgressEventType.Warning,
+                DicomState.Failure => ProgressEventType.Error,
+                _ => throw new ArgumentOutOfRangeException()
+            };
         }
     }
 }

@@ -37,7 +37,7 @@ namespace Rdmp.Dicom.Attachers.Routing
 
         public static AutoRoutingAttacherPipelineUseCase GetDesignTimeUseCase(AutoRoutingAttacher attacher)
         {
-            return new AutoRoutingAttacherPipelineUseCase(attacher);
+            return new(attacher);
         }
     }
 }

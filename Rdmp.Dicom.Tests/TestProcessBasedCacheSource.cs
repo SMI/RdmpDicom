@@ -54,7 +54,7 @@ namespace Rdmp.Dicom.Tests
             var toMem = new ToMemoryDataLoadEventListener(true);
             var fork = new ForkDataLoadEventListener(toMem,new ThrowImmediatelyDataLoadEventListener {WriteToConsole = true});
 
-            source.GetChunk(fork,new GracefulCancellationToken());
+            source.GetChunk(fork,new());
 
             Assert.Contains($"Hey Thomas go get 24/12/01 and store in {Path.Combine(loadDir.Cache.FullName,"ALL")}",toMem.GetAllMessagesByProgressEventType()[ProgressEventType.Information].Select(v=>v.Message).ToArray());
             

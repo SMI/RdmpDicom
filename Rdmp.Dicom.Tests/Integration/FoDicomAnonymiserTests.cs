@@ -1,5 +1,4 @@
-﻿using Dicom;
-using MapsDirectlyToDatabaseTable;
+﻿using FellowOakDicom;
 using MapsDirectlyToDatabaseTable.Versioning;
 using Moq;
 using NUnit.Framework;
@@ -7,7 +6,6 @@ using Rdmp.Core.Curation.Data;
 using Rdmp.Core.Curation.Data.Spontaneous;
 using Rdmp.Core.DataExport.Data;
 using Rdmp.Core.DataExport.DataExtraction.Commands;
-using Rdmp.Core.DataFlowPipeline;
 using Rdmp.Core.QueryBuilding;
 using Rdmp.Core.Repositories.Construction;
 using Rdmp.Dicom.Extraction.FoDicomBased;
@@ -57,14 +55,14 @@ namespace Rdmp.Dicom.Tests.Integration
         {
             var uidMapDb = GetCleanedServer(DatabaseType.MicrosoftSQLServer, "TESTUIDMapp");
 
-            MasterDatabaseScriptExecutor e = new MasterDatabaseScriptExecutor(uidMapDb);
+            MasterDatabaseScriptExecutor e = new(uidMapDb);
             var patcher = new SMIDatabasePatcher();
             e.CreateAndPatchDatabase(patcher,new AcceptAllCheckNotifier());
 
             var eds = new ExternalDatabaseServer(CatalogueRepository, "eds", patcher);
             eds.SetProperties(uidMapDb);
             
-            Dictionary<DicomTag,string> thingThatShouldDisappear = new Dictionary<DicomTag, string>
+            Dictionary<DicomTag,string> thingThatShouldDisappear = new()
             {
                 //Things we would want to disappear
                 {DicomTag.PatientName,"Moscow"},
@@ -75,7 +73,7 @@ namespace Rdmp.Dicom.Tests.Integration
                 {DicomTag.StudyDate,"20020101"},
             };
 
-            Dictionary<DicomTag,string> thingsThatShouldRemain = new Dictionary<DicomTag, string>
+            Dictionary<DicomTag,string> thingsThatShouldRemain = new()
             {
                 //Things we would want to remain
                 //{DicomTag.SmokingStatus,"YES"},
@@ -99,7 +97,7 @@ namespace Rdmp.Dicom.Tests.Integration
 
             var fi = new FileInfo(Path.Combine(TestContext.CurrentContext.WorkDirectory, "madness.dcm"));
 
-            DicomFile df = new DicomFile(dicom);
+            DicomFile df = new(dicom);
             df.Save(fi.FullName);
 
             var dt = new DataTable();
@@ -126,7 +124,7 @@ namespace Rdmp.Dicom.Tests.Integration
             anonymiser.RetainDates = keepDates;
             anonymiser.DeleteTags = "AlgorithmName";
 
-            var anoDt = anonymiser.ProcessPipelineData(dt,new ThrowImmediatelyDataLoadEventListener(),new GracefulCancellationToken());
+            var anoDt = anonymiser.ProcessPipelineData(dt,new ThrowImmediatelyDataLoadEventListener(),new());
 
             Assert.AreEqual(1,anoDt.Rows.Count);
             
@@ -139,16 +137,20 @@ namespace Rdmp.Dicom.Tests.Integration
 
             FileInfo expectedFile = null;
             if(putterType == typeof(PutInRoot))
-                expectedFile = new FileInfo(Path.Combine(TestContext.CurrentContext.WorkDirectory,"Images", anoDt.Rows[0]["SOPInstanceUID"] + ".dcm"));
+                expectedFile = new(Path.Combine(TestContext.CurrentContext.WorkDirectory,"Images",
+                    $"{anoDt.Rows[0]["SOPInstanceUID"]}.dcm"));
 
             if (putterType == typeof(PutInReleaseIdentifierSubfolders))
-                expectedFile = new FileInfo(Path.Combine(TestContext.CurrentContext.WorkDirectory, "Images","Hank", anoDt.Rows[0]["SOPInstanceUID"] + ".dcm"));
+                expectedFile = new(Path.Combine(TestContext.CurrentContext.WorkDirectory, "Images","Hank",
+                    $"{anoDt.Rows[0]["SOPInstanceUID"]}.dcm"));
 
             if (putterType == typeof(PutInUidSeriesFolders))
-                expectedFile = new FileInfo(Path.Combine(TestContext.CurrentContext.WorkDirectory, "Images", "Hank", anoDt.Rows[0]["SeriesInstanceUID"].ToString(), anoDt.Rows[0]["SOPInstanceUID"] + ".dcm"));
+                expectedFile = new(Path.Combine(TestContext.CurrentContext.WorkDirectory, "Images", "Hank", anoDt.Rows[0]["SeriesInstanceUID"].ToString(),
+                    $"{anoDt.Rows[0]["SOPInstanceUID"]}.dcm"));
 
             if (putterType == typeof(PutInUidStudySeriesFolders))
-                expectedFile = new FileInfo(Path.Combine(TestContext.CurrentContext.WorkDirectory, "Images", "Hank", anoDt.Rows[0]["StudyInstanceUID"].ToString(), anoDt.Rows[0]["SeriesInstanceUID"].ToString(), anoDt.Rows[0]["SOPInstanceUID"] + ".dcm"));
+                expectedFile = new(Path.Combine(TestContext.CurrentContext.WorkDirectory, "Images", "Hank", anoDt.Rows[0]["StudyInstanceUID"].ToString(), anoDt.Rows[0]["SeriesInstanceUID"].ToString(),
+                    $"{anoDt.Rows[0]["SOPInstanceUID"]}.dcm"));
 
             Assert.IsTrue(expectedFile.Exists);
             var anoDicom = DicomFile.Open(expectedFile.FullName);
@@ -183,7 +185,7 @@ namespace Rdmp.Dicom.Tests.Integration
                         continue;
 
 
-                    default: Assert.Fail("Unexpected value for " + key + ":" + value);
+                    default: Assert.Fail($"Unexpected value for {key}:{value}");
                         break;
                 }
             }
@@ -197,21 +199,21 @@ namespace Rdmp.Dicom.Tests.Integration
         {
             var uidMapDb = GetCleanedServer(DatabaseType.MicrosoftSQLServer, "TESTUIDMapp");
 
-            MasterDatabaseScriptExecutor e = new MasterDatabaseScriptExecutor(uidMapDb);
+            MasterDatabaseScriptExecutor e = new(uidMapDb);
             var patcher = new SMIDatabasePatcher();
             e.CreateAndPatchDatabase(patcher, new AcceptAllCheckNotifier());
 
             var eds = new ExternalDatabaseServer(CatalogueRepository, "eds", patcher);
             eds.SetProperties(uidMapDb);
 
-            Dictionary<DicomTag, string> thingThatShouldDisappear = new Dictionary<DicomTag, string>
+            Dictionary<DicomTag, string> thingThatShouldDisappear = new()
             {
                 //Things we would want to disappear
                 {DicomTag.PatientName,"Moscow"},
                 {DicomTag.PatientBirthDate,"20010101"},
             };
 
-            Dictionary<DicomTag, string> thingsThatShouldRemain = new Dictionary<DicomTag, string>
+            Dictionary<DicomTag, string> thingsThatShouldRemain = new()
             {
                 //Things we would want to remain
                 {DicomTag.StudyDescription,"Frank has lots of problems, he lives at 60 Pancake road"},
@@ -239,7 +241,7 @@ namespace Rdmp.Dicom.Tests.Integration
 
             var fi = new FileInfo(Path.Combine(TestContext.CurrentContext.WorkDirectory, "madness.dcm"));
 
-            DicomFile df = new DicomFile(dicom);
+            DicomFile df = new(dicom);
             df.Save(fi.FullName);
 
             var dt = new DataTable();
@@ -266,7 +268,7 @@ namespace Rdmp.Dicom.Tests.Integration
             anonymiser.RetainDates = false;
             anonymiser.SkipAnonymisationOnStructuredReports = true; // <- the thing we are testing
 
-            var anoDt = anonymiser.ProcessPipelineData(dt, new ThrowImmediatelyDataLoadEventListener(), new GracefulCancellationToken());
+            var anoDt = anonymiser.ProcessPipelineData(dt, new ThrowImmediatelyDataLoadEventListener(), new());
 
             Assert.AreEqual(1, anoDt.Rows.Count);
 
@@ -277,7 +279,8 @@ namespace Rdmp.Dicom.Tests.Integration
             Assert.AreNotEqual("123.4.6", anoDt.Rows[0]["StudyInstanceUID"]);
             Assert.AreEqual(56, anoDt.Rows[0]["StudyInstanceUID"].ToString().Length);
             
-            var expectedFile = new FileInfo(Path.Combine(TestContext.CurrentContext.WorkDirectory, "Images", anoDt.Rows[0]["SOPInstanceUID"] + ".dcm"));
+            var expectedFile = new FileInfo(Path.Combine(TestContext.CurrentContext.WorkDirectory, "Images",
+                $"{anoDt.Rows[0]["SOPInstanceUID"]}.dcm"));
 
             Assert.IsTrue(expectedFile.Exists);
             var anoDicom = DicomFile.Open(expectedFile.FullName);
@@ -306,7 +309,7 @@ namespace Rdmp.Dicom.Tests.Integration
                     case "ANONYMOUS": continue;
 
                     default:
-                        Assert.Fail("Unexpected value for " + key + ":" + value);
+                        Assert.Fail($"Unexpected value for {key}:{value}");
                         break;
                 }
             }
@@ -340,23 +343,23 @@ namespace Rdmp.Dicom.Tests.Integration
 
             FileInfo expectedFile = null;
             if (putterType == typeof(PutInRoot))
-               expectedFile = new FileInfo(Path.Combine(outputDirectory.FullName,
-                   dicomDataset.GetValue<string>(DicomTag.SOPInstanceUID, 0) + ".dcm"));
+               expectedFile = new(Path.Combine(outputDirectory.FullName,
+                   $"{dicomDataset.GetValue<string>(DicomTag.SOPInstanceUID, 0)}.dcm"));
 
             if (putterType == typeof(PutInReleaseIdentifierSubfolders))
-               expectedFile = new FileInfo(Path.Combine(outputDirectory.FullName, releaseIdentifier, 
-                    dicomDataset.GetValue<string>(DicomTag.SOPInstanceUID, 0) + ".dcm"));
+               expectedFile = new(Path.Combine(outputDirectory.FullName, releaseIdentifier,
+                   $"{dicomDataset.GetValue<string>(DicomTag.SOPInstanceUID, 0)}.dcm"));
 
             if (putterType == typeof(PutInUidSeriesFolders))
-                expectedFile = new FileInfo(Path.Combine(outputDirectory.FullName, releaseIdentifier,
+                expectedFile = new(Path.Combine(outputDirectory.FullName, releaseIdentifier,
                     dicomDataset.GetValue<string>(DicomTag.SeriesInstanceUID, 0),
-                    dicomDataset.GetValue<string>(DicomTag.SOPInstanceUID, 0) + ".dcm"));
+                    $"{dicomDataset.GetValue<string>(DicomTag.SOPInstanceUID, 0)}.dcm"));
 
             if (putterType == typeof(PutInUidStudySeriesFolders))
-                expectedFile = new FileInfo(Path.Combine(outputDirectory.FullName, releaseIdentifier,
+                expectedFile = new(Path.Combine(outputDirectory.FullName, releaseIdentifier,
                     dicomDataset.GetValue<string>(DicomTag.StudyInstanceUID, 0), 
                     dicomDataset.GetValue<string>(DicomTag.SeriesInstanceUID, 0),
-                    dicomDataset.GetValue<string>(DicomTag.SOPInstanceUID, 0) + ".dcm"));
+                    $"{dicomDataset.GetValue<string>(DicomTag.SOPInstanceUID, 0)}.dcm"));
             
 
             Assert.IsTrue(expectedFile.Exists);
@@ -373,8 +376,10 @@ namespace Rdmp.Dicom.Tests.Integration
             var eds = new ExternalDatabaseServer(CatalogueRepository,"UID server",null);
             eds.SetProperties(db);
 
-            var anon = new FoDicomAnonymiser();
-            anon.UIDMappingServer = eds;
+            var anon = new FoDicomAnonymiser
+            {
+                UIDMappingServer = eds
+            };
 
             var ex = Assert.Throws<Exception>(()=>anon.Check(new ThrowImmediatelyCheckNotifier() { ThrowOnWarning = true }));
 
@@ -397,7 +402,7 @@ namespace Rdmp.Dicom.Tests.Integration
             
             //mock the prochi/release id columnvar cohort = MockRepository.GenerateMock<IExtractableCohort>();
             var queryBuilder = Mock.Of<ISqlQueryBuilder>(q=>
-            q.SelectColumns == new List<QueryTimeColumn> { new QueryTimeColumn(new SpontaneouslyInventedColumn(new MemoryRepository(), "Pat","[db]..[tb].[Pat]"){IsExtractionIdentifier = true}) });
+            q.SelectColumns == new List<QueryTimeColumn> { new(new SpontaneouslyInventedColumn(new(), "Pat","[db]..[tb].[Pat]"){IsExtractionIdentifier = true}) });
                        
             
             //mock the extraction directory

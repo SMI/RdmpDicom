@@ -15,8 +15,8 @@ namespace Rdmp.Dicom.Cache.Pipeline
         /// </summary>
         public long ThresholdBeatsPerMinute { get; set; }
 
-        List<DateTime> collection = new List<DateTime>();
-        object oLock = new object();
+        List<DateTime> collection = new();
+        object oLock = new();
 
         public PressureGauge()
         {
@@ -54,7 +54,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
             if(exceeded)
             {
                 // Important to use log level Information here and not Error in case the listener breaks flow control e.g. ThrowImmediately listener
-                listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information, "ThresholdBeatsPerMinute exceeded, invoking delegate"));
+                listener.OnNotify(this, new(ProgressEventType.Information, "ThresholdBeatsPerMinute exceeded, invoking delegate"));
                 pressureTooHigh();
             }
         }

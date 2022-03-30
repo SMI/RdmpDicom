@@ -4,7 +4,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
-using Dicom;
+using FellowOakDicom;
 using Rdmp.Dicom.PACS;
 using ReusableLibraryCode.Progress;
 
@@ -34,14 +34,15 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
     {
         public string FullPath { get; private set; }
         
-        private static readonly Regex _regexDigitsAndDotsOnly = new Regex(@"^[0-9\.]*$");
+        private static readonly Regex _regexDigitsAndDotsOnly = new(@"^[0-9\.]*$");
 
 
 
         public AmbiguousFilePath(string fullPath)
         {
             if(!IsAbsolute(fullPath))
-                throw new ArgumentException("Relative path was encountered without specifying a root, if you want to process relative paths you will need to provide a root path too.  fullPath was '" + fullPath + "'",nameof(fullPath));
+                throw new ArgumentException(
+                    $"Relative path was encountered without specifying a root, if you want to process relative paths you will need to provide a root path too.  fullPath was '{fullPath}'",nameof(fullPath));
 
             FullPath = fullPath;
         }
@@ -50,7 +51,7 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
         {
             //if root is provided but is not absolute
             if(!string.IsNullOrWhiteSpace(root) && !IsAbsolute(root))
-                throw new ArgumentException("Specified root path '" + root + "' was not IsAbsolute", nameof(root));
+                throw new ArgumentException($"Specified root path '{root}' was not IsAbsolute", nameof(root));
 
             FullPath = Combine(root, path);
         }
@@ -64,7 +65,7 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
                 return Path.Combine(root,path);
             
             var bits = path.Split('!');
-            return Path.Combine(root,bits[0]) + '!' + bits[1];
+            return $"{Path.Combine(root, bits[0])}!{bits[1]}";
         }
 
         /// <summary>
@@ -109,11 +110,12 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
                         }
 
                         //we fixed it to something that actually exists so update our state that we don't make the same mistake again
-                        FullPath = bits[0] + '!' + adjusted;
+                        FullPath = $"{bits[0]}!{adjusted}";
                     }
                         
                     if (!IsDicomReference(bits[1]))
-                        throw new AmbiguousFilePathResolutionException("Path provided '" + FullPath + "' was to a zip file but not to a dicom file entry");
+                        throw new AmbiguousFilePathResolutionException(
+                            $"Path provided '{FullPath}' was to a zip file but not to a dicom file entry");
 
                     var buffer = ByteStreamHelper.ReadFully(entry.Open());
 
@@ -127,7 +129,7 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
                 {
                     if (attempt < retryCount)
                     {
-                        listener?.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning, $"Sleeping for {retryDelay}ms because of encountering Exception : {ex.Message}", ex));
+                        listener?.OnNotify(this, new(ProgressEventType.Warning, $"Sleeping for {retryDelay}ms because of encountering Exception : {ex.Message}", ex));
 
                         Thread.Sleep(retryDelay);
                         attempt++;
@@ -146,7 +148,8 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
             }
 
             if(!IsDicomReference(FullPath))
-                throw new AmbiguousFilePathResolutionException("Path provided '" + FullPath + "' was not to either an entry in a zip file or to a dicom file");
+                throw new AmbiguousFilePathResolutionException(
+                    $"Path provided '{FullPath}' was not to either an entry in a zip file or to a dicom file");
 
             return DicomFile.Open(FullPath);
         }
@@ -170,12 +173,12 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
 
         public static bool IsZipReference(string path)
         {
-            switch (path.Count(c=>c=='!'))
+            return path.Count(c => c == '!') switch
             {
-                case 0: return false;
-                case 1: return true;
-                default: throw new Exception("Path '" + path + "' had too many exclamation marks, expected 0 or 1");
-            }
+                0 => false,
+                1 => true,
+                _ => throw new($"Path '{path}' had too many exclamation marks, expected 0 or 1")
+            };
         }
 
         private bool IsAbsolute(string path)

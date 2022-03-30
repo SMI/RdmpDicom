@@ -43,7 +43,7 @@ namespace Rdmp.Dicom.Extraction
                 builder.Password = server.GetDecryptedPassword();
             }
 
-            return new DiscoveredServer(builder);
+            return new(builder);
         }
 
         private SqlConnection GetConnection()
@@ -55,29 +55,27 @@ namespace Rdmp.Dicom.Extraction
         public UIDMapping[] LoadMappingsForProject(int projectNumber)
         {
             var table = _database.ExpectTable(_tableName);
-            using (var conn = GetConnection())
+            using var conn = GetConnection();
+            conn.Open();
+            var cmd =
+                DatabaseCommandHelper.GetCommand(
+                    $"SELECT * FROM {table.GetFullyQualifiedName()} WHERE ProjectNumber = @ProjectNumber", conn);
+            DatabaseCommandHelper.AddParameterWithValueToCommand("@ProjectNumber", cmd, projectNumber);
+
+            var reader = cmd.ExecuteReader();
+            var mappings = new List<UIDMapping>();
+            while (reader.Read())
             {
-                conn.Open();
-                var cmd =
-                    DatabaseCommandHelper.GetCommand(
-                        "SELECT * FROM " + table.GetFullyQualifiedName() + " WHERE ProjectNumber = @ProjectNumber", conn);
-                DatabaseCommandHelper.AddParameterWithValueToCommand("@ProjectNumber", cmd, projectNumber);
-
-                var reader = cmd.ExecuteReader();
-                var mappings = new List<UIDMapping>();
-                while (reader.Read())
-                {
-                    var mappingFromDatabase = HydrateMapping(reader);
-                    mappings.Add(mappingFromDatabase);
-                }
-
-                return mappings.ToArray();
+                var mappingFromDatabase = HydrateMapping(reader);
+                mappings.Add(mappingFromDatabase);
             }
+
+            return mappings.ToArray();
         }
 
         private UIDMapping HydrateMapping(DbDataReader reader)
         {
-            return new UIDMapping
+            return new()
             {
                 PrivateUID = reader["PrivateUID"].ToString(),
                 ReleaseUID = reader["ReleaseUID"].ToString(),
@@ -98,35 +96,33 @@ namespace Rdmp.Dicom.Extraction
             var table = _database.ExpectTable(_tableName);
 
             // Create data table
-            using (var dt = new DataTable(_tableName))
+            using var dt = new DataTable(_tableName);
+            using (var conn = (SqlConnection)_server.GetConnection())
             {
-                using (var conn = (SqlConnection)_server.GetConnection())
-                {
-                    conn.Open();
-                    
-                    using (var da = new SqlDataAdapter(table.GetTopXSql(0), conn))
-                        da.Fill(dt);
-                }
+                conn.Open();
 
-                // Fill up the data table
-                foreach (var mapping in newMappings)
-                {
-                    var row = dt.NewRow();
-                    row["PrivateUID"] = mapping.PrivateUID;
-                    row["ReleaseUID"] = mapping.ReleaseUID;
-                    row["ProjectNumber"] = mapping.ProjectNumber;
-                    row["UIDType"] = mapping.UIDType;
-                    row["IsExternalReference"] = mapping.IsExternalReference;
-                    dt.Rows.Add(row);
-                }
+                using var da = new SqlDataAdapter(table.GetTopXSql(0), conn);
+                da.Fill(dt);
+            }
 
-                // Perform the bulk copy
-                using (var conn = (SqlConnection)_server.GetConnection())
-                {
-                    conn.Open();
-                    using (var bulkCopy = table.BeginBulkInsert())
-                        bulkCopy.Upload(dt);
-                }
+            // Fill up the data table
+            foreach (var mapping in newMappings)
+            {
+                var row = dt.NewRow();
+                row["PrivateUID"] = mapping.PrivateUID;
+                row["ReleaseUID"] = mapping.ReleaseUID;
+                row["ProjectNumber"] = mapping.ProjectNumber;
+                row["UIDType"] = mapping.UIDType;
+                row["IsExternalReference"] = mapping.IsExternalReference;
+                dt.Rows.Add(row);
+            }
+
+            // Perform the bulk copy
+            using (var conn = (SqlConnection)_server.GetConnection())
+            {
+                conn.Open();
+                using var bulkCopy = table.BeginBulkInsert();
+                bulkCopy.Upload(dt);
             }
         }
 
@@ -134,75 +130,64 @@ namespace Rdmp.Dicom.Extraction
         {
 
             var table = _database.ExpectTable(_tableName);
-            var sql = "UPDATE " + table.GetFullyQualifiedName() + " SET " +
-                      "PrivateUID = @PrivateUID, " +
-                      "ProjectNumber = @ProjectNumber, " +
-                      "UIDType = @UIDType, " +
-                      "IsExternalReference = @IsExternalReference " +
-                      "WHERE ReleaseUID = @ReleaseUID";
+            var sql =
+                $"UPDATE {table.GetFullyQualifiedName()} SET PrivateUID = @PrivateUID, ProjectNumber = @ProjectNumber, UIDType = @UIDType, IsExternalReference = @IsExternalReference WHERE ReleaseUID = @ReleaseUID";
 
-            using (var conn = GetConnection())
-            {
-                conn.Open();
-                var cmd = _server.GetCommand(sql, conn);
-                _server.AddParameterWithValueToCommand("@PrivateUID", cmd, mapping.PrivateUID);
-                _server.AddParameterWithValueToCommand("@ProjectNumber", cmd, mapping.ProjectNumber);
-                _server.AddParameterWithValueToCommand("@UIDType", cmd, mapping.UIDType);
-                _server.AddParameterWithValueToCommand("@IsExternalReference", cmd, mapping.IsExternalReference);
-                _server.AddParameterWithValueToCommand("@ReleaseUID", cmd, mapping.ReleaseUID);
+            using var conn = GetConnection();
+            conn.Open();
+            var cmd = _server.GetCommand(sql, conn);
+            _server.AddParameterWithValueToCommand("@PrivateUID", cmd, mapping.PrivateUID);
+            _server.AddParameterWithValueToCommand("@ProjectNumber", cmd, mapping.ProjectNumber);
+            _server.AddParameterWithValueToCommand("@UIDType", cmd, mapping.UIDType);
+            _server.AddParameterWithValueToCommand("@IsExternalReference", cmd, mapping.IsExternalReference);
+            _server.AddParameterWithValueToCommand("@ReleaseUID", cmd, mapping.ReleaseUID);
 
-                cmd.ExecuteNonQuery();
-            }
-
+            cmd.ExecuteNonQuery();
         }
 
         public string GetOrAllocateMapping(string value, int projectNumber, UIDType uidType)
         {
-            using (var con = _database.Server.GetConnection())
+            using var con = _database.Server.GetConnection();
+            con.Open();
+
+            var cmd =
+                _server.GetCommand(
+                    "SELECT ReleaseUID from UIDMapping WHERE ProjectNumber = @ProjectNumber AND UIDType = @UIDType AND PrivateUID = @PrivateUID",
+                    con);
+
+            _server.AddParameterWithValueToCommand("@ProjectNumber", cmd, projectNumber);
+            _server.AddParameterWithValueToCommand("@UIDType", cmd, uidType);
+            _server.AddParameterWithValueToCommand("@PrivateUID", cmd, value);
+
+            var result = cmd.ExecuteScalar();
+
+            if (result != DBNull.Value && result != null) return result.ToString();
+            var m = new UIDMapping
             {
-                con.Open();
+                UIDType = uidType,
+                ProjectNumber = projectNumber,
+                PrivateUID = value,
+                ReleaseUID = GetKindaUid(),
+                IsExternalReference = false
+            };
 
-                var cmd =
-                    _server.GetCommand(
-                        "SELECT ReleaseUID from UIDMapping WHERE ProjectNumber = @ProjectNumber AND UIDType = @UIDType AND PrivateUID = @PrivateUID",
-                        con);
+            InsertMapping(m);
 
-                _server.AddParameterWithValueToCommand("@ProjectNumber", cmd, projectNumber);
-                _server.AddParameterWithValueToCommand("@UIDType", cmd, uidType);
-                _server.AddParameterWithValueToCommand("@PrivateUID", cmd, value);
-
-                var result = cmd.ExecuteScalar();
-
-                if (result != DBNull.Value && result != null) return result.ToString();
-                var m = new UIDMapping
-                {
-                    UIDType = uidType,
-                    ProjectNumber = projectNumber,
-                    PrivateUID = value,
-                    ReleaseUID = GetKindaUid(),
-                    IsExternalReference = false
-                };
-
-                InsertMapping(m);
-
-                return m.ReleaseUID;
-
-            }
-            
+            return m.ReleaseUID;
         }
 
-        static readonly Random r = new Random();
+        static readonly Random r = new();
         
         private string GetKindaUid()
         {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
             while (sb.Length < 51)
             {
                 var d = r.Next(int.MaxValue);
-                sb.Append(d.ToString());
+                sb.Append(d);
             }
 
-            return "2.25." + sb.ToString(0, 51);
+            return $"2.25.{sb.ToString(0, 51)}";
         }
     }
 }

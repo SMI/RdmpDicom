@@ -58,13 +58,13 @@ namespace Rdmp.Dicom.Tests.Unit
 
             var f = Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestData/IM-0001-0013.dcm");
 
-            source.PreInitialize(new FlatFileToLoadDicomFileWorklist(new FlatFileToLoad(new FileInfo(f))), new ThrowImmediatelyDataLoadEventListener());
-            var result = source.GetChunk(new ThrowImmediatelyDataLoadEventListener(), new GracefulCancellationToken());
+            source.PreInitialize(new FlatFileToLoadDicomFileWorklist(new(new(f))), new ThrowImmediatelyDataLoadEventListener());
+            var result = source.GetChunk(new ThrowImmediatelyDataLoadEventListener(), new());
 
             Assert.AreEqual("IM00010013",result.TableName);
             Assert.Greater(result.Columns.Count,0);
             
-            Assert.IsNull(source.GetChunk(new ThrowImmediatelyDataLoadJob(), new GracefulCancellationToken()));
+            Assert.IsNull(source.GetChunk(new ThrowImmediatelyDataLoadJob(), new()));
         }
 
         [Test]
@@ -81,9 +81,9 @@ namespace Rdmp.Dicom.Tests.Unit
             var fileCount = Directory.GetFiles(dir,"*.dcm").Length;
 
             var source = new DicomFileCollectionSource {FilenameField = "RelativeFileArchiveURI"};
-            source.PreInitialize(new FlatFileToLoadDicomFileWorklist(new FlatFileToLoad(new FileInfo(zip))), new ThrowImmediatelyDataLoadEventListener());
+            source.PreInitialize(new FlatFileToLoadDicomFileWorklist(new(new(zip))), new ThrowImmediatelyDataLoadEventListener());
             var toMemory = new ToMemoryDataLoadEventListener(true);
-            var result = source.GetChunk(toMemory, new GracefulCancellationToken());
+            var result = source.GetChunk(toMemory, new());
 
             //processed every file once
             Assert.AreEqual(fileCount, toMemory.LastProgressRecieivedByTaskName.Single().Value.Progress.Value);
@@ -101,16 +101,16 @@ namespace Rdmp.Dicom.Tests.Unit
             File.WriteAllText(controlFile.FullName,file1.FullName + Environment.NewLine + file2.FullName);
 
             var source = new DicomFileCollectionSource {FilenameField = "RelativeFileArchiveURI"};
-            source.PreInitialize(new FlatFileToLoadDicomFileWorklist(new FlatFileToLoad(controlFile)), new ThrowImmediatelyDataLoadEventListener());
+            source.PreInitialize(new FlatFileToLoadDicomFileWorklist(new(controlFile)), new ThrowImmediatelyDataLoadEventListener());
             
             var toMemory = new ToMemoryDataLoadEventListener(true);
-            var result = source.GetChunk(toMemory, new GracefulCancellationToken());
+            var result = source.GetChunk(toMemory, new());
             Assert.AreEqual(1,result.Rows.Count);
 
-            result = source.GetChunk(toMemory, new GracefulCancellationToken());
+            result = source.GetChunk(toMemory, new());
             Assert.AreEqual(1, result.Rows.Count);
 
-            Assert.AreEqual(null, source.GetChunk(toMemory, new GracefulCancellationToken()));
+            Assert.AreEqual(null, source.GetChunk(toMemory, new()));
         }
         
         
@@ -155,7 +155,7 @@ namespace Rdmp.Dicom.Tests.Unit
 
             //illegal file
             File.WriteAllText(file, "<lolz>");
-            source.TagElevationConfigurationFile = new FileInfo(file);
+            source.TagElevationConfigurationFile = new(file);
             
             var ex = Assert.Throws<XmlException>(()=>source.LoadElevationRequestsFile());
             StringAssert.Contains("Unexpected end of file",ex.Message);
@@ -168,24 +168,24 @@ namespace Rdmp.Dicom.Tests.Unit
             Assert.AreEqual("CodeValueCol",source.LoadElevationRequestsFile().Requests.Single().ColumnName);
             
             //Setting the xml property will override the file xml
-            source.TagElevationConfigurationXml = new DicomSource.TagElevationXml {xml= "<lolz>" };
+            source.TagElevationConfigurationXml = new() {xml= "<lolz>" };
 
             var ex3 = Assert.Throws<XmlException>(() => source.LoadElevationRequestsFile());
             StringAssert.Contains("Unexpected end of file", ex3.Message);
 
-            source.TagElevationConfigurationXml = new DicomSource.TagElevationXml { xml = invalidXml };
+            source.TagElevationConfigurationXml = new() { xml = invalidXml };
             var ex4 = Assert.Throws<TagNavigationException>(() => source.LoadElevationRequestsFile());
             StringAssert.Contains("Navigation Token CodeValue was not the final token in the pathway", ex4.Message);
 
-            source.TagElevationConfigurationXml = new DicomSource.TagElevationXml { xml = validXml2 };
+            source.TagElevationConfigurationXml = new() { xml = validXml2 };
             Assert.AreEqual("CodeValueCol2", source.LoadElevationRequestsFile().Requests.Single().ColumnName);
             
             //now we go back to the file one (by setting the xml one to null)
             source.TagElevationConfigurationXml = null;
             Assert.AreEqual("CodeValueCol", source.LoadElevationRequestsFile().Requests.Single().ColumnName);
-            source.TagElevationConfigurationXml = new DicomSource.TagElevationXml {xml = "" };
+            source.TagElevationConfigurationXml = new() {xml = "" };
             Assert.AreEqual("CodeValueCol", source.LoadElevationRequestsFile().Requests.Single().ColumnName);
-            source.TagElevationConfigurationXml = new DicomSource.TagElevationXml { xml = "  \r\n  " };
+            source.TagElevationConfigurationXml = new() { xml = "  \r\n  " };
             Assert.AreEqual("CodeValueCol", source.LoadElevationRequestsFile().Requests.Single().ColumnName);
         }
     }
