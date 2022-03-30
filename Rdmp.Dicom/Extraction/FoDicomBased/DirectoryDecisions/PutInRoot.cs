@@ -1,5 +1,5 @@
 ﻿using System.IO;
-using Dicom;
+using FellowOakDicom;
 
 namespace Rdmp.Dicom.Extraction.FoDicomBased.DirectoryDecisions
 {

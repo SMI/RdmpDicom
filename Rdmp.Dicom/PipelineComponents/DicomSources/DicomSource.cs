@@ -1,4 +1,4 @@
-using Dicom;
+using FellowOakDicom;
 using DicomTypeTranslation;
 using DicomTypeTranslation.Elevation.Exceptions;
 using DicomTypeTranslation.Elevation.Serialization;
@@ -53,7 +53,7 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
             //Standardize on forward slashes (but don't try to fix \\ e.g. at the start of a UNC path
             if (!string.IsNullOrEmpty(value))
                 if (value.StartsWith("\\\\")) //if it is a UNC path
-                    value = "\\\\" + value.Substring(2).Replace('\\', '/');
+                    value = $"\\\\{value.Substring(2).Replace('\\', '/')}";
                 else
                     value = value.Replace('\\', '/');
 
@@ -97,7 +97,7 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
         public void Check(ICheckNotifier notifier)
         {
             if (FieldMapTableIfAny != null && TagWhitelist != null)
-                notifier.OnCheckPerformed(new CheckEventArgs("Cannot specify both a FieldMapTableIfAny and a TagWhitelist", CheckResult.Fail));
+                notifier.OnCheckPerformed(new("Cannot specify both a FieldMapTableIfAny and a TagWhitelist", CheckResult.Fail));
                         
             try
             {
@@ -105,12 +105,12 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
             }
             catch (Exception e)
             {
-                notifier.OnCheckPerformed(new CheckEventArgs("Could not deserialize TagElevationConfigurationFile", CheckResult.Fail, e));
+                notifier.OnCheckPerformed(new("Could not deserialize TagElevationConfigurationFile", CheckResult.Fail, e));
             }
 
             if (string.IsNullOrWhiteSpace(ArchiveRoot)) return;
             if (!Path.IsPathRooted(ArchiveRoot))
-                notifier.OnCheckPerformed(new CheckEventArgs("ArchiveRoot is not rooted, it must be an absolute path e.g. c:\\temp\\MyImages\\", CheckResult.Fail));
+                notifier.OnCheckPerformed(new("ArchiveRoot is not rooted, it must be an absolute path e.g. c:\\temp\\MyImages\\", CheckResult.Fail));
 
         }
 
@@ -165,7 +165,8 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
                             MarkCorrupt(ds);
                             
                             //but make sure to warn people listening
-                            listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning, "Could not GetCSharpValue for DicomItem " + item.Tag + "(" + entry.Keyword + ") for " + GetProblemFileDescription(filename, otherValuesToStoreInRow), ex));
+                            listener.OnNotify(this, new(ProgressEventType.Warning,
+                                $"Could not GetCSharpValue for DicomItem {item.Tag}({entry.Keyword}) for {GetProblemFileDescription(filename, otherValuesToStoreInRow)}", ex));
 
                             //do not add the row to the table
                             return;
@@ -182,7 +183,8 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
                         {
 
                             //but make sure to warn people listening
-                            listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning, "Could not GetCSharpValue for DicomItem " + item.Tag + "(" + entry.Keyword + ") for " + GetProblemFileDescription(filename, otherValuesToStoreInRow), ex));
+                            listener.OnNotify(this, new(ProgressEventType.Warning,
+                                $"Could not GetCSharpValue for DicomItem {item.Tag}({entry.Keyword}) for {GetProblemFileDescription(filename, otherValuesToStoreInRow)}", ex));
 
                             if (InvalidDataHandlingStrategy == InvalidDataHandling.MarkCorrupt)
                             {
@@ -228,7 +230,8 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
                 }
                 catch (Exception e)
                 {
-                    listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning, "Error getting Tag '" + header + "' item.ValueRepresentation is (" + item.ValueRepresentation + ") " + GetProblemFileDescription(filename, otherValuesToStoreInRow), e));
+                    listener.OnNotify(this, new(ProgressEventType.Warning,
+                        $"Error getting Tag '{header}' item.ValueRepresentation is ({item.ValueRepresentation}) {GetProblemFileDescription(filename, otherValuesToStoreInRow)}", e));
                 }
 
             }
@@ -256,7 +259,8 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
                                     if (e is TagNavigationException)
                                         throw;
 
-                                    listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning, "Error getting Tag for ElevationRequest '" + request.ColumnName + "' for " + GetProblemFileDescription(filename, otherValuesToStoreInRow), e));
+                                    listener.OnNotify(this, new(ProgressEventType.Warning,
+                                        $"Error getting Tag for ElevationRequest '{request.ColumnName}' for {GetProblemFileDescription(filename, otherValuesToStoreInRow)}", e));
                                     value = DBNull.Value;
                                 }
 
@@ -269,7 +273,8 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
                     }
                     catch (TagNavigationException e)
                     {
-                        listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning, "Rule for column " + request.ColumnName + " failed to resolve GetValue for " + GetProblemFileDescription(filename, otherValuesToStoreInRow), e));
+                        listener.OnNotify(this, new(ProgressEventType.Warning,
+                            $"Rule for column {request.ColumnName} failed to resolve GetValue for {GetProblemFileDescription(filename, otherValuesToStoreInRow)}", e));
                     }
                 }
             }
@@ -331,9 +336,8 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
                 if (_maxTagLengths[tag] <= 0 || value.Length <= _maxTagLengths[tag])
                     return true;
 
-                listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning,
-                    "Found value '" + value + "' that was too long for it's VR (" + tag + ").  Max length was " +
-                        _maxTagLengths[tag] + " supplied value was length " + value.Length));
+                listener.OnNotify(this, new(ProgressEventType.Warning,
+                    $"Found value '{value}' that was too long for it's VR ({tag}).  Max length was {_maxTagLengths[tag]} supplied value was length {value.Length}"));
             }
 
             return false;
@@ -346,10 +350,11 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
 
         private string GetProblemFileDescription(string filename, Dictionary<string, string> otherValuesToStoreInRow)
         {
-            string s = "Problem File:" + Environment.NewLine + filename;
+            string s = $"Problem File:{Environment.NewLine}{filename}";
 
             if (otherValuesToStoreInRow != null)
-                s += Environment.NewLine + string.Join(Environment.NewLine, otherValuesToStoreInRow.Select(kvp => kvp.Key + ":" + kvp.Value));
+                s += Environment.NewLine + string.Join(Environment.NewLine, otherValuesToStoreInRow.Select(kvp =>
+                    $"{kvp.Key}:{kvp.Value}"));
 
             return s.Trim();
         }
@@ -375,7 +380,7 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
             //if it is relative to ArchiveRoot then express only the subsection with "./" at start
             if (string.IsNullOrWhiteSpace(ArchiveRoot)) return filename;
             if (filename.StartsWith(ArchiveRoot, StringComparison.CurrentCultureIgnoreCase))
-                return "./" + filename.Substring(ArchiveRoot.Length).TrimStart('/');
+                return $"./{filename.Substring(ArchiveRoot.Length).TrimStart('/')}";
 
             //otherwise return the original
             return filename;
@@ -394,7 +399,7 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
         {
             //if tag elevation is specified in raw XML
             if(TagElevationConfigurationXml != null && !string.IsNullOrWhiteSpace(TagElevationConfigurationXml.xml))
-                return new TagElevationRequestCollection(TagElevationConfigurationXml.xml);
+                return new(TagElevationConfigurationXml.xml);
 
             //if tag elevation is specified in a file
             return TagElevationConfigurationFile != null ? new TagElevationRequestCollection(File.ReadAllText(TagElevationConfigurationFile.FullName)) : null;

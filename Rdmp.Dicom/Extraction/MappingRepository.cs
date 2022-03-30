@@ -43,7 +43,7 @@ namespace Rdmp.Dicom.Extraction
                 builder.Password = server.GetDecryptedPassword();
             }
 
-            return new DiscoveredServer(builder);
+            return new(builder);
         }
 
         private SqlConnection GetConnection()
@@ -59,7 +59,7 @@ namespace Rdmp.Dicom.Extraction
             conn.Open();
             var cmd =
                 DatabaseCommandHelper.GetCommand(
-                    "SELECT * FROM " + table.GetFullyQualifiedName() + " WHERE ProjectNumber = @ProjectNumber", conn);
+                    $"SELECT * FROM {table.GetFullyQualifiedName()} WHERE ProjectNumber = @ProjectNumber", conn);
             DatabaseCommandHelper.AddParameterWithValueToCommand("@ProjectNumber", cmd, projectNumber);
 
             var reader = cmd.ExecuteReader();
@@ -75,7 +75,7 @@ namespace Rdmp.Dicom.Extraction
 
         private UIDMapping HydrateMapping(DbDataReader reader)
         {
-            return new UIDMapping
+            return new()
             {
                 PrivateUID = reader["PrivateUID"].ToString(),
                 ReleaseUID = reader["ReleaseUID"].ToString(),
@@ -100,9 +100,9 @@ namespace Rdmp.Dicom.Extraction
             using (var conn = (SqlConnection)_server.GetConnection())
             {
                 conn.Open();
-                    
-                using (var da = new SqlDataAdapter(table.GetTopXSql(0), conn))
-                    da.Fill(dt);
+
+                using var da = new SqlDataAdapter(table.GetTopXSql(0), conn);
+                da.Fill(dt);
             }
 
             // Fill up the data table
@@ -121,8 +121,8 @@ namespace Rdmp.Dicom.Extraction
             using (var conn = (SqlConnection)_server.GetConnection())
             {
                 conn.Open();
-                using (var bulkCopy = table.BeginBulkInsert())
-                    bulkCopy.Upload(dt);
+                using var bulkCopy = table.BeginBulkInsert();
+                bulkCopy.Upload(dt);
             }
         }
 
@@ -130,12 +130,8 @@ namespace Rdmp.Dicom.Extraction
         {
 
             var table = _database.ExpectTable(_tableName);
-            var sql = "UPDATE " + table.GetFullyQualifiedName() + " SET " +
-                      "PrivateUID = @PrivateUID, " +
-                      "ProjectNumber = @ProjectNumber, " +
-                      "UIDType = @UIDType, " +
-                      "IsExternalReference = @IsExternalReference " +
-                      "WHERE ReleaseUID = @ReleaseUID";
+            var sql =
+                $"UPDATE {table.GetFullyQualifiedName()} SET PrivateUID = @PrivateUID, ProjectNumber = @ProjectNumber, UIDType = @UIDType, IsExternalReference = @IsExternalReference WHERE ReleaseUID = @ReleaseUID";
 
             using var conn = GetConnection();
             conn.Open();
@@ -184,14 +180,14 @@ namespace Rdmp.Dicom.Extraction
         
         private string GetKindaUid()
         {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
             while (sb.Length < 51)
             {
                 var d = r.Next(int.MaxValue);
-                sb.Append(d.ToString());
+                sb.Append(d);
             }
 
-            return "2.25." + sb.ToString(0, 51);
+            return $"2.25.{sb.ToString(0, 51)}";
         }
     }
 }

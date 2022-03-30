@@ -3,7 +3,7 @@ using System.Data;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using Dicom;
+using FellowOakDicom;
 using ReusableLibraryCode.Checks;
 using ReusableLibraryCode.Progress;
 using Rdmp.Dicom.Extraction.FoDicomBased.DirectoryDecisions;
@@ -15,7 +15,7 @@ using Rdmp.Core.Repositories.Construction;
 using MapsDirectlyToDatabaseTable.Versioning;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using static Dicom.DicomAnonymizer;
+using static FellowOakDicom.DicomAnonymizer;
 
 namespace Rdmp.Dicom.Extraction.FoDicomBased
 {
@@ -69,14 +69,15 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
             //Things we ignore, Lookups, SupportingSql etc
             if (_extractCommand == null)
             {
-                listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information, "Ignoring non dataset command "));
+                listener.OnNotify(this, new(ProgressEventType.Information, "Ignoring non dataset command "));
                 return toProcess;
             }
             
             //if it isn't a dicom dataset don't process it
             if (!toProcess.Columns.Contains(RelativeArchiveColumnName))
             {
-                listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Warning, "Dataset " + _extractCommand.DatasetBundle.DataSet + " did not contain field '" + RelativeArchiveColumnName + "' so we will not attempt to extract images"));
+                listener.OnNotify(this,new(ProgressEventType.Warning,
+                    $"Dataset {_extractCommand.DatasetBundle.DataSet} did not contain field '{RelativeArchiveColumnName}' so we will not attempt to extract images"));
                 return toProcess;
             }
 
@@ -97,7 +98,7 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
             foreach (DataRow row in toProcess.Rows)
             {
                 if(_errors > 0 && _errors > ErrorThreshold)
-                    throw new Exception($"Number of errors reported ({_errors}) reached the threshold ({ErrorThreshold})");
+                    throw new($"Number of errors reported ({_errors}) reached the threshold ({ErrorThreshold})");
 
                 cancellationToken.ThrowIfAbortRequested();
 
@@ -212,12 +213,12 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
         {
             // we still want to remove PatientName, PatientAddress etc see these:
             // https://dicom.nema.org/medical/dicom/2015c/output/chtml/part03/sect_C.2.3.html
-            profile.Add(new Regex("0010,.*"), SecurityProfileActions.Z);
+            profile.Add(new("0010,.*"), SecurityProfileActions.Z);
         }
 
         private IEnumerable<DicomTag> GetDeleteTags()
         {
-            List<DicomTag> toReturn = new List<DicomTag>();
+            List<DicomTag> toReturn = new();
             var alsoDelete = DeleteTags?.Split(",", StringSplitOptions.RemoveEmptyEntries) ?? Array.Empty<string>();
 
             foreach(var s in alsoDelete)
@@ -228,7 +229,7 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
                 }
                 catch (Exception)
                 {
-                    throw new Exception($"Could not find a tag called '{s}' when resolving {nameof(DeleteTags)} property.  All names must exactly match DicomTags");
+                    throw new($"Could not find a tag called '{s}' when resolving {nameof(DeleteTags)} property.  All names must exactly match DicomTags");
                 }
             }
 
@@ -250,7 +251,7 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
             _extractCommand = value as IExtractDatasetCommand;
         }
 
-        private static object CreateServersOneAtATime = new();
+        private static readonly object CreateServersOneAtATime = new();
 
         public void Check(ICheckNotifier notifier)
         {
@@ -260,7 +261,7 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
             }
             catch (Exception ex)
             {
-                notifier.OnCheckPerformed(new CheckEventArgs($"Error processing {nameof(DeleteTags)}",CheckResult.Fail, ex));
+                notifier.OnCheckPerformed(new($"Error processing {nameof(DeleteTags)}",CheckResult.Fail, ex));
             }
             
 
@@ -268,7 +269,7 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
             {
                 if (UIDMappingServer == null)
                 {
-                    throw new Exception($"{nameof(UIDMappingServer)} not set, set it existing UID mapping server or to an empty database to create a new one");
+                    throw new($"{nameof(UIDMappingServer)} not set, set it existing UID mapping server or to an empty database to create a new one");
                 }
 
                 var patcher = new SMIDatabasePatcher();

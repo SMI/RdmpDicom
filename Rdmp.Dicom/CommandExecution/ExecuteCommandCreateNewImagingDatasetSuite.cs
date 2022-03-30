@@ -78,7 +78,7 @@ namespace Rdmp.Dicom.CommandExecution
             _catalogueRepository = repositoryLocator.CatalogueRepository;
             _databaseToCreateInto = databaseToCreateInto;
             _projectDirectory = projectDirectory;
-            NewCataloguesCreated = new List<ICatalogue>();
+            NewCataloguesCreated = new();
 
             _loggingServer = _catalogueRepository.GetServerDefaults().GetDefaultFor(PermissableDefaults.LiveLoggingServer_ID);
 
@@ -120,7 +120,7 @@ namespace Rdmp.Dicom.CommandExecution
 
             base.Execute();
 
-            List<DiscoveredTable> tablesCreated = new List<DiscoveredTable>();
+            List<DiscoveredTable> tablesCreated = new();
 
             //Create with template?
             if(Template != null)
@@ -138,7 +138,7 @@ namespace Rdmp.Dicom.CommandExecution
                 }
             }
             else
-                throw new Exception("No Template provided");
+                throw new("No Template provided");
 
             //that's us done if we aren't creating a load
             if(!CreateLoad)
@@ -146,7 +146,7 @@ namespace Rdmp.Dicom.CommandExecution
 
             string loadName = GetNameWithPrefixInBracketsIfAny("SMI Image Loading");
 
-            NewLoadMetadata = new LoadMetadata(_catalogueRepository, loadName);
+            NewLoadMetadata = new(_catalogueRepository, loadName);
 
             //tell all the catalogues that they are part of this load and where to log under the same task
             foreach (var c in NewCataloguesCreated)
@@ -169,7 +169,7 @@ namespace Rdmp.Dicom.CommandExecution
             
             //Create a pipeline for reading from Dicom files and writing to any destination component (which must be fixed)
             var pipe = new Pipeline(_catalogueRepository, GetNameWithPrefixInBracketsIfAny("Image Loading Pipe"));
-            DicomSourcePipelineComponent = new PipelineComponent(_catalogueRepository, pipe, DicomSourceType, 0, DicomSourceType.Name);
+            DicomSourcePipelineComponent = new(_catalogueRepository, pipe, DicomSourceType, 0, DicomSourceType.Name);
             DicomSourcePipelineComponent.CreateArgumentsForClassIfNotExists(DicomSourceType);
 
             // Set the argument for only populating tags who appear in the end tables of the load (no need for source to read all the tags only those we are actually loading)
@@ -227,10 +227,10 @@ namespace Rdmp.Dicom.CommandExecution
                 };
                 coalescer.SaveToDatabase();
 
-                StringBuilder regexPattern = new StringBuilder();
+                StringBuilder regexPattern = new();
 
                 foreach (var tbl in tablesCreated.Where(tbl => !tbl.DiscoverColumns().Any(c=>c.GetRuntimeName().Equals("SOPInstanceUID",StringComparison.CurrentCultureIgnoreCase))))
-                    regexPattern.Append("(" + tbl.GetRuntimeName() +")|");
+                    regexPattern.Append($"({tbl.GetRuntimeName()})|");
                 
 
                 var coalArgs = coalescer.CreateArgumentsForClassIfNotExists<Coalescer>();
@@ -255,7 +255,7 @@ namespace Rdmp.Dicom.CommandExecution
 
             ////////////////////////////////////////////////////////////////////////////////////////////////
             
-            var checker = new CheckEntireDataLoadProcess(NewLoadMetadata, new HICDatabaseConfiguration(NewLoadMetadata), new HICLoadConfigurationFlags(), _catalogueRepository.MEF);
+            var checker = new CheckEntireDataLoadProcess(NewLoadMetadata, new(NewLoadMetadata), new(), _catalogueRepository.MEF);
             checker.Check(new AcceptAllCheckNotifier());
         }
         
@@ -264,7 +264,7 @@ namespace Rdmp.Dicom.CommandExecution
             if (string.IsNullOrWhiteSpace(TablePrefix))
                 return name;
 
-            return name + "(" +TablePrefix.Trim('_') + ")"  ;
+            return $"{name}({TablePrefix.Trim('_')})";
         }
         private string GetNameWithPrefix(string name)
         {

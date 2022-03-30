@@ -1,5 +1,5 @@
 using System;
-using Dicom.Network;
+using FellowOakDicom.Network;
 using ReusableLibraryCode.Progress;
 
 namespace Rdmp.Dicom.Cache.Pipeline.Dicom

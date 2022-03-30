@@ -5,11 +5,13 @@ using Rdmp.Dicom.PipelineComponents.DicomSources;
 using ReusableLibraryCode.Checks;
 using ScintillaNET;
 using System;
+using System.Runtime.Versioning;
 using System.Windows.Forms;
 using Rdmp.UI.ScintillaHelper;
 
 namespace Rdmp.Dicom.UI
 {
+    [SupportedOSPlatform("windows7.0")]
     public partial class TagElevationXmlUI : Form,ICustomUI<DicomSource.TagElevationXml>
     {
         private readonly Scintilla queryEditor;
@@ -60,8 +62,8 @@ namespace Rdmp.Dicom.UI
 
             try
             {
-                new TagElevationRequestCollection(queryEditor.Text);
-                RagSmiley1.OnCheckPerformed(new CheckEventArgs("Succesfully created elevator",CheckResult.Success));
+                _=new TagElevationRequestCollection(queryEditor.Text);
+                RagSmiley1.OnCheckPerformed(new("Successfully created elevator",CheckResult.Success));
             }
             catch(Exception ex)
             {

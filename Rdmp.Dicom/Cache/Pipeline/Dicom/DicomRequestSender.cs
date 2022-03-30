@@ -2,10 +2,12 @@ using System;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
-using Dicom.Network;
+using FellowOakDicom.Imaging.Codec;
+using FellowOakDicom.Log;
+using FellowOakDicom.Network;
+using FellowOakDicom.Network.Client;
 using ReusableLibraryCode.Progress;
 using Rdmp.Dicom.PACS;
-using DicomClient = Dicom.Network.Client.DicomClient;
 
 namespace Rdmp.Dicom.Cache.Pipeline.Dicom
 {
@@ -39,7 +41,7 @@ namespace Rdmp.Dicom.Cache.Pipeline.Dicom
         public void Check()
         {
             var echoRequest = new DicomCEchoRequest();
-            SendRequest(echoRequest, new CancellationToken(false));
+            SendRequest(echoRequest, new(false));
         }
         #endregion
 
@@ -72,9 +74,9 @@ namespace Rdmp.Dicom.Cache.Pipeline.Dicom
             // value in mills
             var delay =  _dicomConfiguration.RequestCooldownInMilliseconds;
             if (delay <= 0) return;
-            _listener.OnNotify(this, new NotifyEventArgs(
+            _listener.OnNotify(this, new(
                 verbose ? ProgressEventType.Information : ProgressEventType.Trace,
-                "Requests sleeping for " + delay / 1000 + "seconds"));
+                $"Requests sleeping for {delay / 1000}seconds"));
             Task.Delay(delay, cancellationToken).Wait(cancellationToken);
         }
         #endregion
@@ -90,7 +92,9 @@ namespace Rdmp.Dicom.Cache.Pipeline.Dicom
         #region SendRequest
         private void SendRequest(DicomRequest dicomRequest, CancellationToken token)
         {
-            var client = new DicomClient(_dicomConfiguration.RemoteAetUri.Host,_dicomConfiguration.RemoteAetUri.Port,false,_dicomConfiguration.LocalAetTitle,_dicomConfiguration.RemoteAetTitle);
+            var client = new DicomClient(_dicomConfiguration.RemoteAetUri.Host, _dicomConfiguration.RemoteAetUri.Port,
+                false, _dicomConfiguration.LocalAetTitle, _dicomConfiguration.RemoteAetTitle, new DicomClientOptions(),
+                new DicomServiceOptions(), new DesktopNetworkManager(), new ConsoleLogManager(),new DefaultTranscoderManager());
             SendRequest(dicomRequest, client,token);
         }
         #endregion
@@ -122,9 +126,9 @@ namespace Rdmp.Dicom.Cache.Pipeline.Dicom
         #region SendRequest
         public void SendRequest(DicomClient client,CancellationToken token)
         {
-            _listener.OnNotify(this, new NotifyEventArgs(
+            _listener.OnNotify(this, new(
                 verbose ? ProgressEventType.Information : ProgressEventType.Trace,
-                "Sending request to " + _dicomConfiguration.RemoteAetTitle + " at " + _dicomConfiguration.RemoteAetUri.Host + ":" + _dicomConfiguration.RemoteAetUri.Port));
+                $"Sending request to {_dicomConfiguration.RemoteAetTitle} at {_dicomConfiguration.RemoteAetUri.Host}:{_dicomConfiguration.RemoteAetUri.Port}"));
             bool completed;
             try
             {
@@ -134,7 +138,7 @@ namespace Rdmp.Dicom.Cache.Pipeline.Dicom
             catch (Exception ex)
             {
                 OnRequestException?.Invoke(ex);
-                throw new Exception("Error when attempting to send DICOM request: " + ex.Message, ex);
+                throw new($"Error when attempting to send DICOM request: {ex.Message}", ex);
             }
 
             if(completed)

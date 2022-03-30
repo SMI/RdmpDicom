@@ -48,7 +48,7 @@ namespace Rdmp.Dicom.Cache
         {
             // Ensure there are no files in the root directory
             if (RootDirectory.EnumerateFiles("*", SearchOption.TopDirectoryOnly).Any())
-                throw new Exception("The imaging cache directory should not contain any files at its root.");
+                throw new("The imaging cache directory should not contain any files at its root.");
 
             // Ensure all directories are named after valid dates by filtering on those that don't parse exactly
             // todo: reinstate correct version after an actual layout is decided on!
@@ -85,7 +85,7 @@ namespace Rdmp.Dicom.Cache
             var allFiles = GetLoadCacheDirectory(listener).EnumerateFiles($"*.{ArchiveType}", SearchOption.AllDirectories).ToList();
             var dateTimes = allFiles.Select(ConvertFilenameToDateTime).ToList();
             dateTimes.Sort((a, b) => a.CompareTo(b));
-            return new Queue<DateTime>(dateTimes);
+            return new(dateTimes);
         }
 
         private DateTime ConvertFilenameToDateTime(FileInfo fileInfo)
@@ -93,7 +93,7 @@ namespace Rdmp.Dicom.Cache
             var nameWithoutExtension = fileInfo.Name.Substring(0, fileInfo.Name.Length - fileInfo.Extension.Length);
 
             if (!DateTime.TryParseExact(nameWithoutExtension, DateFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out var dt))
-                throw new Exception(
+                throw new(
                     $"Dodgy file in cache. Could not parse '{nameWithoutExtension}' using DateFormat={DateFormat} : {fileInfo.FullName}");
 
             return dt;

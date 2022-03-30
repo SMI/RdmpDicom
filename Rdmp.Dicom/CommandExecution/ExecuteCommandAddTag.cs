@@ -47,7 +47,8 @@ namespace Rdmp.Dicom.CommandExecution
 
                     if(similar.Any())
                     {
-                        SetImpossible($"Could not find a tag called '{column}'. Possibly  you meant:" + Environment.NewLine + string.Join(Environment.NewLine,similar));
+                        SetImpossible(
+                            $"Could not find a tag called '{column}'. Possibly  you meant:{Environment.NewLine}{string.Join(Environment.NewLine, similar)}");
                         return;
                     }
                         
@@ -61,12 +62,12 @@ namespace Rdmp.Dicom.CommandExecution
                 }
                 catch (Exception e)
                 {
-                    throw new Exception("No dataType was specified and column name could not be resolved to a DicomTag",e);
+                    throw new("No dataType was specified and column name could not be resolved to a DicomTag",e);
                 }
                 
             }
                         
-            _adder = new TagColumnAdder(column,dataType,(TableInfo)tables[0],new AcceptAllCheckNotifier());
+            _adder = new(column,dataType,(TableInfo)tables[0],new AcceptAllCheckNotifier());
             
         }
         public override void Execute()

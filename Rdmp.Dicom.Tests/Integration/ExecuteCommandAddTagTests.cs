@@ -59,7 +59,7 @@ namespace Rdmp.Dicom.Tests.Integration
             var implementer = triggerImplementerFactory.Create(tbl);
             implementer.CreateTrigger(new ThrowImmediatelyCheckNotifier());
 
-            var archive = tbl.Database.ExpectTable(tbl.GetRuntimeName() + "_Archive");
+            var archive = tbl.Database.ExpectTable($"{tbl.GetRuntimeName()}_Archive");
 
             Assert.IsTrue(archive.Exists());
 

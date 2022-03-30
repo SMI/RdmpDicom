@@ -1,17 +1,20 @@
-using Dicom;
-using Dicom.Network;
+using FellowOakDicom;
+using FellowOakDicom.Network;
 using ReusableLibraryCode.Progress;
 using Rdmp.Dicom.Cache.Pipeline.Dicom;
 using Rdmp.Core.Caching.Requests;
 using Rdmp.Core.DataFlowPipeline;
 using Rdmp.Core.Curation;
-using DicomClient = Dicom.Network.Client.DicomClient;
 using CsvHelper;
 using System.IO;
 using CsvHelper.Configuration;
 using System.Globalization;
 using System.Threading;
 using DicomTypeTranslation;
+using System;
+using FellowOakDicom.Imaging.Codec;
+using FellowOakDicom.Log;
+using FellowOakDicom.Network.Client;
 
 namespace Rdmp.Dicom.Cache.Pipeline
 {
@@ -33,8 +36,8 @@ namespace Rdmp.Dicom.Cache.Pipeline
 
         public override SMIDataChunk DoGetChunk(ICacheFetchRequest cacheRequest, IDataLoadEventListener listener,GracefulCancellationToken cancellationToken)
         {
-            listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,$"CFindSource version is {typeof(CFindSource).Assembly.GetName().Version}.  Assembly is {typeof(PACSSource).Assembly} " ));
-            listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,$"Fo-Dicom version is {typeof(DicomClient).Assembly.GetName().Version}.  Assembly is {typeof(DicomClient).Assembly} " ));
+            listener.OnNotify(this,new(ProgressEventType.Information,$"CFindSource version is {typeof(CFindSource).Assembly.GetName().Version}.  Assembly is {typeof(PACSSource).Assembly} " ));
+            listener.OnNotify(this,new(ProgressEventType.Information,$"Fo-Dicom version is {typeof(DicomClient).Assembly.GetName().Version}.  Assembly is {typeof(DicomClient).Assembly} " ));
 
             var dicomConfiguration = GetConfiguration();
             var requestSender = new DicomRequestSender(dicomConfiguration, listener,true);
@@ -49,9 +52,9 @@ namespace Rdmp.Dicom.Cache.Pipeline
 
             //temp dir
             var cacheDir = new LoadDirectory(Request.CacheProgress.LoadProgress.LoadMetadata.LocationOfFlatFiles).Cache;
-            var cacheLayout = new SMICacheLayout(cacheDir, new SMICachePathResolver(Modality));
+            var cacheLayout = new SMICacheLayout(cacheDir, new(Modality));
             
-            Chunk = new SMIDataChunk(Request)
+            Chunk = new(Request)
             {
                 FetchDate = dateFrom,
                 Modality = Modality,
@@ -64,11 +67,11 @@ namespace Rdmp.Dicom.Cache.Pipeline
             var filepath = Path.Combine(workingDirectory.FullName, filename);
 
             var sw = new StreamWriter(filepath);
-            var writer = new CsvWriter(sw,new CsvConfiguration(CultureInfo.CurrentCulture));
+            var writer = new CsvWriter(sw,new(CultureInfo.CurrentCulture));
 
             WriteHeaders(writer);
                         
-            DicomClient client = new DicomClient(dicomConfiguration.RemoteAetUri.Host, dicomConfiguration.RemoteAetUri.Port, false, dicomConfiguration.LocalAetTitle, dicomConfiguration.RemoteAetTitle);
+            DicomClient client = new(dicomConfiguration.RemoteAetUri.Host, dicomConfiguration.RemoteAetUri.Port, false, dicomConfiguration.LocalAetTitle, dicomConfiguration.RemoteAetTitle, new(), new(),new DesktopNetworkManager(), new ConsoleLogManager(), new DefaultTranscoderManager());
                 
             try
             {
@@ -76,8 +79,8 @@ namespace Rdmp.Dicom.Cache.Pipeline
                 #region Query
 
                 listener.OnNotify(this,
-                    new NotifyEventArgs(ProgressEventType.Information,
-                        "Requesting Studies from " + dateFrom + " to " + dateTo));
+                    new(ProgressEventType.Information,
+                        $"Requesting Studies from {dateFrom} to {dateTo}"));
                 int responses = 0;
 
                 var request = CreateStudyRequestByDateRangeForModality(dateFrom, dateTo, Modality);
@@ -90,8 +93,8 @@ namespace Rdmp.Dicom.Cache.Pipeline
                 };
                 requestSender.ThrottleRequest(request,client, cancellationToken.AbortToken);
                 listener.OnNotify(this,
-                    new NotifyEventArgs(ProgressEventType.Debug,
-                        "Total filtered studies for " + dateFrom + " to " + dateTo +" is " + responses));
+                    new(ProgressEventType.Debug,
+                        $"Total filtered studies for {dateFrom} to {dateTo} is {responses}"));
                 #endregion
 
             }

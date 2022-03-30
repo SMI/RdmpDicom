@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using Dicom;
-using Dicom.Network;
+using FellowOakDicom;
+using FellowOakDicom.Network;
 using MapsDirectlyToDatabaseTable;
 using ReusableLibraryCode.Checks;
 using ReusableLibraryCode.DataAccess;
@@ -65,7 +65,8 @@ namespace Rdmp.Dicom.Cache.Pipeline
         protected DicomCMoveRequest CreateCMoveByStudyUid(string destination, string studyUid, IDataLoadEventListener listener)
         {
             var request = new DicomCMoveRequest(destination, studyUid);
-            listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information, "DicomRetriever.CreateCMoveByStudyUid created request for: " + studyUid));
+            listener.OnNotify(this, new(ProgressEventType.Information,
+                $"DicomRetriever.CreateCMoveByStudyUid created request for: {studyUid}"));
             // no more dicomtags have to be set
             return request;
         }
@@ -91,15 +92,15 @@ namespace Rdmp.Dicom.Cache.Pipeline
             var echoRequestSender = new DicomRequestSender(GetConfiguration(), new FromCheckNotifierToDataLoadEventListener(notifier),true);
             echoRequestSender.OnRequestException += ex =>
             {
-                notifier.OnCheckPerformed(new CheckEventArgs("Error sending ECHO", CheckResult.Fail, ex));
+                notifier.OnCheckPerformed(new("Error sending ECHO", CheckResult.Fail, ex));
             };
             echoRequestSender.OnRequestTimeout += () =>
             {
-                notifier.OnCheckPerformed(new CheckEventArgs("Failed to get response from server after timeout", CheckResult.Fail));
+                notifier.OnCheckPerformed(new("Failed to get response from server after timeout", CheckResult.Fail));
             };
             echoRequestSender.OnRequestSucess += () =>
             {
-                notifier.OnCheckPerformed(new CheckEventArgs("Successfully received C-ECHO response from remote PACS", CheckResult.Success));
+                notifier.OnCheckPerformed(new("Successfully received C-ECHO response from remote PACS", CheckResult.Success));
             };
 
             try
@@ -108,7 +109,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
             }
             catch (Exception e)
             {
-                notifier.OnCheckPerformed(new CheckEventArgs("Error when sending C-ECHO to remote PACS", CheckResult.Fail, e));
+                notifier.OnCheckPerformed(new("Error when sending C-ECHO to remote PACS", CheckResult.Fail, e));
             }
         }
         #endregion
@@ -120,7 +121,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
             var request = new DicomCFindRequest(DicomQueryRetrieveLevel.Study, priority);
 
             // always add the encoding - with agnostic encoding
-            request.Dataset.AddOrUpdate(new DicomTag(0x8, 0x5), "ISO_IR 100");
+            request.Dataset.AddOrUpdate(new(0x8, 0x5), "ISO_IR 100");
 
             // add the dicom tags with empty values that should be included in the result of the QR Server
             request.Dataset.AddOrUpdate(DicomTag.PatientID, "");
@@ -150,7 +151,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
             // you realy need pro process your data and not to cause unneccessary traffic and IO load:
             var request = new DicomCFindRequest(DicomQueryRetrieveLevel.Series, priority);
 
-            request.Dataset.AddOrUpdate(new DicomTag(0x8, 0x5), "ISO_IR 100");
+            request.Dataset.AddOrUpdate(new(0x8, 0x5), "ISO_IR 100");
 
             // add the dicom tags with empty values that should be included in the result
             request.Dataset.AddOrUpdate(DicomTag.SeriesInstanceUID, "");
@@ -172,7 +173,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
             // you realy need pro process your data and not to cause unneccessary traffic and IO load:
             var request = new DicomCFindRequest(DicomQueryRetrieveLevel.Image, priority);
 
-            request.Dataset.AddOrUpdate(new DicomTag(0x8, 0x5), "ISO_IR 100");
+            request.Dataset.AddOrUpdate(new(0x8, 0x5), "ISO_IR 100");
 
             // add the dicom tags with empty values that should be included in the result
             request.Dataset.AddOrUpdate(DicomTag.PatientID, "");
@@ -190,7 +191,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
         #region GetConfiguration
         protected DicomConfiguration GetConfiguration()
         {
-            return new DicomConfiguration
+            return new()
             {
                 LocalAetTitle = LocalAETitle,
                 LocalAetUri = DicomConfiguration.MakeUriUsePort(LocalAEUri, LocalAEPort),
@@ -213,17 +214,18 @@ namespace Rdmp.Dicom.Cache.Pipeline
         /// <param name="listener"></param>
         protected void GetWhitelist(IDataLoadEventListener listener)
         {
-            Whitelist = new HashSet<string>();
+            Whitelist = new();
 
             var db = DataAccessPortal.GetInstance().ExpectDatabase(PatientIdWhitelistColumnInfo.TableInfo, DataAccessContext.DataLoad);
             var server = db.Server;
 
             var qb = new QueryBuilder("distinct", null);
-            qb.AddColumn(new ColumnInfoToIColumn(new MemoryRepository(), PatientIdWhitelistColumnInfo));
+            qb.AddColumn(new ColumnInfoToIColumn(new(), PatientIdWhitelistColumnInfo));
 
             var sql = qb.SQL;
 
-            listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information, "Downloading Whitelist with SQL:" + sql));
+            listener.OnNotify(this, new(ProgressEventType.Information,
+                $"Downloading Whitelist with SQL:{sql}"));
 
             using (var con = server.GetConnection())
             {
@@ -240,7 +242,8 @@ namespace Rdmp.Dicom.Cache.Pipeline
                 }
             }
 
-            listener.OnNotify(this, new NotifyEventArgs(Whitelist.Count == 0 ? ProgressEventType.Error : ProgressEventType.Information, "Whitelist contained " + Whitelist.Count + " identifiers"));
+            listener.OnNotify(this, new(Whitelist.Count == 0 ? ProgressEventType.Error : ProgressEventType.Information,
+                $"Whitelist contained {Whitelist.Count} identifiers"));
         }
         #endregion
 

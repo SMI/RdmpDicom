@@ -58,9 +58,9 @@ namespace Rdmp.Dicom.PipelineComponents.CFind
         public DataTable GetChunk(IDataLoadEventListener listener, GracefulCancellationToken cancellationToken)
         {
             if (_file == null)
-                throw new Exception("File has not been set");
+                throw new("File has not been set");
             if (!_file.File.Exists)
-                throw new FileNotFoundException("File did not exist:'" + _file.File.FullName + "'");
+                throw new FileNotFoundException($"File did not exist:'{_file.File.FullName}'");
 
             // This is an all at once source, next call returns null (i.e. we are done)
             if (!firstTime)
@@ -105,37 +105,37 @@ namespace Rdmp.Dicom.PipelineComponents.CFind
 
         private void ProcessDir(string dir, DataTable dt, IDataLoadEventListener listener)
         {
-            listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information, $"Starting '{dir}'"));
+            listener.OnNotify(this, new(ProgressEventType.Information, $"Starting '{dir}'"));
 
             if (File.Exists(dir))
             {
                 // the inventory entry is a xml file directly :o
-                XmlToRows(dir, dt, listener);
+                XmlToRows(dir, dt);
                 return;
             }
 
             if (!Directory.Exists(dir))
             {
-                listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Error, $"'{dir}' was not a Directory or File"));
+                listener.OnNotify(this, new(ProgressEventType.Error, $"'{dir}' was not a Directory or File"));
                 return;
             }
 
             var matches = Directory.GetFiles(dir, SearchPattern, SearchOption.AllDirectories);
 
-            listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information, $"Found {matches.Length} CFind files in {dir}"));
+            listener.OnNotify(this, new(ProgressEventType.Information, $"Found {matches.Length} CFind files in {dir}"));
 
             foreach(var file in matches)
             {
-                XmlToRows(file, dt,listener);
+                XmlToRows(file, dt);
 
                 if (filesRead++ % 10000 == 0)
                 {
-                    listener.OnProgress(this, new ProgressEventArgs("Reading files", new ProgressMeasurement(filesRead, ProgressType.Records, matches.Length), timer?.Elapsed ?? TimeSpan.Zero));
+                    listener.OnProgress(this, new("Reading files", new(filesRead, ProgressType.Records, matches.Length), timer?.Elapsed ?? TimeSpan.Zero));
                 }
             }
         }
 
-        private void XmlToRows(string file, DataTable dt, IDataLoadEventListener listener)
+        private void XmlToRows(string file, DataTable dt)
         {
             using var fileStream = File.Open(file, FileMode.Open);
             //Load the file and create a navigator object. 
@@ -168,7 +168,7 @@ namespace Rdmp.Dicom.PipelineComponents.CFind
 
         public DataTable TryGetPreview()
         {
-            return GetChunk(new ThrowImmediatelyDataLoadEventListener(), new GracefulCancellationToken());
+            return GetChunk(new ThrowImmediatelyDataLoadEventListener(), new());
         }
     }
 }

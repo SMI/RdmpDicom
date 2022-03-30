@@ -6,7 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Dicom;
+using FellowOakDicom;
 using FAnsi.Discovery;
 using ReusableLibraryCode.Progress;
 using Rdmp.Dicom.PipelineComponents.DicomSources.Worklists;
@@ -55,7 +55,7 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
 
             if (_fileWorklist == null)
             {
-                listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning, "Skipping component because _fileWorklist is null"));
+                listener.OnNotify(this, new(ProgressEventType.Warning, "Skipping component because _fileWorklist is null"));
                 return null;
             }
 
@@ -69,8 +69,8 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
                     return null;
 
                 // Exactly one of file/directory must be null:
-                if (file!=null == (directory!=null))
-                    throw new Exception("Expected IDicomProcessListProvider to return either a DirectoryInfo or a FileInfo not both/neither");
+                if ((file!=null) == (directory!=null))
+                    throw new("Expected IDicomProcessListProvider to return either a DirectoryInfo or a FileInfo not both/neither");
 
                 if (file != null)
                 {
@@ -111,7 +111,7 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
 
         private void UpdateProgressListeners()
         {
-            _listener.OnProgress(this, new ProgressEventArgs("Processing Files", new ProgressMeasurement(_filesProcessedSoFar, ProgressType.Records), _stopwatch.Elapsed));
+            _listener.OnProgress(this, new("Processing Files", new(_filesProcessedSoFar, ProgressType.Records), _stopwatch.Elapsed));
         }
 
         private void ProcessZipArchive(Stream arcStream, DataTable dt, string zipFileName, IDataLoadEventListener listener)
@@ -150,12 +150,12 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
             }
             catch (InvalidDataException e)
             {
-                listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Warning,
+                listener.OnNotify(this,new(ProgressEventType.Warning,
                     $"Error processing zip file '{zipFileName}'", e));
             }
                 
             if(skippedEntries>0)
-                listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Warning,
+                listener.OnNotify(this,new(ProgressEventType.Warning,
                     $"Skipped '{skippedEntries}' in zip archive '{zipFileName}' because they did not have .dcm extensions"));
 
             UpdateProgressListeners();
@@ -164,11 +164,11 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
         private void RecordError(string filenameOrZipEntry, Exception exception)
         {                    
             _totalErrors ++;
-            _listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning,
+            _listener.OnNotify(this, new(ProgressEventType.Warning,
                 $"{filenameOrZipEntry} could not be processed", exception));
 
             if (_totalErrors > ErrorThreshold)
-                throw new Exception("Maximum number of errors reached (ErrorThreshold)", exception);
+                throw new("Maximum number of errors reached (ErrorThreshold)", exception);
         }
 
 
@@ -213,8 +213,8 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
 
         private void ProcessDirectory(DataTable dt, DirectoryInfo directoryInfo,IDataLoadEventListener listener)
         {
-            listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information,
-                $"Started Directory '{directoryInfo.FullName}' on Thread {Thread.CurrentThread.ManagedThreadId}"));
+            listener.OnNotify(this, new(ProgressEventType.Information,
+                $"Started Directory '{directoryInfo.FullName}' on Thread {Environment.CurrentManagedThreadId}"));
 
             //process all dcm files and archives in current directory
             foreach (var file in directoryInfo.EnumerateFiles())
@@ -256,7 +256,7 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
                 if(file == null)
                 {
 
-                    listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning,
+                    listener.OnNotify(this, new(ProgressEventType.Warning,
                         $"Skipping file '{filename}' because DicomFile.Open returned null"));
                     return;
                 }
@@ -276,14 +276,14 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
             if (value == null)
             {
                 listener.OnNotify(this,
-                    new NotifyEventArgs(ProgressEventType.Warning, "Could not check IDicomProcessListProvider because it was null (only valid at Design Time)"));
+                    new(ProgressEventType.Warning, "Could not check IDicomProcessListProvider because it was null (only valid at Design Time)"));
                 return;
             }
 
             _fileWorklist = value as IDicomFileWorklist;
             
             if(_fileWorklist == null)
-                listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Warning,
+                listener.OnNotify(this,new(ProgressEventType.Warning,
                     $"Expected IDicomWorklist to be of Type IDicomProcessListProvider (but it was {value.GetType().Name}).  This component will be skipped"));
         }
         
@@ -292,11 +292,11 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
             try
             {
                 //todo timeout 10s
-                return GetChunk(new ThrowImmediatelyDataLoadEventListener(), new GracefulCancellationToken());
+                return GetChunk(new ThrowImmediatelyDataLoadEventListener(), new());
             }
             finally
             {
-                _stopwatch = new Stopwatch();
+                _stopwatch = new();
             }
         }
 

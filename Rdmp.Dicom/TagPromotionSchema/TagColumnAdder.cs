@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Linq;
-using Dicom;
+using FellowOakDicom;
 using DicomTypeTranslation;
 using ReusableLibraryCode;
 using ReusableLibraryCode.Checks;
@@ -72,7 +72,8 @@ namespace Rdmp.Dicom.TagPromotionSchema
 
             if (_tableInfo.ColumnInfos.Any(c => c.GetRuntimeName().Equals(_tagName)))
             {
-                notifier.OnCheckPerformed(new CheckEventArgs("There is already a column called '" + _tagName + "' in TableInfo " + _tableInfo,CheckResult.Fail));
+                notifier.OnCheckPerformed(new(
+                    $"There is already a column called '{_tagName}' in TableInfo {_tableInfo}",CheckResult.Fail));
                 return;
             }
 
@@ -80,11 +81,11 @@ namespace Rdmp.Dicom.TagPromotionSchema
             try
             {
                 var cSharpType = db.Server.GetQuerySyntaxHelper().TypeTranslater.GetCSharpTypeForSQLDBType(_datatype);
-                notifier.OnCheckPerformed(new CheckEventArgs($"Datatype { _datatype } is compatible with TypeTranslater as { cSharpType }",CheckResult.Success));
+                notifier.OnCheckPerformed(new($"Datatype { _datatype } is compatible with TypeTranslater as { cSharpType }",CheckResult.Success));
             }
             catch (Exception ex)
             {
-                notifier.OnCheckPerformed(new CheckEventArgs("Datatype '" + _datatype + "' is not supported",CheckResult.Fail, ex));
+                notifier.OnCheckPerformed(new($"Datatype '{_datatype}' is not supported",CheckResult.Fail, ex));
             }
         }
 
@@ -108,7 +109,7 @@ namespace Rdmp.Dicom.TagPromotionSchema
             var tag = DicomDictionary.Default.FirstOrDefault(t => t.Keyword == keyword);
 
             if(tag == null)
-                throw new NotSupportedException("Keyword '"+keyword + "' is not a valid Dicom Tag.");
+                throw new NotSupportedException($"Keyword '{keyword}' is not a valid Dicom Tag.");
             
             var type = DicomTypeTranslater.GetNaturalTypeForVr(tag.ValueRepresentations, tag.ValueMultiplicity);
             return tt.GetSQLDBTypeForCSharpType(type);

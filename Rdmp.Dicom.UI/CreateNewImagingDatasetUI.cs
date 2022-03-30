@@ -37,7 +37,7 @@ namespace Rdmp.Dicom.UI
             }
 
             if (db.Exists()) return true;
-            if (MessageBox.Show("Create database '" + db + "'", "Create", MessageBoxButtons.YesNo) != DialogResult.Yes)
+            if (MessageBox.Show($"Create database '{db}'", "Create", MessageBoxButtons.YesNo) != DialogResult.Yes)
                 return false;
             db.Create();
 
@@ -47,8 +47,8 @@ namespace Rdmp.Dicom.UI
         private void btnCreateSuiteWithTemplate_Click(object sender, EventArgs e)
         {
             string filename;
-            using (OpenFileDialog ofd = new OpenFileDialog
-            {
+            using (OpenFileDialog ofd = new()
+                   {
                 Filter = "Imaging Template|*.it"
             })
             {
@@ -78,15 +78,15 @@ namespace Rdmp.Dicom.UI
 
 
             DirectoryInfo dir = null;
-            using (FolderBrowserDialog dialog = new FolderBrowserDialog
-            {
+            using (FolderBrowserDialog dialog = new()
+                   {
                 Description = "Select Project Directory (For Sql scripts/Executables etc)"
             })
             {
                 //if we are creating a load we need to know where to store load scripts etc
                 if (cbCreateLoad.Checked)
                     if (dialog.ShowDialog() == DialogResult.OK)
-                        dir = new DirectoryInfo(dialog.SelectedPath);
+                        dir = new(dialog.SelectedPath);
                     else
                         return;
             }

@@ -152,10 +152,10 @@ Tables:
             File.WriteAllText(template,TemplateYaml);
 
             var cmd = new ExecuteCommandCreateNewImagingDatasetSuite(RepositoryLocator,db,
-                new DirectoryInfo(TestContext.CurrentContext.WorkDirectory),
+                new(TestContext.CurrentContext.WorkDirectory),
                 typeof(DicomFileCollectionSource),
                 "CT_",
-                new FileInfo(template),
+                new(template),
                 persistentRaw: false,
                 createLoad: true);
 

@@ -38,12 +38,12 @@ namespace Rdmp.Dicom.CommandExecution
             var cp = new CacheProgress(memory,lp);
 
             //Create the source component only and a valid request range to fetch
-            _source = new PACSSource
+            _source = new()
             {
-                RemoteAEUri = new Uri("http://" + remoteAeUri),
+                RemoteAEUri = new($"http://{remoteAeUri}"),
                 RemoteAEPort = remotePort,
                 RemoteAETitle = remoteAeTitle,
-                LocalAEUri = new Uri("http://" + localAeUri),
+                LocalAEUri = new($"http://{localAeUri}"),
                 LocalAEPort = localPort,
                 LocalAETitle = localAeTitle,
                 TransferTimeOutInSeconds = 50000,
@@ -52,7 +52,7 @@ namespace Rdmp.Dicom.CommandExecution
             };
             //<- rly? its not gonna pass without an http!?
 
-            _request = new BackfillCacheFetchRequest(BasicActivator.RepositoryLocator.CatalogueRepository, startDate)
+            _request = new(BasicActivator.RepositoryLocator.CatalogueRepository, startDate)
             {
                 ChunkPeriod = endDate.Subtract(startDate), CacheProgress = cp
             };
@@ -68,7 +68,7 @@ namespace Rdmp.Dicom.CommandExecution
         {
             base.Execute();
 
-            _source.GetChunk(new ThrowImmediatelyDataLoadEventListener {WriteToConsole = true},new GracefulCancellationToken());
+            _source.GetChunk(new ThrowImmediatelyDataLoadEventListener {WriteToConsole = true},new());
 
         }
         public ICacheFetchRequest Current => _request;

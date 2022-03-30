@@ -159,7 +159,7 @@ namespace Rdmp.Dicom.ExternalApis
             string mainYaml = ac.Catalogue.Description;
             string overrideYaml = ac.Description;
 
-            Deserializer d = new Deserializer();
+            Deserializer d = new();
 
             main = string.IsNullOrWhiteSpace(mainYaml) ? null : d.Deserialize<SemEHRConfiguration>(mainYaml);
             over = string.IsNullOrWhiteSpace(overrideYaml) ? null : d.Deserialize<SemEHRConfiguration>(overrideYaml);
@@ -259,7 +259,7 @@ namespace Rdmp.Dicom.ExternalApis
                 termsObj.temporality = new JArray(Temporality);
 
             //Add terms to terms array
-            JArray termsArray = new JArray();
+            JArray termsArray = new();
             termsArray.Add(termsObj);
 
             //Set the filter
@@ -292,15 +292,15 @@ namespace Rdmp.Dicom.ExternalApis
         public string GetUrlWithQuerystring()
         {
             string fullRequestUrl = Url;
-            string queryJsonForUrl = "j=" + GetQueryJsonAsString();
+            string queryJsonForUrl = $"j={GetQueryJsonAsString()}";
 
             if (!string.IsNullOrEmpty(Passphrase))
             {
-                fullRequestUrl += "?passphrase=" + Passphrase + "&" + queryJsonForUrl;
+                fullRequestUrl += $"?passphrase={Passphrase}&{queryJsonForUrl}";
             }
             else
             {
-                fullRequestUrl += "?" + queryJsonForUrl;
+                fullRequestUrl += $"?{queryJsonForUrl}";
             }
             return (fullRequestUrl);
         }

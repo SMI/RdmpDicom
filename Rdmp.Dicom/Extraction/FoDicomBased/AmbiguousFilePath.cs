@@ -3,7 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
-using Dicom;
+using FellowOakDicom;
 using Rdmp.Dicom.PACS;
 using ReusableLibraryCode.Progress;
 using SharpCompress.Archives;
@@ -136,7 +136,7 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
             {
                 if (attempt < retryCount)
                 {
-                    listener?.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning, $"Sleeping for {retryDelay}ms because of encountering Exception : {ex.Message}", ex));
+                    listener?.OnNotify(this, new(ProgressEventType.Warning, $"Sleeping for {retryDelay}ms because of encountering Exception : {ex.Message}", ex));
 
                     Thread.Sleep(retryDelay);
                     attempt++;
@@ -177,7 +177,7 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
             {
                 0 => false,
                 1 => true,
-                _ => throw new Exception($"Path '{path}' had too many exclamation marks, expected 0 or 1")
+                _ => throw new($"Path '{path}' had too many exclamation marks, expected 0 or 1")
             };
         }
 

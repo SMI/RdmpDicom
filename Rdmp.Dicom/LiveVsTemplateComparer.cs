@@ -34,7 +34,7 @@ namespace Rdmp.Dicom
                 c.TableName.Equals(liveTableNameWithoutPrefix,StringComparison.CurrentCultureIgnoreCase));
 
             if(template == null)
-                throw new Exception($"Could not find a Template called '{liveTableName}' or '{liveTableNameWithoutPrefix}'.  Templates in file were {string.Join(",",templateCollection.Tables.Select(t=>t.TableName))}");
+                throw new($"Could not find a Template called '{liveTableName}' or '{liveTableNameWithoutPrefix}'.  Templates in file were {string.Join(",",templateCollection.Tables.Select(t=>t.TableName))}");
 
             //script the template
             var creator = new ImagingTableCreation(discoveredTable.Database.Server.GetQuerySyntaxHelper());            
