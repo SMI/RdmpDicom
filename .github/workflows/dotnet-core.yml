@@ -46,7 +46,15 @@ jobs:
           cmd /c rdmpcli\rdmp.exe pack --file Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg
           cmd /c rdmpcli\rdmp.exe cmd listsupportedcommands
           cmd /c rdmpcli\rdmp.exe cmd describecommand CreateNewImagingDatasetSuite
-
+      - name: Get Imaging Template
+        run: |
+          Invoke-WebRequest -Uri https://raw.githubusercontent.com/HicServices/DicomTypeTranslation/main/Templates/CT.it -OutFile CT.it
+      - name: Integration Tests
+          cmd /c rdmpcli\rdmp.exe cmd CreateNewImagingDatasetSuite "DatabaseType:MicrosoftSqlServer:Name:ImagingTest:server=Server=localhost;Integrated Security=true;Encrypt=yes;TrustServerCertificate=true" ./data DicomFileCollectionSource CT_ ../CT.it false false
+          cmd /c rdmpcli\rdmp.exe cmd AddTag Catalogue:CT_ImageTable StudyDate null
+          cmd /c rdmpcli\rdmp.exe cmd AddTag Catalogue:*Table SeriesDate null
+          cmd /c rdmpcli\rdmp.exe cmd AddTag Catalogue:*Table SeriesDate null
+          cmd /c rdmpcli\rdmp.exe cmd AddTag Catalogue:*Table SeriesDate null
       - name: Nuget push
         if: contains(github.ref,'refs/tags/')
         run: nuget push HIC.Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg -Source https://api.nuget.org/v3/index.json -ApiKey ${{ secrets.NUGET_KEY }} -SkipDuplicate
