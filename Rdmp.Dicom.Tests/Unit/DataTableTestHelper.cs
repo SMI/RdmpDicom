@@ -1,7 +1,7 @@
 ﻿using System.Data;
 using System.Linq;
 
-namespace Rdmp.Dicom.Tests
+namespace Rdmp.Dicom.Tests.Unit
 {
     /// <summary>
     /// Helper class for writing unit tests that use DataTable objects.

@@ -69,8 +69,7 @@ namespace Rdmp.Dicom.PipelineComponents
 
         public DataTable GetDifferences(KeyValuePair<TableInfo,DiscoveredTable> isolationTable, out List<IsolationDifference> differences)
         {
-            var ti = isolationTable.Key;
-            var tbl = isolationTable.Value;
+            var (ti, tbl) = isolationTable;
 
             if(!tbl.Exists())
                 throw new($"Table '{tbl.GetFullyQualifiedName()}' did not exist");

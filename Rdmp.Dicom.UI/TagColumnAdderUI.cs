@@ -27,11 +27,7 @@ namespace Rdmp.Dicom.UI
                 var type = TagColumnAdder.GetDataTypeForTag(keyword, _tableInfo.GetQuerySyntaxHelper().TypeTranslater);
 
                 var multiplicity = TagColumnAdder.GetTag(keyword).ValueMultiplicity;
-                if (multiplicity == null)
-                    lblMultiplicity.Text = "(Multiplicity:None)";
-                else
-                    lblMultiplicity.Text =
-                        $"(Multiplicity: Min {multiplicity.Minimum} Max {multiplicity.Maximum} M {multiplicity.Multiplicity})";
+                lblMultiplicity.Text = multiplicity == null ? "(Multiplicity:None)" : $"(Multiplicity: Min {multiplicity.Minimum} Max {multiplicity.Maximum} M {multiplicity.Multiplicity})";
 
                 tbDataType.Text = type;
             }

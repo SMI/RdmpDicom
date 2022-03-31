@@ -2,10 +2,6 @@
 using Rdmp.Dicom.Cache.Pipeline;
 using ReusableLibraryCode.Progress;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Rdmp.Dicom.Tests
 {
@@ -16,9 +12,11 @@ namespace Rdmp.Dicom.Tests
         {
             bool someFact = false;
 
-            var g = new PressureGauge();
-            g.ThresholdBeatsPerMinute = 4;
-            g.Tick(new(2001, 01, 01, 01, 01, 01), new ThrowImmediatelyDataLoadEventListener(), () => someFact = true);
+            var g = new PressureGauge
+            {
+                ThresholdBeatsPerMinute = 4
+            };
+            g.Tick(new DateTime(2001, 01, 01, 01, 01, 01), new ThrowImmediatelyDataLoadEventListener(), () => someFact = true);
             Assert.IsFalse(someFact);
         }
         [Test]
@@ -26,8 +24,10 @@ namespace Rdmp.Dicom.Tests
         {
             bool someFact = false;
 
-            var g = new PressureGauge();
-            g.ThresholdBeatsPerMinute = 1;
+            var g = new PressureGauge
+            {
+                ThresholdBeatsPerMinute = 1
+            };
 
             // events are 1 minute appart so does not trigger
             g.Tick(new(2001, 01, 01, 01, 01, 01), new ThrowImmediatelyDataLoadEventListener(), () => someFact = true);
@@ -42,9 +42,11 @@ namespace Rdmp.Dicom.Tests
         {
             bool someFact = false;
 
-            var g = new PressureGauge();
-            g.ThresholdBeatsPerMinute = 4;
-            g.Tick(new(2001, 01, 01, 01, 01, 01), new ThrowImmediatelyDataLoadEventListener(), () => someFact = true);
+            var g = new PressureGauge
+            {
+                ThresholdBeatsPerMinute = 4
+            };
+            g.Tick(new DateTime(2001, 01, 01, 01, 01, 01), new ThrowImmediatelyDataLoadEventListener(), () => someFact = true);
             Assert.IsFalse(someFact);
             g.Tick(new(2001, 01, 01, 01, 01, 01), new ThrowImmediatelyDataLoadEventListener(), () => someFact = true);
             Assert.IsFalse(someFact);
@@ -61,9 +63,11 @@ namespace Rdmp.Dicom.Tests
         {
             bool someFact = false;
 
-            var g = new PressureGauge();
-            g.ThresholdBeatsPerMinute = 1;
-            g.Tick(new(2001, 01, 01, 01, 01, 01), new ThrowImmediatelyDataLoadEventListener(), () => someFact = true);
+            var g = new PressureGauge
+            {
+                ThresholdBeatsPerMinute = 1
+            };
+            g.Tick(new DateTime(2001, 01, 01, 01, 01, 01), new ThrowImmediatelyDataLoadEventListener(), () => someFact = true);
             Assert.IsFalse(someFact);
             g.Tick(new(2001, 01, 01, 01, 01, 30), new ThrowImmediatelyDataLoadEventListener(), () => someFact = true);
             Assert.IsTrue(someFact);
@@ -73,9 +77,11 @@ namespace Rdmp.Dicom.Tests
         {
             bool someFact = false;
 
-            var g = new PressureGauge();
-            g.ThresholdBeatsPerMinute = 1;
-            g.Tick(new(2001, 01, 01, 01, 01, 30), new ThrowImmediatelyDataLoadEventListener(), () => someFact = true);
+            var g = new PressureGauge
+            {
+                ThresholdBeatsPerMinute = 1
+            };
+            g.Tick(new DateTime(2001, 01, 01, 01, 01, 30), new ThrowImmediatelyDataLoadEventListener(), () => someFact = true);
             Assert.IsFalse(someFact);
             g.Tick(new(2001, 01, 01, 01, 02, 29), new ThrowImmediatelyDataLoadEventListener(), () => someFact = true);
             Assert.IsTrue(someFact);
