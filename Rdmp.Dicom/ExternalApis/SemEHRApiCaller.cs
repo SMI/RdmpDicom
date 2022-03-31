@@ -17,8 +17,12 @@ namespace Rdmp.Dicom.ExternalApis
 
         public override void Run(AggregateConfiguration ac, CachedAggregateConfigurationResultsManager cache, CancellationToken token)
         {
-            var config = SemEHRConfiguration.LoadFrom(ac);
-            HttpClientHandler httpClientHandler = new();
+            Run(ac, cache, token, SemEHRConfiguration.LoadFrom(ac));
+        }
+
+        internal void Run(AggregateConfiguration ac, CachedAggregateConfigurationResultsManager cache, CancellationToken token, SemEHRConfiguration config)
+        {
+            HttpClientHandler httpClientHandler = new HttpClientHandler();
 
             //Get data as post - not currently used
             //In the future we'll enable getting the data with POST maybe. Here for reference
