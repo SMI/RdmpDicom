@@ -10,7 +10,6 @@ using Rdmp.Core.Curation.Data;
 using Rdmp.Core.Curation.Data.DataLoad;
 using Rdmp.Core.DataLoad;
 using Rdmp.Core.DataLoad.Engine.DatabaseManagement.Operations;
-using Rdmp.Core.DataLoad.Engine.DatabaseManagement.EntityNaming;
 
 namespace Rdmp.Dicom.Attachers.Routing
 {

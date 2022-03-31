@@ -21,11 +21,11 @@ namespace Rdmp.Dicom.Tests.Unit
             {
                 //in linux this looks like a relative path
                 var ex = Assert.Throws<ArgumentException>(()=>new AmbiguousFilePath(@"c:\temp\my.dcm"));
-                StringAssert.StartsWith("Relative path was encountered without specifying a root",ex.Message);
+                StringAssert.StartsWith("Relative path was encountered without specifying a root",ex?.Message);
 
 
                 ex = Assert.Throws<ArgumentException>(()=>new AmbiguousFilePath(@"c:\temp",@"c:\temp\my.dcm"));
-                StringAssert.IsMatch("Specified root path '.*' was not IsAbsolute",ex.Message);
+                StringAssert.IsMatch("Specified root path '.*' was not IsAbsolute",ex?.Message);
             }
             else
             {

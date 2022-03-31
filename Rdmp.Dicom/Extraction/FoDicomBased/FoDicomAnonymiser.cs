@@ -81,8 +81,7 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
                 return toProcess;
             }
 
-            if(_putter == null)
-                _putter = (IPutDicomFilesInExtractionDirectories)  new ObjectConstructor().Construct(PutterType);
+            _putter ??= (IPutDicomFilesInExtractionDirectories)new ObjectConstructor().Construct(PutterType);
 
             var projectNumber = _extractCommand.Configuration.Project.ProjectNumber.Value;
 
@@ -113,7 +112,7 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
                 }
                 catch (Exception e)
                 {
-                    listener.OnNotify(this,new(ProgressEventType.Error,$"Failed to get image at path '{path.FullPath}'",e));
+                    listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Error,$"Failed to get image at path '{path.FullPath}'",e));
                     _errors++;
                     continue;
                 }
@@ -123,70 +122,70 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
                     
                 DicomDataset ds;
 
-                try
-                {
-                    // do not anonymise SRs if this flag is set
-                    bool skipAnon = SkipAnonymisationOnStructuredReports && dicomFile.Dataset.GetSingleValue<string>(DicomTag.Modality) == "SR";
+                    try
+                    {
+                        // do not anonymise SRs if this flag is set
+                        bool skipAnon = SkipAnonymisationOnStructuredReports && dicomFile.Dataset.GetSingleValue<string>(DicomTag.Modality) == "SR";
                         
-                    // See: ftp://medical.nema.org/medical/dicom/2011/11_15pu.pdf
-                    var flags = skipAnon ?
-                        //dont anonymise
-                        DicomAnonymizer.SecurityProfileOptions.RetainSafePrivate |
-                        DicomAnonymizer.SecurityProfileOptions.RetainDeviceIdent|
-                        DicomAnonymizer.SecurityProfileOptions.RetainInstitutionIdent |
-                        DicomAnonymizer.SecurityProfileOptions.RetainUIDs |
-                        DicomAnonymizer.SecurityProfileOptions.RetainLongFullDates |
-                        DicomAnonymizer.SecurityProfileOptions.RetainPatientChars :
-                        // do anonymise
-                        DicomAnonymizer.SecurityProfileOptions.BasicProfile |
-                        DicomAnonymizer.SecurityProfileOptions.CleanStructdCont |
-                        DicomAnonymizer.SecurityProfileOptions.CleanDesc |
-                        DicomAnonymizer.SecurityProfileOptions.RetainUIDs;
+                        // See: ftp://medical.nema.org/medical/dicom/2011/11_15pu.pdf
+                        var flags = skipAnon ?
+                            //dont anonymise
+                            DicomAnonymizer.SecurityProfileOptions.RetainSafePrivate |
+                            DicomAnonymizer.SecurityProfileOptions.RetainDeviceIdent|
+                            DicomAnonymizer.SecurityProfileOptions.RetainInstitutionIdent |
+                            DicomAnonymizer.SecurityProfileOptions.RetainUIDs |
+                            DicomAnonymizer.SecurityProfileOptions.RetainLongFullDates |
+                            DicomAnonymizer.SecurityProfileOptions.RetainPatientChars :
+                            // do anonymise
+                            DicomAnonymizer.SecurityProfileOptions.BasicProfile |
+                            DicomAnonymizer.SecurityProfileOptions.CleanStructdCont |
+                            DicomAnonymizer.SecurityProfileOptions.CleanDesc |
+                            DicomAnonymizer.SecurityProfileOptions.RetainUIDs;
 
-                    if (RetainDates && !skipAnon)
-                        flags |= DicomAnonymizer.SecurityProfileOptions.RetainLongFullDates;
+                        if (RetainDates && !skipAnon)
+                            flags |= DicomAnonymizer.SecurityProfileOptions.RetainLongFullDates;
 
-                    var profile = DicomAnonymizer.SecurityProfile.LoadProfile(null, flags);
+                        var profile = DicomAnonymizer.SecurityProfile.LoadProfile(null, flags);
 
 
-                    // I know we said skip anonymisation but still remove this stuff cmon
-                    if (skipAnon)
-                        RemovePatientNameEtc(profile);
+                        // I know we said skip anonymisation but still remove this stuff cmon
+                        if (skipAnon)
+                            RemovePatientNameEtc(profile);
 
-                    var anonymiser = new DicomAnonymizer(profile);
+                        var anonymiser = new DicomAnonymizer(profile);
 
                         
-                    ds = anonymiser.Anonymize(dicomFile.Dataset);
+                        ds = anonymiser.Anonymize(dicomFile.Dataset);
                         
-                }
-                catch (Exception e)
-                {
-                    listener.OnNotify(this,new(ProgressEventType.Error,$"Failed to anonymize image at path '{path.FullPath}'",e));
-                    _errors++;
-                    continue;
-                }
+                    }
+                    catch (Exception e)
+                    {
+                        listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Error,$"Failed to anonymize image at path '{path.FullPath}'",e));
+                        _errors++;
+                        continue;
+                    }
 
                 //now we want to explicitly use our own release Id regardless of what FoDicom said
                 ds.AddOrUpdate(DicomTag.PatientID, releaseId);
 
                 //rewrite the UIDs
-                foreach (var kvp in UIDMapping.SupportedTags)
+                foreach (var (key, uidType) in UIDMapping.SupportedTags)
                 {
-                    if(!ds.Contains(kvp.Key))
+                    if(!ds.Contains(key))
                         continue;
                         
-                    var value = ds.GetValue<string>(kvp.Key, 0);
+                    var value = ds.GetValue<string>(key, 0);
 
                     //if it has a value for this UID
                     if (value == null) continue;
-                    var releaseValue = mappingServer.GetOrAllocateMapping(value, projectNumber, kvp.Value);
+                    var releaseValue = mappingServer.GetOrAllocateMapping(value, projectNumber, uidType);
 
                     //change value in dataset
-                    ds.AddOrUpdate(kvp.Key, releaseValue);
+                    ds.AddOrUpdate(key, releaseValue);
 
                     //and change value in DataTable
-                    if (toProcess.Columns.Contains(kvp.Key.DictionaryEntry.Keyword))
-                        row[kvp.Key.DictionaryEntry.Keyword] = releaseValue;
+                    if (toProcess.Columns.Contains(key.DictionaryEntry.Keyword))
+                        row[key.DictionaryEntry.Keyword] = releaseValue;
                 }
                     
                 foreach(var tag in deleteTags)
@@ -202,7 +201,7 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
 
                 _anonymisedImagesCount++;
 
-                listener.OnProgress(this, new("Writing ANO images", new(_anonymisedImagesCount, ProgressType.Records), _sw.Elapsed));
+                listener.OnProgress(this, new ProgressEventArgs("Writing ANO images", new ProgressMeasurement(_anonymisedImagesCount, ProgressType.Records), _sw.Elapsed));
             }
 
             _sw.Stop();
@@ -275,41 +274,36 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
 
                 var patcher = new SMIDatabasePatcher();
 
-                if (!UIDMappingServer.WasCreatedBy(patcher))
+                if (UIDMappingServer.WasCreatedBy(patcher)) return;
+                if (!string.IsNullOrWhiteSpace(UIDMappingServer.CreatedByAssembly))
                 {
-                    if (string.IsNullOrWhiteSpace(UIDMappingServer.CreatedByAssembly))
-                    {
-                        bool create = notifier.OnCheckPerformed(new($"{nameof(UIDMappingServer)} is not set up yet", CheckResult.Warning, null, "Attempt to create UID mapping schema"));
-
-                        if (create)
-                        {
-                            var db = UIDMappingServer.Discover(ReusableLibraryCode.DataAccess.DataAccessContext.DataExport);
-
-                            if (!db.Exists())
-                            {
-                                notifier.OnCheckPerformed(new($"About to create {db}", CheckResult.Success));
-                                db.Create();
-                            }
-
-                            notifier.OnCheckPerformed(new($"Creating UID Mapping schema in {db}", CheckResult.Success));
-
-                            var scripter = new MasterDatabaseScriptExecutor(db);
-                            scripter.CreateAndPatchDatabase(patcher, new AcceptAllCheckNotifier());
-
-                            UIDMappingServer.CreatedByAssembly = patcher.Name;
-                            UIDMappingServer.SaveToDatabase();
-                        }
-                        else
-                        {
-                            return;
-                        }
-                    }
-                    else
-                    {
-                        notifier.OnCheckPerformed(new($"{nameof(UIDMappingServer)} '{UIDMappingServer}' was created by '{UIDMappingServer.CreatedByAssembly}' not a UID patcher.  Try creating a new server reference to a blank database", CheckResult.Fail));
-                        return;
-                    }
+                    notifier.OnCheckPerformed(new CheckEventArgs(
+                        $"{nameof(UIDMappingServer)} '{UIDMappingServer}' was created by '{UIDMappingServer.CreatedByAssembly}' not a UID patcher.  Try creating a new server reference to a blank database",
+                        CheckResult.Fail));
+                    return;
                 }
+
+                bool create = notifier.OnCheckPerformed(new CheckEventArgs(
+                    $"{nameof(UIDMappingServer)} is not set up yet", CheckResult.Warning, null,
+                    "Attempt to create UID mapping schema"));
+
+                if (!create) return;
+                var db = UIDMappingServer.Discover(ReusableLibraryCode.DataAccess.DataAccessContext.DataExport);
+
+                if (!db.Exists())
+                {
+                    notifier.OnCheckPerformed(new CheckEventArgs($"About to create {db}", CheckResult.Success));
+                    db.Create();
+                }
+
+                notifier.OnCheckPerformed(new CheckEventArgs($"Creating UID Mapping schema in {db}",
+                    CheckResult.Success));
+
+                var scripter = new MasterDatabaseScriptExecutor(db);
+                scripter.CreateAndPatchDatabase(patcher, new AcceptAllCheckNotifier());
+
+                UIDMappingServer.CreatedByAssembly = patcher.Name;
+                UIDMappingServer.SaveToDatabase();
             }
         }
     }

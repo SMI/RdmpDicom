@@ -1,12 +1,12 @@
 ﻿using System;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using FellowOakDicom;
 using Rdmp.Dicom.PACS;
 using ReusableLibraryCode.Progress;
+using SharpCompress.Archives;
 
 namespace Rdmp.Dicom.Extraction.FoDicomBased
 {
@@ -78,80 +78,80 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
         /// <returns></returns>
         public DicomFile GetDataset(int retryCount = 0, int retryDelay=100, ZipPool pool = null, IDataLoadEventListener listener = null)
         {
-            if (IsZipReference(FullPath))
+            if (!IsZipReference(FullPath))
             {
-                int attempt = 0;
+                if (!IsDicomReference(FullPath))
+                    throw new AmbiguousFilePathResolutionException(
+                        $"Path provided '{FullPath}' was not to either an entry in a zip file or to a dicom file");
+
+                return DicomFile.Open(FullPath);
+            }
+
+            int attempt = 0;
 
             TryAgain:
 
-                var bits = FullPath.Split('!');
-                ZipArchive zip = null;
-                try
+            var bits = FullPath.Split('!');
+            IArchive zip = null;
+            try
+            {
+                zip = pool != null ? pool.OpenRead(bits[0]) : ArchiveFactory.Open(bits[0]);
+
+                var entry = zip.GetEntry(bits[1]);
+
+                if (entry == null)
                 {
-                    zip = pool != null ? pool.OpenRead(bits[0]) : ZipFile.Open(bits[0], ZipArchiveMode.Read);
-
-                    var entry = zip.GetEntry(bits[1]);
-
-                    if (entry == null)
+                    //Maybe user has formatted it dodgy
+                    //e.g. \2015\3\18\2.25.177481563701402448825228719253578992342.dcm
+                    string adjusted = bits[1].TrimStart('\\','/');
+                    
+                    //if that doesn't work
+                    if ((entry = zip.GetEntry(adjusted)) == null)
                     {
-                        //Maybe user has formatted it dodgy
-                        //e.g. \2015\3\18\2.25.177481563701402448825228719253578992342.dcm
-                        string adjusted = bits[1].TrimStart('\\','/');
+                        //try normalizing the slashes
+                        adjusted = adjusted.Replace('\\','/');
 
-                        //if that doesn't work
+                        //nope we just cannot get a legit path in this zip
                         if ((entry = zip.GetEntry(adjusted)) == null)
-                        {
-                            //try normalizing the slashes
-                            adjusted = adjusted.Replace('\\','/');
-
-                            //nope we just cannot get a legit path in this zip
-                            if ((entry = zip.GetEntry(adjusted)) == null)
-                                throw new AmbiguousFilePathResolutionException($"Could not find path '{bits[1]}' within zip archive '{bits[0]}'");
-                        }
-
-                        //we fixed it to something that actually exists so update our state that we don't make the same mistake again
-                        FullPath = $"{bits[0]}!{adjusted}";
+                            throw new AmbiguousFilePathResolutionException($"Could not find path '{bits[1]}' within zip archive '{bits[0]}'");
                     }
+
+                    //we fixed it to something that actually exists so update our state that we don't make the same mistake again
+                    FullPath = $"{bits[0]}!{adjusted}";
+                }
                         
-                    if (!IsDicomReference(bits[1]))
-                        throw new AmbiguousFilePathResolutionException(
-                            $"Path provided '{FullPath}' was to a zip file but not to a dicom file entry");
+                if (!IsDicomReference(bits[1]))
+                    throw new AmbiguousFilePathResolutionException(
+                        $"Path provided '{FullPath}' was to a zip file but not to a dicom file entry");
 
-                    var buffer = ByteStreamHelper.ReadFully(entry.Open());
+                var buffer = ByteStreamHelper.ReadFully(entry.OpenEntryStream());
 
-                    //todo: when GH-627 goes live we can use FileReadOption  https://github.com/fo-dicom/fo-dicom/blob/GH-627/DICOM/DicomFile.cs
-                    //using (var memoryStream = new MemoryStream(buffer))
-                    var memoryStream = new MemoryStream(buffer);
+                //todo: when GH-627 goes live we can use FileReadOption  https://github.com/fo-dicom/fo-dicom/blob/GH-627/DICOM/DicomFile.cs
+                //using (var memoryStream = new MemoryStream(buffer))
+                var memoryStream = new MemoryStream(buffer);
 
-                    return DicomFile.Open(memoryStream);
-                }
-                catch(Exception ex)
+                return DicomFile.Open(memoryStream);
+            }
+            catch(Exception ex)
+            {
+                if (attempt < retryCount)
                 {
-                    if (attempt < retryCount)
-                    {
-                        listener?.OnNotify(this, new(ProgressEventType.Warning, $"Sleeping for {retryDelay}ms because of encountering Exception : {ex.Message}", ex));
+                    listener?.OnNotify(this, new(ProgressEventType.Warning, $"Sleeping for {retryDelay}ms because of encountering Exception : {ex.Message}", ex));
 
-                        Thread.Sleep(retryDelay);
-                        attempt++;
-                        goto TryAgain;
-                    }
-                    else 
-                        throw;
+                    Thread.Sleep(retryDelay);
+                    attempt++;
+                    goto TryAgain;
                 }
-                finally
+                else 
+                    throw;
+            }
+            finally
+            {
+                if(pool == null)
                 {
-                    if(pool == null)
-                    {
-                        zip?.Dispose();
-                    }
+                    zip?.Dispose();
                 }
             }
-
-            if(!IsDicomReference(FullPath))
-                throw new AmbiguousFilePathResolutionException(
-                    $"Path provided '{FullPath}' was not to either an entry in a zip file or to a dicom file");
-
-            return DicomFile.Open(FullPath);
         }
 
         public static bool IsDicomReference(string fullPath)

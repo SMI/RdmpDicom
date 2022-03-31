@@ -3,11 +3,8 @@ using NUnit.Framework;
 using Rdmp.Core.Curation.Data.Pipelines;
 using Rdmp.Dicom.CommandExecution;
 using Rdmp.Dicom.PipelineComponents.DicomSources;
-using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using Tests.Common;
 
 namespace Rdmp.Dicom.Tests.Integration

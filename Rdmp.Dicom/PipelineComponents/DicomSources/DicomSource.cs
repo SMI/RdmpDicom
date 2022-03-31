@@ -51,11 +51,7 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
             value = value?.TrimStart().TrimEnd(' ', '\t', '\r', '\n');
 
             //Standardize on forward slashes (but don't try to fix \\ e.g. at the start of a UNC path
-            if (!string.IsNullOrEmpty(value))
-                if (value.StartsWith("\\\\")) //if it is a UNC path
-                    value = $"\\\\{value.Substring(2).Replace('\\', '/')}";
-                else
-                    value = value.Replace('\\', '/');
+            if (!string.IsNullOrEmpty(value)) value = value.StartsWith("\\\\") ? $"\\\\{value.Substring(2).Replace('\\', '/')}" : value.Replace('\\', '/');
 
             //if it has a trailing slash (but isn't just '/') then trim the end
             if(value != null)
@@ -125,8 +121,7 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
         /// <param name="otherValuesToStoreInRow"></param>
         protected void ProcessDataset(string filename, DicomDataset ds, DataTable dt, IDataLoadEventListener listener, Dictionary<string, string> otherValuesToStoreInRow = null)
         {
-            if (_elevationRequests == null)
-                _elevationRequests = LoadElevationRequestsFile();
+            _elevationRequests ??= LoadElevationRequestsFile();
 
             filename = ApplyArchiveRootToMakeRelativePath(filename);
 
@@ -291,15 +286,15 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
                 row[FilenameField] = filename;
 
                 if (otherValuesToStoreInRow != null)
-                    foreach (KeyValuePair<string, string> kvp in otherValuesToStoreInRow)
+                    foreach (var (key, value) in otherValuesToStoreInRow)
                     {
-                        if (!dt.Columns.Contains(kvp.Key))
-                            dt.Columns.Add(kvp.Key);
-                        row[kvp.Key] = kvp.Value;
+                        if (!dt.Columns.Contains(key))
+                            dt.Columns.Add(key);
+                        row[key] = value;
                     }
 
-                foreach (KeyValuePair<string, object> keyValuePair in rowValues)
-                    Add(dt, row, keyValuePair.Key, keyValuePair.Value);
+                foreach (var (key, value) in rowValues)
+                    Add(dt, row, key, value);
             }
         }
 
@@ -380,11 +375,9 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
 
             //if it is relative to ArchiveRoot then express only the subsection with "./" at start
             if (string.IsNullOrWhiteSpace(ArchiveRoot)) return filename;
-            if (filename.StartsWith(ArchiveRoot, StringComparison.CurrentCultureIgnoreCase))
-                return $"./{filename.Substring(ArchiveRoot.Length).TrimStart('/')}";
+            return filename.StartsWith(ArchiveRoot, StringComparison.CurrentCultureIgnoreCase) ? $"./{filename.Substring(ArchiveRoot.Length).TrimStart('/')}" : filename;
 
             //otherwise return the original
-            return filename;
         }
 
         private void Add(DataTable dt, DataRow row, string header, object value)

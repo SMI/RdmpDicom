@@ -6,10 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Extend repertoire of archive formats to include 7zip, RAR, tar, bz2 via SharpCompress
 
 ## [5.0.5] 2022-03-03
 
-- Bump HIC.RDMP.Plugin from 7.0.5 to 7.0.7
+- Bump HIC.RDMP.Plugin from 7.0.6 to 7.0.7
 
 ## [5.0.4] 2022-02-04
 

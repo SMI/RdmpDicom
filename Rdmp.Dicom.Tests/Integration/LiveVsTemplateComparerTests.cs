@@ -2,7 +2,6 @@
 using FAnsi;
 using NUnit.Framework;
 using Rdmp.Core.Curation;
-using Rdmp.Core.Curation.Data;
 using Rdmp.Dicom.CommandExecution;
 using System.Collections.Generic;
 using Tests.Common;
@@ -49,7 +48,7 @@ namespace Rdmp.Dicom.Tests.Integration
                     new ImageColumnTemplate
                     {
                         IsPrimaryKey = false, AllowNulls = true, ColumnName = "PatientAge"
-                    },
+                    }
                 }
             };
 

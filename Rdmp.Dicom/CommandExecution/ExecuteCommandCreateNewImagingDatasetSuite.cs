@@ -149,7 +149,7 @@ namespace Rdmp.Dicom.CommandExecution
             NewLoadMetadata = new(_catalogueRepository, loadName);
 
             //tell all the catalogues that they are part of this load and where to log under the same task
-            foreach (Catalogue c in NewCataloguesCreated)
+            foreach (var c in NewCataloguesCreated)
             {
                 c.LoadMetadata_ID = NewLoadMetadata.ID;
                 c.LoggingDataTask = loadName;
@@ -261,10 +261,7 @@ namespace Rdmp.Dicom.CommandExecution
         
         private string GetNameWithPrefixInBracketsIfAny(string name)
         {
-            if (string.IsNullOrWhiteSpace(TablePrefix))
-                return name;
-
-            return $"{name}({TablePrefix.Trim('_')})";
+            return string.IsNullOrWhiteSpace(TablePrefix) ? name : $"{name}({TablePrefix.Trim('_')})";
         }
         private string GetNameWithPrefix(string name)
         {
