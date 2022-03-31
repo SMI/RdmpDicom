@@ -15,7 +15,7 @@
         <dependencies>
           <dependency id="HIC.DicomTypeTranslation" version="4.0.0" />
           <dependency id="HIC.RDMP.Plugin" version="7.0.9" />
-          <dependency id="SharpCompress" version="0.30.1" />
+          <dependency id="SharpCompress" version="0.31.0" />
         </dependencies>
     </metadata>
   <files>
