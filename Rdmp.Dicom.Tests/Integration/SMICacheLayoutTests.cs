@@ -11,7 +11,7 @@ namespace Rdmp.Dicom.Tests.Integration
         public void TestFactoryConstruction()
         {
             var rootDirectory = new DirectoryInfo(TestContext.CurrentContext.WorkDirectory);
-            var layout = new SMICacheLayout(rootDirectory,new SMICachePathResolver("CT"));
+            var layout = new SMICacheLayout(rootDirectory,new("CT"));
 
             var downloadDirectory = layout.GetLoadCacheDirectory(new ThrowImmediatelyDataLoadEventListener());
 

@@ -1,13 +1,12 @@
 ﻿using System.Threading;
-using Dicom.Network;
-using DicomClient = Dicom.Network.Client.DicomClient;
+using FellowOakDicom.Network;
+using FellowOakDicom.Network.Client;
 
-namespace Rdmp.Dicom.Cache.Pipeline.Dicom
+namespace Rdmp.Dicom.Cache.Pipeline.Dicom;
+
+public interface IDicomRequestSender
 {
-    public interface IDicomRequestSender
-    {
-        void ThrottleRequest(DicomRequest dicomRequest, DicomClient client, CancellationToken cancellationToken);
-        
-        void SendRequest(DicomRequest dicomRequest, DicomClient client, CancellationToken cancellationToken);
-    }
+    void ThrottleRequest(DicomRequest dicomRequest, DicomClient client, CancellationToken cancellationToken);
+
+    void SendRequest(DicomRequest dicomRequest, DicomClient client, CancellationToken cancellationToken);
 }

@@ -13,8 +13,9 @@
         <description>Rdmp library containing Dicom attachers, Dicom server cache sources etc.</description>
         <copyright>Copyright 2018-2019</copyright>
         <dependencies>
-          <dependency id="HIC.DicomTypeTranslation" version="3.0.0" />
-          <dependency id="HIC.RDMP.Plugin" version="7.0.8" />
+          <dependency id="HIC.DicomTypeTranslation" version="4.0.0" />
+          <dependency id="HIC.RDMP.Plugin" version="7.0.9" />
+          <dependency id="SharpCompress" version="0.30.1" />
         </dependencies>
     </metadata>
   <files>

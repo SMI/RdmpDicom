@@ -35,7 +35,7 @@ namespace Rdmp.Dicom.Tests.Integration
                     {
                         IsPrimaryKey = false, AllowNulls = true, ColumnName = "SeriesInstanceUID"
                     },
-                    new ImageColumnTemplate {IsPrimaryKey = false, AllowNulls = true, ColumnName = "StudyDate"},
+                    new ImageColumnTemplate {IsPrimaryKey = false, AllowNulls = true, ColumnName = "StudyDate"}
                 }
             };
 
@@ -59,7 +59,7 @@ namespace Rdmp.Dicom.Tests.Integration
             var implementer = triggerImplementerFactory.Create(tbl);
             implementer.CreateTrigger(new ThrowImmediatelyCheckNotifier());
 
-            var archive = tbl.Database.ExpectTable(tbl.GetRuntimeName() + "_Archive");
+            var archive = tbl.Database.ExpectTable($"{tbl.GetRuntimeName()}_Archive");
 
             Assert.IsTrue(archive.Exists());
 

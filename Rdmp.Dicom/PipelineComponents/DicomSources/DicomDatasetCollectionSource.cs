@@ -1,7 +1,6 @@
-using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
-using Dicom;
+using FellowOakDicom;
 using ReusableLibraryCode.Progress;
 using Rdmp.Dicom.PipelineComponents.DicomSources.Worklists;
 using Rdmp.Core.DataFlowPipeline;
@@ -15,14 +14,15 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
 
         private const int BatchSize = 50000;
 
-        readonly Stopwatch _sw = new Stopwatch();
+        readonly Stopwatch _sw = new();
 
         public void PreInitialize(IDicomWorklist value, IDataLoadEventListener listener)
         {
             _datasetListWorklist = value as IDicomDatasetWorklist;
 
             if (_datasetListWorklist == null)
-                listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning, "Expected IDicomWorklist to be of Type IDicomDatasetWorklist (but it was " + value.GetType().Name + "). Component will be skipped."));
+                listener.OnNotify(this, new(ProgressEventType.Warning,
+                    $"Expected IDicomWorklist to be of Type IDicomDatasetWorklist (but it was {value.GetType().Name}). Component will be skipped."));
         }
 
         protected override void MarkCorrupt(DicomDataset ds)
@@ -37,7 +37,7 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
 
             if(_datasetListWorklist == null)
             {
-                listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning, "Skipping component because _datasetListWorklist is null"));
+                listener.OnNotify(this, new(ProgressEventType.Warning, "Skipping component because _datasetListWorklist is null"));
                 return null;
             }
 
@@ -48,16 +48,13 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources
 
             while (currentBatch > 0 && (ds = _datasetListWorklist.GetNextDatasetToProcess(out var filename,out var otherValuesToStoreInRow)) != null)
             {
-                string filename1 = filename;
-                Dictionary<string, string> row = otherValuesToStoreInRow;
-                DicomDataset ds1 = ds;
-                
-                ProcessDataset(filename1, ds1, dt, listener, row);
+                ProcessDataset(filename, ds, dt, listener, otherValuesToStoreInRow);
                 currentBatch--;
             }
             
             _sw.Stop();
-            listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information, "GetChunk cumulative total time is " + _sw.ElapsedMilliseconds + "ms"));
+            listener.OnNotify(this, new(ProgressEventType.Information,
+                $"GetChunk cumulative total time is {_sw.ElapsedMilliseconds}ms"));
 
             return dt.Rows.Count > 0 ? dt : null;
         }

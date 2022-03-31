@@ -18,12 +18,10 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources.Worklists
         {
             _file = file;
             
-            if(file.File == null)
+            if(file.File is not { Extension: ".txt" })
                 return;
                 
             //input is a textual list of files/zips
-            if (file.File.Extension != ".txt") return;
-            if (_lines != null) return;
             _lines = File.ReadAllLines(file.File.FullName).Where(l => !string.IsNullOrWhiteSpace(l)).ToArray();
             _linesCurrent = 0;
 
@@ -42,7 +40,7 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources.Worklists
             {
                 _dataExhausted = true;
 
-                file = new AmbiguousFilePath(_file.File.FullName);
+                file = new(_file.File.FullName);
                 return true;
             }
 
@@ -54,22 +52,22 @@ namespace Rdmp.Dicom.PipelineComponents.DicomSources.Worklists
                 if (File.Exists(line.Trim()))
                 {
                     _linesCurrent++;
-                    file = new AmbiguousFilePath(new FileInfo(line.Trim()).FullName);
+                    file = new(new FileInfo(line.Trim()).FullName);
                     return true;
                 }
                     
                 if (Directory.Exists(line.Trim()))
                 {
                     _linesCurrent++;
-                    directory = new DirectoryInfo(line);
+                    directory = new(line);
                     return true;
                 }
 
                 if (!AmbiguousFilePath.IsZipReference(line))
-                    throw new Exception(
+                    throw new(
                         $"Text file '{_file.File.Name}' contained a line that was neither a File or a Directory:'{line}'");
                 _linesCurrent++;
-                file = new AmbiguousFilePath(line);
+                file = new(line);
                 return true;
             }
 

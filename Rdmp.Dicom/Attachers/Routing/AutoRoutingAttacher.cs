@@ -43,12 +43,12 @@ This Grouping will be used to extract the Modality code when deciding which tabl
         [DemandsInitialization("This attacher expects multiple flat files that will be loaded this pattern should match them (file pattern not regex e.g. *.csv)")]
         public string ListPattern { get; set; }
         
-        readonly Dictionary<string, bool> _columnNamesRoutedSuccesfully = new Dictionary<string, bool>(StringComparer.CurrentCultureIgnoreCase);
+        readonly Dictionary<string, bool> _columnNamesRoutedSuccesfully = new(StringComparer.CurrentCultureIgnoreCase);
 
-        readonly Stopwatch _sw = new Stopwatch();
+        readonly Stopwatch _sw = new();
         Dictionary<DataTable, string> _modalityMap;
 
-        protected AutoRoutingAttacher(bool requestsExternalDatabaseCreation) : base(requestsExternalDatabaseCreation) //Derrived classes can change mind about RAW creation
+        protected AutoRoutingAttacher(bool requestsExternalDatabaseCreation) : base(requestsExternalDatabaseCreation) //Derived classes can change mind about RAW creation
         {
             
         }
@@ -72,25 +72,26 @@ This Grouping will be used to extract the Modality code when deciding which tabl
             {
                 if (ListPattern == null)
                 {
-                    job.OnNotify(this,new NotifyEventArgs(ProgressEventType.Warning, "ListPattern was null and no Payload alternative was set, skipping component"));
+                    job.OnNotify(this,new(ProgressEventType.Warning, "ListPattern was null and no Payload alternative was set, skipping component"));
                     return ExitCodeType.Success;
                 }
 
                 //no explicit injected payload, so use the ForLoading directory to generate the list of dicom/zip files to process
                 foreach (var filesToLoad in job.LoadDirectory.ForLoading.GetFiles(ListPattern))
                 {
-                    var useCase = new AutoRoutingAttacherPipelineUseCase(this, new FlatFileToLoadDicomFileWorklist(new FlatFileToLoad(filesToLoad)));
+                    var useCase = new AutoRoutingAttacherPipelineUseCase(this, new FlatFileToLoadDicomFileWorklist(new(filesToLoad)));
                     var engine = useCase.GetEngine(LoadPipeline, job);
                     engine.ExecutePipeline(token);
                 }
             }
 
-            var unmatchedColumns = string.Join(","+Environment.NewLine , _columnNamesRoutedSuccesfully.Where(kvp => kvp.Value == false).Select(k => k.Key));
+            var unmatchedColumns = string.Join($",{Environment.NewLine}", _columnNamesRoutedSuccesfully.Where(kvp => kvp.Value == false).Select(k => k.Key));
 
             if (!string.IsNullOrWhiteSpace(unmatchedColumns))
             {
                 //for each column see in an input table that was not succesfully routed somewhere
-                job.OnNotify(this,new NotifyEventArgs(ProgressEventType.Warning, "Ignored input columns:"+unmatchedColumns));
+                job.OnNotify(this,new(ProgressEventType.Warning,
+                    $"Ignored input columns:{unmatchedColumns}"));
             }
             
 
@@ -99,11 +100,11 @@ This Grouping will be used to extract the Modality code when deciding which tabl
 
         private void CreateTableUploaders()
         {
-            _uploaders = new Dictionary<string, Tuple<SqlBulkInsertDestination,ITableLoadInfo>>(StringComparer.CurrentCultureIgnoreCase);
+            _uploaders = new(StringComparer.CurrentCultureIgnoreCase);
             foreach (var t in Job.RegularTablesToLoad)
             {
                 var tblName = t.GetRuntimeName(LoadBubble.Raw,Job.Configuration.DatabaseNamer);
-                var dest = new SqlBulkInsertDestination(_dbInfo,tblName,new String[0]);
+                var dest = new SqlBulkInsertDestination(_dbInfo,tblName,Array.Empty<string>());
 
                 var tli = Job.DataLoadInfo.CreateTableLoadInfo("", tblName, new[] {new DataSource("AutoRoutingAttacher")}, 0);
 
@@ -116,7 +117,7 @@ This Grouping will be used to extract the Modality code when deciding which tabl
         private void RefreshUploadDictionary()
         {
             //Each column name can exist in multiple TableInfos (e.g. foreign keys with the same name) so we can route a column to multiple destination tables
-            _columnNameToTargetTablesDictionary = new Dictionary<string, HashSet<DataTable>>(StringComparer.CurrentCultureIgnoreCase);
+            _columnNameToTargetTablesDictionary = new(StringComparer.CurrentCultureIgnoreCase);
 
             foreach (var tableInfo in Job.RegularTablesToLoad)
             {
@@ -131,7 +132,7 @@ This Grouping will be used to extract the Modality code when deciding which tabl
 
                     //add it to the routing dictionary
                     if (!_columnNameToTargetTablesDictionary.ContainsKey(colName))
-                        _columnNameToTargetTablesDictionary.Add(colName, new HashSet<DataTable>());
+                        _columnNameToTargetTablesDictionary.Add(colName, new());
 
                     if (!_columnNameToTargetTablesDictionary[colName].Contains(dt))
                         _columnNameToTargetTablesDictionary[colName].Add(dt);
@@ -147,15 +148,14 @@ This Grouping will be used to extract the Modality code when deciding which tabl
                 
                 //don't check this since we are our own Fixed source for the engine so we just end up in a loop! but do instantiate it incase there are construction/context errors
                 
-                PipelineChecker c = new PipelineChecker(LoadPipeline);
+                PipelineChecker c = new(LoadPipeline);
                 c.Check(notifier);
             }
 
             if (ModalityMatchingRegex != null && !ModalityMatchingRegex.ToString().Contains('('))
                 notifier.OnCheckPerformed(
-                    new CheckEventArgs(
-                        "Expected ModalityMatchingRegex '" + ModalityMatchingRegex +
-                        "' to contain a group matching for extracting modality e.g. '^(.*)_.*$'", CheckResult.Fail));
+                    new(
+                        $"Expected ModalityMatchingRegex '{ModalityMatchingRegex}' to contain a group matching for extracting modality e.g. '^(.*)_.*$'", CheckResult.Fail));
         }
 
         public override void LoadCompletedSoDispose(ExitCodeType exitCode, IDataLoadEventListener postLoadEventListener)
@@ -196,11 +196,12 @@ This Grouping will be used to extract the Modality code when deciding which tabl
             DisposeUploaders(ex);
 
             if (ex != null)
-                throw new Exception("Error occurred during upload",ex);
+                throw new("Error occurred during upload",ex);
 
             _sw.Stop();
 
-            listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information, "ProcessPipelineData (Upload) cumulative total time is " + _sw.ElapsedMilliseconds + "ms"));
+            listener.OnNotify(this, new(ProgressEventType.Information,
+                $"ProcessPipelineData (Upload) cumulative total time is {_sw.ElapsedMilliseconds}ms"));
 
             return null;
         }
@@ -211,14 +212,14 @@ This Grouping will be used to extract the Modality code when deciding which tabl
             if(ModalityMatchingRegex == null)
                 return;
 
-            _modalityMap = new Dictionary<DataTable,string>();
+            _modalityMap = new();
 
             foreach (DataTable dt in _columnNameToTargetTablesDictionary.Values.SelectMany(v=>v).Distinct())
             {
                 var m = ModalityMatchingRegex.Match(dt.TableName);
 
                 if(!m.Success)
-                    throw new Exception("ModalityMatchingRegex failed to match against DataTable " + dt.TableName);
+                    throw new($"ModalityMatchingRegex failed to match against DataTable {dt.TableName}");
 
                 var modality = m.Groups[1].Value;
             
@@ -244,7 +245,7 @@ This Grouping will be used to extract the Modality code when deciding which tabl
             //for every row in the input table
             foreach (DataRow inputRow in toProcess.Rows)
             {
-                Dictionary<DataTable,DataRow>  newDestinationRows = new Dictionary<DataTable, DataRow>();
+                Dictionary<DataTable,DataRow>  newDestinationRows = new();
 
                 //get the modality of the current record (if we care)
                 string modality = null;
@@ -292,8 +293,8 @@ This Grouping will be used to extract the Modality code when deciding which tabl
                 }
 
                 if(!addedToAtLeastOneTable && _modalityMap != null)
-                    throw new Exception("Failed to route row with modality:" + modality + " Mapping was " +
-                        string.Join(Environment.NewLine,_modalityMap.Select(kvp=>kvp.Key.TableName + "=" + kvp.Value)));
+                    throw new(
+                        $"Failed to route row with modality:{modality} Mapping was {string.Join(Environment.NewLine, _modalityMap.Select(kvp => $"{kvp.Key.TableName}={kvp.Value}"))}");
             }
         }
 

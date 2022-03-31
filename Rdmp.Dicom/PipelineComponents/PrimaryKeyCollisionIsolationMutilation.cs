@@ -52,13 +52,13 @@ namespace Rdmp.Dicom.PipelineComponents
         {
             //if there is only one or no tables that's fine (mandatory will check for null itself)
             if (TablesToIsolate == null)
-                throw new Exception("No tables have been selected");
+                throw new("No tables have been selected");
              
             //make sure there is only one primary key per table and that it's a string
             foreach (TableInfo t in TablesToIsolate)
             {
                 if (t.ColumnInfos.Count(c => c.IsPrimaryKey) != 1)
-                    throw new Exception("Table '" + t + "' did not have exactly 1 IsPrimaryKey column");
+                    throw new($"Table '{t}' did not have exactly 1 IsPrimaryKey column");
             }
 
             //if there are multiple tables then we must know how to join them
@@ -67,7 +67,7 @@ namespace Rdmp.Dicom.PipelineComponents
                 var primaryTables = TablesToIsolate.Where(t => t.IsPrimaryExtractionTable).ToArray();
                 
                 notifier.OnCheckPerformed(
-                    new CheckEventArgs(
+                    new(
                         $"There are {TablesToIsolate.Length} tables to operate on but {primaryTables.Length} are marked IsPrimaryExtractionTable ({string.Join(",",primaryTables.Select(t=>t.Name))}).  This should be set on a single top level table only e.g. Study",
                         CheckResult.Fail));
             }
@@ -79,7 +79,7 @@ namespace Rdmp.Dicom.PipelineComponents
             }
             catch (Exception e)
             {
-                notifier.OnCheckPerformed(new CheckEventArgs("Failed to build join order", CheckResult.Fail, e));
+                notifier.OnCheckPerformed(new("Failed to build join order", CheckResult.Fail, e));
                 return;
             }
 
@@ -87,7 +87,7 @@ namespace Rdmp.Dicom.PipelineComponents
             var db = IsolationDatabase.Discover(DataAccessContext.DataLoad);
 
             if(!db.Exists())
-                throw new Exception("IsolationDatabase did not exist");
+                throw new("IsolationDatabase did not exist");
 
             //Make sure the isolation tables exist and the schema matches RAW
             foreach (var tableInfo in TablesToIsolate)
@@ -97,13 +97,13 @@ namespace Rdmp.Dicom.PipelineComponents
                 if (!table.Exists())
                 {
                     bool fix = notifier.OnCheckPerformed(
-                        new CheckEventArgs("Isolation table '" + table.GetFullyQualifiedName() + "' did not exist",
+                        new($"Isolation table '{table.GetFullyQualifiedName()}' did not exist",
                             CheckResult.Fail, null, "Create isolation table?"));
 
                     if (fix)
                         CreateIsolationTable(table, tableInfo);
                     else
-                        throw new Exception("User rejected change");
+                        throw new("User rejected change");
                 }
                 else
                     ValidateIsolationTableSchema(table,tableInfo,notifier);
@@ -112,7 +112,7 @@ namespace Rdmp.Dicom.PipelineComponents
 
         public static string GetIsolationTableName(TableInfo tableInfo)
         {
-            return tableInfo.GetRuntimeName(LoadBubble.Live) + "_Isolation";
+            return $"{tableInfo.GetRuntimeName(LoadBubble.Live)}_Isolation";
         }
 
         private void ValidateIsolationTableSchema(DiscoveredTable toValidate, TableInfo tableInfo, ICheckNotifier notifier)
@@ -122,15 +122,13 @@ namespace Rdmp.Dicom.PipelineComponents
 
             foreach (var missingFromIsolation in expected.Except(found, StringComparer.CurrentCultureIgnoreCase))
                 notifier.OnCheckPerformed(
-                    new CheckEventArgs(
-                        "Isolation table '" + toValidate + "' did not contain expected column'" + missingFromIsolation +
-                        "'", CheckResult.Fail));
+                    new(
+                        $"Isolation table '{toValidate}' did not contain expected column'{missingFromIsolation}'", CheckResult.Fail));
 
             foreach (var unexpectedInIsolation in found.Except(expected, StringComparer.CurrentCultureIgnoreCase))
                 notifier.OnCheckPerformed(
-                    new CheckEventArgs(
-                        "Isolation table '" + toValidate + "' contained an unexpected column'" + unexpectedInIsolation +
-                        "'", CheckResult.Fail));
+                    new(
+                        $"Isolation table '{toValidate}' contained an unexpected column'{unexpectedInIsolation}'", CheckResult.Fail));
         }
 
         private void CreateIsolationTable(DiscoveredTable toCreate, TableInfo tableInfo)
@@ -138,11 +136,11 @@ namespace Rdmp.Dicom.PipelineComponents
             var from = tableInfo.Discover(DataAccessContext.DataLoad);
 
             //create a RAW table schema called TableName_Isolation
-            var cloner = new TableInfoCloneOperation(new HICDatabaseConfiguration(toCreate.Database.Server),tableInfo,LoadBubble.Live,_job ?? (IDataLoadEventListener)new ThrowImmediatelyDataLoadEventListener());
+            var cloner = new TableInfoCloneOperation(new(toCreate.Database.Server),tableInfo,LoadBubble.Live,_job ?? (IDataLoadEventListener)new ThrowImmediatelyDataLoadEventListener());
             cloner.CloneTable(from.Database, toCreate.Database, from, toCreate.GetRuntimeName(), true, true, true, tableInfo.PreLoadDiscardedColumns);
             
             if(!toCreate.Exists())
-                throw new Exception($"Table '{toCreate}' did not exist after issuing create command");
+                throw new($"Table '{toCreate}' did not exist after issuing create command");
 
             //Add the data load run id
             toCreate.AddColumn(SpecialFieldNames.DataLoadRunID,new DatabaseTypeRequest(typeof(int)),false,10);
@@ -150,7 +148,7 @@ namespace Rdmp.Dicom.PipelineComponents
 
         private void BuildJoinOrder(bool isChecks)
         {
-            _qb = new QueryBuilder(null, null);
+            _qb = new(null, null);
 
             var memory = new MemoryRepository();
 
@@ -173,10 +171,10 @@ namespace Rdmp.Dicom.PipelineComponents
                     _fromSql = _fromSql.Replace(tableInfo.GetFullyQualifiedName(), GetRAWTableNameFullyQualified(tableInfo));
 
             if (_joins.Any(j=>j.GetSupplementalJoins().Any()))
-                throw new Exception("Supplemental (2 column) joins are not supported when resolving multi table primary key collisions");
+                throw new("Supplemental (2 column) joins are not supported when resolving multi table primary key collisions");
 
             //order the tables in order of dependency
-            List<TableInfo> tables = new List<TableInfo>();
+            List<TableInfo> tables = new();
 
             TableInfo next = _primaryTable;
 
@@ -191,7 +189,7 @@ namespace Rdmp.Dicom.PipelineComponents
                 next = jnext.ForeignKey.TableInfo;
                 
                 if(overflow-- ==0)
-                    throw new Exception("Joins resulted in a loop overflow");
+                    throw new("Joins resulted in a loop overflow");
             }
 
             TablesToIsolate = tables.ToArray();
@@ -214,7 +212,7 @@ namespace Rdmp.Dicom.PipelineComponents
             _syntaxHelper = _raw.Server.GetQuerySyntaxHelper();
 
             if(loadStage != LoadStage.AdjustRaw)
-                throw new Exception("This component should only run in AdjustRaw");
+                throw new("This component should only run in AdjustRaw");
         }
 
         public ExitCodeType Mutilate(IDataLoadJob job)
@@ -232,7 +230,7 @@ namespace Rdmp.Dicom.PipelineComponents
                 var allCollisions = DetectCollisions(pkCol, tableInfo).Distinct().ToArray();
 
                 if (!allCollisions.Any()) continue;
-                _job.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information, $"Found duplication in column '{pkCol}', duplicate values were '{string.Join(",",allCollisions)}'"));
+                _job.OnNotify(this,new(ProgressEventType.Information, $"Found duplication in column '{pkCol}', duplicate values were '{string.Join(",",allCollisions)}'"));
                 MigrateRecords(pkCol, allCollisions);
             }
 
@@ -243,35 +241,33 @@ namespace Rdmp.Dicom.PipelineComponents
         {
             var deleteOnColumnName = GetRAWColumnNameFullyQualified(deleteOn);
 
-            using (var con = _raw.Server.GetConnection())
+            using var con = _raw.Server.GetConnection();
+            con.Open();
+
+            //if we are deleting on a child table we need to look up the primary table primary key (e.g. StudyInstanceUID) we should then migrate that data instead (for all tables)
+            if (!deleteOn.Equals(_primaryTablePk))
             {
-                con.Open();
-
-                //if we are deleting on a child table we need to look up the primary table primary key (e.g. StudyInstanceUID) we should then migrate that data instead (for all tables)
-                if (!deleteOn.Equals(_primaryTablePk))
-                {
-                    deleteValues = GetPrimaryKeyValuesFor(deleteOn, deleteValues, con);
-                    deleteOnColumnName = GetRAWColumnNameFullyQualified(_primaryTablePk);
-                }
-
-                //pull all records that we must isolate in all joined tables
-                Dictionary<TableInfo,DataTable> toPush = TablesToIsolate.ToDictionary(tableInfo => tableInfo, tableInfo => PullTable(tableInfo, con, deleteOnColumnName, deleteValues));
-
-                //push the results to isolation
-                foreach (KeyValuePair<TableInfo, DataTable> kvp in toPush)
-                {
-                    var toDatabase = IsolationDatabase.Discover(DataAccessContext.DataLoad);
-                    var toTable = toDatabase.ExpectTable(GetIsolationTableName(kvp.Key));
-
-                    using (var bulkInsert = toTable.BeginBulkInsert())
-                        bulkInsert.Upload(kvp.Value);
-                }
-
-                foreach (TableInfo t in TablesToIsolate.Reverse())
-                    DeleteRows(t, deleteOnColumnName, deleteValues, con);
-
-                con.Close();
+                deleteValues = GetPrimaryKeyValuesFor(deleteOn, deleteValues, con);
+                deleteOnColumnName = GetRAWColumnNameFullyQualified(_primaryTablePk);
             }
+
+            //pull all records that we must isolate in all joined tables
+            Dictionary<TableInfo,DataTable> toPush = TablesToIsolate.ToDictionary(tableInfo => tableInfo, tableInfo => PullTable(tableInfo, con, deleteOnColumnName, deleteValues));
+
+            //push the results to isolation
+            foreach (var (key, value) in toPush)
+            {
+                var toDatabase = IsolationDatabase.Discover(DataAccessContext.DataLoad);
+                var toTable = toDatabase.ExpectTable(GetIsolationTableName(key));
+
+                using var bulkInsert = toTable.BeginBulkInsert();
+                bulkInsert.Upload(value);
+            }
+
+            foreach (TableInfo t in TablesToIsolate.Reverse())
+                DeleteRows(t, deleteOnColumnName, deleteValues, con);
+
+            con.Close();
         }
 
         /// <summary>
@@ -296,7 +292,7 @@ namespace Rdmp.Dicom.PipelineComponents
             var deleteOnColumnName = GetRAWColumnNameFullyQualified(deleteOn);
             var pkColumnName = GetRAWColumnNameFullyQualified(_primaryTablePk);
 
-            HashSet<object> toReturn = new HashSet<object>();
+            HashSet<object> toReturn = new();
 
             //fetch all the data
             string sqlSelect = $"Select distinct {pkColumnName} {_fromSql} WHERE {deleteOnColumnName} = @val";
@@ -311,22 +307,20 @@ namespace Rdmp.Dicom.PipelineComponents
                 {
                     p.Value = d;
                     bool readOne = false;
-                    using (var r = cmdSelect.ExecuteReader())
+                    using var r = cmdSelect.ExecuteReader();
+                    while (r.Read())
                     {
-                        while (r.Read())
-                        {
-                            var result = r[0];
+                        var result = r[0];
 
-                            if(result == DBNull.Value || result == null)
-                                throw new Exception("Primary key value not found for " + d + " foreign Key was null");
+                        if(result == DBNull.Value || result == null)
+                            throw new($"Primary key value not found for {d} foreign Key was null");
 
-                            toReturn.Add(result);
-                            readOne = true;
-                        }
-
-                        if(!readOne)
-                            throw new Exception("Primary key value not found for " + d);
+                        toReturn.Add(result);
+                        readOne = true;
                     }
+
+                    if(!readOne)
+                        throw new($"Primary key value not found for {d}");
                 }
 
             }
@@ -337,7 +331,7 @@ namespace Rdmp.Dicom.PipelineComponents
 
         private DataTable PullTable(TableInfo tableInfo, DbConnection con, string deleteOnColumnName, object[] deleteValues)
         {
-            DataTable dt = new DataTable();
+            DataTable dt = new();
             var pk = tableInfo.ColumnInfos.Single(c => c.IsPrimaryKey);
             var pkColumnName = GetRAWColumnNameFullyQualified(pk);
 
@@ -346,26 +340,24 @@ namespace Rdmp.Dicom.PipelineComponents
             //fetch all the data (LEFT/RIGHT joins can introduce null records so add not null to WHERE for the table being migrated to avoid full null rows)
             string sqlSelect =
                 $"Select distinct {deleteFromTableName}.* {_fromSql} WHERE {deleteOnColumnName} = @val AND {pkColumnName} is not null";
-            using(var cmdSelect = _raw.Server.GetCommand(sqlSelect, con))
+            using var cmdSelect = _raw.Server.GetCommand(sqlSelect, con);
+            var p = cmdSelect.CreateParameter();
+            p.ParameterName = "@val";
+            cmdSelect.Parameters.Add(p);
+            cmdSelect.CommandTimeout = TimeoutInSeconds;
+
+            foreach (var value in deleteValues)
             {
-                var p = cmdSelect.CreateParameter();
-                p.ParameterName = "@val";
-                cmdSelect.Parameters.Add(p);
-                cmdSelect.CommandTimeout = TimeoutInSeconds;
+                p.Value = value;
 
-                foreach (var value in deleteValues)
-                {
-                    p.Value = value;
-
-                    using(var da = _raw.Server.GetDataAdapter(cmdSelect))
-                        da.Fill(dt);
-                }
-                
-                dt.Columns.Add(SpecialFieldNames.DataLoadRunID, typeof(int));
-                
-                foreach (DataRow row in dt.Rows)
-                    row[SpecialFieldNames.DataLoadRunID] = _dataLoadInfoId;
+                using var da = _raw.Server.GetDataAdapter(cmdSelect);
+                da.Fill(dt);
             }
+                
+            dt.Columns.Add(SpecialFieldNames.DataLoadRunID, typeof(int));
+                
+            foreach (DataRow row in dt.Rows)
+                row[SpecialFieldNames.DataLoadRunID] = _dataLoadInfoId;
 
 
             return dt;
@@ -384,25 +376,24 @@ namespace Rdmp.Dicom.PipelineComponents
                 sqlDelete = GetPostgreSqlDeleteCommand(toDelete,deleteOnColumnName,syntax);
             }
 
-            _job.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,"Running:" + sqlDelete));
+            _job.OnNotify(this,new(ProgressEventType.Information, $"Running:{sqlDelete}"));
 
-            using(var cmdDelete = _raw.Server.GetCommand(sqlDelete, con))
+            using var cmdDelete = _raw.Server.GetCommand(sqlDelete, con);
+            var p2 = cmdDelete.CreateParameter();
+            p2.ParameterName = "@val";
+            cmdDelete.Parameters.Add(p2);
+            cmdDelete.CommandTimeout = TimeoutInSeconds;
+
+            foreach (var d in deleteValues)
             {
-                var p2 = cmdDelete.CreateParameter();
-                p2.ParameterName = "@val";
-                cmdDelete.Parameters.Add(p2);
-                cmdDelete.CommandTimeout = TimeoutInSeconds;
-
-                foreach (var d in deleteValues)
-                {
-                    p2.Value = d;
+                p2.Value = d;
                     
-                    //then delete it
-                    int affectedRows = cmdDelete.ExecuteNonQuery();
+                //then delete it
+                int affectedRows = cmdDelete.ExecuteNonQuery();
 
-                    _job.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,affectedRows + " affected rows"));
+                _job.OnNotify(this,new(ProgressEventType.Information,
+                    $"{affectedRows} affected rows"));
 
-                }
             }
         }
 
@@ -419,7 +410,7 @@ namespace Rdmp.Dicom.PipelineComponents
             // 1 join per pair of tables
                 
             if(_joins.Count != TablesToIsolate.Length -1)
-                throw new Exception($"Unexpected join count, expected {(TablesToIsolate.Length -1)} but found {_joins.Count}");
+                throw new($"Unexpected join count, expected {(TablesToIsolate.Length -1)} but found {_joins.Count}");
 
             // Imagine a 3 table query (2 joins)
             // if we are index 2 (child)
@@ -437,13 +428,13 @@ namespace Rdmp.Dicom.PipelineComponents
                 idx--;
 
                 sb.Append(syntax.EnsureWrapped(j.PrimaryKey.TableInfo.GetRuntimeName(LoadBubble.Raw,_namer)));
-                sb.Append(".");
+                sb.Append('.');
                 sb.Append(syntax.EnsureWrapped(j.PrimaryKey.GetRuntimeName(LoadStage.AdjustRaw)));
                     
-                sb.Append("=");
+                sb.Append('=');
                     
                 sb.Append(syntax.EnsureWrapped(j.ForeignKey.TableInfo.GetRuntimeName(LoadBubble.Raw,_namer)));
-                sb.Append(".");
+                sb.Append('.');
                 sb.Append(syntax.EnsureWrapped(j.ForeignKey.GetRuntimeName(LoadStage.AdjustRaw)));
 
                 sb.Append(" AND ");
@@ -454,7 +445,7 @@ namespace Rdmp.Dicom.PipelineComponents
 
             var delTable = syntax.EnsureWrapped(toDelete.GetRuntimeName(LoadBubble.Raw, _namer));
             var usingsStr = string.Join(",",usings.Except(new []{toDelete}).Select(t=>syntax.EnsureWrapped(t.GetRuntimeName(LoadBubble.Raw,_namer))));
-            usingsStr = string.IsNullOrWhiteSpace(usingsStr) ? "" : " USING " + usingsStr;
+            usingsStr = string.IsNullOrWhiteSpace(usingsStr) ? "" : $" USING {usingsStr}";
 
             return $"DELETE FROM {delTable} {usingsStr} WHERE {sb} {deleteOnColumnName} = @val";
         }
@@ -471,18 +462,14 @@ namespace Rdmp.Dicom.PipelineComponents
                 tableNameFullyQualified
                 );
 
-            using (var con = _raw.Server.GetConnection())
-            {
-                con.Open();
-                using(var cmd = _raw.Server.GetCommand(primaryKeysColliding, con))
-                {
-                    cmd.CommandTimeout = TimeoutInSeconds;
+            using var con = _raw.Server.GetConnection();
+            con.Open();
+            using var cmd = _raw.Server.GetCommand(primaryKeysColliding, con);
+            cmd.CommandTimeout = TimeoutInSeconds;
 
-                    using(var r = cmd.ExecuteReader())
-                        while (r.Read())
-                            yield return r[pkColName];
-                }
-            }
+            using var r = cmd.ExecuteReader();
+            while (r.Read())
+                yield return r[pkColName];
         }
     }
 }

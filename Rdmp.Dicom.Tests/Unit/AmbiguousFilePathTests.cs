@@ -1,4 +1,4 @@
-﻿using Dicom;
+﻿using FellowOakDicom;
 using NUnit.Framework;
 using Rdmp.Dicom.Extraction.FoDicomBased;
 using System;
@@ -21,24 +21,24 @@ namespace Rdmp.Dicom.Tests.Unit
             {
                 //in linux this looks like a relative path
                 var ex = Assert.Throws<ArgumentException>(()=>new AmbiguousFilePath(@"c:\temp\my.dcm"));
-                StringAssert.StartsWith("Relative path was encountered without specifying a root",ex.Message);
+                StringAssert.StartsWith("Relative path was encountered without specifying a root",ex?.Message);
 
 
                 ex = Assert.Throws<ArgumentException>(()=>new AmbiguousFilePath(@"c:\temp",@"c:\temp\my.dcm"));
-                StringAssert.IsMatch("Specified root path '.*' was not IsAbsolute",ex.Message);
+                StringAssert.IsMatch("Specified root path '.*' was not IsAbsolute",ex?.Message);
             }
             else
             {
                 var a = new AmbiguousFilePath(@"c:\temp\my.dcm");
                 Assert.AreEqual(@"c:\temp\my.dcm", a.FullPath);
 
-                a = new AmbiguousFilePath(@"c:\temp",@"c:\temp\my.dcm");
+                a = new(@"c:\temp",@"c:\temp\my.dcm");
                 Assert.AreEqual(@"c:\temp\my.dcm", a.FullPath);
 
-                a = new AmbiguousFilePath(@"c:\temp", @"c:\temp\myzip.zip!my.dcm");
+                a = new(@"c:\temp", @"c:\temp\myzip.zip!my.dcm");
                 Assert.AreEqual(@"c:\temp\myzip.zip!my.dcm", a.FullPath);
 
-                a = new AmbiguousFilePath(@"c:\temp", @"myzip.zip!my.dcm");
+                a = new(@"c:\temp", @"myzip.zip!my.dcm");
                 Assert.AreEqual(@"c:\temp\myzip.zip!my.dcm", a.FullPath);
             }
             
@@ -48,13 +48,13 @@ namespace Rdmp.Dicom.Tests.Unit
             var b = new AmbiguousFilePath(@"/temp/my.dcm");
             Assert.AreEqual(@"/temp/my.dcm", b.FullPath);
 
-            b = new AmbiguousFilePath(@"/temp",@"/temp/my.dcm");
+            b = new(@"/temp",@"/temp/my.dcm");
             Assert.AreEqual(@"/temp/my.dcm", b.FullPath);
 
-            b = new AmbiguousFilePath(@"/temp", @"/temp/myzip.zip!my.dcm");
+            b = new(@"/temp", @"/temp/myzip.zip!my.dcm");
             Assert.AreEqual(@"/temp/myzip.zip!my.dcm", b.FullPath);
 
-            b = new AmbiguousFilePath(@"/temp/", @"./myzip.zip!my.dcm");
+            b = new(@"/temp/", @"./myzip.zip!my.dcm");
             Assert.AreEqual(@"/temp/./myzip.zip!my.dcm", b.FullPath);
         }
         
@@ -62,7 +62,7 @@ namespace Rdmp.Dicom.Tests.Unit
         [Test]
         public void GetDatasetFromFileTest()
         {
-            FileInfo f = new FileInfo(Path.Combine(TestContext.CurrentContext.WorkDirectory,"test.dcm"));
+            FileInfo f = new(Path.Combine(TestContext.CurrentContext.WorkDirectory,"test.dcm"));
             
             File.Copy(
                 Path.Combine(TestContext.CurrentContext.TestDirectory,"TestData","IM-0001-0013.dcm"),
@@ -78,7 +78,7 @@ namespace Rdmp.Dicom.Tests.Unit
         [Test]
         public void GetDatasetFromZipFileTest()
         {
-            FileInfo fzip = new FileInfo(Path.Combine(TestContext.CurrentContext.WorkDirectory, "omgzip.zip"));
+            FileInfo fzip = new(Path.Combine(TestContext.CurrentContext.WorkDirectory, "omgzip.zip"));
 
             if (fzip.Exists)
                 fzip.Delete();
@@ -88,8 +88,8 @@ namespace Rdmp.Dicom.Tests.Unit
             using (var z = ZipFile.Open(fzip.FullName, ZipArchiveMode.Create))
             {
                 var entry = z.CreateEntry("test.dcm");
-                using (Stream s = entry.Open())
-                    s.Write(bytes, 0, bytes.Length);
+                using Stream s = entry.Open();
+                s.Write(bytes, 0, bytes.Length);
             }
 
             Assert.Throws<AmbiguousFilePathResolutionException>(()=>new AmbiguousFilePath(Path.Combine(TestContext.CurrentContext.WorkDirectory, "omgzip.zip")).GetDataset());
@@ -105,7 +105,7 @@ namespace Rdmp.Dicom.Tests.Unit
         [Test]
         public void GetDatasetFromZipFile_WithPooling_Test()
         {
-            FileInfo fzip = new FileInfo(Path.Combine(TestContext.CurrentContext.WorkDirectory, "omgzip.zip"));
+            FileInfo fzip = new(Path.Combine(TestContext.CurrentContext.WorkDirectory, "omgzip.zip"));
 
             if (fzip.Exists)
                 fzip.Delete();
@@ -116,7 +116,7 @@ namespace Rdmp.Dicom.Tests.Unit
             using (var z = ZipFile.Open(fzip.FullName, ZipArchiveMode.Create))
                 for (int i = 0; i < 1500; i++)
                 {
-                    var entry = z.CreateEntry("test" + i + ".dcm");
+                    var entry = z.CreateEntry($"test{i}.dcm");
                     using Stream s = entry.Open();
                     s.Write(bytes, 0, bytes.Length);
                 }
@@ -129,23 +129,18 @@ namespace Rdmp.Dicom.Tests.Unit
             for (int i = 0; i < 1000; i++)
                 a.GetDataset();
 
-            Console.WriteLine("No Caching:" + sw.ElapsedMilliseconds + "ms");
+            Console.WriteLine($"No Caching:{sw.ElapsedMilliseconds}ms");
 
             //read the same entry lots of times with pooling
             sw = Stopwatch.StartNew();
-            using (var pool = new ZipPool())
-            {
-                for (int i = 0; i < 1000; i++)
-                    a.GetDataset(0,0,pool);
+            using var pool = new ZipPool();
+            for (int i = 0; i < 1000; i++)
+                a.GetDataset(0,0,pool);
 
-                Console.WriteLine("With Caching:" + sw.ElapsedMilliseconds + "ms");
+            Console.WriteLine($"With Caching:{sw.ElapsedMilliseconds}ms");
 
-                Assert.AreEqual(999,pool.CacheHits);
-                Assert.AreEqual(1, pool.CacheMisses);
-            }
-
-            
-
+            Assert.AreEqual(999,pool.CacheHits);
+            Assert.AreEqual(1, pool.CacheMisses);
         }
 
         [Test]
@@ -167,10 +162,10 @@ namespace Rdmp.Dicom.Tests.Unit
             
             FileAssert.Exists(zipFile.FullName);
 
-            var exists = new AmbiguousFilePath(zipFile.FullName + "!file1.dcm");
+            var exists = new AmbiguousFilePath($"{zipFile.FullName}!file1.dcm");
             Assert.IsNotNull(exists.GetDataset());
 
-            var notexists = new AmbiguousFilePath(zipFile.FullName + "!file2.dcm");
+            var notexists = new AmbiguousFilePath($"{zipFile.FullName}!file2.dcm");
             var ex = Assert.Throws<AmbiguousFilePathResolutionException>(()=>notexists.GetDataset());
 
             StringAssert.Contains("Could not find path 'file2.dcm' within zip archive",ex.Message);

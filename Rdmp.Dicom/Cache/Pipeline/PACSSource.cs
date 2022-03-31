@@ -2,8 +2,8 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
-using Dicom;
-using Dicom.Network;
+using FellowOakDicom;
+using FellowOakDicom.Network;
 using ReusableLibraryCode.Progress;
 using Rdmp.Dicom.Cache.Pipeline.Dicom;
 using Timer = System.Timers.Timer;
@@ -11,20 +11,22 @@ using Rdmp.Core.Curation.Data;
 using Rdmp.Core.Caching.Requests;
 using Rdmp.Core.DataFlowPipeline;
 using Rdmp.Core.Curation;
-using DicomClient = Dicom.Network.Client.DicomClient;
 using System.Collections.Concurrent;
+using FellowOakDicom.Imaging.Codec;
+using FellowOakDicom.Log;
+using FellowOakDicom.Network.Client;
 
 namespace Rdmp.Dicom.Cache.Pipeline
 {
     public class PACSSource : SMICacheSource
     {
-        
-        
+
+
         /// <summary>
         /// The maximum number of tries to fetch a given Study from the PACS.  Note that retries requests might not be issued immediately after
         /// a failure.
         /// </summary>
-        [DemandsInitialization("Maximum number of times to re-request a Study when a Failure is encountered",defaultValue:3 , mandatory: true)]
+        [DemandsInitialization("Maximum number of times to re-request a Study when a Failure is encountered", defaultValue: 3, mandatory: true)]
         public int MaxRetries { get; set; } = 3;
 
         [DemandsInitialization("The timeout (in ms) to wait for an association response after sending an association release request.  Defaults to 50ms if not specified")]
@@ -40,24 +42,24 @@ namespace Rdmp.Dicom.Cache.Pipeline
         [DemandsInitialization("The maximum number of DICOM requests that are allowed to be sent over one single association.  When this limit is reached, the DICOM client will wait for pending requests to complete, and then open a new association to send the remaining requests, if any.  If not provided then int.MaxValue is used (i.e. keep reusing association)")]
         public int? MaximumNumberOfRequestsPerAssociation { get; set; }
 
-        [DemandsInitialization("The maximum number of Association related events that can be permitted per minute before the system exits",DefaultValue = 30)]
+        [DemandsInitialization("The maximum number of Association related events that can be permitted per minute before the system exits", DefaultValue = 30)]
         public int MaximumAllowableAssociationEventsPerMinute { get; set; } = 30;
 
         [DemandsInitialization("True to log individual file fetch messages for each study requested at Info level.  False to log at Trace level.", DefaultValue = true)]
         public bool Verbose { get; set; }
 
-        public static PressureGauge gauge = new PressureGauge() { ThresholdBeatsPerMinute = 30 };
+        public static PressureGauge gauge = new() { ThresholdBeatsPerMinute = 30 };
 
 
-        public override SMIDataChunk DoGetChunk(ICacheFetchRequest cacheRequest, IDataLoadEventListener listener,GracefulCancellationToken cancellationToken)
+        public override SMIDataChunk DoGetChunk(ICacheFetchRequest cacheRequest, IDataLoadEventListener listener, GracefulCancellationToken cancellationToken)
         {
             gauge.ThresholdBeatsPerMinute = MaximumAllowableAssociationEventsPerMinute;
 
-            listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,$"PACSSource version is {typeof(PACSSource).Assembly.GetName().Version}.  Assembly is {typeof(PACSSource).Assembly} " ));
-            listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,$"Fo-Dicom version is {typeof(DicomClient).Assembly.GetName().Version}.  Assembly is {typeof(DicomClient).Assembly} " ));
+            listener.OnNotify(this, new(ProgressEventType.Information, $"PACSSource version is {typeof(PACSSource).Assembly.GetName().Version}.  Assembly is {typeof(PACSSource).Assembly} "));
+            listener.OnNotify(this, new(ProgressEventType.Information, $"Fo-Dicom version is {typeof(DicomClient).Assembly.GetName().Version}.  Assembly is {typeof(DicomClient).Assembly} "));
 
             var dicomConfiguration = GetConfiguration();
-            var requestSender = new DicomRequestSender(dicomConfiguration, listener,Verbose);
+            var requestSender = new DicomRequestSender(dicomConfiguration, listener, Verbose);
             var dateFrom = Request.Start;
             var dateTo = Request.End;
             CachingSCP.LocalAet = LocalAETitle;
@@ -69,186 +71,192 @@ namespace Rdmp.Dicom.Cache.Pipeline
 
             //temp dir
             var cacheDir = new LoadDirectory(Request.CacheProgress.LoadProgress.LoadMetadata.LocationOfFlatFiles).Cache;
-            var cacheLayout = new SMICacheLayout(cacheDir, new SMICachePathResolver(Modality));
-            
-            Chunk = new SMIDataChunk(Request)
+            var cacheLayout = new SMICacheLayout(cacheDir, new(Modality));
+
+            Chunk = new(Request)
             {
                 FetchDate = dateFrom,
                 Modality = Modality,
                 Layout = cacheLayout
             };
-            
-            ConcurrentBag<StudyToFetch> studiesToOrder = new ConcurrentBag<StudyToFetch>();
+
+            ConcurrentBag<StudyToFetch> studiesToOrder = new();
 
             CachingSCP.OnEndProcessingCStoreRequest = (storeRequest, storeResponse) =>
-            {                
-                SaveSopInstance(storeRequest,cacheLayout,listener);
+            {
+                SaveSopInstance(storeRequest, cacheLayout, listener);
                 listener.OnNotify(this,
-                    new NotifyEventArgs(ProgressEventType.Debug,
-                        "Stored sopInstance" + storeRequest.SOPInstanceUID.UID));
+                    new(ProgressEventType.Debug,
+                        $"Stored sopInstance{storeRequest.SOPInstanceUID.UID}"));
             };
 
             //helps with tidying up resources if we abort or through an exception and neatly avoids ->  Access to disposed closure
-            using (var server = (DicomServer<CachingSCP>) DicomServer.Create<CachingSCP>(dicomConfiguration.LocalAetUri.Port))
+            using var server = new DicomServer<CachingSCP>(new DesktopNetworkManager(), new ConsoleLogManager());
+            DicomClient client = new(dicomConfiguration.RemoteAetUri.Host,
+                dicomConfiguration.RemoteAetUri.Port, false, dicomConfiguration.LocalAetTitle,
+                dicomConfiguration.RemoteAetTitle, new DicomClientOptions(), new DicomServiceOptions(),
+                new DesktopNetworkManager(), new ConsoleLogManager(), new DefaultTranscoderManager());
+            client.AssociationAccepted += (s, e) => {
+                gauge.Tick(listener, () => Process.GetCurrentProcess().Kill());
+                listener.OnNotify(this, new(ProgressEventType.Trace, "AssociationAccepted"));
+            };
+            client.AssociationReleased += (s, e) => {
+                gauge.Tick(listener, () => Process.GetCurrentProcess().Kill());
+                listener.OnNotify(this, new(ProgressEventType.Trace, $"AssociationReleased"));
+            };
+            client.AssociationRejected += (s, e) =>
             {
-                DicomClient client = new DicomClient(dicomConfiguration.RemoteAetUri.Host, dicomConfiguration.RemoteAetUri.Port, false, dicomConfiguration.LocalAetTitle, dicomConfiguration.RemoteAetTitle);
-                client.AssociationAccepted += (s, e) => {
-                    gauge.Tick(listener, () => Process.GetCurrentProcess().Kill());
-                    listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Trace, "AssociationAccepted"));
-                    };
-                client.AssociationReleased += (s, e) => {
-                    gauge.Tick(listener, () => Process.GetCurrentProcess().Kill());
-                    listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Trace, $"AssociationReleased"));
-                    };
-                client.AssociationRejected += (s, e) =>
+                gauge.Tick(listener, () => Process.GetCurrentProcess().Kill());
+                listener.OnNotify(this, new(ProgressEventType.Trace, $"AssociationRejected"));
+            };
+
+            if (AssociationLingerTimeoutInMs is > 0)
+                client.ClientOptions.AssociationLingerTimeoutInMs = AssociationLingerTimeoutInMs.Value;
+
+            if (AssociationReleaseTimeoutInMs is > 0)
+                client.ClientOptions.AssociationReleaseTimeoutInMs = AssociationReleaseTimeoutInMs.Value;
+
+            if (AssociationRequestTimeoutInMs is > 0)
+                client.ClientOptions.AssociationRequestTimeoutInMs = AssociationRequestTimeoutInMs.Value;
+
+            if (MaximumNumberOfRequestsPerAssociation is > 0)
+                client.ClientOptions.MaximumNumberOfRequestsPerAssociation = MaximumNumberOfRequestsPerAssociation.Value;
+
+            try
+            {
+                // Find a list of studies
+                #region Query
+
+                listener.OnNotify(this,
+                    new(ProgressEventType.Information,
+                        $"Requesting Studies from {dateFrom} to {dateTo}"));
+
+                var request = CreateStudyRequestByDateRangeForModality(dateFrom, dateTo, Modality);
+                request.OnResponseReceived += (req, response) =>
                 {
-                    gauge.Tick(listener,()=>Process.GetCurrentProcess().Kill());
-                    listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Trace, $"AssociationRejected"));
+                    if (Filter(Whitelist, response))
+                        studiesToOrder.Add(new(response.Dataset.GetSingleValue<string>(DicomTag.StudyInstanceUID)));
+
                 };
+                requestSender.ThrottleRequest(request, client, cancellationToken.AbortToken);
+                listener.OnNotify(this,
+                    new(ProgressEventType.Debug,
+                        $"Total filtered studies for {dateFrom} to {dateTo}is {studiesToOrder.Count}"));
+                #endregion
 
-                if (AssociationLingerTimeoutInMs != null && AssociationLingerTimeoutInMs > 0)
-                    client.AssociationLingerTimeoutInMs = AssociationLingerTimeoutInMs.Value;
+                //go and get them
+                #region Retrieval
 
-                if(AssociationReleaseTimeoutInMs != null && AssociationReleaseTimeoutInMs > 0)
-                    client.AssociationReleaseTimeoutInMs = AssociationReleaseTimeoutInMs.Value;
+                var transferStopwatch = new Stopwatch();
 
-                if(AssociationRequestTimeoutInMs != null && AssociationRequestTimeoutInMs > 0)
-                    client.AssociationRequestTimeoutInMs = AssociationRequestTimeoutInMs.Value;
+                int consecutiveFailures = 0;
 
-                if(MaximumNumberOfRequestsPerAssociation != null && MaximumNumberOfRequestsPerAssociation > 0)
-                    client.MaximumNumberOfRequestsPerAssociation = MaximumNumberOfRequestsPerAssociation.Value;
-
-                try
+                //While we have things to fetch
+                while (studiesToOrder.TryTake(out var current))
                 {
-                    // Find a list of studies
-                    #region Query
-
-                    listener.OnNotify(this,
-                        new NotifyEventArgs( ProgressEventType.Information,
-                            "Requesting Studies from " + dateFrom + " to " + dateTo));
-                        
-                    var request = CreateStudyRequestByDateRangeForModality(dateFrom, dateTo, Modality);
-                    request.OnResponseReceived += (req, response) =>
+                    transferStopwatch.Restart();
+                    //delay value in mills
+                    if (dicomConfiguration.TransferCooldownInMilliseconds != 0)
                     {
-                        if (Filter(Whitelist, response))
-                            studiesToOrder.Add(new StudyToFetch(response.Dataset.GetSingleValue<string>(DicomTag.StudyInstanceUID)));
+                        listener.OnNotify(this,
+                            new(Verbose ? ProgressEventType.Information : ProgressEventType.Trace,
+                                $"Transfers sleeping for {dicomConfiguration.TransferCooldownInMilliseconds / 1000}seconds"));
+                        Task.Delay(dicomConfiguration.TransferCooldownInMilliseconds, cancellationToken.AbortToken).Wait(cancellationToken.AbortToken);
+                    }
 
-                    };
-                    requestSender.ThrottleRequest(request,client, cancellationToken.AbortToken);
-                    listener.OnNotify(this,
-                        new NotifyEventArgs(ProgressEventType.Debug,
-                            "Total filtered studies for " + dateFrom + " to " + dateTo +"is " + studiesToOrder.Count));
-                    #endregion
+                    bool done = false;
 
-                    //go and get them
-                    #region Retrieval
+                    //Build fetch command that Study
+                    var cMoveRequest = CreateCMoveByStudyUid(LocalAETitle, current.StudyUid, listener);
 
-                    var transferStopwatch = new Stopwatch();
-
-                    int consecutiveFailures = 0;
-                                            
-                    //While we have things to fetch
-                    while(studiesToOrder.TryTake(out var current))
+                    //Register callbacks
+                    cMoveRequest.OnResponseReceived += (requ, response) =>
                     {
-                        transferStopwatch.Restart();
-                        //delay value in mills
-                        if (dicomConfiguration.TransferCooldownInMilliseconds != 0)
-                        {
-                            listener.OnNotify(this,
-                                new NotifyEventArgs(Verbose ? ProgressEventType.Information : ProgressEventType.Trace,
-                                    "Transfers sleeping for " + dicomConfiguration.TransferCooldownInMilliseconds / 1000 + "seconds"));
-                            Task.Delay(dicomConfiguration.TransferCooldownInMilliseconds, cancellationToken.AbortToken).Wait(cancellationToken.AbortToken);
-                        }
-                                                
-                        bool done = false;
-
-                        //Build fetch command that Study
-                        var cMoveRequest = CreateCMoveByStudyUid(LocalAETitle,current.StudyUid, listener);
-
-                        //Register callbacks
-                        cMoveRequest.OnResponseReceived += (requ, response) =>
-                        {
-                            listener.OnNotify(this,
-                                new NotifyEventArgs(ProgressEventType.Debug,
+                        listener.OnNotify(this,
+                            new(ProgressEventType.Debug,
                                 $"Got {response.Status.State} response for {requ}.  Items remaining {response.Remaining}"));
 
-                            switch(response.Status.State)
-                            {
-                                case DicomState.Pending : 
-                                case DicomState.Warning : 
-                                        // ignore
-                                        break;                                 
-                                case DicomState.Cancel : 
-                                case DicomState.Failure :
-                                    consecutiveFailures++;
-                                    
-                                    if(current.RetryCount < MaxRetries)
-                                    {
-                                        // put it back in the bag with a increased retry count
-                                        current.RetryCount++;
-                                        studiesToOrder.Add(current);
-                                    }
-
-                                    // final state
-                                    done = true;
-                                    break;
-                                case DicomState.Success :
-                                    // final state
-                                    consecutiveFailures = 0;
-                                    done = true;
-                                    break;
-                            }
-                        };
-                        
-                        //send the command to the server
-                        
-                        //tell user what we are sending
-                        listener.OnNotify(this,new NotifyEventArgs(
-                            Verbose ? ProgressEventType.Information : ProgressEventType.Trace,
-                            CMoveRequestToString(cMoveRequest,current.RetryCount +1)));
-
-                        //do not use requestSender.ThrottleRequest(cMoveRequest, cancellationToken);
-                        //TODO is there any need to throtttle this request given its lifetime
-                        requestSender.ThrottleRequest(cMoveRequest, client, cancellationToken.AbortToken);
-                                                
-                        
-                        //enforce a minimum timeout
-                        var swStudyTransfer = Stopwatch.StartNew();
-                        bool hasTransferTimedOut = false;
-
-                        do
+                        switch (response.Status.State)
                         {
-                            Task.Delay(Math.Max(100,dicomConfiguration.TransferPollingInMilliseconds), cancellationToken.AbortToken)
-                                .Wait(cancellationToken.AbortToken);
-                            
-                           hasTransferTimedOut = swStudyTransfer.ElapsedMilliseconds > dicomConfiguration.TransferTimeOutInMilliseconds;
-                                
-                        }while(!done && !hasTransferTimedOut);
+                            case DicomState.Pending:
+                            case DicomState.Warning:
+                                // ignore
+                                break;
+                            case DicomState.Cancel:
+                            case DicomState.Failure:
+                                consecutiveFailures++;
 
-                        // Study has finished being fetched (or timed out)
-                        
-                        if(hasTransferTimedOut)
-                            listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,"Abandonning fetch of study " + current.StudyUid));
-                        
-                        if(consecutiveFailures > 5)
-                            throw new Exception("Too many consecutive failures, giving up");
+                                if (current.RetryCount < MaxRetries)
+                                {
+                                    // put it back in the bag with a increased retry count
+                                    current.RetryCount++;
+                                    studiesToOrder.Add(current);
+                                }
 
-                        // 1 failure = study not available, 2 failures = system is having a bad day?
-                        if (consecutiveFailures <= 1) continue;
-                        //wait 4 minutes then 6 minutes then 8 minutes, eventually server will start responding again?
-                        int sleepFor = consecutiveFailures * 2 * 60_000;
-                        listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Warning,$"Sleeping for {sleepFor}ms due to {consecutiveFailures} consecutive failures"));
+                                // final state
+                                done = true;
+                                break;
+                            case DicomState.Success:
+                                // final state
+                                consecutiveFailures = 0;
+                                done = true;
+                                break;
+                        }
+                    };
 
-                        Task.Delay( sleepFor, cancellationToken.AbortToken)
+                    //send the command to the server
+
+                    //tell user what we are sending
+                    listener.OnNotify(this, new(
+                        Verbose ? ProgressEventType.Information : ProgressEventType.Trace,
+                        CMoveRequestToString(cMoveRequest, current.RetryCount + 1)));
+
+                    //do not use requestSender.ThrottleRequest(cMoveRequest, cancellationToken);
+                    //TODO is there any need to throtttle this request given its lifetime
+                    requestSender.ThrottleRequest(cMoveRequest, client, cancellationToken.AbortToken);
+
+
+                    //enforce a minimum timeout
+                    var swStudyTransfer = Stopwatch.StartNew();
+                    bool hasTransferTimedOut;
+
+                    do
+                    {
+                        Task.Delay(Math.Max(100, dicomConfiguration.TransferPollingInMilliseconds), cancellationToken.AbortToken)
                             .Wait(cancellationToken.AbortToken);
+
+                        hasTransferTimedOut = swStudyTransfer.ElapsedMilliseconds > dicomConfiguration.TransferTimeOutInMilliseconds;
+
+                    } while (!done && !hasTransferTimedOut);
+
+                    // Study has finished being fetched (or timed out)
+
+                    if (hasTransferTimedOut)
+                        listener.OnNotify(this, new(ProgressEventType.Information,
+                            $"Abandonning fetch of study {current.StudyUid}"));
+
+                    switch (consecutiveFailures)
+                    {
+                        case > 5:
+                            throw new("Too many consecutive failures, giving up");
+                        // 1 failure = study not available, 2 failures = system is having a bad day?
+                        case <= 1:
+                            continue;
                     }
-                        
-                    #endregion
+
+                    //wait 4 minutes then 6 minutes then 8 minutes, eventually server will start responding again?
+                    int sleepFor = consecutiveFailures * 2 * 60_000;
+                    listener.OnNotify(this, new(ProgressEventType.Warning, $"Sleeping for {sleepFor}ms due to {consecutiveFailures} consecutive failures"));
+
+                    Task.Delay(sleepFor, cancellationToken.AbortToken)
+                        .Wait(cancellationToken.AbortToken);
                 }
-                finally
-                {
-                    server.Stop();
-                }
+
+                #endregion
+            }
+            finally
+            {
+                server.Stop();
             }
 
             return Chunk;
@@ -262,7 +270,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
                 return;
             // Create filepath and save
             var workingDirectory = cacheLayout.GetLoadCacheDirectory(listener);
-            var filename = instUid + ".dcm";
+            var filename = $"{instUid}.dcm";
             var filepath = Path.Combine(workingDirectory.FullName, filename);
             request.File.Save(filepath);
         }
@@ -272,19 +280,19 @@ namespace Rdmp.Dicom.Cache.Pipeline
         private string CMoveRequestToString(DicomCMoveRequest cMoveRequest, int attempt)
         {
             var stub = $"Retrieving {cMoveRequest.Level} (attempt {attempt}) : ";
-            switch (cMoveRequest.Level)
+            return cMoveRequest.Level switch
             {
-                case DicomQueryRetrieveLevel.Patient:
-                    return stub + cMoveRequest.Dataset.GetSingleValue<string>(DicomTag.PatientID);
-                case DicomQueryRetrieveLevel.Study:
-                    return stub + cMoveRequest.Dataset.GetSingleValue<string>(DicomTag.StudyInstanceUID);
-                case DicomQueryRetrieveLevel.Series:
-                    return stub + cMoveRequest.Dataset.GetSingleValue<string>(DicomTag.SeriesInstanceUID);
-                case DicomQueryRetrieveLevel.Image:
-                    return stub + cMoveRequest.Dataset.GetSingleValue<string>(DicomTag.SOPInstanceUID);
-                default:
-                    return stub + DicomQueryRetrieveLevel.NotApplicable;
-            }
+                DicomQueryRetrieveLevel.Patient => stub +
+                                                   cMoveRequest.Dataset.GetSingleValue<string>(DicomTag.PatientID),
+                DicomQueryRetrieveLevel.Study => stub +
+                                                 cMoveRequest.Dataset.GetSingleValue<string>(DicomTag.StudyInstanceUID),
+                DicomQueryRetrieveLevel.Series => stub +
+                                                  cMoveRequest.Dataset.GetSingleValue<string>(
+                                                      DicomTag.SeriesInstanceUID),
+                DicomQueryRetrieveLevel.Image => stub +
+                                                 cMoveRequest.Dataset.GetSingleValue<string>(DicomTag.SOPInstanceUID),
+                _ => stub + DicomQueryRetrieveLevel.NotApplicable
+            };
         }
 
         #endregion

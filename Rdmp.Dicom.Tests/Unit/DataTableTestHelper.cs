@@ -1,7 +1,7 @@
 ﻿using System.Data;
 using System.Linq;
 
-namespace Rdmp.Dicom.Tests
+namespace Rdmp.Dicom.Tests.Unit
 {
     /// <summary>
     /// Helper class for writing unit tests that use DataTable objects.
@@ -21,11 +21,11 @@ namespace Rdmp.Dicom.Tests
             string[,] data
             )
         {
-            DataTable result = new DataTable();
+            DataTable result = new();
 
             for (int i = 0; i < columnNames.Length; i++)
             {
-                DataColumn column = new DataColumn {DataType = data[0, i].GetType(), ColumnName = columnNames[i]};
+                DataColumn column = new() {DataType = data[0, i].GetType(), ColumnName = columnNames[i]};
                 result.Columns.Add(column);
             }
 

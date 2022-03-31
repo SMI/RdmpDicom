@@ -3,11 +3,8 @@ using NUnit.Framework;
 using Rdmp.Core.Curation.Data.Pipelines;
 using Rdmp.Dicom.CommandExecution;
 using Rdmp.Dicom.PipelineComponents.DicomSources;
-using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using Tests.Common;
 
 namespace Rdmp.Dicom.Tests.Integration
@@ -155,10 +152,10 @@ Tables:
             File.WriteAllText(template,TemplateYaml);
 
             var cmd = new ExecuteCommandCreateNewImagingDatasetSuite(RepositoryLocator,db,
-                new DirectoryInfo(TestContext.CurrentContext.WorkDirectory),
+                new(TestContext.CurrentContext.WorkDirectory),
                 typeof(DicomFileCollectionSource),
                 "CT_",
-                new FileInfo(template),
+                new(template),
                 persistentRaw: false,
                 createLoad: true);
 

@@ -152,8 +152,8 @@ namespace Rdmp.Dicom.Tests.Unit
 
             foreach (ColumnInfo column in columnInfosCreated)
             {
-                column.Name = tableInfoCreated.Name + "." +
-                    (includeQualifiers ?  syntax.EnsureWrapped(column.GetRuntimeName()) : column.GetRuntimeName());
+                column.Name =
+                    $"{tableInfoCreated.Name}.{(includeQualifiers ? syntax.EnsureWrapped(column.GetRuntimeName()) : column.GetRuntimeName())}";
                 column.SaveToDatabase();
             }
 
@@ -215,7 +215,7 @@ namespace Rdmp.Dicom.Tests.Unit
 
             var tblParent = db.CreateTable("Parent", dt, new[]
             {
-                new DatabaseColumnRequest("SeriesInstanceUID",new DatabaseTypeRequest(typeof(string))),
+                new DatabaseColumnRequest("SeriesInstanceUID",new DatabaseTypeRequest(typeof(string)))
             });
             
             var tblChild = db.CreateTable("Child", dt2,new []

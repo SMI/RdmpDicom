@@ -1,11 +1,12 @@
-﻿using NUnit.Framework;
+﻿using System.IO;
+using NUnit.Framework;
 using Rdmp.Core.DataFlowPipeline;
 using Rdmp.Core.DataFlowPipeline.Requirements;
-using Rdmp.Dicom;
+using Rdmp.Dicom.PipelineComponents.CFind;
 using ReusableLibraryCode.Checks;
 using ReusableLibraryCode.Progress;
-using System.IO;
 
+namespace Rdmp.Dicom.Tests.Unit;
 public class CFindDirSourceTests
 {
     [Test]
@@ -24,17 +25,17 @@ public class CFindDirSourceTests
 
         Assert.DoesNotThrow(() => source.Check(new ThrowImmediatelyCheckNotifier()));
 
-        source.PreInitialize(new FlatFileToLoad(new FileInfo(inventory)), new ThrowImmediatelyDataLoadEventListener());
+        source.PreInitialize(new(new(inventory)), new ThrowImmediatelyDataLoadEventListener());
 
-        var dt = source.GetChunk(new ThrowImmediatelyDataLoadEventListener(), new GracefulCancellationToken());
+        var dt = source.GetChunk(new ThrowImmediatelyDataLoadEventListener(), new());
 
         /*
-         * 
+     * 
 someAE	DX\SR	XR Facial bones	0102030405	TEXT	1.2.3.4.50	20200416
 someAE	DX\SR	XR Elbow Lt	0102030405	TEXT	1.2.3.4.60	20200416
 someAE	XA\SR	Fluoroscopy upper limb Lt	0102030405	TEXT	1.2.3.4.70	20200416
 */
-        
+
         Assert.AreEqual(3, dt.Rows.Count);
 
 
@@ -72,9 +73,9 @@ someAE	XA\SR	Fluoroscopy upper limb Lt	0102030405	TEXT	1.2.3.4.70	20200416
 
         Assert.DoesNotThrow(() => source.Check(new ThrowImmediatelyCheckNotifier()));
 
-        source.PreInitialize(new FlatFileToLoad(new FileInfo(inventory)), new ThrowImmediatelyDataLoadEventListener());
+        source.PreInitialize(new(new(inventory)), new ThrowImmediatelyDataLoadEventListener());
 
-        var dt = source.GetChunk(new ThrowImmediatelyDataLoadEventListener(), new GracefulCancellationToken());
+        var dt = source.GetChunk(new ThrowImmediatelyDataLoadEventListener(), new());
 
         Assert.AreEqual(3, dt.Rows.Count);
     }
