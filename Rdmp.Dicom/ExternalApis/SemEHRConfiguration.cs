@@ -55,7 +55,7 @@ namespace Rdmp.Dicom.ExternalApis
         /// <summary>
         /// The URL used to connect to the API
         /// </summary>
-        public string Url { get; set; } = "https://192.168.1.200:8485/api/search_anns/myQuery/";
+        public string Url { get; set; } = "https://localhost:8485/api/search_anns/myQuery/";
 
         /// <summary>
         /// TRUE if the <see cref="Url">Url</see> fir tge API should check that the certificate and certificate chain are valid
@@ -291,18 +291,12 @@ namespace Rdmp.Dicom.ExternalApis
 
         public string GetUrlWithQuerystring()
         {
-            string fullRequestUrl = Url;
-            string queryJsonForUrl = "j=" + GetQueryJsonAsString();
-
+            string passphraseIfSet = "";
             if (!string.IsNullOrEmpty(Passphrase))
             {
-                fullRequestUrl += "?passphrase=" + Passphrase + "&" + queryJsonForUrl;
+                passphraseIfSet = $"passphrase={Passphrase}&";
             }
-            else
-            {
-                fullRequestUrl += "?" + queryJsonForUrl;
-            }
-            return (fullRequestUrl);
+            return ($"{this.Url}?{passphraseIfSet}j={GetQueryJsonAsString()}");
         }
     }
 }
