@@ -122,6 +122,12 @@ namespace Rdmp.Dicom.CommandExecution
 
             List<DiscoveredTable> tablesCreated = new();
 
+            // create the database if it does not exist
+            if(!_databaseToCreateInto.Exists())
+            {
+                _databaseToCreateInto.Server.CreateDatabase(_databaseToCreateInto.GetRuntimeName());
+            }
+
             //Create with template?
             if(Template != null)
             {

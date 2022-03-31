@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Support for running CLI `AddTag` command for multiple Catalogues at once
 - Extend repertoire of archive formats to include 7zip, RAR, tar, bz2 via SharpCompress
 
 ## [5.0.5] 2022-03-03

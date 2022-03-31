@@ -41,9 +41,23 @@ jobs:
           cd ../..
           nuget pack ./Rdmp.Dicom.nuspec -Properties Configuration=Release -IncludeReferencedProjects -Symbols -Version ${{ steps.version.outputs.version }}
           nuget pack ./Rdmp.Dicom.Library.nuspec -Properties Configuration=Release -IncludeReferencedProjects -Symbols -Version ${{ steps.version.outputs.version }}
-          cmd /c rdmpcli\rdmp.exe pack --file Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg  --CatalogueConnectionString "Server=localhost;Integrated Security=true;Encrypt=yes;Database=TEST_Catalogue;TrustServerCertificate=true" --dataexportconnectionstring "Server=localhost;Integrated Security=true;Encrypt=yes;Database=TEST_DataExport;TrustServerCertificate=true"
-          cmd /c rdmpcli\rdmp.exe cmd listsupportedcommands  --CatalogueConnectionString "Server=localhost;Integrated Security=true;Encrypt=yes;Database=TEST_Catalogue;TrustServerCertificate=true" --dataexportconnectionstring "Server=localhost;Integrated Security=true;Encrypt=yes;Database=TEST_DataExport;TrustServerCertificate=true"
-          cmd /c rdmpcli\rdmp.exe cmd describecommand CreateNewImagingDatasetSuite --CatalogueConnectionString "Server=localhost;Integrated Security=true;Encrypt=yes;Database=TEST_Catalogue;TrustServerCertificate=true" --dataexportconnectionstring "Server=localhost;Integrated Security=true;Encrypt=yes;Database=TEST_DataExport;TrustServerCertificate=true"
+          
+          cp Databases.Integration.yaml .\rdmpcli\Databases.yaml
+          cmd /c rdmpcli\rdmp.exe pack --file Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg
+          cmd /c rdmpcli\rdmp.exe cmd listsupportedcommands
+          cmd /c rdmpcli\rdmp.exe cmd describecommand CreateNewImagingDatasetSuite
+      - name: Get Imaging Template
+        run: |
+          Invoke-WebRequest -Uri https://raw.githubusercontent.com/HicServices/DicomTypeTranslation/main/Templates/CT.it -OutFile D:\a\RdmpDicom\CT.it
+      - name: Integration Tests
+        run: |
+          cmd /c rdmpcli\rdmp.exe cmd NewObject ConnectionStringKeyword MicrosoftSqlServer TrustServerCertificate yes
+          cmd /c rdmpcli\rdmp.exe cmd NewObject ConnectionStringKeyword MicrosoftSqlServer Encrypt yes
+          cmd /c rdmpcli\rdmp.exe cmd CreateNewImagingDatasetSuite "DatabaseType:MicrosoftSqlServer:Name:ImagingTest:Server=localhost;Integrated Security=true;Encrypt=yes;TrustServerCertificate=true" ./data DicomFileCollectionSource CT_ ../CT.it false false
+          cmd /c rdmpcli\rdmp.exe cmd AddTag Catalogue:CT_ImageTable StudyDate null
+          cmd /c rdmpcli\rdmp.exe cmd AddTag Catalogue:CT_*Table SeriesDate null
+          cmd /c rdmpcli\rdmp.exe cmd AddTag Catalogue:CT_*Table SeriesDate null
+          cmd /c rdmpcli\rdmp.exe cmd AddTag Catalogue:CT_*Table SeriesDate null
       - name: Nuget push
         if: contains(github.ref,'refs/tags/')
         run: nuget push HIC.Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg -Source https://api.nuget.org/v3/index.json -ApiKey ${{ secrets.NUGET_KEY }} -SkipDuplicate

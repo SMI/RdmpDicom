@@ -43,6 +43,9 @@ namespace Rdmp.Dicom.TagPromotionSchema
 
         public void Execute()
         {
+            if (ColumnAlreadyExists())
+                return;
+
             if(!SkipChecksAndSynchronization)
                 Check(_notifierForExecute);
 
@@ -70,10 +73,10 @@ namespace Rdmp.Dicom.TagPromotionSchema
             //synchronize the TableInfo
             new TableInfoSynchronizer(_tableInfo).Synchronize(notifier);
 
-            if (_tableInfo.ColumnInfos.Any(c => c.GetRuntimeName().Equals(_tagName)))
+            if(ColumnAlreadyExists())
             {
                 notifier.OnCheckPerformed(new(
-                    $"There is already a column called '{_tagName}' in TableInfo {_tableInfo}",CheckResult.Fail));
+                    $"There is already a column called '{_tagName}' in TableInfo {_tableInfo}.  No column will be created.",CheckResult.Warning));
                 return;
             }
 
@@ -87,6 +90,11 @@ namespace Rdmp.Dicom.TagPromotionSchema
             {
                 notifier.OnCheckPerformed(new($"Datatype '{_datatype}' is not supported",CheckResult.Fail, ex));
             }
+        }
+
+        private bool ColumnAlreadyExists()
+        {
+            return _tableInfo.ColumnInfos.Any(c => c.GetRuntimeName().Equals(_tagName));
         }
 
         private DiscoveredDatabase GetDatabase()

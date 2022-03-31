@@ -77,9 +77,9 @@ namespace Rdmp.Dicom.Tests.Integration
             Assert.IsFalse(cmd.IsImpossible,cmd.ReasonCommandImpossible);
             cmd.Execute();
 
-            var ex = Assert.Throws<Exception>(()=>new ExecuteCommandAddTag(activator,catalogue,"StudyDate",null).Execute());
-            StringAssert.StartsWith("Failed check with message: There is already a column called 'StudyDate' in TableInfo ",ex.Message);
-
+            // attempting to add something that is already there is not a problem and just gets skipped
+            Assert.DoesNotThrow(()=>new ExecuteCommandAddTag(activator,catalogue,"StudyDate",null).Execute());
+            
             cmd = new ExecuteCommandAddTag(activator,catalogue,"SeriesDate",null);
             Assert.IsFalse(cmd.IsImpossible,cmd.ReasonCommandImpossible);
             cmd.Execute();
