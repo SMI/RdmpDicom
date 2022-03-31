@@ -54,13 +54,13 @@ namespace Rdmp.Dicom.UI
             this.dtpEndDate = new System.Windows.Forms.DateTimePicker();
             this.dtpStartDate = new System.Windows.Forms.DateTimePicker();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.tbPassphrase = new System.Windows.Forms.TextBox();
+            this.label10 = new System.Windows.Forms.Label();
             this.cbValidateServerCert = new System.Windows.Forms.CheckBox();
             this.label8 = new System.Windows.Forms.Label();
             this.tbStartEndDateFormat = new System.Windows.Forms.TextBox();
             this.checkStateRenderer1 = new BrightIdeasSoftware.CheckStateRenderer();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.label10 = new System.Windows.Forms.Label();
-            this.tbPassphrase = new System.Windows.Forms.TextBox();
             this.flowLayoutPanel1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -81,14 +81,14 @@ namespace Rdmp.Dicom.UI
             this.tbUrl.Location = new System.Drawing.Point(15, 33);
             this.tbUrl.Name = "tbUrl";
             this.tbUrl.Size = new System.Drawing.Size(407, 23);
-            this.tbUrl.TabIndex = 12;
+            this.tbUrl.TabIndex = 10;
             // 
             // btnSave
             // 
             this.btnSave.Location = new System.Drawing.Point(3, 3);
             this.btnSave.Name = "btnSave";
             this.btnSave.Size = new System.Drawing.Size(75, 23);
-            this.btnSave.TabIndex = 8;
+            this.btnSave.TabIndex = 100;
             this.btnSave.Text = "Save";
             this.btnSave.UseVisualStyleBackColor = true;
             this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
@@ -98,7 +98,7 @@ namespace Rdmp.Dicom.UI
             this.btnCancel.Location = new System.Drawing.Point(84, 3);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(75, 23);
-            this.btnCancel.TabIndex = 9;
+            this.btnCancel.TabIndex = 101;
             this.btnCancel.Text = "Cancel";
             this.btnCancel.UseVisualStyleBackColor = true;
             this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
@@ -172,7 +172,7 @@ namespace Rdmp.Dicom.UI
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
             this.tabControl1.Size = new System.Drawing.Size(445, 631);
-            this.tabControl1.TabIndex = 11;
+            this.tabControl1.TabIndex = 200;
             // 
             // tabPage1
             // 
@@ -207,7 +207,7 @@ namespace Rdmp.Dicom.UI
             this.cbReturnFeild.Location = new System.Drawing.Point(16, 537);
             this.cbReturnFeild.Name = "cbReturnFeild";
             this.cbReturnFeild.Size = new System.Drawing.Size(407, 23);
-            this.cbReturnFeild.TabIndex = 21;
+            this.cbReturnFeild.TabIndex = 9;
             // 
             // label9
             // 
@@ -224,7 +224,7 @@ namespace Rdmp.Dicom.UI
             this.cbUseEndDate.Location = new System.Drawing.Point(228, 243);
             this.cbUseEndDate.Name = "cbUseEndDate";
             this.cbUseEndDate.Size = new System.Drawing.Size(15, 14);
-            this.cbUseEndDate.TabIndex = 18;
+            this.cbUseEndDate.TabIndex = 6;
             this.cbUseEndDate.UseVisualStyleBackColor = true;
             this.cbUseEndDate.CheckedChanged += new System.EventHandler(this.cbUseEndDate_CheckedChanged);
             // 
@@ -234,7 +234,7 @@ namespace Rdmp.Dicom.UI
             this.cbUseStartDate.Location = new System.Drawing.Point(24, 243);
             this.cbUseStartDate.Name = "cbUseStartDate";
             this.cbUseStartDate.Size = new System.Drawing.Size(15, 14);
-            this.cbUseStartDate.TabIndex = 17;
+            this.cbUseStartDate.TabIndex = 4;
             this.cbUseStartDate.UseVisualStyleBackColor = true;
             this.cbUseStartDate.CheckedChanged += new System.EventHandler(this.cbUseStartDate_CheckedChanged);
             // 
@@ -262,7 +262,7 @@ namespace Rdmp.Dicom.UI
             this.cblModalities.Location = new System.Drawing.Point(16, 291);
             this.cblModalities.Name = "cblModalities";
             this.cblModalities.Size = new System.Drawing.Size(407, 220);
-            this.cblModalities.TabIndex = 6;
+            this.cblModalities.TabIndex = 8;
             // 
             // label5
             // 
@@ -279,7 +279,7 @@ namespace Rdmp.Dicom.UI
             this.dtpEndDate.Location = new System.Drawing.Point(249, 239);
             this.dtpEndDate.Name = "dtpEndDate";
             this.dtpEndDate.Size = new System.Drawing.Size(174, 23);
-            this.dtpEndDate.TabIndex = 5;
+            this.dtpEndDate.TabIndex = 7;
             // 
             // dtpStartDate
             // 
@@ -287,7 +287,7 @@ namespace Rdmp.Dicom.UI
             this.dtpStartDate.Location = new System.Drawing.Point(43, 239);
             this.dtpStartDate.Name = "dtpStartDate";
             this.dtpStartDate.Size = new System.Drawing.Size(174, 23);
-            this.dtpStartDate.TabIndex = 4;
+            this.dtpStartDate.TabIndex = 5;
             // 
             // tabPage2
             // 
@@ -306,6 +306,23 @@ namespace Rdmp.Dicom.UI
             this.tabPage2.Text = "Settings";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
+            // tbPassphrase
+            // 
+            this.tbPassphrase.Location = new System.Drawing.Point(15, 77);
+            this.tbPassphrase.Name = "tbPassphrase";
+            this.tbPassphrase.PasswordChar = '*';
+            this.tbPassphrase.Size = new System.Drawing.Size(407, 23);
+            this.tbPassphrase.TabIndex = 12;
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(15, 59);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(137, 15);
+            this.label10.TabIndex = 16;
+            this.label10.Text = "API Endpoint Passphrase";
+            // 
             // cbValidateServerCert
             // 
             this.cbValidateServerCert.AutoSize = true;
@@ -313,7 +330,7 @@ namespace Rdmp.Dicom.UI
             this.cbValidateServerCert.Name = "cbValidateServerCert";
             this.cbValidateServerCert.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
             this.cbValidateServerCert.Size = new System.Drawing.Size(159, 19);
-            this.cbValidateServerCert.TabIndex = 15;
+            this.cbValidateServerCert.TabIndex = 11;
             this.cbValidateServerCert.Text = "Validate Server Certificate";
             this.toolTip1.SetToolTip(this.cbValidateServerCert, "Ensure the certificate trust chain is valid when making a connection to this serv" +
         "er.");
@@ -333,24 +350,7 @@ namespace Rdmp.Dicom.UI
             this.tbStartEndDateFormat.Location = new System.Drawing.Point(15, 139);
             this.tbStartEndDateFormat.Name = "tbStartEndDateFormat";
             this.tbStartEndDateFormat.Size = new System.Drawing.Size(407, 23);
-            this.tbStartEndDateFormat.TabIndex = 14;
-            // 
-            // label10
-            // 
-            this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(15, 59);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(137, 15);
-            this.label10.TabIndex = 16;
-            this.label10.Text = "API Endpoint Passphrase";
-            // 
-            // tbPassphrase
-            // 
-            this.tbPassphrase.Location = new System.Drawing.Point(15, 77);
-            this.tbPassphrase.Name = "tbPassphrase";
-            this.tbPassphrase.PasswordChar = '*';
-            this.tbPassphrase.Size = new System.Drawing.Size(407, 23);
-            this.tbPassphrase.TabIndex = 17;
+            this.tbStartEndDateFormat.TabIndex = 13;
             // 
             // SemEHRUI
             // 
@@ -360,7 +360,7 @@ namespace Rdmp.Dicom.UI
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.flowLayoutPanel1);
             this.Name = "SemEHRUI";
-            this.Text = "SemEHRUI";
+            this.Text = "SemEHR Query Builder";
             this.flowLayoutPanel1.ResumeLayout(false);
             this.tabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
