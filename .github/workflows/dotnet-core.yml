@@ -51,6 +51,8 @@ jobs:
           Invoke-WebRequest -Uri https://raw.githubusercontent.com/HicServices/DicomTypeTranslation/main/Templates/CT.it -OutFile D:\a\RdmpDicom\CT.it
       - name: Integration Tests
         run: |
+          cmd /c rdmpcli\rdmp.exe cmd NewObject ConnectionStringKeyword MicrosoftSqlServer TrustServerCertificate yes
+          cmd /c rdmpcli\rdmp.exe cmd NewObject ConnectionStringKeyword MicrosoftSqlServer Encrypt yes
           cmd /c rdmpcli\rdmp.exe cmd CreateNewImagingDatasetSuite "DatabaseType:MicrosoftSqlServer:Name:ImagingTest:Server=localhost;Integrated Security=true;Encrypt=yes;TrustServerCertificate=true" ./data DicomFileCollectionSource CT_ ../CT.it false false
           cmd /c rdmpcli\rdmp.exe cmd AddTag Catalogue:CT_ImageTable StudyDate null
           cmd /c rdmpcli\rdmp.exe cmd AddTag Catalogue:*Table SeriesDate null
