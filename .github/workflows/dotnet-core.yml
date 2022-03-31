@@ -48,7 +48,7 @@ jobs:
           cmd /c rdmpcli\rdmp.exe cmd describecommand CreateNewImagingDatasetSuite
       - name: Get Imaging Template
         run: |
-          Invoke-WebRequest -Uri https://raw.githubusercontent.com/HicServices/DicomTypeTranslation/main/Templates/CT.it -OutFile CT.it
+          Invoke-WebRequest -Uri https://raw.githubusercontent.com/HicServices/DicomTypeTranslation/main/Templates/CT.it -OutFile D:\a\RdmpDicom\CT.it
       - name: Integration Tests
         run: |
           cmd /c rdmpcli\rdmp.exe cmd CreateNewImagingDatasetSuite "DatabaseType:MicrosoftSqlServer:Name:ImagingTest:server=Server=localhost;Integrated Security=true;Encrypt=yes;TrustServerCertificate=true" ./data DicomFileCollectionSource CT_ ../CT.it false false
