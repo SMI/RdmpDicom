@@ -27,7 +27,7 @@ jobs:
         run: |
           Invoke-WebRequest -Uri https://github.com/HicServices/RDMP/releases/download/v${{ steps.version.outputs.rdmpversion }}/rdmp-cli-win-x64.zip -OutFile rdmp.zip
           Expand-Archive -Path rdmp.zip -DestinationPath .\rdmpcli
-          cmd.exe /c rdmpcli\rdmp.exe install "(localdb)\MSSQLLocalDB" TEST_
+          cmd.exe /c rdmpcli\rdmp.exe install --createdatabasetimeout 180  "(localdb)\MSSQLLocalDB" TEST_
       - name: Test
         run: |
           dotnet test -c Release
