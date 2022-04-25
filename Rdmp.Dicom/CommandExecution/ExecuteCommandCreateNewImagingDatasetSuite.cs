@@ -80,7 +80,7 @@ namespace Rdmp.Dicom.CommandExecution
             _projectDirectory = projectDirectory;
             NewCataloguesCreated = new();
 
-            _loggingServer = _catalogueRepository.GetServerDefaults().GetDefaultFor(PermissableDefaults.LiveLoggingServer_ID);
+            _loggingServer = _catalogueRepository.GetDefaultFor(PermissableDefaults.LiveLoggingServer_ID);
 
             if(_loggingServer == null)
                 SetImpossible("No default logging server has been configured in your Catalogue database");
