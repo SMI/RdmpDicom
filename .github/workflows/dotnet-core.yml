@@ -23,8 +23,8 @@ jobs:
           for /f tokens^=2^,4^ delims^=^" %%i in (Rdmp.Dicom/Rdmp.Dicom.csproj) do @if "%%i"=="HIC.RDMP.Plugin" echo ::set-output name=rdmpversion::%%j
       - name: Install MS SQL 2019
         uses: crazy-max/ghaction-chocolatey@v1
-          with:
-            args: install sqllocaldb
+        with:
+          args: install sqllocaldb
       - name: Set up database
         run: |
           Invoke-WebRequest -Uri https://github.com/HicServices/RDMP/releases/download/v${{ steps.version.outputs.rdmpversion }}/rdmp-cli-win-x64.zip -OutFile rdmp.zip
