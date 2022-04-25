@@ -1,2 +1,2 @@
-CatalogueConnectionString: Server=(localdb)MSSQLLocalDB;Integrated Security=true;Encrypt=yes;Database=TEST_Catalogue;TrustServerCertificate=true
-DataExportConnectionString: Server=(localdb)MSSQLLocalDB;Integrated Security=true;Encrypt=yes;Database=TEST_DataExport;TrustServerCertificate=true
+CatalogueConnectionString: Server=(localdb)\MSSQLLocalDB;Integrated Security=true;Encrypt=yes;Database=TEST_Catalogue;TrustServerCertificate=true
+DataExportConnectionString: Server=(localdb)\MSSQLLocalDB;Integrated Security=true;Encrypt=yes;Database=TEST_DataExport;TrustServerCertificate=true
