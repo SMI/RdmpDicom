@@ -48,7 +48,7 @@ This Grouping will be used to extract the Modality code when deciding which tabl
         readonly Stopwatch _sw = new();
         Dictionary<DataTable, string> _modalityMap;
 
-        protected AutoRoutingAttacher(bool requestsExternalDatabaseCreation) : base(requestsExternalDatabaseCreation) //Derrived classes can change mind about RAW creation
+        protected AutoRoutingAttacher(bool requestsExternalDatabaseCreation) : base(requestsExternalDatabaseCreation) //Derived classes can change mind about RAW creation
         {
             
         }
@@ -104,7 +104,7 @@ This Grouping will be used to extract the Modality code when deciding which tabl
             foreach (var t in Job.RegularTablesToLoad)
             {
                 var tblName = t.GetRuntimeName(LoadBubble.Raw,Job.Configuration.DatabaseNamer);
-                var dest = new SqlBulkInsertDestination(_dbInfo,tblName,new String[0]);
+                var dest = new SqlBulkInsertDestination(_dbInfo,tblName,Array.Empty<string>());
 
                 var tli = Job.DataLoadInfo.CreateTableLoadInfo("", tblName, new[] {new DataSource("AutoRoutingAttacher")}, 0);
 

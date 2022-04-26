@@ -25,7 +25,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
     /// </summary>
     public class CFindSource : SMICacheSource
     {
-        private DicomTag[] _tagsToWrite = new DicomTag[] {
+        private DicomTag[] _tagsToWrite = {
             DicomTag.StudyInstanceUID,
             DicomTag.PatientID,
             DicomTag.StudyDate,
@@ -86,10 +86,9 @@ namespace Rdmp.Dicom.Cache.Pipeline
                 var request = CreateStudyRequestByDateRangeForModality(dateFrom, dateTo, Modality);
                 request.OnResponseReceived += (req, response) =>
                 {
-                    if (Filter(Whitelist, response)) {
-                        Interlocked.Increment(ref responses);
-                        WriteResult(writer,response);
-                        }
+                    if (!Filter(Whitelist, response)) return;
+                    Interlocked.Increment(ref responses);
+                    WriteResult(writer,response);
 
                 };
                 requestSender.ThrottleRequest(request,client, cancellationToken.AbortToken);

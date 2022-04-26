@@ -70,7 +70,7 @@ namespace Rdmp.Dicom.Tests.Integration
                 {DicomTag.StudyDescription,"Frank has lots of problems, he lives at 60 Pancake road"},
                 {DicomTag.SeriesDescription,"Coconuts"},
                 {DicomTag.AlgorithmName,"Chessnuts"}, // would not normally be dropped by anonymisation
-                {DicomTag.StudyDate,"20020101"},
+                {DicomTag.StudyDate,"20020101"}
             };
 
             Dictionary<DicomTag,string> thingsThatShouldRemain = new()
@@ -84,7 +84,7 @@ namespace Rdmp.Dicom.Tests.Integration
                 {DicomTag.SOPInstanceUID, "123.4.4"},
                 {DicomTag.SeriesInstanceUID, "123.4.5"},
                 {DicomTag.StudyInstanceUID, "123.4.6"},
-                {DicomTag.SOPClassUID,"1"},
+                {DicomTag.SOPClassUID,"1"}
             };
 
             foreach (var (key, value) in thingThatShouldDisappear)
@@ -336,7 +336,7 @@ namespace Rdmp.Dicom.Tests.Integration
                 {DicomTag.SeriesInstanceUID, "123.4.5"},
                 {DicomTag.StudyInstanceUID, "123.4.6"},
                 {DicomTag.SOPClassUID,"1"},
-                {DicomTag.StudyDate,"20020101"},
+                {DicomTag.StudyDate,"20020101"}
             };
             //the actual work
             putter.WriteOutDataset(outputDirectory, releaseIdentifier, dicomDataset);
@@ -381,14 +381,14 @@ namespace Rdmp.Dicom.Tests.Integration
                 UIDMappingServer = eds
             };
 
-            var ex = Assert.Throws<Exception>(()=>anon.Check(new ThrowImmediatelyCheckNotifier() { ThrowOnWarning = true }));
+            var ex = Assert.Throws<Exception>(()=>anon.Check(new ThrowImmediatelyCheckNotifier { ThrowOnWarning = true }));
 
-            StringAssert.AreEqualIgnoringCase("UIDMappingServer is not set up yet", ex.Message);
+            StringAssert.AreEqualIgnoringCase("UIDMappingServer is not set up yet", ex?.Message);
 
             anon.Check(new AcceptAllCheckNotifier());
 
             // no warnings after it has been created
-            Assert.DoesNotThrow(() => anon.Check(new ThrowImmediatelyCheckNotifier() { ThrowOnWarning = true }));
+            Assert.DoesNotThrow(() => anon.Check(new ThrowImmediatelyCheckNotifier { ThrowOnWarning = true }));
 
         }
 

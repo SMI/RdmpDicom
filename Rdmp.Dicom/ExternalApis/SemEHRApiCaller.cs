@@ -4,11 +4,8 @@ using Rdmp.Core.Curation.Data.Aggregation;
 using Rdmp.Core.QueryCaching.Aggregation;
 using System;
 using System.Threading;
-using Newtonsoft.Json.Linq;
-
 using System.Net;
 using System.Net.Http;
-using System.Web;
 using Newtonsoft.Json;
 using System.Linq;
 
@@ -20,8 +17,12 @@ namespace Rdmp.Dicom.ExternalApis
 
         public override void Run(AggregateConfiguration ac, CachedAggregateConfigurationResultsManager cache, CancellationToken token)
         {
-            var config = SemEHRConfiguration.LoadFrom(ac);
-            HttpClientHandler httpClientHandler = new();
+            Run(ac, cache, token, SemEHRConfiguration.LoadFrom(ac));
+        }
+
+        internal void Run(AggregateConfiguration ac, CachedAggregateConfigurationResultsManager cache, CancellationToken token, SemEHRConfiguration config)
+        {
+            HttpClientHandler httpClientHandler = new HttpClientHandler();
 
             //Get data as post - not currently used
             //In the future we'll enable getting the data with POST maybe. Here for reference
@@ -43,27 +44,22 @@ namespace Rdmp.Dicom.ExternalApis
             HttpClient httpClient = new(httpClientHandler);
 
             //Make the request to the API
-            HttpResponseMessage response = httpClient.GetAsync(config.GetUrlWithQuerystring()).Result;
+            HttpResponseMessage response = httpClient.GetAsync(config.GetUrlWithQuerystring(), token).Result;
 
             //Check the status code is 200 success
             if (response.StatusCode == HttpStatusCode.OK)
             {
                 //Get the result object and use built in DeserializeObject to concert to SemEHRResponse
-                string responseData = response.Content.ReadAsStringAsync().Result;
+                string responseData = response.Content.ReadAsStringAsync(token).Result;
                 SemEHRResponse semEHRResponse = JsonConvert.DeserializeObject<SemEHRResponse>(responseData);
 
-                if (semEHRResponse.success == true)
+                if (semEHRResponse.success)
                 {
-                    if(semEHRResponse.results.Count == 0)
-                    {
-                        SubmitIdentifierList(config.ReturnField, new string[] { }, ac, cache);
-                    }
-                    else
-                    {
-                        SubmitIdentifierList(config.ReturnField, semEHRResponse.results.ToArray(), ac, cache);
-                    }
+                    SubmitIdentifierList(config.ReturnField,
+                        semEHRResponse.results.Count == 0 ? new string[] { } : semEHRResponse.results.ToArray(), ac,
+                        cache);
 
-                    /*If we can cope with the return feild with multiple types this will handle that
+                    /*If we can cope with the return field with multiple types this will handle that
                     /*if (string.IsNullOrEmpty(config.ReturnField))
                     {
                         SubmitIdentifierList("sopinstanceuid", semEHRResponse.GetResultSopUids().ToArray(), ac, cache);

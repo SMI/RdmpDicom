@@ -35,7 +35,7 @@ namespace Rdmp.Dicom.CommandExecution
             importer.DoImport(out var tis, out var cis);
 
             var engineer = new ForwardEngineerCatalogue(tis, cis, true);
-            engineer.ExecuteForwardEngineering(out var cata, out var cataItems, out var eis);
+            engineer.ExecuteForwardEngineering(out var cata, out _, out var eis);
 
             var patientIdentifier = eis.SingleOrDefault(e => e.GetRuntimeName().Equals("PatientID"));
 

@@ -12,6 +12,12 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
+      - uses: actions/cache@v3
+        with:
+          path: ${{ github.workspace }}/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
       - uses: actions/setup-dotnet@v2
         with:
           dotnet-version: 6.0.x
@@ -22,12 +28,15 @@ jobs:
           for /f tokens^=1^,2^ delims^=^" %%i in (SharedAssemblyInfo.cs) do @if "%%i"=="[assembly: AssemblyVersion(" echo ::set-output name=version::%%j
           for /f tokens^=2^,4^ delims^=^" %%i in (Rdmp.Dicom/Rdmp.Dicom.csproj) do @if "%%i"=="HIC.RDMP.Plugin" echo ::set-output name=rdmpversion::%%j
       - name: Install MS SQL 2019
-        run: Choco-Install -PackageName sql-server-2019 --params="'/IgnorePendingReboot'"
+        uses: crazy-max/ghaction-chocolatey@v1
+        with:
+          args: install sqllocaldb
       - name: Set up database
         run: |
           Invoke-WebRequest -Uri https://github.com/HicServices/RDMP/releases/download/v${{ steps.version.outputs.rdmpversion }}/rdmp-cli-win-x64.zip -OutFile rdmp.zip
           Expand-Archive -Path rdmp.zip -DestinationPath .\rdmpcli
-          cmd.exe /c rdmpcli\rdmp.exe install localhost TEST_
+          sqlcmd -l 180 -S "(localdb)\MSSQLLocalDB" -Q "SELECT @@VERSION;"
+          cmd.exe /c rdmpcli\rdmp.exe install --createdatabasetimeout 180  "(localdb)\MSSQLLocalDB" TEST_
       - name: Test
         run: |
           dotnet test -c Release
@@ -41,14 +50,28 @@ jobs:
           cd ../..
           nuget pack ./Rdmp.Dicom.nuspec -Properties Configuration=Release -IncludeReferencedProjects -Symbols -Version ${{ steps.version.outputs.version }}
           nuget pack ./Rdmp.Dicom.Library.nuspec -Properties Configuration=Release -IncludeReferencedProjects -Symbols -Version ${{ steps.version.outputs.version }}
-          cmd /c rdmpcli\rdmp.exe pack --file Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg  --CatalogueConnectionString "Server=localhost;Integrated Security=true;Encrypt=yes;Database=TEST_Catalogue;TrustServerCertificate=true" --dataexportconnectionstring "Server=localhost;Integrated Security=true;Encrypt=yes;Database=TEST_DataExport;TrustServerCertificate=true"
-          cmd /c rdmpcli\rdmp.exe cmd listsupportedcommands  --CatalogueConnectionString "Server=localhost;Integrated Security=true;Encrypt=yes;Database=TEST_Catalogue;TrustServerCertificate=true" --dataexportconnectionstring "Server=localhost;Integrated Security=true;Encrypt=yes;Database=TEST_DataExport;TrustServerCertificate=true"
-          cmd /c rdmpcli\rdmp.exe cmd describecommand CreateNewImagingDatasetSuite --CatalogueConnectionString "Server=localhost;Integrated Security=true;Encrypt=yes;Database=TEST_Catalogue;TrustServerCertificate=true" --dataexportconnectionstring "Server=localhost;Integrated Security=true;Encrypt=yes;Database=TEST_DataExport;TrustServerCertificate=true"
+          
+          cp Databases.Integration.yaml .\rdmpcli\Databases.yaml
+          cmd /c rdmpcli\rdmp.exe pack --file Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg
+          cmd /c rdmpcli\rdmp.exe cmd listsupportedcommands
+          cmd /c rdmpcli\rdmp.exe cmd describecommand CreateNewImagingDatasetSuite
+      - name: Get Imaging Template
+        run: |
+          Invoke-WebRequest -Uri https://raw.githubusercontent.com/HicServices/DicomTypeTranslation/main/Templates/CT.it -OutFile D:\a\RdmpDicom\CT.it
+      - name: Integration Tests
+        run: |
+          cmd /c rdmpcli\rdmp.exe cmd NewObject ConnectionStringKeyword MicrosoftSqlServer TrustServerCertificate yes
+          cmd /c rdmpcli\rdmp.exe cmd NewObject ConnectionStringKeyword MicrosoftSqlServer Encrypt yes
+          cmd /c rdmpcli\rdmp.exe cmd CreateNewImagingDatasetSuite "DatabaseType:MicrosoftSqlServer:Name:ImagingTest:Server=(localdb)\MSSQLLocalDB;Integrated Security=true;Encrypt=yes;TrustServerCertificate=true" ./data DicomFileCollectionSource CT_ ../CT.it false false
+          cmd /c rdmpcli\rdmp.exe cmd AddTag Catalogue:CT_ImageTable StudyDate null
+          cmd /c rdmpcli\rdmp.exe cmd AddTag Catalogue:CT_*Table SeriesDate null
+          cmd /c rdmpcli\rdmp.exe cmd AddTag Catalogue:CT_*Table SeriesDate null
+          cmd /c rdmpcli\rdmp.exe cmd AddTag Catalogue:CT_*Table SeriesDate null
       - name: Nuget push
         if: contains(github.ref,'refs/tags/')
         run: nuget push HIC.Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg -Source https://api.nuget.org/v3/index.json -ApiKey ${{ secrets.NUGET_KEY }} -SkipDuplicate
       - name: Store created nupkg files
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           path: ./*.nupkg
           retention-days: 1

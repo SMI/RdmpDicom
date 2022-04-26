@@ -255,13 +255,13 @@ namespace Rdmp.Dicom.PipelineComponents
             Dictionary<TableInfo,DataTable> toPush = TablesToIsolate.ToDictionary(tableInfo => tableInfo, tableInfo => PullTable(tableInfo, con, deleteOnColumnName, deleteValues));
 
             //push the results to isolation
-            foreach (KeyValuePair<TableInfo, DataTable> kvp in toPush)
+            foreach (var (key, value) in toPush)
             {
                 var toDatabase = IsolationDatabase.Discover(DataAccessContext.DataLoad);
-                var toTable = toDatabase.ExpectTable(GetIsolationTableName(kvp.Key));
+                var toTable = toDatabase.ExpectTable(GetIsolationTableName(key));
 
                 using var bulkInsert = toTable.BeginBulkInsert();
-                bulkInsert.Upload(kvp.Value);
+                bulkInsert.Upload(value);
             }
 
             foreach (TableInfo t in TablesToIsolate.Reverse())

@@ -80,7 +80,7 @@ namespace Rdmp.Dicom.CommandExecution
             _projectDirectory = projectDirectory;
             NewCataloguesCreated = new();
 
-            _loggingServer = _catalogueRepository.GetServerDefaults().GetDefaultFor(PermissableDefaults.LiveLoggingServer_ID);
+            _loggingServer = _catalogueRepository.GetDefaultFor(PermissableDefaults.LiveLoggingServer_ID);
 
             if(_loggingServer == null)
                 SetImpossible("No default logging server has been configured in your Catalogue database");
@@ -122,6 +122,12 @@ namespace Rdmp.Dicom.CommandExecution
 
             List<DiscoveredTable> tablesCreated = new();
 
+            // create the database if it does not exist
+            if(!_databaseToCreateInto.Exists())
+            {
+                _databaseToCreateInto.Server.CreateDatabase(_databaseToCreateInto.GetRuntimeName());
+            }
+
             //Create with template?
             if(Template != null)
             {
@@ -149,7 +155,7 @@ namespace Rdmp.Dicom.CommandExecution
             NewLoadMetadata = new(_catalogueRepository, loadName);
 
             //tell all the catalogues that they are part of this load and where to log under the same task
-            foreach (Catalogue c in NewCataloguesCreated)
+            foreach (var c in NewCataloguesCreated)
             {
                 c.LoadMetadata_ID = NewLoadMetadata.ID;
                 c.LoggingDataTask = loadName;
@@ -261,10 +267,7 @@ namespace Rdmp.Dicom.CommandExecution
         
         private string GetNameWithPrefixInBracketsIfAny(string name)
         {
-            if (string.IsNullOrWhiteSpace(TablePrefix))
-                return name;
-
-            return $"{name}({TablePrefix.Trim('_')})";
+            return string.IsNullOrWhiteSpace(TablePrefix) ? name : $"{name}({TablePrefix.Trim('_')})";
         }
         private string GetNameWithPrefix(string name)
         {

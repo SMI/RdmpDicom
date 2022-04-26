@@ -66,8 +66,8 @@ namespace Rdmp.Dicom.Tests
         {
             get
             {
-                int p = (int) Environment.OSVersion.Platform;
-                return (p == 4) || (p == 6) || (p == 128);
+                var p = (int) Environment.OSVersion.Platform;
+                return p is 4 or 6 or 128;
             }
         }
     }
