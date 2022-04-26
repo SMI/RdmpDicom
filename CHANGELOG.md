@@ -6,10 +6,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.0.6] 2022-04-26
+
 ### Added
 
 - Support for running CLI `AddTag` command for multiple Catalogues at once
 - Extend repertoire of archive formats to include 7zip, RAR, tar, bz2 via SharpCompress
+- New dependency: SharpCompress 0.31.0
+
+### Changed
+
+- Bump HIC.RDMP.Plugin from 7.0.7 to 7.0.10
 
 ## [5.0.5] 2022-03-03
 
@@ -336,7 +343,8 @@ Updated to be compatible with RDMP 4.2
 
 - Initial commit from private repo
 
-[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v5.0.5...develop
+[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v5.0.6...develop
+[5.0.6]: https://github.com/HicServices/RdmpDicom/compare/v5.0.5...v5.0.6
 [5.0.5]: https://github.com/HicServices/RdmpDicom/compare/v5.0.4...v5.0.5
 [5.0.4]: https://github.com/HicServices/RdmpDicom/compare/v5.0.3...v5.0.4
 [5.0.3]: https://github.com/HicServices/RdmpDicom/compare/v5.0.2...v5.0.3
