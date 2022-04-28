@@ -42,7 +42,14 @@ namespace Rdmp.Dicom.UI
             this.label4 = new System.Windows.Forms.Label();
             this.tbQuery = new System.Windows.Forms.TextBox();
             this.tabControl1 = new System.Windows.Forms.TabControl();
+            this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.tbPassphrase = new System.Windows.Forms.TextBox();
+            this.label10 = new System.Windows.Forms.Label();
+            this.cbValidateServerCert = new System.Windows.Forms.CheckBox();
+            this.label8 = new System.Windows.Forms.Label();
+            this.tbStartEndDateFormat = new System.Windows.Forms.TextBox();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.forceScrollBars = new System.Windows.Forms.Label();
             this.cbReturnFeild = new System.Windows.Forms.ComboBox();
             this.label9 = new System.Windows.Forms.Label();
             this.cbUseEndDate = new System.Windows.Forms.CheckBox();
@@ -53,18 +60,12 @@ namespace Rdmp.Dicom.UI
             this.label5 = new System.Windows.Forms.Label();
             this.dtpEndDate = new System.Windows.Forms.DateTimePicker();
             this.dtpStartDate = new System.Windows.Forms.DateTimePicker();
-            this.tabPage2 = new System.Windows.Forms.TabPage();
-            this.tbPassphrase = new System.Windows.Forms.TextBox();
-            this.label10 = new System.Windows.Forms.Label();
-            this.cbValidateServerCert = new System.Windows.Forms.CheckBox();
-            this.label8 = new System.Windows.Forms.Label();
-            this.tbStartEndDateFormat = new System.Windows.Forms.TextBox();
             this.checkStateRenderer1 = new BrightIdeasSoftware.CheckStateRenderer();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.flowLayoutPanel1.SuspendLayout();
             this.tabControl1.SuspendLayout();
-            this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
+            this.tabPage1.SuspendLayout();
             this.SuspendLayout();
             // 
             // label1
@@ -78,6 +79,8 @@ namespace Rdmp.Dicom.UI
             // 
             // tbUrl
             // 
+            this.tbUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.tbUrl.Location = new System.Drawing.Point(15, 33);
             this.tbUrl.Name = "tbUrl";
             this.tbUrl.Size = new System.Drawing.Size(407, 23);
@@ -108,26 +111,30 @@ namespace Rdmp.Dicom.UI
             this.flowLayoutPanel1.Controls.Add(this.btnSave);
             this.flowLayoutPanel1.Controls.Add(this.btnCancel);
             this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.flowLayoutPanel1.Location = new System.Drawing.Point(0, 647);
+            this.flowLayoutPanel1.Location = new System.Drawing.Point(0, 627);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(467, 31);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(493, 31);
             this.flowLayoutPanel1.TabIndex = 4;
             // 
             // cblTemporality
             // 
+            this.cblTemporality.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.cblTemporality.FormattingEnabled = true;
             this.cblTemporality.Location = new System.Drawing.Point(17, 89);
             this.cblTemporality.Name = "cblTemporality";
-            this.cblTemporality.Size = new System.Drawing.Size(406, 58);
+            this.cblTemporality.Size = new System.Drawing.Size(425, 58);
             this.cblTemporality.TabIndex = 2;
             // 
             // cbNegation
             // 
+            this.cbNegation.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.cbNegation.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbNegation.FormattingEnabled = true;
             this.cbNegation.Location = new System.Drawing.Point(17, 181);
             this.cbNegation.Name = "cbNegation";
-            this.cbNegation.Size = new System.Drawing.Size(406, 23);
+            this.cbNegation.Size = new System.Drawing.Size(425, 23);
             this.cbNegation.TabIndex = 3;
             // 
             // label2
@@ -159,23 +166,99 @@ namespace Rdmp.Dicom.UI
             // 
             // tbQuery
             // 
+            this.tbQuery.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.tbQuery.Location = new System.Drawing.Point(16, 33);
             this.tbQuery.Name = "tbQuery";
-            this.tbQuery.Size = new System.Drawing.Size(407, 23);
+            this.tbQuery.Size = new System.Drawing.Size(425, 23);
             this.tbQuery.TabIndex = 1;
             // 
             // tabControl1
             // 
+            this.tabControl1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Controls.Add(this.tabPage2);
             this.tabControl1.Location = new System.Drawing.Point(12, 12);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(445, 631);
+            this.tabControl1.Size = new System.Drawing.Size(465, 606);
             this.tabControl1.TabIndex = 200;
+            // 
+            // tabPage2
+            // 
+            this.tabPage2.AutoScroll = true;
+            this.tabPage2.Controls.Add(this.tbPassphrase);
+            this.tabPage2.Controls.Add(this.label10);
+            this.tabPage2.Controls.Add(this.cbValidateServerCert);
+            this.tabPage2.Controls.Add(this.label8);
+            this.tabPage2.Controls.Add(this.tbStartEndDateFormat);
+            this.tabPage2.Controls.Add(this.label1);
+            this.tabPage2.Controls.Add(this.tbUrl);
+            this.tabPage2.Location = new System.Drawing.Point(4, 24);
+            this.tabPage2.Name = "tabPage2";
+            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage2.Size = new System.Drawing.Size(457, 578);
+            this.tabPage2.TabIndex = 1;
+            this.tabPage2.Text = "Settings";
+            this.tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // tbPassphrase
+            // 
+            this.tbPassphrase.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.tbPassphrase.Location = new System.Drawing.Point(15, 77);
+            this.tbPassphrase.Name = "tbPassphrase";
+            this.tbPassphrase.PasswordChar = '*';
+            this.tbPassphrase.Size = new System.Drawing.Size(407, 23);
+            this.tbPassphrase.TabIndex = 12;
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(15, 59);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(137, 15);
+            this.label10.TabIndex = 16;
+            this.label10.Text = "API Endpoint Passphrase";
+            // 
+            // cbValidateServerCert
+            // 
+            this.cbValidateServerCert.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.cbValidateServerCert.AutoSize = true;
+            this.cbValidateServerCert.Location = new System.Drawing.Point(263, 8);
+            this.cbValidateServerCert.Name = "cbValidateServerCert";
+            this.cbValidateServerCert.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
+            this.cbValidateServerCert.Size = new System.Drawing.Size(159, 19);
+            this.cbValidateServerCert.TabIndex = 11;
+            this.cbValidateServerCert.Text = "Validate Server Certificate";
+            this.toolTip1.SetToolTip(this.cbValidateServerCert, "Ensure the certificate trust chain is valid when making a connection to this serv" +
+        "er.");
+            this.cbValidateServerCert.UseVisualStyleBackColor = true;
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(15, 121);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(123, 15);
+            this.label8.TabIndex = 13;
+            this.label8.Text = "Date From/To Format:";
+            // 
+            // tbStartEndDateFormat
+            // 
+            this.tbStartEndDateFormat.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.tbStartEndDateFormat.Location = new System.Drawing.Point(15, 139);
+            this.tbStartEndDateFormat.Name = "tbStartEndDateFormat";
+            this.tbStartEndDateFormat.Size = new System.Drawing.Size(407, 23);
+            this.tbStartEndDateFormat.TabIndex = 13;
             // 
             // tabPage1
             // 
+            this.tabPage1.AutoScroll = true;
+            this.tabPage1.Controls.Add(this.forceScrollBars);
             this.tabPage1.Controls.Add(this.cbReturnFeild);
             this.tabPage1.Controls.Add(this.label9);
             this.tabPage1.Controls.Add(this.cbUseEndDate);
@@ -195,22 +278,36 @@ namespace Rdmp.Dicom.UI
             this.tabPage1.Location = new System.Drawing.Point(4, 24);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(437, 603);
+            this.tabPage1.Size = new System.Drawing.Size(457, 578);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Query";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
+            // forceScrollBars
+            // 
+            this.forceScrollBars.AutoSize = true;
+            this.forceScrollBars.Location = new System.Drawing.Point(16, 562);
+            this.forceScrollBars.Name = "forceScrollBars";
+            this.forceScrollBars.Size = new System.Drawing.Size(0, 15);
+            this.forceScrollBars.TabIndex = 21;
+            // 
             // cbReturnFeild
             // 
+            this.cbReturnFeild.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.cbReturnFeild.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbReturnFeild.FormattingEnabled = true;
             this.cbReturnFeild.Location = new System.Drawing.Point(16, 537);
             this.cbReturnFeild.Name = "cbReturnFeild";
-            this.cbReturnFeild.Size = new System.Drawing.Size(407, 23);
+            this.cbReturnFeild.Size = new System.Drawing.Size(425, 23);
             this.cbReturnFeild.TabIndex = 9;
             // 
             // label9
             // 
+            this.label9.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.label9.AutoSize = true;
             this.label9.Location = new System.Drawing.Point(16, 519);
             this.label9.Name = "label9";
@@ -258,10 +355,12 @@ namespace Rdmp.Dicom.UI
             // 
             // cblModalities
             // 
+            this.cblModalities.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.cblModalities.FormattingEnabled = true;
             this.cblModalities.Location = new System.Drawing.Point(16, 291);
             this.cblModalities.Name = "cblModalities";
-            this.cblModalities.Size = new System.Drawing.Size(407, 220);
+            this.cblModalities.Size = new System.Drawing.Size(425, 220);
             this.cblModalities.TabIndex = 8;
             // 
             // label5
@@ -289,84 +388,23 @@ namespace Rdmp.Dicom.UI
             this.dtpStartDate.Size = new System.Drawing.Size(174, 23);
             this.dtpStartDate.TabIndex = 5;
             // 
-            // tabPage2
-            // 
-            this.tabPage2.Controls.Add(this.tbPassphrase);
-            this.tabPage2.Controls.Add(this.label10);
-            this.tabPage2.Controls.Add(this.cbValidateServerCert);
-            this.tabPage2.Controls.Add(this.label8);
-            this.tabPage2.Controls.Add(this.tbStartEndDateFormat);
-            this.tabPage2.Controls.Add(this.label1);
-            this.tabPage2.Controls.Add(this.tbUrl);
-            this.tabPage2.Location = new System.Drawing.Point(4, 24);
-            this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(437, 603);
-            this.tabPage2.TabIndex = 1;
-            this.tabPage2.Text = "Settings";
-            this.tabPage2.UseVisualStyleBackColor = true;
-            // 
-            // tbPassphrase
-            // 
-            this.tbPassphrase.Location = new System.Drawing.Point(15, 77);
-            this.tbPassphrase.Name = "tbPassphrase";
-            this.tbPassphrase.PasswordChar = '*';
-            this.tbPassphrase.Size = new System.Drawing.Size(407, 23);
-            this.tbPassphrase.TabIndex = 12;
-            // 
-            // label10
-            // 
-            this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(15, 59);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(137, 15);
-            this.label10.TabIndex = 16;
-            this.label10.Text = "API Endpoint Passphrase";
-            // 
-            // cbValidateServerCert
-            // 
-            this.cbValidateServerCert.AutoSize = true;
-            this.cbValidateServerCert.Location = new System.Drawing.Point(263, 11);
-            this.cbValidateServerCert.Name = "cbValidateServerCert";
-            this.cbValidateServerCert.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
-            this.cbValidateServerCert.Size = new System.Drawing.Size(159, 19);
-            this.cbValidateServerCert.TabIndex = 11;
-            this.cbValidateServerCert.Text = "Validate Server Certificate";
-            this.toolTip1.SetToolTip(this.cbValidateServerCert, "Ensure the certificate trust chain is valid when making a connection to this serv" +
-        "er.");
-            this.cbValidateServerCert.UseVisualStyleBackColor = true;
-            // 
-            // label8
-            // 
-            this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(15, 121);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(123, 15);
-            this.label8.TabIndex = 13;
-            this.label8.Text = "Date From/To Format:";
-            // 
-            // tbStartEndDateFormat
-            // 
-            this.tbStartEndDateFormat.Location = new System.Drawing.Point(15, 139);
-            this.tbStartEndDateFormat.Name = "tbStartEndDateFormat";
-            this.tbStartEndDateFormat.Size = new System.Drawing.Size(407, 23);
-            this.tbStartEndDateFormat.TabIndex = 13;
-            // 
             // SemEHRUI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(467, 678);
+            this.AutoScroll = true;
+            this.ClientSize = new System.Drawing.Size(493, 658);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.flowLayoutPanel1);
+            this.MinimumSize = new System.Drawing.Size(509, 373);
             this.Name = "SemEHRUI";
             this.Text = "SemEHR Query Builder";
             this.flowLayoutPanel1.ResumeLayout(false);
             this.tabControl1.ResumeLayout(false);
-            this.tabPage1.ResumeLayout(false);
-            this.tabPage1.PerformLayout();
             this.tabPage2.ResumeLayout(false);
             this.tabPage2.PerformLayout();
+            this.tabPage1.ResumeLayout(false);
+            this.tabPage1.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -404,5 +442,6 @@ namespace Rdmp.Dicom.UI
         private System.Windows.Forms.ToolTip toolTip1;
         private System.Windows.Forms.TextBox tbPassphrase;
         private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.Label forceScrollBars;
     }
 }

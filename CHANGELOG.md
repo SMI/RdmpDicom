@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Corrected resizing for the SemEHR API query builder - [#236](https://github.com/HicServices/RdmpDicom/issues/236)
+
 ## [5.0.7] 2022-04-26
 
 ### Changed
