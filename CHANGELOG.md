@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.0.8] 2022-05-04
+
+### Changed
+- Corrected resizing for the SemEHR API query builder - [#236](https://github.com/HicServices/RdmpDicom/issues/236)
+
 ## [5.0.7] 2022-04-26
 
 ### Changed
@@ -350,7 +355,8 @@ Updated to be compatible with RDMP 4.2
 
 - Initial commit from private repo
 
-[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v5.0.7...develop
+[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v5.0.8...develop
+[5.0.8]: https://github.com/HicServices/RdmpDicom/compare/v5.0.7...v5.0.8
 [5.0.7]: https://github.com/HicServices/RdmpDicom/compare/v5.0.6...v5.0.7
 [5.0.6]: https://github.com/HicServices/RdmpDicom/compare/v5.0.5...v5.0.6
 [5.0.5]: https://github.com/HicServices/RdmpDicom/compare/v5.0.4...v5.0.5
