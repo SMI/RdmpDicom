@@ -78,7 +78,7 @@ namespace Rdmp.Dicom.Tests.Unit
 
             //generate some random dicoms
             var r = new Random(999);
-            DicomDataGenerator generator = new(r, dirToLoad, "CT") {MaximumImages = 5};
+            DicomDataGenerator generator = new(r, dirToLoad.FullName, "CT") {MaximumImages = 5};
             var people = new PersonCollection();
             people.GeneratePeople(1,r);
             generator.GenerateTestDataFile(people,new("./inventory.csv"),1);
@@ -175,7 +175,7 @@ namespace Rdmp.Dicom.Tests.Unit
 
             //generate some random dicoms
             var r = new Random(999);
-            DicomDataGenerator generator = new(r, dirToLoad, "CT") {MaximumImages = 5};
+            DicomDataGenerator generator = new(r, dirToLoad.FullName, "CT") {MaximumImages = 5};
             var people = new PersonCollection();
             people.GeneratePeople(1,r);
             generator.GenerateTestDataFile(people,new("./inventory.csv"),1);
