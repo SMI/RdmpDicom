@@ -70,7 +70,7 @@ namespace Rdmp.Dicom.ExternalApis
         /// <summary>
         /// The number of seconds before the API request will time out
         /// </summary>
-        public int RequestTimeout { get; set; } = 18000;
+        public int RequestTimeout { get; set; } = 3000;
 
         /// <summary>
         /// The date format for the API start date and end date filter
@@ -194,6 +194,10 @@ namespace Rdmp.Dicom.ExternalApis
             if (!string.IsNullOrWhiteSpace(over.Passphrase))
             {
                 Passphrase = over.Passphrase;
+            }
+            if (over.RequestTimeout > 0)
+            {
+                RequestTimeout = over.RequestTimeout;
             }
             if (!string.IsNullOrWhiteSpace(over.StartEndDateFormat))
             {
