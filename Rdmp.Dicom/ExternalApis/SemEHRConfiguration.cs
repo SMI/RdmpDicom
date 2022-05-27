@@ -68,6 +68,11 @@ namespace Rdmp.Dicom.ExternalApis
         public string Passphrase { get; set; } = "";
 
         /// <summary>
+        /// The number of seconds before the API request will time out
+        /// </summary>
+        public int RequestTimeout { get; set; } = 18000;
+
+        /// <summary>
         /// The date format for the API start date and end date filter
         /// </summary>
         public string StartEndDateFormat { get; set; } = "yyyy-MM-dd";

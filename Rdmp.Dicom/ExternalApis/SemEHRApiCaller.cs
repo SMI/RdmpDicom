@@ -42,6 +42,7 @@ namespace Rdmp.Dicom.ExternalApis
                 httpClientHandler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
             }
             HttpClient httpClient = new(httpClientHandler);
+            httpClient.Timeout = TimeSpan.FromSeconds(config.RequestTimeout);
 
             //Make the request to the API
             HttpResponseMessage response = httpClient.GetAsync(config.GetUrlWithQuerystring(), token).Result;
