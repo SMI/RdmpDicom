@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Added SemEHR Request Timeout property so that the timeout setting can be changed as needed for longer running queries.
+
 ## [5.0.8] 2022-05-04
 
 ### Changed
