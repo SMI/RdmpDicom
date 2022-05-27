@@ -33,6 +33,7 @@ jobs:
           args: install sqllocaldb
       - name: Set up database
         run: |
+          SqlLocalDB.exe create MSSQLLocalDB -s
           Invoke-WebRequest -Uri https://github.com/HicServices/RDMP/releases/download/v${{ steps.version.outputs.rdmpversion }}/rdmp-cli-win-x64.zip -OutFile rdmp.zip
           Expand-Archive -Path rdmp.zip -DestinationPath .\rdmpcli
           sqlcmd -l 180 -S "(localdb)\MSSQLLocalDB" -Q "SELECT @@VERSION;"
