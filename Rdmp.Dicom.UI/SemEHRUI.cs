@@ -45,6 +45,7 @@ namespace Rdmp.Dicom.UI
             tbUrl.Text = _configuration.Url;
             cbValidateServerCert.Checked = _configuration.ValidateServerCert;
             tbPassphrase.Text = _configuration.Passphrase;
+            tbRequestTimeout.Text = _configuration.RequestTimeout.ToString();
             tbStartEndDateFormat.Text = _configuration.StartEndDateFormat;
             tbQuery.Text = _configuration.Query;
             SetCheckedListBox(cblTemporality, _configuration.Temporality.ToList());
@@ -75,6 +76,7 @@ namespace Rdmp.Dicom.UI
             _configuration.Url = tbUrl.Text;
             _configuration.ValidateServerCert = cbValidateServerCert.Checked;
             _configuration.Passphrase = tbPassphrase.Text;
+            _configuration.RequestTimeout = int.Parse(tbRequestTimeout.Text);
             _configuration.StartEndDateFormat = tbStartEndDateFormat.Text;
             _configuration.Query = tbQuery.Text;
 
