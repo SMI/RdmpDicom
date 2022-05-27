@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+## [5.0.9] 2022-05-27
+
 - Added SemEHR Request Timeout property so that the timeout setting can be changed as needed for longer running queries.
 
 ## [5.0.8] 2022-05-04
@@ -357,7 +360,8 @@ Updated to be compatible with RDMP 4.2
 
 - Initial commit from private repo
 
-[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v5.0.8...develop
+[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v5.0.9...develop
+[5.0.9]: https://github.com/HicServices/RdmpDicom/compare/v5.0.8...v5.0.9
 [5.0.8]: https://github.com/HicServices/RdmpDicom/compare/v5.0.7...v5.0.8
 [5.0.7]: https://github.com/HicServices/RdmpDicom/compare/v5.0.6...v5.0.7
 [5.0.6]: https://github.com/HicServices/RdmpDicom/compare/v5.0.5...v5.0.6
