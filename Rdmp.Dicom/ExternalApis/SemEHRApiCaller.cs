@@ -8,6 +8,7 @@ using System.Net;
 using System.Net.Http;
 using Newtonsoft.Json;
 using System.Linq;
+using System.Text;
 
 namespace Rdmp.Dicom.ExternalApis
 {
@@ -18,6 +19,11 @@ namespace Rdmp.Dicom.ExternalApis
         public override void Run(AggregateConfiguration ac, CachedAggregateConfigurationResultsManager cache, CancellationToken token)
         {
             Run(ac, cache, token, SemEHRConfiguration.LoadFrom(ac));
+        }
+
+        private string GetAuthString(SemEHRConfiguration config)
+        {
+            return Convert.ToBase64String(Encoding.UTF8.GetBytes($"{config.ApiHttpAuthUsername}:{config.ApiHttpAuthPassword}"));
         }
 
         internal void Run(AggregateConfiguration ac, CachedAggregateConfigurationResultsManager cache, CancellationToken token, SemEHRConfiguration config)
@@ -42,6 +48,8 @@ namespace Rdmp.Dicom.ExternalApis
                 httpClientHandler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
             }
             HttpClient httpClient = new(httpClientHandler);
+            if(config.ApiUsingHttpAuth())
+                httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", GetAuthString(config));
             httpClient.Timeout = TimeSpan.FromSeconds(config.RequestTimeout);
 
             //Make the request to the API

@@ -55,6 +55,8 @@ namespace Rdmp.Dicom.UI
             this.dtpEndDate = new System.Windows.Forms.DateTimePicker();
             this.dtpStartDate = new System.Windows.Forms.DateTimePicker();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.label11 = new System.Windows.Forms.Label();
+            this.tbRequestTimeout = new System.Windows.Forms.TextBox();
             this.tbPassphrase = new System.Windows.Forms.TextBox();
             this.label10 = new System.Windows.Forms.Label();
             this.cbValidateServerCert = new System.Windows.Forms.CheckBox();
@@ -62,8 +64,10 @@ namespace Rdmp.Dicom.UI
             this.tbStartEndDateFormat = new System.Windows.Forms.TextBox();
             this.checkStateRenderer1 = new BrightIdeasSoftware.CheckStateRenderer();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.tbRequestTimeout = new System.Windows.Forms.TextBox();
-            this.label11 = new System.Windows.Forms.Label();
+            this.label12 = new System.Windows.Forms.Label();
+            this.label13 = new System.Windows.Forms.Label();
+            this.tbApiHttpAuthUsername = new System.Windows.Forms.TextBox();
+            this.tbApiHttpAuthPassword = new System.Windows.Forms.TextBox();
             this.flowLayoutPanel1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -324,6 +328,10 @@ namespace Rdmp.Dicom.UI
             // tabPage2
             // 
             this.tabPage2.AutoScroll = true;
+            this.tabPage2.Controls.Add(this.tbApiHttpAuthPassword);
+            this.tabPage2.Controls.Add(this.tbApiHttpAuthUsername);
+            this.tabPage2.Controls.Add(this.label13);
+            this.tabPage2.Controls.Add(this.label12);
             this.tabPage2.Controls.Add(this.label11);
             this.tabPage2.Controls.Add(this.tbRequestTimeout);
             this.tabPage2.Controls.Add(this.tbPassphrase);
@@ -340,6 +348,22 @@ namespace Rdmp.Dicom.UI
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Settings";
             this.tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // label11
+            // 
+            this.label11.AutoSize = true;
+            this.label11.Location = new System.Drawing.Point(15, 111);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(171, 15);
+            this.label11.TabIndex = 18;
+            this.label11.Text = "API Request Timeout (seconds)";
+            // 
+            // tbRequestTimeout
+            // 
+            this.tbRequestTimeout.Location = new System.Drawing.Point(15, 129);
+            this.tbRequestTimeout.Name = "tbRequestTimeout";
+            this.tbRequestTimeout.Size = new System.Drawing.Size(407, 23);
+            this.tbRequestTimeout.TabIndex = 17;
             // 
             // tbPassphrase
             // 
@@ -377,7 +401,7 @@ namespace Rdmp.Dicom.UI
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(15, 170);
+            this.label8.Location = new System.Drawing.Point(15, 304);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(123, 15);
             this.label8.TabIndex = 13;
@@ -387,26 +411,42 @@ namespace Rdmp.Dicom.UI
             // 
             this.tbStartEndDateFormat.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.tbStartEndDateFormat.Location = new System.Drawing.Point(15, 188);
+            this.tbStartEndDateFormat.Location = new System.Drawing.Point(15, 322);
             this.tbStartEndDateFormat.Name = "tbStartEndDateFormat";
             this.tbStartEndDateFormat.Size = new System.Drawing.Size(407, 23);
             this.tbStartEndDateFormat.TabIndex = 13;
             // 
-            // tbRequestTimeout
+            // label12
             // 
-            this.tbRequestTimeout.Location = new System.Drawing.Point(15, 126);
-            this.tbRequestTimeout.Name = "tbRequestTimeout";
-            this.tbRequestTimeout.Size = new System.Drawing.Size(407, 23);
-            this.tbRequestTimeout.TabIndex = 17;
+            this.label12.AutoSize = true;
+            this.label12.Location = new System.Drawing.Point(15, 164);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(203, 15);
+            this.label12.TabIndex = 19;
+            this.label12.Text = "HTTP Basic Authentication Username";
             // 
-            // label11
+            // label13
             // 
-            this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(15, 108);
-            this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(171, 15);
-            this.label11.TabIndex = 18;
-            this.label11.Text = "API Request Timeout (seconds)";
+            this.label13.AutoSize = true;
+            this.label13.Location = new System.Drawing.Point(15, 215);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(200, 15);
+            this.label13.TabIndex = 20;
+            this.label13.Text = "HTTP Basic Authentication Password";
+            // 
+            // tbApiHttpAuthUsername
+            // 
+            this.tbApiHttpAuthUsername.Location = new System.Drawing.Point(15, 182);
+            this.tbApiHttpAuthUsername.Name = "tbApiHttpAuthUsername";
+            this.tbApiHttpAuthUsername.Size = new System.Drawing.Size(407, 23);
+            this.tbApiHttpAuthUsername.TabIndex = 21;
+            // 
+            // tbApiHttpAuthPassword
+            // 
+            this.tbApiHttpAuthPassword.Location = new System.Drawing.Point(15, 233);
+            this.tbApiHttpAuthPassword.Name = "tbApiHttpAuthPassword";
+            this.tbApiHttpAuthPassword.Size = new System.Drawing.Size(407, 23);
+            this.tbApiHttpAuthPassword.TabIndex = 22;
             // 
             // SemEHRUI
             // 
@@ -465,5 +505,9 @@ namespace Rdmp.Dicom.UI
         private System.Windows.Forms.Label forceScrollBars;
         private System.Windows.Forms.Label label11;
         private System.Windows.Forms.TextBox tbRequestTimeout;
+        private System.Windows.Forms.TextBox tbApiHttpAuthPassword;
+        private System.Windows.Forms.TextBox tbApiHttpAuthUsername;
+        private System.Windows.Forms.Label label13;
+        private System.Windows.Forms.Label label12;
     }
 }

@@ -66,6 +66,16 @@ namespace Rdmp.Dicom.ExternalApis
         /// The passphrase required to connect to the API
         /// </summary>
         public string Passphrase { get; set; } = "";
+        
+        /// <summary>
+        /// The HTTP Basic Authentication Username to use when connecting to the SemEHR Api
+        /// </summary>
+        public string ApiHttpAuthUsername { get; set; } = "";
+
+        /// <summary>
+        /// The HTTP Basic Authentication Password to use when connecting to the SemEHR Api
+        /// </summary>
+        public string ApiHttpAuthPassword { get; set; } = "";
 
         /// <summary>
         /// The number of seconds before the API request will time out
@@ -147,6 +157,7 @@ namespace Rdmp.Dicom.ExternalApis
         /// </summary>
         public string ReturnField { get; set; } = "";
 
+
         public static SemEHRConfiguration LoadFrom(AggregateConfiguration aggregate)
         {
             LoadFrom(aggregate, out SemEHRConfiguration main, out SemEHRConfiguration over);
@@ -198,6 +209,14 @@ namespace Rdmp.Dicom.ExternalApis
             if (over.RequestTimeout > 0)
             {
                 RequestTimeout = over.RequestTimeout;
+            }
+            if (!string.IsNullOrWhiteSpace(over.ApiHttpAuthUsername))
+            {
+                ApiHttpAuthUsername = over.ApiHttpAuthUsername;
+            }
+            if (!string.IsNullOrWhiteSpace(over.ApiHttpAuthPassword))
+            {
+                ApiHttpAuthPassword = over.ApiHttpAuthPassword;
             }
             if (!string.IsNullOrWhiteSpace(over.StartEndDateFormat))
             {
@@ -306,6 +325,14 @@ namespace Rdmp.Dicom.ExternalApis
                 passphraseIfSet = $"passphrase={Passphrase}&";
             }
             return ($"{this.Url}?{passphraseIfSet}j={GetQueryJsonAsString()}");
+        }
+
+        public bool ApiUsingHttpAuth()
+        {
+            if(!string.IsNullOrWhiteSpace(ApiHttpAuthUsername) || !string.IsNullOrWhiteSpace(ApiHttpAuthPassword))
+                return true;
+
+            return false;
         }
     }
 }
