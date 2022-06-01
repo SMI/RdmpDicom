@@ -402,7 +402,7 @@ namespace Rdmp.Dicom {
             this.tbBasicAuthCredentialsId.Height = 1;
             this.tbBasicAuthCredentialsId.X = 32;
             this.tbBasicAuthCredentialsId.Y = 6;
-            this.tbBasicAuthCredentialsId.Secret = true;
+            this.tbBasicAuthCredentialsId.Secret = false;
             this.tbBasicAuthCredentialsId.Data = "tbBasicAuthCredentialsId";
             this.tbBasicAuthCredentialsId.Text = "";
             this.tbBasicAuthCredentialsId.TextAlignment = Terminal.Gui.TextAlignment.Left;
