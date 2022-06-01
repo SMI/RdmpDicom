@@ -28,5 +28,6 @@
     <PackageReference Include="HIC.DicomTypeTranslation" Version="4.0.0" />
     <PackageReference Include="HIC.RDMP.Plugin" Version="7.0.13" />
     <PackageReference Include="SharpCompress" Version="0.31.0" />
+    <PackageReference Include="Terminal.Gui" Version="1.6.4" />
   </ItemGroup>
 </Project>
