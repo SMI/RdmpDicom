@@ -64,10 +64,8 @@ namespace Rdmp.Dicom.UI
             this.tbStartEndDateFormat = new System.Windows.Forms.TextBox();
             this.checkStateRenderer1 = new BrightIdeasSoftware.CheckStateRenderer();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.selectHttpAuthCredentialsCombo = new Rdmp.UI.SimpleControls.SelectIMapsDirectlyToDatabaseTableComboBox();
             this.label12 = new System.Windows.Forms.Label();
-            this.label13 = new System.Windows.Forms.Label();
-            this.tbApiHttpAuthUsername = new System.Windows.Forms.TextBox();
-            this.tbApiHttpAuthPassword = new System.Windows.Forms.TextBox();
             this.flowLayoutPanel1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -328,10 +326,8 @@ namespace Rdmp.Dicom.UI
             // tabPage2
             // 
             this.tabPage2.AutoScroll = true;
-            this.tabPage2.Controls.Add(this.tbApiHttpAuthPassword);
-            this.tabPage2.Controls.Add(this.tbApiHttpAuthUsername);
-            this.tabPage2.Controls.Add(this.label13);
             this.tabPage2.Controls.Add(this.label12);
+            this.tabPage2.Controls.Add(this.selectHttpAuthCredentialsCombo);
             this.tabPage2.Controls.Add(this.label11);
             this.tabPage2.Controls.Add(this.tbRequestTimeout);
             this.tabPage2.Controls.Add(this.tbPassphrase);
@@ -416,37 +412,23 @@ namespace Rdmp.Dicom.UI
             this.tbStartEndDateFormat.Size = new System.Drawing.Size(407, 23);
             this.tbStartEndDateFormat.TabIndex = 13;
             // 
+            // selectHttpAuthCredentialsCombo
+            // 
+            this.selectHttpAuthCredentialsCombo.Location = new System.Drawing.Point(15, 179);
+            this.selectHttpAuthCredentialsCombo.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.selectHttpAuthCredentialsCombo.Name = "selectHttpAuthCredentialsCombo";
+            this.selectHttpAuthCredentialsCombo.SelectedItem = null;
+            this.selectHttpAuthCredentialsCombo.Size = new System.Drawing.Size(407, 25);
+            this.selectHttpAuthCredentialsCombo.TabIndex = 19;
+            // 
             // label12
             // 
             this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(15, 164);
+            this.label12.Location = new System.Drawing.Point(15, 161);
             this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(203, 15);
-            this.label12.TabIndex = 19;
-            this.label12.Text = "HTTP Basic Authentication Username";
-            // 
-            // label13
-            // 
-            this.label13.AutoSize = true;
-            this.label13.Location = new System.Drawing.Point(15, 215);
-            this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(200, 15);
-            this.label13.TabIndex = 20;
-            this.label13.Text = "HTTP Basic Authentication Password";
-            // 
-            // tbApiHttpAuthUsername
-            // 
-            this.tbApiHttpAuthUsername.Location = new System.Drawing.Point(15, 182);
-            this.tbApiHttpAuthUsername.Name = "tbApiHttpAuthUsername";
-            this.tbApiHttpAuthUsername.Size = new System.Drawing.Size(407, 23);
-            this.tbApiHttpAuthUsername.TabIndex = 21;
-            // 
-            // tbApiHttpAuthPassword
-            // 
-            this.tbApiHttpAuthPassword.Location = new System.Drawing.Point(15, 233);
-            this.tbApiHttpAuthPassword.Name = "tbApiHttpAuthPassword";
-            this.tbApiHttpAuthPassword.Size = new System.Drawing.Size(407, 23);
-            this.tbApiHttpAuthPassword.TabIndex = 22;
+            this.label12.Size = new System.Drawing.Size(209, 15);
+            this.label12.TabIndex = 20;
+            this.label12.Text = "HTTP Basic Authentication Credentials";
             // 
             // SemEHRUI
             // 
@@ -505,9 +487,7 @@ namespace Rdmp.Dicom.UI
         private System.Windows.Forms.Label forceScrollBars;
         private System.Windows.Forms.Label label11;
         private System.Windows.Forms.TextBox tbRequestTimeout;
-        private System.Windows.Forms.TextBox tbApiHttpAuthPassword;
-        private System.Windows.Forms.TextBox tbApiHttpAuthUsername;
-        private System.Windows.Forms.Label label13;
         private System.Windows.Forms.Label label12;
+        private Rdmp.UI.SimpleControls.SelectIMapsDirectlyToDatabaseTableComboBox selectHttpAuthCredentialsCombo;
     }
 }

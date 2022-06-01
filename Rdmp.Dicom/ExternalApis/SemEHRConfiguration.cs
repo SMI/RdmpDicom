@@ -68,14 +68,9 @@ namespace Rdmp.Dicom.ExternalApis
         public string Passphrase { get; set; } = "";
         
         /// <summary>
-        /// The HTTP Basic Authentication Username to use when connecting to the SemEHR Api
+        /// The HTTP Basic Authentication Username/Password to use when connecting to the SemEHR Api
         /// </summary>
-        public string ApiHttpAuthUsername { get; set; } = "";
-
-        /// <summary>
-        /// The HTTP Basic Authentication Password to use when connecting to the SemEHR Api
-        /// </summary>
-        public string ApiHttpAuthPassword { get; set; } = "";
+        public int ApiHttpDataAccessCredentials { get; set; } = 0;
 
         /// <summary>
         /// The number of seconds before the API request will time out
@@ -210,13 +205,9 @@ namespace Rdmp.Dicom.ExternalApis
             {
                 RequestTimeout = over.RequestTimeout;
             }
-            if (!string.IsNullOrWhiteSpace(over.ApiHttpAuthUsername))
+            if (over.ApiHttpDataAccessCredentials != 0)
             {
-                ApiHttpAuthUsername = over.ApiHttpAuthUsername;
-            }
-            if (!string.IsNullOrWhiteSpace(over.ApiHttpAuthPassword))
-            {
-                ApiHttpAuthPassword = over.ApiHttpAuthPassword;
+                ApiHttpDataAccessCredentials = over.ApiHttpDataAccessCredentials;
             }
             if (!string.IsNullOrWhiteSpace(over.StartEndDateFormat))
             {
@@ -329,10 +320,7 @@ namespace Rdmp.Dicom.ExternalApis
 
         public bool ApiUsingHttpAuth()
         {
-            if(!string.IsNullOrWhiteSpace(ApiHttpAuthUsername) || !string.IsNullOrWhiteSpace(ApiHttpAuthPassword))
-                return true;
-
-            return false;
+            return ApiHttpDataAccessCredentials != 0;
         }
     }
 }

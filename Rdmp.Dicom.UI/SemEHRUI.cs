@@ -1,4 +1,5 @@
-﻿using Rdmp.Core.Curation.Data.Aggregation;
+﻿using Rdmp.Core.Curation.Data;
+using Rdmp.Core.Curation.Data.Aggregation;
 using Rdmp.Dicom.ExternalApis;
 using Rdmp.UI.ItemActivation;
 using System;
@@ -46,8 +47,12 @@ namespace Rdmp.Dicom.UI
             cbValidateServerCert.Checked = _configuration.ValidateServerCert;
             tbPassphrase.Text = _configuration.Passphrase;
             tbRequestTimeout.Text = _configuration.RequestTimeout.ToString();
-            tbApiHttpAuthUsername.Text = _configuration.ApiHttpAuthUsername;
-            tbApiHttpAuthPassword.Text = _configuration.ApiHttpAuthPassword;
+
+            var available = activator.RepositoryLocator.CatalogueRepository.GetAllObjects<DataAccessCredentials>();
+            selectHttpAuthCredentialsCombo.SetItemActivator(activator);
+            selectHttpAuthCredentialsCombo.SetUp(available);
+            selectHttpAuthCredentialsCombo.SelectedItem = available.FirstOrDefault(c => c.ID == _configuration.ApiHttpDataAccessCredentials);
+
             tbStartEndDateFormat.Text = _configuration.StartEndDateFormat;
             tbQuery.Text = _configuration.Query;
             SetCheckedListBox(cblTemporality, _configuration.Temporality.ToList());
@@ -79,8 +84,7 @@ namespace Rdmp.Dicom.UI
             _configuration.ValidateServerCert = cbValidateServerCert.Checked;
             _configuration.Passphrase = tbPassphrase.Text;
             _configuration.RequestTimeout = int.Parse(tbRequestTimeout.Text);
-            _configuration.ApiHttpAuthUsername = tbApiHttpAuthUsername.Text;
-            _configuration.ApiHttpAuthPassword = tbApiHttpAuthPassword.Text;
+            _configuration.ApiHttpDataAccessCredentials = selectHttpAuthCredentialsCombo.SelectedItem?.ID ?? 0;
             _configuration.StartEndDateFormat = tbStartEndDateFormat.Text;
             _configuration.Query = tbQuery.Text;
 

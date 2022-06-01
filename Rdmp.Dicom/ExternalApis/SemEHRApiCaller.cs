@@ -9,6 +9,7 @@ using System.Net.Http;
 using Newtonsoft.Json;
 using System.Linq;
 using System.Text;
+using Rdmp.Core.Repositories;
 
 namespace Rdmp.Dicom.ExternalApis
 {
@@ -21,9 +22,14 @@ namespace Rdmp.Dicom.ExternalApis
             Run(ac, cache, token, SemEHRConfiguration.LoadFrom(ac));
         }
 
-        private string GetAuthString(SemEHRConfiguration config)
+        private string GetAuthString(ICatalogueRepository repo, SemEHRConfiguration config)
         {
-            return Convert.ToBase64String(Encoding.UTF8.GetBytes($"{config.ApiHttpAuthUsername}:{config.ApiHttpAuthPassword}"));
+            if (config.ApiHttpDataAccessCredentials == 0)
+                return null;
+
+            var creds = repo.GetObjectByID<DataAccessCredentials>(config.ApiHttpDataAccessCredentials);
+
+            return Convert.ToBase64String(Encoding.UTF8.GetBytes($"{creds.Username}:{creds.GetDecryptedPassword()}"));
         }
 
         internal void Run(AggregateConfiguration ac, CachedAggregateConfigurationResultsManager cache, CancellationToken token, SemEHRConfiguration config)
@@ -49,7 +55,7 @@ namespace Rdmp.Dicom.ExternalApis
             }
             HttpClient httpClient = new(httpClientHandler);
             if(config.ApiUsingHttpAuth())
-                httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", GetAuthString(config));
+                httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", GetAuthString(ac.CatalogueRepository,config));
             httpClient.Timeout = TimeSpan.FromSeconds(config.RequestTimeout);
 
             //Make the request to the API
