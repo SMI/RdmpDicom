@@ -14,14 +14,14 @@ using Rdmp.Core.DataLoad.Modules.Mutilators;
 using Rdmp.Core.Curation.Data.Defaults;
 using Rdmp.Core.Curation;
 using Rdmp.Core.DataLoad.Engine.Checks;
-using Rdmp.Core.DataLoad.Engine.DatabaseManagement.EntityNaming;
 using Rdmp.Core.DataLoad;
-using Rdmp.Core.DataLoad.Engine.LoadProcess;
 using DicomTypeTranslation.TableCreation;
 using Rdmp.Core.CommandExecution;
 using Rdmp.Core.Repositories.Construction;
 using Rdmp.Dicom.PipelineComponents.DicomSources;
 using ReusableLibraryCode.Annotations;
+using NLog;
+using System.Threading;
 
 namespace Rdmp.Dicom.CommandExecution
 {
@@ -112,6 +112,8 @@ namespace Rdmp.Dicom.CommandExecution
 
         public override void Execute()
         {
+            var logging = LogManager.GetCurrentClassLogger();
+
             if (DicomSourceType == null)
             {
                 SetImpossible("You must specify a Type for DicomSourceType");
@@ -123,9 +125,19 @@ namespace Rdmp.Dicom.CommandExecution
             List<DiscoveredTable> tablesCreated = new();
 
             // create the database if it does not exist
-            if(!_databaseToCreateInto.Exists())
+            if(!_databaseToCreateInto.Server.Exists() || !_databaseToCreateInto.Exists())
             {
-                _databaseToCreateInto.Server.CreateDatabase(_databaseToCreateInto.GetRuntimeName());
+                var create = _databaseToCreateInto.GetRuntimeName();
+                logging.Info($"Creating '{create}'");
+                _databaseToCreateInto.Server.CreateDatabase(create);
+
+                logging.Info($"Database Created, now waiting");
+                Thread.Sleep(5000);
+
+                if(!_databaseToCreateInto.Exists())
+                {
+                    throw new Exception($"Created database '{create}' but then it was still reported to not exist");
+                }
             }
 
             //Create with template?
@@ -134,13 +146,15 @@ namespace Rdmp.Dicom.CommandExecution
                 foreach (ImageTableTemplate table in Template.Tables)
                 {
                     string tblName = GetNameWithPrefix(table.TableName);
-
+                    
                     var tbl = _databaseToCreateInto.ExpectTable(tblName);
-                    var cmd = new ExecuteCommandCreateNewImagingDataset(_repositoryLocator, tbl,table);
+
+                    var cmd = new ExecuteCommandCreateNewImagingDataset(_repositoryLocator, tbl, table);
                     cmd.Execute();
 
                     NewCataloguesCreated.Add(cmd.NewCatalogueCreated);
                     tablesCreated.Add(tbl);
+
                 }
             }
             else
@@ -172,9 +186,12 @@ namespace Rdmp.Dicom.CommandExecution
 
             /////////////////////////////////////////////Attacher////////////////////////////
 
-            
+
             //Create a pipeline for reading from Dicom files and writing to any destination component (which must be fixed)
-            var pipe = new Pipeline(_catalogueRepository, GetNameWithPrefixInBracketsIfAny("Image Loading Pipe"));
+            var name = GetNameWithPrefixInBracketsIfAny("Image Loading Pipe");
+            name = MakeUniqueName(_catalogueRepository.GetAllObjects<Pipeline>().Select(p=>p.Name).ToArray(),name);
+
+            var pipe = new Pipeline(_catalogueRepository, name);
             DicomSourcePipelineComponent = new(_catalogueRepository, pipe, DicomSourceType, 0, DicomSourceType.Name);
             DicomSourcePipelineComponent.CreateArgumentsForClassIfNotExists(DicomSourceType);
 
@@ -264,7 +281,22 @@ namespace Rdmp.Dicom.CommandExecution
             var checker = new CheckEntireDataLoadProcess(NewLoadMetadata, new(NewLoadMetadata), new(), _catalogueRepository.MEF);
             checker.Check(new AcceptAllCheckNotifier());
         }
-        
+
+        public static string MakeUniqueName(string[] existingUsedNames, string candidate)
+        {
+            // if name is unique then keep candidate name
+            if (!existingUsedNames.Any(p => p.Equals(candidate, StringComparison.CurrentCultureIgnoreCase)))
+                return candidate;
+
+            // otherwise give it a suffix
+            int suffix = 2;
+            while (existingUsedNames.Any(p => p.Equals(candidate + suffix,StringComparison.CurrentCultureIgnoreCase)))
+            {
+                suffix++;
+            }
+            return candidate + suffix;
+        }
+
         private string GetNameWithPrefixInBracketsIfAny(string name)
         {
             return string.IsNullOrWhiteSpace(TablePrefix) ? name : $"{name}({TablePrefix.Trim('_')})";
