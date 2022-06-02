@@ -20,6 +20,7 @@ using Rdmp.Core.CommandExecution;
 using Rdmp.Core.Repositories.Construction;
 using Rdmp.Dicom.PipelineComponents.DicomSources;
 using ReusableLibraryCode.Annotations;
+using NLog;
 
 namespace Rdmp.Dicom.CommandExecution
 {
@@ -124,6 +125,7 @@ namespace Rdmp.Dicom.CommandExecution
             if(!_databaseToCreateInto.Server.Exists() || !_databaseToCreateInto.Exists())
             {
                 var create = _databaseToCreateInto.GetRuntimeName();
+                LogManager.GetCurrentClassLogger().Info($"Creating '{create}'");
                 _databaseToCreateInto.Server.CreateDatabase(create);
 
                 if(!_databaseToCreateInto.Exists())
