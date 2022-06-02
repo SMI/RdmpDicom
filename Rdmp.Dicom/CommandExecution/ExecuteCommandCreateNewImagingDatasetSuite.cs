@@ -172,9 +172,12 @@ namespace Rdmp.Dicom.CommandExecution
 
             /////////////////////////////////////////////Attacher////////////////////////////
 
-            
+
             //Create a pipeline for reading from Dicom files and writing to any destination component (which must be fixed)
-            var pipe = new Pipeline(_catalogueRepository, GetNameWithPrefixInBracketsIfAny("Image Loading Pipe"));
+            var name = GetNameWithPrefixInBracketsIfAny("Image Loading Pipe");
+            name = MakeUniqueName(_catalogueRepository.GetAllObjects<Pipeline>().Select(p=>p.Name).ToArray(),name);
+
+            var pipe = new Pipeline(_catalogueRepository, name);
             DicomSourcePipelineComponent = new(_catalogueRepository, pipe, DicomSourceType, 0, DicomSourceType.Name);
             DicomSourcePipelineComponent.CreateArgumentsForClassIfNotExists(DicomSourceType);
 
@@ -264,7 +267,22 @@ namespace Rdmp.Dicom.CommandExecution
             var checker = new CheckEntireDataLoadProcess(NewLoadMetadata, new(NewLoadMetadata), new(), _catalogueRepository.MEF);
             checker.Check(new AcceptAllCheckNotifier());
         }
-        
+
+        public static string MakeUniqueName(string[] existingUsedNames, string candidate)
+        {
+            // if name is unique then keep candidate name
+            if (!existingUsedNames.Any(p => p.Equals(candidate, StringComparison.CurrentCultureIgnoreCase)))
+                return candidate;
+
+            // otherwise give it a suffix
+            int suffix = 2;
+            while (existingUsedNames.Any(p => p.Equals(candidate + suffix,StringComparison.CurrentCultureIgnoreCase)))
+            {
+                suffix++;
+            }
+            return candidate + suffix;
+        }
+
         private string GetNameWithPrefixInBracketsIfAny(string name)
         {
             return string.IsNullOrWhiteSpace(TablePrefix) ? name : $"{name}({TablePrefix.Trim('_')})";
