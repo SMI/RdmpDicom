@@ -123,7 +123,13 @@ namespace Rdmp.Dicom.CommandExecution
             // create the database if it does not exist
             if(!_databaseToCreateInto.Server.Exists() || !_databaseToCreateInto.Exists())
             {
-                _databaseToCreateInto.Server.CreateDatabase(_databaseToCreateInto.GetRuntimeName());
+                var create = _databaseToCreateInto.GetRuntimeName();
+                _databaseToCreateInto.Server.CreateDatabase(create);
+
+                if(!_databaseToCreateInto.Exists())
+                {
+                    throw new Exception($"Created database '{create}' but then it was still reported to not exist");
+                }
             }
 
             //Create with template?
