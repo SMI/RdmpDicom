@@ -148,6 +148,9 @@ namespace Rdmp.Dicom.CommandExecution
                     string tblName = GetNameWithPrefix(table.TableName);
                     
                     var tbl = _databaseToCreateInto.ExpectTable(tblName);
+
+                    logging.Info($"Creating Tables with ConnectionString:{tbl.Database.Server.Builder}");
+
                     var cmd = new ExecuteCommandCreateNewImagingDataset(_repositoryLocator, tbl, table);
                     cmd.Execute();
 
