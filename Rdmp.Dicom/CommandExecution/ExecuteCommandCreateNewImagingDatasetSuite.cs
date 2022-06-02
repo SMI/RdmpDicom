@@ -14,9 +14,7 @@ using Rdmp.Core.DataLoad.Modules.Mutilators;
 using Rdmp.Core.Curation.Data.Defaults;
 using Rdmp.Core.Curation;
 using Rdmp.Core.DataLoad.Engine.Checks;
-using Rdmp.Core.DataLoad.Engine.DatabaseManagement.EntityNaming;
 using Rdmp.Core.DataLoad;
-using Rdmp.Core.DataLoad.Engine.LoadProcess;
 using DicomTypeTranslation.TableCreation;
 using Rdmp.Core.CommandExecution;
 using Rdmp.Core.Repositories.Construction;
@@ -123,7 +121,7 @@ namespace Rdmp.Dicom.CommandExecution
             List<DiscoveredTable> tablesCreated = new();
 
             // create the database if it does not exist
-            if(!_databaseToCreateInto.Exists())
+            if(!_databaseToCreateInto.Server.Exists() || !_databaseToCreateInto.Exists())
             {
                 _databaseToCreateInto.Server.CreateDatabase(_databaseToCreateInto.GetRuntimeName());
             }
