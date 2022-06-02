@@ -21,6 +21,7 @@ using Rdmp.Core.Repositories.Construction;
 using Rdmp.Dicom.PipelineComponents.DicomSources;
 using ReusableLibraryCode.Annotations;
 using NLog;
+using System.Threading;
 
 namespace Rdmp.Dicom.CommandExecution
 {
@@ -111,6 +112,8 @@ namespace Rdmp.Dicom.CommandExecution
 
         public override void Execute()
         {
+            var logging = LogManager.GetCurrentClassLogger();
+
             if (DicomSourceType == null)
             {
                 SetImpossible("You must specify a Type for DicomSourceType");
@@ -125,8 +128,11 @@ namespace Rdmp.Dicom.CommandExecution
             if(!_databaseToCreateInto.Server.Exists() || !_databaseToCreateInto.Exists())
             {
                 var create = _databaseToCreateInto.GetRuntimeName();
-                LogManager.GetCurrentClassLogger().Info($"Creating '{create}'");
+                logging.Info($"Creating '{create}'");
                 _databaseToCreateInto.Server.CreateDatabase(create);
+
+                logging.Info($"Database Created, now waiting");
+                Thread.Sleep(5000);
 
                 if(!_databaseToCreateInto.Exists())
                 {
@@ -140,13 +146,17 @@ namespace Rdmp.Dicom.CommandExecution
                 foreach (ImageTableTemplate table in Template.Tables)
                 {
                     string tblName = GetNameWithPrefix(table.TableName);
-
+                    
                     var tbl = _databaseToCreateInto.ExpectTable(tblName);
-                    var cmd = new ExecuteCommandCreateNewImagingDataset(_repositoryLocator, tbl,table);
+
+                    logging.Info($"Creating Tables with ConnectionString:{tbl.Database.Server.Builder}");
+
+                    var cmd = new ExecuteCommandCreateNewImagingDataset(_repositoryLocator, tbl, table);
                     cmd.Execute();
 
                     NewCataloguesCreated.Add(cmd.NewCatalogueCreated);
                     tablesCreated.Add(tbl);
+
                 }
             }
             else
