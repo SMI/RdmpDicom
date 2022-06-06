@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using FellowOakDicom;
 using FellowOakDicom.Imaging.Codec;
 using FellowOakDicom.Log;
+using FellowOakDicom.Memory;
 using FellowOakDicom.Network;
 using FellowOakDicom.Network.Client;
 using NUnit.Framework;
@@ -16,7 +17,9 @@ internal class PacsFetch
     class QRService : DicomService, IDicomServiceProvider, IDicomCFindProvider, IDicomCEchoProvider,
         IDicomCMoveProvider
     {
-        public QRService(INetworkStream stream, Encoding fallbackEncoding, Logger log) : base(stream, fallbackEncoding, log, new ConsoleLogManager(), new DesktopNetworkManager(), new DefaultTranscoderManager())
+        private static readonly DicomServiceDependencies Deps = new(new ConsoleLogManager(),
+            new DesktopNetworkManager(), new DefaultTranscoderManager(), new ArrayPoolMemoryProvider());
+        public QRService(INetworkStream stream, Encoding fallbackEncoding, Logger log) : base(stream, fallbackEncoding, log,Deps)
         {
         }
 

@@ -70,8 +70,10 @@ namespace Rdmp.Dicom.Cache.Pipeline
             var writer = new CsvWriter(sw,new(CultureInfo.CurrentCulture));
 
             WriteHeaders(writer);
-                        
-            DicomClient client = new(dicomConfiguration.RemoteAetUri.Host, dicomConfiguration.RemoteAetUri.Port, false, dicomConfiguration.LocalAetTitle, dicomConfiguration.RemoteAetTitle, new(), new(),new DesktopNetworkManager(), new ConsoleLogManager(), new DefaultTranscoderManager());
+
+            IDicomClient client = DicomClientFactory.Create(dicomConfiguration.RemoteAetUri.Host,
+                dicomConfiguration.RemoteAetUri.Port, false, dicomConfiguration.LocalAetTitle,
+                dicomConfiguration.RemoteAetTitle);
                 
             try
             {
