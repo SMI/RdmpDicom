@@ -6,7 +6,7 @@ namespace Rdmp.Dicom.Cache.Pipeline.Dicom;
 
 public interface IDicomRequestSender
 {
-    void ThrottleRequest(DicomRequest dicomRequest, DicomClient client, CancellationToken cancellationToken);
+    void ThrottleRequest(DicomRequest dicomRequest, IDicomClient client, CancellationToken cancellationToken);
 
-    void SendRequest(DicomRequest dicomRequest, DicomClient client, CancellationToken cancellationToken);
+    void SendRequest(DicomRequest dicomRequest, IDicomClient client, CancellationToken cancellationToken);
 }

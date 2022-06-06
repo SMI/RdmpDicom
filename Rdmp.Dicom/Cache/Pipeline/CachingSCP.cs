@@ -5,6 +5,7 @@ using System;
 using System.Text;
 using System.Threading.Tasks;
 using FellowOakDicom.Imaging.Codec;
+using FellowOakDicom.Memory;
 using ReusableLibraryCode.Progress;
 
 namespace Rdmp.Dicom.Cache.Pipeline
@@ -59,7 +60,8 @@ namespace Rdmp.Dicom.Cache.Pipeline
         private String CalledAE = String.Empty;
         private String CallingAE = String.Empty;
 
-        public CachingSCP(INetworkStream stream, Encoding encoding, Logger logger): base(stream, encoding, logger, new ConsoleLogManager(),new DesktopNetworkManager(), new DefaultTranscoderManager())
+        private static DicomServiceDependencies Deps = new(new ConsoleLogManager(),new DesktopNetworkManager(),new DefaultTranscoderManager(),new ArrayPoolMemoryProvider());
+        public CachingSCP(INetworkStream stream, Encoding encoding, Logger logger): base(stream, encoding, logger, Deps)
         {
             Options.LogDimseDatasets = false;
             Options.LogDataPDUs = false;
