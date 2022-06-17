@@ -69,7 +69,6 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
         private int _projectNumber;
         private IMappingRepository _uidSubstitutionLookup;
         private DirectoryInfo _destinationDirectory;
-        private IColumn _releaseCol;
         private DicomTag[] _deleteTags;
 
         private bool initialized;
@@ -93,21 +92,19 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
 
             _putter ??= (IPutDicomFilesInExtractionDirectories)new ObjectConstructor().Construct(PutterType);
 
-            if(!initialized)
+            if (!initialized)
             {
                 Initialize(
                     _extractCommand.Configuration.Project.ProjectNumber.Value,
-                    new MappingRepository(UIDMappingServer),
-                    new DirectoryInfo(Path.Combine(_extractCommand.GetExtractionDirectory().FullName, "Images")),
-                    _extractCommand.QueryBuilder.SelectColumns.Select(c => c.IColumn).Single(c => c.IsExtractionIdentifier),
-                    GetDeleteTags().ToArray()
-                    );
+                    new DirectoryInfo(Path.Combine(_extractCommand.GetExtractionDirectory().FullName, "Images")));
             }
 
             using var pool = new ZipPool();
 
-            _sw.Start();
+            var releaseColumn = _extractCommand.QueryBuilder.SelectColumns.Select(c => c.IColumn).Single(c => c.IsExtractionIdentifier);
 
+            _sw.Start();
+            
             foreach (DataRow row in toProcess.Rows)
             {
                 if (_errors > 0 && _errors > ErrorThreshold)
@@ -118,7 +115,7 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
                 var path = new AmbiguousFilePath(ArchiveRootIfAny, (string)row[RelativeArchiveColumnName]);
 
                 //get the new patient ID
-                var releasePatientId = row[_releaseCol.GetRuntimeName()].ToString();
+                var releasePatientId = row[releaseColumn.GetRuntimeName()].ToString();
 
                 ProcessFile(path,listener,pool, releasePatientId,_putter,row);
             }
@@ -129,22 +126,20 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
         }
 
         /// <summary>
-        /// 
+        /// Setup class ready to start anonymizing.  Pass in 
         /// </summary>
-        /// <param name="uidSubstitutionLookup">The UID lookup server or class which contains project specific substitutions</param>
         /// <param name="projectNumber"></param>
-        /// <param name="destinationDirectory">Destination directory to pass to <paramref name="putter"/> or null if putter does not require it</destinationDirectory>
-        /// <param name="deleteTags">List of explicit tags you definetly want to delete</param>
-        private void Initialize(int projectNumber, IMappingRepository uidSubstitutionLookup, DirectoryInfo destinationDirectory,
-            IColumn releaseColumn, DicomTag[] deleteTags)
+        /// <param name="destinationDirectory">Destination directory to pass to <see cref="IPutDicomFilesInExtractionDirectories"/>
+        /// instances later on or null your putter does not require it</destinationDirectory>
+        /// <param name="uidSubstitutionLookup">Custom IMappingRepository or null to use <see cref="UIDMappingServer"/></param>
+        public void Initialize(int projectNumber, DirectoryInfo destinationDirectory, IMappingRepository uidSubstitutionLookup = null)
         {
             _projectNumber = projectNumber;
 
-            _uidSubstitutionLookup = uidSubstitutionLookup;
+            _uidSubstitutionLookup = uidSubstitutionLookup ?? (UIDMappingServer == null ? null : new MappingRepository(UIDMappingServer));
             _destinationDirectory = destinationDirectory;
 
-            _releaseCol = releaseColumn;
-            _deleteTags = deleteTags;
+            _deleteTags = GetDeleteTags().ToArray();
 
             initialized = true;
         }
@@ -229,6 +224,10 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
             foreach (var (key, uidType) in UIDMapping.SupportedTags)
             {
                 if (!ds.Contains(key))
+                    continue;
+
+                // no UID substitution server so no UID subs
+                if (_uidSubstitutionLookup == null)
                     continue;
 
                 var value = ds.GetValue<string>(key, 0);

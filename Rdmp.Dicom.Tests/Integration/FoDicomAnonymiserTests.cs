@@ -21,6 +21,7 @@ using DatabaseType = FAnsi.DatabaseType;
 
 namespace Rdmp.Dicom.Tests.Integration
 {
+
     public class FoDicomAnonymiserTests:DatabaseTests
     {
         [OneTimeSetUp]
