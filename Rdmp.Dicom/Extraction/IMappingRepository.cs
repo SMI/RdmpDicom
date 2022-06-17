@@ -5,5 +5,7 @@ namespace Rdmp.Dicom.Extraction
         UIDMapping[] LoadMappingsForProject(int projectNumber);
         void InsertMappings(UIDMapping[] newMappings);
         void Update(UIDMapping mapping);
+
+        string GetOrAllocateMapping(string value, int projectNumber, UIDType uidType);
     }
 }

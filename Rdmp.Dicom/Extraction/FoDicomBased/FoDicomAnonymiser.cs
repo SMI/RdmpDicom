@@ -1,9 +1,4 @@
-﻿using System;
-using System.Data;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using FellowOakDicom;
+﻿using FellowOakDicom;
 using ReusableLibraryCode.Checks;
 using ReusableLibraryCode.Progress;
 using Rdmp.Dicom.Extraction.FoDicomBased.DirectoryDecisions;
@@ -13,9 +8,14 @@ using Rdmp.Core.DataFlowPipeline.Requirements;
 using Rdmp.Core.DataFlowPipeline;
 using Rdmp.Core.Repositories.Construction;
 using MapsDirectlyToDatabaseTable.Versioning;
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
+using System.Data;
 using static FellowOakDicom.DicomAnonymizer;
+using System;
+using System.Diagnostics;
+using System.IO;
+using System.Collections.Generic;
+using System.Linq;
+using Rdmp.Core.QueryBuilding;
 
 namespace Rdmp.Dicom.Extraction.FoDicomBased
 {
@@ -64,6 +64,16 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
 
         private int _errors = 0;
 
+
+        // private variables set up with Initialize
+        private int _projectNumber;
+        private IMappingRepository _uidSubstitutionLookup;
+        private DirectoryInfo _destinationDirectory;
+        private IColumn _releaseCol;
+        private DicomTag[] _deleteTags;
+
+        private bool initialized;
+
         public DataTable ProcessPipelineData(DataTable toProcess, IDataLoadEventListener listener,GracefulCancellationToken cancellationToken)
         {
             //Things we ignore, Lookups, SupportingSql etc
@@ -83,130 +93,175 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
 
             _putter ??= (IPutDicomFilesInExtractionDirectories)new ObjectConstructor().Construct(PutterType);
 
-            var projectNumber = _extractCommand.Configuration.Project.ProjectNumber.Value;
-
-            var mappingServer = new MappingRepository(UIDMappingServer);
-            var destinationDirectory = new DirectoryInfo(Path.Combine(_extractCommand.GetExtractionDirectory().FullName, "Images"));
-
-            var releaseCol = _extractCommand.QueryBuilder.SelectColumns.Select(c=>c.IColumn).Single(c=>c.IsExtractionIdentifier);
-
-            var deleteTags = GetDeleteTags();
+            if(!initialized)
+            {
+                Initialize(
+                    _extractCommand.Configuration.Project.ProjectNumber.Value,
+                    new MappingRepository(UIDMappingServer),
+                    new DirectoryInfo(Path.Combine(_extractCommand.GetExtractionDirectory().FullName, "Images")),
+                    _extractCommand.QueryBuilder.SelectColumns.Select(c => c.IColumn).Single(c => c.IsExtractionIdentifier),
+                    GetDeleteTags().ToArray()
+                    );
+            }
 
             using var pool = new ZipPool();
+
             _sw.Start();
-                
+
             foreach (DataRow row in toProcess.Rows)
             {
-                if(_errors > 0 && _errors > ErrorThreshold)
+                if (_errors > 0 && _errors > ErrorThreshold)
                     throw new($"Number of errors reported ({_errors}) reached the threshold ({ErrorThreshold})");
 
                 cancellationToken.ThrowIfAbortRequested();
 
                 var path = new AmbiguousFilePath(ArchiveRootIfAny, (string)row[RelativeArchiveColumnName]);
 
-                DicomFile dicomFile;
-                    
-                try
-                {
-                    dicomFile = path.GetDataset(RetryCount,RetryDelay,pool, listener);
-                }
-                catch (Exception e)
-                {
-                    listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Error,$"Failed to get image at path '{path.FullPath}'",e));
-                    _errors++;
-                    continue;
-                }
-
                 //get the new patient ID
-                var releaseId = row[releaseCol.GetRuntimeName()].ToString();
-                    
-                DicomDataset ds;
+                var releasePatientId = row[_releaseCol.GetRuntimeName()].ToString();
 
-                    try
-                    {
-                        // do not anonymise SRs if this flag is set
-                        bool skipAnon = SkipAnonymisationOnStructuredReports && dicomFile.Dataset.GetSingleValue<string>(DicomTag.Modality) == "SR";
-                        
-                        // See: ftp://medical.nema.org/medical/dicom/2011/11_15pu.pdf
-                        var flags = skipAnon ?
-                            //dont anonymise
-                            DicomAnonymizer.SecurityProfileOptions.RetainSafePrivate |
-                            DicomAnonymizer.SecurityProfileOptions.RetainDeviceIdent|
-                            DicomAnonymizer.SecurityProfileOptions.RetainInstitutionIdent |
-                            DicomAnonymizer.SecurityProfileOptions.RetainUIDs |
-                            DicomAnonymizer.SecurityProfileOptions.RetainLongFullDates |
-                            DicomAnonymizer.SecurityProfileOptions.RetainPatientChars :
-                            // do anonymise
-                            DicomAnonymizer.SecurityProfileOptions.BasicProfile |
-                            DicomAnonymizer.SecurityProfileOptions.CleanStructdCont |
-                            DicomAnonymizer.SecurityProfileOptions.CleanDesc |
-                            DicomAnonymizer.SecurityProfileOptions.RetainUIDs;
-
-                        if (RetainDates && !skipAnon)
-                            flags |= DicomAnonymizer.SecurityProfileOptions.RetainLongFullDates;
-
-                        var profile = DicomAnonymizer.SecurityProfile.LoadProfile(null, flags);
-
-
-                        // I know we said skip anonymisation but still remove this stuff cmon
-                        if (skipAnon)
-                            RemovePatientNameEtc(profile);
-
-                        var anonymiser = new DicomAnonymizer(profile);
-
-                        
-                        ds = anonymiser.Anonymize(dicomFile.Dataset);
-                        
-                    }
-                    catch (Exception e)
-                    {
-                        listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Error,$"Failed to anonymize image at path '{path.FullPath}'",e));
-                        _errors++;
-                        continue;
-                    }
-
-                //now we want to explicitly use our own release Id regardless of what FoDicom said
-                ds.AddOrUpdate(DicomTag.PatientID, releaseId);
-
-                //rewrite the UIDs
-                foreach (var (key, uidType) in UIDMapping.SupportedTags)
-                {
-                    if(!ds.Contains(key))
-                        continue;
-                        
-                    var value = ds.GetValue<string>(key, 0);
-
-                    //if it has a value for this UID
-                    if (value == null) continue;
-                    var releaseValue = mappingServer.GetOrAllocateMapping(value, projectNumber, uidType);
-
-                    //change value in dataset
-                    ds.AddOrUpdate(key, releaseValue);
-
-                    //and change value in DataTable
-                    if (toProcess.Columns.Contains(key.DictionaryEntry.Keyword))
-                        row[key.DictionaryEntry.Keyword] = releaseValue;
-                }
-                    
-                foreach(var tag in deleteTags)
-                {
-                    if (ds.Contains(tag))
-                    {
-                        ds.Remove(tag);
-                    }   
-                }
-
-                var newPath = _putter.WriteOutDataset(destinationDirectory,releaseId,ds);
-                row[RelativeArchiveColumnName] = newPath;
-
-                _anonymisedImagesCount++;
-
-                listener.OnProgress(this, new ProgressEventArgs("Writing ANO images", new ProgressMeasurement(_anonymisedImagesCount, ProgressType.Records), _sw.Elapsed));
+                ProcessFile(path,listener,pool, releasePatientId,_putter,row);
             }
 
             _sw.Stop();
 
             return toProcess;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="uidSubstitutionLookup">The UID lookup server or class which contains project specific substitutions</param>
+        /// <param name="projectNumber"></param>
+        /// <param name="destinationDirectory">Destination directory to pass to <paramref name="putter"/> or null if putter does not require it</destinationDirectory>
+        /// <param name="deleteTags">List of explicit tags you definetly want to delete</param>
+        private void Initialize(int projectNumber, IMappingRepository uidSubstitutionLookup, DirectoryInfo destinationDirectory,
+            IColumn releaseColumn, DicomTag[] deleteTags)
+        {
+            _projectNumber = projectNumber;
+
+            _uidSubstitutionLookup = uidSubstitutionLookup;
+            _destinationDirectory = destinationDirectory;
+
+            _releaseCol = releaseColumn;
+            _deleteTags = deleteTags;
+
+            initialized = true;
+        }
+
+        /// <summary>
+        /// Anonymises a dicom file at <paramref name="path"/> (which may be in a zip file)
+        /// </summary>
+        /// <param name="path">Location of the zip file</param>
+        /// <param name="listener">Where to report errors/progress to</param>
+        /// <param name="pool">Cache of opened zip files to prevent spam open/closing</param>
+        /// <param name="releaseColumnValue">The substitution to enter in for PatientID</param>
+        /// <param name="putter">Determines where the anonymous image is written to</param>
+        /// <param name="rowIfAny">If a <see cref="System.Data.DataTable"/> is kicking around, pass the row and it's UID fields will be updated.  Otherwise pass null.</param>
+        public void ProcessFile(AmbiguousFilePath path,  IDataLoadEventListener listener, 
+            ZipPool pool, string releaseColumnValue,
+            IPutDicomFilesInExtractionDirectories putter,
+            DataRow rowIfAny)
+        {
+            DicomFile dicomFile;
+
+            try
+            {
+                dicomFile = path.GetDataset(RetryCount, RetryDelay, pool, listener);
+            }
+            catch (Exception e)
+            {
+                listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Error, $"Failed to get image at path '{path.FullPath}'", e));
+                _errors++;
+                return;
+            }
+
+
+            DicomDataset ds;
+
+            try
+            {
+                // do not anonymise SRs if this flag is set
+                bool skipAnon = SkipAnonymisationOnStructuredReports && dicomFile.Dataset.GetSingleValue<string>(DicomTag.Modality) == "SR";
+
+                // See: ftp://medical.nema.org/medical/dicom/2011/11_15pu.pdf
+                var flags = skipAnon ?
+                    //dont anonymise
+                    DicomAnonymizer.SecurityProfileOptions.RetainSafePrivate |
+                    DicomAnonymizer.SecurityProfileOptions.RetainDeviceIdent |
+                    DicomAnonymizer.SecurityProfileOptions.RetainInstitutionIdent |
+                    DicomAnonymizer.SecurityProfileOptions.RetainUIDs |
+                    DicomAnonymizer.SecurityProfileOptions.RetainLongFullDates |
+                    DicomAnonymizer.SecurityProfileOptions.RetainPatientChars :
+                    // do anonymise
+                    DicomAnonymizer.SecurityProfileOptions.BasicProfile |
+                    DicomAnonymizer.SecurityProfileOptions.CleanStructdCont |
+                    DicomAnonymizer.SecurityProfileOptions.CleanDesc |
+                    DicomAnonymizer.SecurityProfileOptions.RetainUIDs;
+
+                if (RetainDates && !skipAnon)
+                    flags |= DicomAnonymizer.SecurityProfileOptions.RetainLongFullDates;
+
+                var profile = DicomAnonymizer.SecurityProfile.LoadProfile(null, flags);
+
+
+                // I know we said skip anonymisation but still remove this stuff cmon
+                if (skipAnon)
+                    RemovePatientNameEtc(profile);
+
+                var anonymiser = new DicomAnonymizer(profile);
+
+
+                ds = anonymiser.Anonymize(dicomFile.Dataset);
+
+            }
+            catch (Exception e)
+            {
+                listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Error, $"Failed to anonymize image at path '{path.FullPath}'", e));
+                _errors++;
+                return;
+            }
+
+            //now we want to explicitly use our own release Id regardless of what FoDicom said
+            ds.AddOrUpdate(DicomTag.PatientID, releaseColumnValue);
+
+            //rewrite the UIDs
+            foreach (var (key, uidType) in UIDMapping.SupportedTags)
+            {
+                if (!ds.Contains(key))
+                    continue;
+
+                var value = ds.GetValue<string>(key, 0);
+
+                //if it has a value for this UID
+                if (value == null) continue;
+                var releaseValue = _uidSubstitutionLookup.GetOrAllocateMapping(value, _projectNumber, uidType);
+
+                //change value in dataset
+                ds.AddOrUpdate(key, releaseValue);
+
+                
+                //and change value in DataTable
+                if (rowIfAny != null && rowIfAny.Table.Columns.Contains(key.DictionaryEntry.Keyword))
+                    rowIfAny[key.DictionaryEntry.Keyword] = releaseValue;
+            }
+
+            foreach (var tag in _deleteTags)
+            {
+                if (ds.Contains(tag))
+                {
+                    ds.Remove(tag);
+                }
+            }
+
+            var newPath = putter.WriteOutDataset(_destinationDirectory, releaseColumnValue, ds);
+    
+            if(rowIfAny != null)
+                rowIfAny[RelativeArchiveColumnName] = newPath;
+
+            _anonymisedImagesCount++;
+
+            listener.OnProgress(this, new ProgressEventArgs("Writing ANO images", new ProgressMeasurement(_anonymisedImagesCount, ProgressType.Records), _sw.Elapsed));
         }
 
         private void RemovePatientNameEtc(DicomAnonymizer.SecurityProfile profile)
