@@ -6,8 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-- Added HTTP Basic Authentication support to SemEHR API endpoint connection.
 
+## [5.0.10] 2022-06-21
+
+- Refactored FoDicomAnonymiser to be easier for downstream consumption
+- Added HTTP Basic Authentication support to SemEHR API endpoint connection.
 
 ## [5.0.9] 2022-05-27
 
@@ -362,7 +365,8 @@ Updated to be compatible with RDMP 4.2
 
 - Initial commit from private repo
 
-[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v5.0.9...develop
+[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v5.0.10...develop
+[5.0.10]: https://github.com/HicServices/RdmpDicom/compare/v5.0.9...v5.0.10
 [5.0.9]: https://github.com/HicServices/RdmpDicom/compare/v5.0.8...v5.0.9
 [5.0.8]: https://github.com/HicServices/RdmpDicom/compare/v5.0.7...v5.0.8
 [5.0.7]: https://github.com/HicServices/RdmpDicom/compare/v5.0.6...v5.0.7
