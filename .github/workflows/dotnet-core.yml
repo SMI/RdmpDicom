@@ -55,7 +55,7 @@ jobs:
           cp Databases.Integration.yaml .\rdmpcli\Databases.yaml
           cmd /c rdmpcli\rdmp.exe pack --file Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg
           cmd /c rdmpcli\rdmp.exe cmd listsupportedcommands
-          cmd /c rdmpcli\rdmp.exe cmd describecommand CreateNewImagingDatasetSuite
+          cmd /c rdmpcli\rdmp.exe cmd describe CreateNewImagingDatasetSuite
       - name: Get Imaging Template
         run: |
           Invoke-WebRequest -Uri https://raw.githubusercontent.com/HicServices/DicomTypeTranslation/main/Templates/CT.it -OutFile D:\a\RdmpDicom\CT.it
