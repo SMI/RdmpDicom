@@ -11,5 +11,5 @@
 | ------- | ------------| --------| ------- | ------- | -------------------------- |
 | HIC.DicomTypeTranslation | [GitHub](https://github.com/HicServices/DicomTypeTranslation) | [4.0.1](https://www.nuget.org/packages/HIC.DicomTypeTranslation/4.0.1) | [GPL 3.0](https://www.gnu.org/licenses/gpl-3.0.html) | Translate dicom types into C# / database types | |
 | HIC.RDMP.Plugin | [GitHub](https://github.com/HicServices/RDMP) | [7.0.17](https://www.nuget.org/packages/HIC.RDMP.Plugin/7.0.17) | [GPL 3.0](https://www.gnu.org/licenses/gpl-3.0.html) | Interact with RDMP objects, base classes for plugin components etc | |
-| SharpCompress | [GitHub](https://github.com/adamhathcock/sharpcompress) | [0.32.1](https://www.nuget.org/packages/SharpCompress/0.32.1) | [MIT] | Access diverse archive formats including RAR, 7zip | |
-| Terminal.Gui | [GitHub](https://github.com/migueldeicaza/gui.cs) | [1.6.4](https://www.nuget.org/packages/Terminal.Gui/1.6.4) | [MIT] | UIs compatible with RDMP gui command line | |
+| SharpCompress | [GitHub](https://github.com/adamhathcock/sharpcompress) | [0.32.2](https://www.nuget.org/packages/SharpCompress/0.32.2) | [MIT] | Access diverse archive formats including RAR, 7zip | |
+| Terminal.Gui | [GitHub](https://github.com/migueldeicaza/gui.cs) | [1.7.0](https://www.nuget.org/packages/Terminal.Gui/1.7.0) | [MIT] | UIs compatible with RDMP gui command line | |
