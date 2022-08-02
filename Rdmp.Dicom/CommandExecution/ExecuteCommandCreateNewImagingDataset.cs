@@ -34,7 +34,7 @@ namespace Rdmp.Dicom.CommandExecution
             var importer = new TableInfoImporter(_repositoryLocator.CatalogueRepository, _expectedTable);
             importer.DoImport(out var tis, out var cis);
 
-            var engineer = new ForwardEngineerCatalogue(tis, cis, true);
+            var engineer = new ForwardEngineerCatalogue(tis, cis);
             engineer.ExecuteForwardEngineering(out var cata, out _, out var eis);
 
             var patientIdentifier = eis.SingleOrDefault(e => e.GetRuntimeName().Equals("PatientID"));
