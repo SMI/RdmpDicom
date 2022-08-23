@@ -7,7 +7,7 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased.DirectoryDecisions
     {
         protected override string WriteOutDatasetImpl(DirectoryInfo outputDirectory, string releaseIdentifier, DicomDataset dicomDataset)
         {
-            return SaveDicomData(outputDirectory, dicomDataset, ".dcm");
+            return SaveDicomData(outputDirectory, dicomDataset);
         }
     }
 }

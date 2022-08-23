@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
+using System.Linq;
 using Tests.Common;
 using DatabaseType = FAnsi.DatabaseType;
 
@@ -195,7 +196,7 @@ namespace Rdmp.Dicom.Tests.Integration
                 Assert.AreEqual(value, anoDicom.Dataset.GetValue<string>(key, 0));
         }
 
-        [Test]
+        [TestCase()]
         public void TestSkipAnonymisationOnStructuredReports()
         {
             var uidMapDb = GetCleanedServer(DatabaseType.MicrosoftSQLServer, "TESTUIDMapp");
@@ -393,6 +394,121 @@ namespace Rdmp.Dicom.Tests.Integration
 
         }
 
+        [TestCase(typeof(PutInReleaseIdentifierSubfolders))]
+        [TestCase(typeof(PutInUidSeriesFolders))]
+        [TestCase(typeof(PutInRoot))]
+        public void TestAnonymisingDataset_MetadataOnlyVsReal(Type putterType)
+        {
+            var uidMapDb = GetCleanedServer(DatabaseType.MicrosoftSQLServer, "TESTUIDMapp");
+
+            MasterDatabaseScriptExecutor e = new(uidMapDb);
+            var patcher = new SMIDatabasePatcher();
+            e.CreateAndPatchDatabase(patcher, new AcceptAllCheckNotifier());
+
+            var eds = new ExternalDatabaseServer(CatalogueRepository, "eds", patcher);
+            eds.SetProperties(uidMapDb);
+
+            Dictionary<DicomTag, string> thingThatShouldDisappear = new()
+            {
+                //Things we would want to disappear
+                {DicomTag.PatientName,"Moscow"},
+                {DicomTag.PatientBirthDate,"20010101"},
+                {DicomTag.StudyDescription,"Frank has lots of problems, he lives at 60 Pancake road"},
+                {DicomTag.SeriesDescription,"Coconuts"},
+                {DicomTag.AlgorithmName,"Chessnuts"}, // would not normally be dropped by anonymisation
+                {DicomTag.StudyDate,"20020101"}
+            };
+
+            Dictionary<DicomTag, string> thingsThatShouldRemain = new()
+            {
+                //Things we would want to remain
+                //{DicomTag.SmokingStatus,"YES"},
+            };
+
+            var dicom = new DicomDataset
+            {
+                {DicomTag.SOPInstanceUID, "123.4.4"},
+                {DicomTag.SeriesInstanceUID, "123.4.5"},
+                {DicomTag.StudyInstanceUID, "123.4.6"},
+                {DicomTag.SOPClassUID,"1"}
+            };
+
+            foreach (var (key, value) in thingThatShouldDisappear)
+                dicom.AddOrUpdate(key, value);
+
+            foreach (var (key, value) in thingsThatShouldRemain)
+                dicom.AddOrUpdate(key, value);
+
+            dicom.AddOrUpdate(DicomTag.StudyDate, new DateTime(2002, 01, 01));
+
+            var fi = new FileInfo(Path.Combine(TestContext.CurrentContext.WorkDirectory, "madness.dcm"));
+
+            DicomFile df = new(dicom);
+            df.Save(fi.FullName);
+
+            DataTable dtFirstTime = null;
+
+            for (int i = 0; i < 2; i++)
+            {
+                var dt = new DataTable();
+                dt.Columns.Add("Filepath");
+                dt.Columns.Add("SOPInstanceUID");
+                dt.Columns.Add("SeriesInstanceUID");
+                dt.Columns.Add("StudyInstanceUID");
+                dt.Columns.Add("Pat");
+                //note we don't have series
+
+                dt.Rows.Add(fi.Name, "123.4.4", "123.4.5", "123.4.6", "Hank");
+
+                var anonymiser = new FoDicomAnonymiser();
+
+                IExtractCommand cmd = MockExtractionCommand();
+
+                //give the mock to anonymiser
+                anonymiser.PreInitialize(cmd, new ThrowImmediatelyDataLoadEventListener());
+
+                anonymiser.PutterType = putterType;
+                anonymiser.ArchiveRootIfAny = TestContext.CurrentContext.WorkDirectory;
+                anonymiser.RelativeArchiveColumnName = "Filepath";
+                anonymiser.UIDMappingServer = eds;
+                anonymiser.DeleteTags = "AlgorithmName";
+
+                // the thing we are actually testing
+                anonymiser.MetadataOnly = i == 0;
+
+                var anoDt = anonymiser.ProcessPipelineData(dt, new ThrowImmediatelyDataLoadEventListener(), new());
+
+                Assert.AreEqual(1, anoDt.Rows.Count);
+
+                //Data table should contain new UIDs
+                Assert.AreNotEqual("123.4.4", anoDt.Rows[0]["SOPInstanceUID"]);
+                Assert.AreEqual(56, anoDt.Rows[0]["SOPInstanceUID"].ToString().Length);
+
+                Assert.AreNotEqual("123.4.6", anoDt.Rows[0]["StudyInstanceUID"]);
+                Assert.AreEqual(56, anoDt.Rows[0]["StudyInstanceUID"].ToString().Length);
+
+                // second time
+                if(dtFirstTime != null)
+                {
+                    // rows should be the same whether or not we are doing Metadata only extraction
+                    foreach(DataRow row in dtFirstTime.Rows)
+                    {
+                        AssertContains(dt, row.ItemArray);
+                    }
+                }
+
+                dtFirstTime = dt;
+            }
+        }
+
+        private void AssertContains(DataTable dt, params object[] rowValues)
+        {
+            Assert.IsTrue(dt.Rows.Cast<DataRow>().Any(r =>
+                    rowValues.All(v => r.ItemArray.Contains(v))), "Did not find expected row " + string.Join(",", rowValues)
+                                                          + Environment.NewLine + "Rows seen were:" +
+                                                          string.Join(Environment.NewLine,
+                                                              dt.Rows.Cast<DataRow>().Select(r => string.Join(",", r.ItemArray))));
+        }
         private IExtractDatasetCommand MockExtractionCommand()
         {
             //Setup Mocks
