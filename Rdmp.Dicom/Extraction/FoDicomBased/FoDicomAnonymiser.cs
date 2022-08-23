@@ -84,16 +84,28 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
                 listener.OnNotify(this, new(ProgressEventType.Information, "Ignoring non dataset command "));
                 return toProcess;
             }
-            
-            if(MetadataOnly)
+
+            if(IgnoreDataset(toProcess,listener))
             {
-                var matching = toProcess.Columns.Cast<DataColumn>().Where(
-                    c => UIDMapping.SupportedTags.Any(k => k.Key.DictionaryEntry.Keyword.Equals(c.ColumnName)))
-                    .ToArray();
+                return toProcess;
+            }
+
+            _putter ??= (IPutDicomFilesInExtractionDirectories)new ObjectConstructor().Construct(PutterType);
+
+            if (!initialized)
+            {
+                Initialize(
+                    _extractCommand.Configuration.Project.ProjectNumber.Value,
+                    new DirectoryInfo(Path.Combine(_extractCommand.GetExtractionDirectory().FullName, "Images")));
+            }
+
+            if (MetadataOnly)
+            {
+                var matching = GetMetadataOnlyColumnsToProcess(toProcess);
                 
                 if (!matching.Any())
                 {
-                    listener.OnNotify(this, new(ProgressEventType.Information, "Ignoring non imaging dataset, it had no UID columns"));
+                    // this should have already returned above via IgnoreDataset, bad times if you end up here.
                     return toProcess;
                 }
 
@@ -105,23 +117,6 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
                     SubstituteMetadataOnly(row, dictionary);
                 }
                 return toProcess;
-            }
-
-            //if it isn't a dicom dataset don't process it
-            if (!toProcess.Columns.Contains(RelativeArchiveColumnName))
-            {
-                listener.OnNotify(this,new(ProgressEventType.Warning,
-                    $"Dataset {_extractCommand.DatasetBundle.DataSet} did not contain field '{RelativeArchiveColumnName}' so we will not attempt to extract images"));
-                return toProcess;
-            }
-
-            _putter ??= (IPutDicomFilesInExtractionDirectories)new ObjectConstructor().Construct(PutterType);
-
-            if (!initialized)
-            {
-                Initialize(
-                    _extractCommand.Configuration.Project.ProjectNumber.Value,
-                    new DirectoryInfo(Path.Combine(_extractCommand.GetExtractionDirectory().FullName, "Images")));
             }
 
             using var pool = new ZipPool();
@@ -148,6 +143,35 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
             _sw.Stop();
 
             return toProcess;
+        }
+
+        private DataColumn[] GetMetadataOnlyColumnsToProcess(DataTable toProcess)
+        {
+             return toProcess.Columns.Cast<DataColumn>().Where(
+                   c => UIDMapping.SupportedTags.Any(k => k.Key.DictionaryEntry.Keyword.Equals(c.ColumnName)))
+                   .ToArray();
+        }
+
+        private bool IgnoreDataset(DataTable toProcess, IDataLoadEventListener listener)
+        {
+            if(MetadataOnly)
+            {
+                if(GetMetadataOnlyColumnsToProcess(toProcess).Length == 0)
+                {
+                    listener.OnNotify(this, new(ProgressEventType.Information, "Ignoring non imaging dataset, it had no UID columns"));
+                    return true;
+                }
+            }
+
+            //if it isn't a dicom dataset don't process it
+            if (!toProcess.Columns.Contains(RelativeArchiveColumnName))
+            {
+                listener.OnNotify(this, new(ProgressEventType.Warning,
+                    $"Dataset {_extractCommand.DatasetBundle.DataSet} did not contain field '{RelativeArchiveColumnName}' so we will not attempt to extract images"));
+                return true;
+            }
+
+            return false;
         }
 
         private void SubstituteMetadataOnly(DataRow row, Dictionary<DataColumn, KeyValuePair<DicomTag, UIDType>> dictionary)
