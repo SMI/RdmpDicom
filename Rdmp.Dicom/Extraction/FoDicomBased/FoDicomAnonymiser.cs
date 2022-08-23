@@ -111,17 +111,19 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
 
                 Dictionary<DataColumn, KeyValuePair<DicomTag, UIDType>> dictionary = matching.ToDictionary(k => k,
                         c => UIDMapping.SupportedTags.First(k => k.Key.DictionaryEntry.Keyword.Equals(c.ColumnName)));
+                
+                var releaseIdentifierColumn = GetReleaseIdentifierColumn().GetRuntimeName();
 
                 foreach (DataRow row in toProcess.Rows)
                 {
-                    SubstituteMetadataOnly(row, dictionary);
+                    SubstituteMetadataOnly(row, dictionary, toProcess.Columns[releaseIdentifierColumn]);
                 }
                 return toProcess;
             }
 
             using var pool = new ZipPool();
 
-            var releaseColumn = _extractCommand.QueryBuilder.SelectColumns.Select(c => c.IColumn).Single(c => c.IsExtractionIdentifier);
+            var releaseColumn = GetReleaseIdentifierColumn();
 
             _sw.Start();
             
@@ -143,6 +145,11 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
             _sw.Stop();
 
             return toProcess;
+        }
+
+        private IColumn GetReleaseIdentifierColumn()
+        {
+            return _extractCommand.QueryBuilder.SelectColumns.Select(c => c.IColumn).Single(c => c.IsExtractionIdentifier);
         }
 
         private DataColumn[] GetMetadataOnlyColumnsToProcess(DataTable toProcess)
@@ -174,8 +181,12 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
             return false;
         }
 
-        private void SubstituteMetadataOnly(DataRow row, Dictionary<DataColumn, KeyValuePair<DicomTag, UIDType>> dictionary)
+        private void SubstituteMetadataOnly(DataRow row, Dictionary<DataColumn, KeyValuePair<DicomTag, UIDType>> dictionary, DataColumn releaseIdentifierCol)
         {
+            string studyUid = null;
+            string seriesUid = null;
+            string sopUid = null;
+
             //rewrite the UIDs
             foreach (var kvp in dictionary)
             {
@@ -187,9 +198,35 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
 
                 //if it has a value for this UID
                 if (value == null) continue;
+
                 row[kvp.Key] = _uidSubstitutionLookup.GetOrAllocateMapping(value, _projectNumber, kvp.Value.Value);
+
+                if (kvp.Value.Key == DicomTag.StudyInstanceUID)
+                    studyUid = row[kvp.Key].ToString();
+
+                if (kvp.Value.Key == DicomTag.SeriesInstanceUID)
+                    seriesUid = row[kvp.Key].ToString();
+
+                if (kvp.Value.Key == DicomTag.SOPInstanceUID)
+                    sopUid = row[kvp.Key].ToString();
+            }
+
+            var releaseIdentifier = row[releaseIdentifierCol].ToString();
+
+            // if we have RelativeArchiveUri then we had better make sure that matches too
+            if (row.Table.Columns.Contains(RelativeArchiveColumnName))
+            {
+                var outPath = _putter.PredictOutputPath(_destinationDirectory, releaseIdentifier,studyUid,seriesUid, sopUid);
+
+                // if we are able to calculate the 'would be' output path from the metadata alone
+                if(!string.IsNullOrWhiteSpace(outPath))
+                {
+                    // then update the row
+                    row[RelativeArchiveColumnName] = outPath;
+                }
             }
         }
+
 
         /// <summary>
         /// Setup class ready to start anonymizing.  Pass in 

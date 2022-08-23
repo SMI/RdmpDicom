@@ -394,8 +394,10 @@ namespace Rdmp.Dicom.Tests.Integration
 
         }
 
-        [Test]
-        public void TestAnonymisingDataset_MetadataOnlyVsReal()
+        [TestCase(typeof(PutInReleaseIdentifierSubfolders))]
+        [TestCase(typeof(PutInUidSeriesFolders))]
+        [TestCase(typeof(PutInRoot))]
+        public void TestAnonymisingDataset_MetadataOnlyVsReal(Type putterType)
         {
             var uidMapDb = GetCleanedServer(DatabaseType.MicrosoftSQLServer, "TESTUIDMapp");
 
@@ -465,7 +467,7 @@ namespace Rdmp.Dicom.Tests.Integration
                 //give the mock to anonymiser
                 anonymiser.PreInitialize(cmd, new ThrowImmediatelyDataLoadEventListener());
 
-                anonymiser.PutterType = typeof(PutInRoot);
+                anonymiser.PutterType = putterType;
                 anonymiser.ArchiveRootIfAny = TestContext.CurrentContext.WorkDirectory;
                 anonymiser.RelativeArchiveColumnName = "Filepath";
                 anonymiser.UIDMappingServer = eds;
