@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Added MetadataOnly property to FoDicomAnonymiser [#64](https://github.com/HicServices/RdmpDicom/issues/64)
 
 ## [5.0.10] 2022-06-21
 
