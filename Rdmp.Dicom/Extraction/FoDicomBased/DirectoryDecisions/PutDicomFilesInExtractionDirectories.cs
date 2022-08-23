@@ -49,7 +49,11 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased.DirectoryDecisions
                 return null;
 
             var path = Path.Combine(outputDirectory.FullName, sopUid);
-            path = Path.ChangeExtension(path, ".dcm");
+            
+            if (!path.EndsWith(".dcm"))
+            {
+                path = path + ".dcm";
+            }
 
             return new FileInfo(path).FullName;
         }
