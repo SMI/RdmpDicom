@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.0.11] 2022-08-24
+
 ### Added
 
 - Added MetadataOnly property to FoDicomAnonymiser [#64](https://github.com/HicServices/RdmpDicom/issues/64)
@@ -368,7 +370,8 @@ Updated to be compatible with RDMP 4.2
 
 - Initial commit from private repo
 
-[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v5.0.10...develop
+[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v5.0.11...develop
+[5.0.11]: https://github.com/HicServices/RdmpDicom/compare/v5.0.10...v5.0.11
 [5.0.10]: https://github.com/HicServices/RdmpDicom/compare/v5.0.9...v5.0.10
 [5.0.9]: https://github.com/HicServices/RdmpDicom/compare/v5.0.8...v5.0.9
 [5.0.8]: https://github.com/HicServices/RdmpDicom/compare/v5.0.7...v5.0.8
