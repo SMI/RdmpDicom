@@ -168,6 +168,9 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
                     listener.OnNotify(this, new(ProgressEventType.Information, "Ignoring non imaging dataset, it had no UID columns"));
                     return true;
                 }
+
+                // metadata only and some legit columns yay
+                return false;
             }
 
             //if it isn't a dicom dataset don't process it
