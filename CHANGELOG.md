@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.0.12] 2022-09-09
+
+- Fixed API for new `Bitmap` substitute (see https://github.com/HicServices/RDMP/pull/1355)
+
 ## [5.0.11] 2022-08-24
 
 ### Added
@@ -370,7 +374,8 @@ Updated to be compatible with RDMP 4.2
 
 - Initial commit from private repo
 
-[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v5.0.11...develop
+[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v5.0.12...develop
+[5.0.12]: https://github.com/HicServices/RdmpDicom/compare/v5.0.11...v5.0.12
 [5.0.11]: https://github.com/HicServices/RdmpDicom/compare/v5.0.10...v5.0.11
 [5.0.10]: https://github.com/HicServices/RdmpDicom/compare/v5.0.9...v5.0.10
 [5.0.9]: https://github.com/HicServices/RdmpDicom/compare/v5.0.8...v5.0.9
