@@ -29,20 +29,33 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased.DirectoryDecisions
             return childDir;
         }
 
-        protected string SaveDicomData(DirectoryInfo outputDirectory,DicomDataset dicomDataset,string ext)
+        protected string SaveDicomData(DirectoryInfo outputDirectory,DicomDataset dicomDataset)
         {
-
-            var extSb = new StringBuilder();
-            if (!ext.IsBasicallyNull())
+            var path = Path.Combine(outputDirectory.FullName, dicomDataset.GetValue<string>(DicomTag.SOPInstanceUID, 0));
+            
+            if(!path.EndsWith(".dcm"))
             {
-                if (!ext.StartsWith("."))
-                    extSb.Append(".");
-                extSb.Append(ext);
+                path = path + ".dcm";
+            }            
 
-            }
-            var outPath = new FileInfo(Path.Combine(outputDirectory.FullName, dicomDataset.GetValue<string>(DicomTag.SOPInstanceUID, 0) + extSb));
+            var outPath = new FileInfo(path);
             new DicomFile(dicomDataset).Save(outPath.FullName);
             return outPath.FullName;
+        }
+
+        public virtual string PredictOutputPath(DirectoryInfo outputDirectory, string releaseIdentifier, string studyUid, string seriesUid, string sopUid)
+        {
+            if (string.IsNullOrWhiteSpace(sopUid))
+                return null;
+
+            var path = Path.Combine(outputDirectory.FullName, sopUid);
+            
+            if (!path.EndsWith(".dcm"))
+            {
+                path = path + ".dcm";
+            }
+
+            return new FileInfo(path).FullName;
         }
     }
 }

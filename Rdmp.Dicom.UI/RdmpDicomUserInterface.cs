@@ -16,6 +16,8 @@ using Rdmp.Core.CommandExecution;
 using System.Collections.Generic;
 using MapsDirectlyToDatabaseTable;
 using System.Linq;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp;
 
 namespace Rdmp.Dicom.UI
 {
@@ -67,7 +69,7 @@ namespace Rdmp.Dicom.UI
             return null;
         }
 
-        public override Bitmap GetImage(object concept, OverlayKind kind = OverlayKind.None)
+        public override Image<Rgba32> GetImage(object concept, OverlayKind kind = OverlayKind.None)
         {
             return null;
         }

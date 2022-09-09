@@ -91,11 +91,10 @@ namespace Rdmp.Dicom.Cache.Pipeline
             };
 
             //helps with tidying up resources if we abort or through an exception and neatly avoids ->  Access to disposed closure
-            using var server = new DicomServer<CachingSCP>(new DesktopNetworkManager(), new ConsoleLogManager());
-            DicomClient client = new(dicomConfiguration.RemoteAetUri.Host,
+            using var server = new DicomServer<CachingSCP>(new DicomServerDependencies(new DesktopNetworkManager(),new ConsoleLogManager()));
+            var client = DicomClientFactory.Create(dicomConfiguration.RemoteAetUri.Host,
                 dicomConfiguration.RemoteAetUri.Port, false, dicomConfiguration.LocalAetTitle,
-                dicomConfiguration.RemoteAetTitle, new DicomClientOptions(), new DicomServiceOptions(),
-                new DesktopNetworkManager(), new ConsoleLogManager(), new DefaultTranscoderManager());
+                dicomConfiguration.RemoteAetTitle);
             client.AssociationAccepted += (s, e) => {
                 gauge.Tick(listener, () => Process.GetCurrentProcess().Kill());
                 listener.OnNotify(this, new(ProgressEventType.Trace, "AssociationAccepted"));

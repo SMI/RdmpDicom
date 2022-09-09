@@ -52,7 +52,7 @@ namespace Rdmp.Dicom.Cache.Pipeline.Dicom
         /// </summary>
         /// 
         #region ThrottleRequest
-        public void ThrottleRequest(DicomRequest dicomRequest, DicomClient client, CancellationToken cancellationToken)
+        public void ThrottleRequest(DicomRequest dicomRequest, IDicomClient client, CancellationToken cancellationToken)
         {
             client.AddRequestAsync(dicomRequest).Wait(cancellationToken);
             ThrottleRequest(client, cancellationToken);
@@ -65,7 +65,7 @@ namespace Rdmp.Dicom.Cache.Pipeline.Dicom
         /// </summary>
         /// 
         #region ThrottleRequest
-        public void ThrottleRequest(DicomClient client, CancellationToken cancellationToken)
+        public void ThrottleRequest(IDicomClient client, CancellationToken cancellationToken)
         {
             var transferTimer = new Stopwatch();
             transferTimer.Start();
@@ -92,9 +92,9 @@ namespace Rdmp.Dicom.Cache.Pipeline.Dicom
         #region SendRequest
         private void SendRequest(DicomRequest dicomRequest, CancellationToken token)
         {
-            var client = new DicomClient(_dicomConfiguration.RemoteAetUri.Host, _dicomConfiguration.RemoteAetUri.Port,
-                false, _dicomConfiguration.LocalAetTitle, _dicomConfiguration.RemoteAetTitle, new DicomClientOptions(),
-                new DicomServiceOptions(), new DesktopNetworkManager(), new ConsoleLogManager(),new DefaultTranscoderManager());
+            var client = DicomClientFactory.Create(_dicomConfiguration.RemoteAetUri.Host,
+                _dicomConfiguration.RemoteAetUri.Port, false, _dicomConfiguration.LocalAetTitle,
+                _dicomConfiguration.RemoteAetTitle);
             SendRequest(dicomRequest, client,token);
         }
         #endregion
@@ -109,7 +109,7 @@ namespace Rdmp.Dicom.Cache.Pipeline.Dicom
         /// <param name="token"></param>
 
         #region SendRequest
-        public void SendRequest(DicomRequest dicomRequest, DicomClient client,CancellationToken token)
+        public void SendRequest(DicomRequest dicomRequest, IDicomClient client,CancellationToken token)
         {
             client.AddRequestAsync(dicomRequest).Wait(token);
             SendRequest(client,token);
@@ -124,7 +124,7 @@ namespace Rdmp.Dicom.Cache.Pipeline.Dicom
         /// <param name="token"></param>
 
         #region SendRequest
-        public void SendRequest(DicomClient client,CancellationToken token)
+        public void SendRequest(IDicomClient client,CancellationToken token)
         {
             _listener.OnNotify(this, new(
                 verbose ? ProgressEventType.Information : ProgressEventType.Trace,

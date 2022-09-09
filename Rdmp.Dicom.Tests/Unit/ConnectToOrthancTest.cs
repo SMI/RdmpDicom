@@ -16,9 +16,7 @@ namespace Rdmp.Dicom.Tests.Unit
         public void EchoTest(string host, int port)
         {
             var success = false;
-            var client = new DicomClient(host, port, false, LocalAetTitle, RemoteAetTitle, new DicomClientOptions(),
-                new DicomServiceOptions(), new DesktopNetworkManager(), new ConsoleLogManager(),
-                new DefaultTranscoderManager());
+            var client = DicomClientFactory.Create(host, port, false, LocalAetTitle, RemoteAetTitle);
             client.AddRequestAsync(new DicomCEchoRequest
             {
                 OnResponseReceived = (req,res) => {

@@ -5,7 +5,8 @@ using Rdmp.UI.CommandExecution.AtomicCommands;
 using Rdmp.UI.ItemActivation;
 using Rdmp.UI.SimpleDialogs.SqlDialogs;
 using ReusableLibraryCode.Icons.IconProvision;
-using System.Drawing;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp;
 using System.IO;
 using System.Windows.Forms;
 
@@ -28,7 +29,7 @@ namespace Rdmp.Dicom.UI.CommandExecution.AtomicCommands
                 _tableInfo = tis[0];
         }
 
-        public override Image GetImage(IIconProvider iconProvider)
+        public override Image<Rgba32> GetImage(IIconProvider iconProvider)
         {
             return iconProvider.GetImage(RDMPConcept.Diff);
         }

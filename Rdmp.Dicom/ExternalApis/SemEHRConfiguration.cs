@@ -66,6 +66,16 @@ namespace Rdmp.Dicom.ExternalApis
         /// The passphrase required to connect to the API
         /// </summary>
         public string Passphrase { get; set; } = "";
+        
+        /// <summary>
+        /// The HTTP Basic Authentication Username/Password to use when connecting to the SemEHR Api
+        /// </summary>
+        public int ApiHttpDataAccessCredentials { get; set; } = 0;
+
+        /// <summary>
+        /// The number of seconds before the API request will time out
+        /// </summary>
+        public int RequestTimeout { get; set; } = 3000;
 
         /// <summary>
         /// The date format for the API start date and end date filter
@@ -142,6 +152,7 @@ namespace Rdmp.Dicom.ExternalApis
         /// </summary>
         public string ReturnField { get; set; } = "";
 
+
         public static SemEHRConfiguration LoadFrom(AggregateConfiguration aggregate)
         {
             LoadFrom(aggregate, out SemEHRConfiguration main, out SemEHRConfiguration over);
@@ -189,6 +200,14 @@ namespace Rdmp.Dicom.ExternalApis
             if (!string.IsNullOrWhiteSpace(over.Passphrase))
             {
                 Passphrase = over.Passphrase;
+            }
+            if (over.RequestTimeout > 0)
+            {
+                RequestTimeout = over.RequestTimeout;
+            }
+            if (over.ApiHttpDataAccessCredentials != 0)
+            {
+                ApiHttpDataAccessCredentials = over.ApiHttpDataAccessCredentials;
             }
             if (!string.IsNullOrWhiteSpace(over.StartEndDateFormat))
             {
@@ -297,6 +316,11 @@ namespace Rdmp.Dicom.ExternalApis
                 passphraseIfSet = $"passphrase={Passphrase}&";
             }
             return ($"{this.Url}?{passphraseIfSet}j={GetQueryJsonAsString()}");
+        }
+
+        public bool ApiUsingHttpAuth()
+        {
+            return ApiHttpDataAccessCredentials != 0;
         }
     }
 }

@@ -1,5 +1,4 @@
-﻿using System.Drawing;
-using System.Windows.Forms;
+﻿using System.Windows.Forms;
 using ReusableLibraryCode.Icons.IconProvision;
 using Rdmp.Dicom.TagPromotionSchema;
 using Rdmp.UI.CommandExecution.AtomicCommands;
@@ -8,6 +7,8 @@ using Rdmp.UI.ItemActivation;
 using Rdmp.Core.Curation.Data;
 using Rdmp.Core.Icons.IconProvision;
 using Rdmp.UI.ChecksUI;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp;
 
 namespace Rdmp.Dicom.UI.CommandExecution.AtomicCommands
 {
@@ -19,7 +20,7 @@ namespace Rdmp.Dicom.UI.CommandExecution.AtomicCommands
         {
         }
 
-        public override Image GetImage(IIconProvider iconProvider)
+        public override Image<Rgba32> GetImage(IIconProvider iconProvider)
         {
             return iconProvider.GetImage(RDMPConcept.ColumnInfo,OverlayKind.Add);
         }
