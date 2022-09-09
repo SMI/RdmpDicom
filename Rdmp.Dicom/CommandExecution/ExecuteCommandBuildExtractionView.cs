@@ -45,16 +45,14 @@ namespace Rdmp.Dicom.CommandExecution
                 // when there are multiple series tables
                 if (ImageLevelTables.Count > 0)
                 {
-                    if(SeriesLevelTables.Count > 1)
+                    switch (SeriesLevelTables.Count)
                     {
-                        SetImpossible("Found multiple Series level tables and at least 1 Image level table");
-                        return;
-                    }
-
-                    if (SeriesLevelTables.Count == 0)
-                    {
-                        SetImpossible("Found image level table(s) but no Series level tables");
-                        return;
+                        case > 1:
+                            SetImpossible("Found multiple Series level tables and at least 1 Image level table");
+                            return;
+                        case 0:
+                            SetImpossible("Found image level table(s) but no Series level tables");
+                            return;
                     }
                 }
 
@@ -65,9 +63,9 @@ namespace Rdmp.Dicom.CommandExecution
 
                 EnsureAllHave("SeriesInstanceUID", ImageLevelTables.ToArray());
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
-                SetImpossible("Could not classify tables:" + ex.Message);
+                SetImpossible($"Could not classify tables:{ex.Message}");
             }
             CatalogueName = catalogueName;
         }
@@ -134,25 +132,14 @@ namespace Rdmp.Dicom.CommandExecution
         {
             var studyTables = fromTables.Where(t => HasPrimaryKey(t,name)).ToArray();
 
-            if (studyTables.Length == 1)
-            {
-                return studyTables[0];
-            }
-
-            return null;
+            return studyTables.Length == 1 ? studyTables[0] : null;
         }
 
         private bool HasPrimaryKey(TableInfo t, string name)
         {
             var pks = t.ColumnInfos.Where(c => c.IsPrimaryKey).ToArray();
-            if(pks.Length == 1)
-            {
-                // single primary key column but does it have the right name?
-                return pks[0].GetRuntimeName().Equals(name, StringComparison.CurrentCultureIgnoreCase);
-            }
-
-            // multiple primary keys
-            return false;
+            // multiple primary keys = false
+            return pks.Length == 1 && pks[0].GetRuntimeName().Equals(name, StringComparison.InvariantCultureIgnoreCase);
         }
 
         /// <summary>
@@ -162,14 +149,9 @@ namespace Rdmp.Dicom.CommandExecution
         /// <returns></returns>
         private TableInfo TryClassifyByName(string name, params TableInfo[] fromTables)
         {
-            var studyTables = fromTables.Where(t => t.GetRuntimeName().EndsWith(name, StringComparison.CurrentCultureIgnoreCase)).ToArray();
+            var studyTables = fromTables.Where(t => t.GetRuntimeName().EndsWith(name, StringComparison.InvariantCultureIgnoreCase)).ToArray();
 
-            if (studyTables.Length == 1)
-            {
-                return studyTables[0];
-            }
-
-            return null;
+            return studyTables.Length == 1 ? studyTables[0] : null;
         }
 
         public override void Execute()
@@ -226,7 +208,7 @@ namespace Rdmp.Dicom.CommandExecution
                 return;
             }
 
-            // we aren't the head of this join network thats for sure
+            // we aren't the head of this join network that's for sure
             subTable.IsPrimaryExtractionTable = false;
             subTable.SaveToDatabase();
 

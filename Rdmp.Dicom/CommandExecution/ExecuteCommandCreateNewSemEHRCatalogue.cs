@@ -3,7 +3,8 @@ using Rdmp.Core.Curation.Data;
 using Rdmp.Core.Icons.IconProvision;
 using Rdmp.Dicom.ExternalApis;
 using ReusableLibraryCode.Icons.IconProvision;
-using System.Drawing;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Rdmp.Dicom.CommandExecution
 {
@@ -14,7 +15,7 @@ namespace Rdmp.Dicom.CommandExecution
 
         }
 
-        public override Image GetImage(IIconProvider iconProvider)
+        public override Image<Rgba32> GetImage(IIconProvider iconProvider)
         {
             return iconProvider.GetImage(RDMPConcept.Catalogue,OverlayKind.Cloud);
         }
