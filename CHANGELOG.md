@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [6.0.1] 2022-09-27
+
+- Fixed issue running `ExecuteCommandCreateNewImagingDatasetSuite` when using a YamlRepository
+
+## [6.0.0] 2022-09-27
+
+- Updated to target RDMP version 8.0.0
+
 ## [5.0.12] 2022-09-09
 
 - Fixed API for new `Bitmap` substitute (see https://github.com/HicServices/RDMP/pull/1355)
@@ -374,7 +382,9 @@ Updated to be compatible with RDMP 4.2
 
 - Initial commit from private repo
 
-[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v5.0.12...develop
+[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v6.0.1...develop
+[6.0.1]: https://github.com/HicServices/RdmpDicom/compare/v6.0.0...v6.0.1
+[6.0.0]: https://github.com/HicServices/RdmpDicom/compare/v5.0.12...v6.0.0
 [5.0.12]: https://github.com/HicServices/RdmpDicom/compare/v5.0.11...v5.0.12
 [5.0.11]: https://github.com/HicServices/RdmpDicom/compare/v5.0.10...v5.0.11
 [5.0.10]: https://github.com/HicServices/RdmpDicom/compare/v5.0.9...v5.0.10
