@@ -316,7 +316,7 @@ namespace Rdmp.Dicom.CommandExecution
 
             var arg = args.Single(a => a.Name.Equals(property));
 
-            var mef = ((CatalogueRepository) arg.Repository).MEF;
+            var mef = ((ICatalogueRepository) arg.Repository).MEF;
             if (mef.GetType(value.GetType().FullName) == null)
                 throw new ArgumentException($"No type found for { value.GetType().FullName }");
 
