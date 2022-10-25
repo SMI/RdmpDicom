@@ -54,7 +54,7 @@ _Connects to the given PACS and writes CFind response for date range into output
 ```
 _Connects to the given PACS and fetches all images between the date ranges (requires firewall allows incomming connections from destination server)_
 
-## Troubleshooting
+# Troubleshooting
 Ensure that you have the Rdmp.Dicom plugin installed and that it has loaded correctly.  Search for it with `Ctrl+F` and enter "Plugin".  If it is not appearing at all then it is not installed.  If it appears under 'Old Plugins' then your Rdmp.Dicom version is out of date and you will need to get the latest version from GitHub Releases.
 
 Check the messages that appear when starting RDMP from the command line, e.g.:

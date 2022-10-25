@@ -9,8 +9,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Databases.Integration.yaml = Databases.Integration.yaml
 		.github\workflows\dotnet-core.yml = .github\workflows\dotnet-core.yml
 		Packages.md = Packages.md
-		rakeconfig.rb = rakeconfig.rb
-		rakefile.rb = rakefile.rb
 		Rdmp.Dicom.Library.nuspec = Rdmp.Dicom.Library.nuspec
 		Rdmp.Dicom.nuspec = Rdmp.Dicom.nuspec
 		README.md = README.md
@@ -33,7 +31,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentat
 		Documentation\Caching.md = Documentation\Caching.md
 		Documentation\DataExtraction.md = Documentation\DataExtraction.md
 		Documentation\DataLoad.md = Documentation\DataLoad.md
-		NlpPlugin.md = NlpPlugin.md
+		Documentation\NlpPlugin.md = Documentation\NlpPlugin.md
 	EndProjectSection
 EndProject
 Global
