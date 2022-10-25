@@ -33,6 +33,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentat
 		Documentation\Caching.md = Documentation\Caching.md
 		Documentation\DataExtraction.md = Documentation\DataExtraction.md
 		Documentation\DataLoad.md = Documentation\DataLoad.md
+		NlpPlugin.md = NlpPlugin.md
 	EndProjectSection
 EndProject
 Global
