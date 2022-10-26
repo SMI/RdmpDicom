@@ -37,6 +37,31 @@ nuget pack ./Rdmp.Dicom.nuspec -Properties Configuration=Release -IncludeReferen
 
 This will produce a nupkg file (e.g. Rdmp.Dicom.0.0.1.nupkg) which can be consumed by both the RDMP client and dot net core RDMP CLI.
 
+# Debugging
+Since it is annoying to have to upload a new version of the plugin to test changes you can instead publish directly to the RDMP bin directory.
+
+For example imagine that you have RDMP checked out and building in the following directory:
+```
+D:\Repos\RDMP\Application\ResearchDataManagementPlatform\bin\Debug\net6.0-windows
+```
+
+Build the RdmpDicom project to this directory:
+
+```
+cd D:\Repos\RdmpDicom
+dotnet publish -o D:\Repos\RDMP\Application\ResearchDataManagementPlatform\bin\Debug\net6.0-windows -r win-x64
+cd D:\Repos\RdmpDicom\Rdmp.Dicom.UI
+dotnet publish -o D:\Repos\RDMP\Application\ResearchDataManagementPlatform\bin\Debug\net6.0-windows -r win-x64
+```
+
+Now run RDMP:
+```
+D:\Repos\RDMP\Application\ResearchDataManagementPlatform\bin\Debug\net6.0-windows\ResearchDataManagementPlatform.exe
+```
+
+Attach the visual studio debugger with `Debug=>Attach To Process...`
+
+
 
 # New CLI Commands
 
