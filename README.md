@@ -18,6 +18,7 @@ Once installed the following functionality is available:
 - [Data Load](./Documentation/DataLoad.md)
 - [Data Extraction](./Documentation/DataExtraction.md)
 - [Caching (Fetching images from a DicomServer)](./Documentation/Caching.md)
+- [NLP Cohort Building Plugin](./Documentation/NlpPlugin.md)
 
 # Building
 
@@ -37,6 +38,31 @@ nuget pack ./Rdmp.Dicom.nuspec -Properties Configuration=Release -IncludeReferen
 
 This will produce a nupkg file (e.g. Rdmp.Dicom.0.0.1.nupkg) which can be consumed by both the RDMP client and dot net core RDMP CLI.
 
+# Debugging
+Since it is annoying to have to upload a new version of the plugin to test changes you can instead publish directly to the RDMP bin directory.
+
+For example imagine that you have RDMP checked out and building in the following directory:
+```
+D:\Repos\RDMP\Application\ResearchDataManagementPlatform\bin\Debug\net6.0-windows
+```
+
+Build the RdmpDicom project to this directory:
+
+```
+cd D:\Repos\RdmpDicom
+dotnet publish -o D:\Repos\RDMP\Application\ResearchDataManagementPlatform\bin\Debug\net6.0-windows -r win-x64
+cd D:\Repos\RdmpDicom\Rdmp.Dicom.UI
+dotnet publish -o D:\Repos\RDMP\Application\ResearchDataManagementPlatform\bin\Debug\net6.0-windows -r win-x64
+```
+
+Now run RDMP:
+```
+D:\Repos\RDMP\Application\ResearchDataManagementPlatform\bin\Debug\net6.0-windows\ResearchDataManagementPlatform.exe
+```
+
+Attach the visual studio debugger with `Debug=>Attach To Process...`
+
+
 
 # New CLI Commands
 
@@ -53,3 +79,15 @@ _Connects to the given PACS and writes CFind response for date range into output
 ```
 _Connects to the given PACS and fetches all images between the date ranges (requires firewall allows incomming connections from destination server)_
 
+# Troubleshooting
+Ensure that you have the Rdmp.Dicom plugin installed and that it has loaded correctly.  Search for it with `Ctrl+F` and enter "Plugin".  If it is not appearing at all then it is not installed.  If it appears under 'Old Plugins' then your Rdmp.Dicom version is out of date and you will need to get the latest version from GitHub Releases.
+
+Check the messages that appear when starting RDMP from the command line, e.g.:
+
+`./rdmp.exe listsupportedcommands --logstartup > out.txt`
+
+If using the RDMP Windows Client you can check that Rdmp.Dicom has loaded correctly by looking at the Types loaded.  Use the menu  `Diagnostics=>Plugins=>List All Types`.  This will generate a file with all the Types RDMP sees (~33,000) you should see all plugin Types here too, for example:
+
+- Rdmp.Dicom.ExternalApis.SemEHRApiCaller
+- Rdmp.Dicom.ExternalApis.SemEHRConfiguration
+- Rdmp.Dicom.ExternalApis.SemEHRResponse

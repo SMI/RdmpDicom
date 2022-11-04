@@ -14,7 +14,7 @@
         <copyright>Copyright 2018-2019</copyright>
         <dependencies>
           <dependency id="HIC.DicomTypeTranslation" version="4.0.1" />
-          <dependency id="HIC.RDMP.Plugin" version="8.0.0" />
+          <dependency id="HIC.RDMP.Plugin" version="8.0.5" />
           <dependency id="SharpCompress" version="0.32.2" />
 		  <dependency id="Terminal.Gui" version="1.8.2" />
         </dependencies>

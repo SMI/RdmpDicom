@@ -67,7 +67,7 @@ namespace Rdmp.Dicom.Cache.Pipeline
             var filepath = Path.Combine(workingDirectory.FullName, filename);
 
             var sw = new StreamWriter(filepath);
-            var writer = new CsvWriter(sw,new(CultureInfo.CurrentCulture));
+            var writer = new CsvWriter(sw,CultureInfo.CurrentCulture);
 
             WriteHeaders(writer);
 
