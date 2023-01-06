@@ -105,6 +105,7 @@ public class AmbiguousFilePath
                         $"Path provided '{entry.Key}' was not to either an entry in a zip file or to a dicom file");
                 _fullPaths.Remove(entry.Key);
                 yield return new ValueTuple<string,DicomFile>(entry.Value,DicomFile.Open(entry.Key));
+                continue;
             }
 
             var attempt = 0;
