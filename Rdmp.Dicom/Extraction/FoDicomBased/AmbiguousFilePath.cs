@@ -125,11 +125,11 @@ public class AmbiguousFilePath
                     var tryNames = new[]
                     {
                         $"{bits[0]}!{zipEntry.Name}",
-                        $"/{bits[0]}!{zipEntry.Name}",
-                        $"\\{bits[0]}!{zipEntry.Name}",
+                        $"{bits[0]}!/{zipEntry.Name}",
+                        $"{bits[0]}!\\{zipEntry.Name}",
                         $"{bits[0]}!{zipEntry.Name.Replace('/','\\')}",
-                        $"/{bits[0]}!{zipEntry.Name.Replace('/','\\')}",
-                        $"\\{bits[0]}!{zipEntry.Name.Replace('/','\\')}",
+                        $"{bits[0]}!/{zipEntry.Name.Replace('/','\\')}",
+                        $"{bits[0]}!\\{zipEntry.Name.Replace('/','\\')}",
                     };
                     foreach(var name in tryNames)
                         if (_fullPaths.TryGetValue(name,out var tag))
