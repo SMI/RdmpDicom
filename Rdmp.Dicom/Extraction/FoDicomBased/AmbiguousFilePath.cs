@@ -53,7 +53,7 @@ public class AmbiguousFilePath
         paths.Select(p => (Combine(root, p.Item1),p.Item2)).Each(p=>_fullPaths.Add(p.Item1,p.Item2));
     }
 
-    public AmbiguousFilePath(string fullPath, string fileName) : this(fullPath,new List<(string,string)> {(fileName,fileName)})
+    public AmbiguousFilePath(string fullPath, string fileName)
     {
         var absPath = Combine(fullPath, fileName);
         try
@@ -98,23 +98,23 @@ public class AmbiguousFilePath
     {
         foreach (var entry in _fullPaths)
         {
-            _fullPaths.Remove(entry.Key);
             if (!IsZipReference(entry.Key))
             {
                 if (!IsDicomReference(entry.Key))
                     throw new AmbiguousFilePathResolutionException(
                         $"Path provided '{entry.Key}' was not to either an entry in a zip file or to a dicom file");
+                _fullPaths.Remove(entry.Key);
                 yield return new ValueTuple<string,DicomFile>(entry.Value,DicomFile.Open(entry.Key));
             }
 
             var attempt = 0;
             // Can't 'yield return' directly from inside try/catch, so buffer:
             List<(string tag, DicomFile)> resultQueue = new();
+            var bits = entry.Key.Split('!');
             TryAgain:
             try
             {
                 var found = false;
-                var bits = entry.Key.Split('!');
                 using var zip = new LibArchiveReader(bits[0]);
                 foreach (var zipEntry in zip.Entries())
                 {
@@ -146,7 +146,7 @@ public class AmbiguousFilePath
                     throw;
                 listener?.OnNotify(this,
                     new(ProgressEventType.Warning,
-                        $"Sleeping for {retryDelay}ms because of encountering Exception : {ex.Message}", ex));
+                        $"Sleeping for {retryDelay}ms because of encountering Exception : {ex.Message} handling {bits[0]}", ex));
                 Thread.Sleep(retryDelay);
                 attempt++;
                 goto TryAgain;

@@ -34,9 +34,8 @@ public class FoDicomAnonymiserStandaloneTests
 
         var putter = new PutInRoot();
 
-        var blah=new List<(string, string)> { ("blah.dcm", "blah.dcm") };
         anon.ProcessFile(
-            new AmbiguousFilePath(inPath.FullName, blah).GetDataset().Single().Item2,
+            new AmbiguousFilePath(inPath.FullName, "blah.dcm").GetDataset().Single().Item2,
             new ThrowImmediatelyDataLoadEventListener(),
             new ZipPool(),
             "fffff",
