@@ -1,13 +1,12 @@
-namespace Rdmp.Dicom.PipelineComponents.DicomSources
+namespace Rdmp.Dicom.PipelineComponents.DicomSources;
+
+public enum DataTooWideHandling
 {
-    public enum DataTooWideHandling
-    {
-        None,
+    None,
 
-        TruncateAndWarn,
+    TruncateAndWarn,
 
-        MarkCorrupt,
+    MarkCorrupt,
 
-        ConvertToNullAndWarn
-    }
+    ConvertToNullAndWarn
 }

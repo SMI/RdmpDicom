@@ -13,55 +13,54 @@ using System.Threading;
 using Tests.Common;
 using DatabaseType = FAnsi.DatabaseType;
 
-namespace Rdmp.Dicom.Tests.Integration
+namespace Rdmp.Dicom.Tests.Integration;
+
+public class SemEHRApiCallerTests : DatabaseTests
 {
-    public class SemEHRApiCallerTests : DatabaseTests
+
+    public CachedAggregateConfigurationResultsManager SetupCache(DatabaseType dbType, out DiscoveredDatabase cacheDb)
     {
+        cacheDb = GetCleanedServer(dbType);
+        var creator = new MasterDatabaseScriptExecutor(cacheDb);
+        var patcher = new QueryCachingPatcher();
 
-        public CachedAggregateConfigurationResultsManager SetupCache(DatabaseType dbType, out DiscoveredDatabase cacheDb)
-        {
-            cacheDb = GetCleanedServer(dbType);
-            var creator = new MasterDatabaseScriptExecutor(cacheDb);
-            var patcher = new QueryCachingPatcher();
+        creator.CreateAndPatchDatabase(patcher, new AcceptAllCheckNotifier());
 
-            creator.CreateAndPatchDatabase(patcher, new AcceptAllCheckNotifier());
+        var eds = new ExternalDatabaseServer(CatalogueRepository, "cache", patcher);
+        eds.SetProperties(cacheDb);
 
-            var eds = new ExternalDatabaseServer(CatalogueRepository, "cache", patcher);
-            eds.SetProperties(cacheDb);
-
-            return new(eds);
-        }
+        return new(eds);
+    }
 
 
-        [RequiresSemEHR]
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        public void TalkToApi(DatabaseType dbType)
-        {
-            var cacheMgr = SetupCache(dbType, out DiscoveredDatabase cacheDb);
-            var caller = new SemEHRApiCaller();
+    [RequiresSemEHR]
+    [TestCase(DatabaseType.MicrosoftSQLServer)]
+    public void TalkToApi(DatabaseType dbType)
+    {
+        var cacheMgr = SetupCache(dbType, out var cacheDb);
+        var caller = new SemEHRApiCaller();
 
-            var cata = new Catalogue(CatalogueRepository, $"{SemEHRApiCaller.ApiPrefix}cata");
-            var cic = new CohortIdentificationConfiguration(CatalogueRepository, "my cic");
-            cic.CreateRootContainerIfNotExists();
+        var cata = new Catalogue(CatalogueRepository, $"{SemEHRApiCaller.ApiPrefix}cata");
+        var cic = new CohortIdentificationConfiguration(CatalogueRepository, "my cic");
+        cic.CreateRootContainerIfNotExists();
             
-            var ac = new AggregateConfiguration(CatalogueRepository, cata, "blah");
-            cic.RootCohortAggregateContainer.AddChild(ac,0);
+        var ac = new AggregateConfiguration(CatalogueRepository, cata, "blah");
+        cic.RootCohortAggregateContainer.AddChild(ac,0);
 
-            SemEHRConfiguration semEHRConfiguration = new SemEHRConfiguration()
-            {
-                Url = RequiresSemEHR.SemEHRTestUrl + "/api/search_anns/myQuery/",
-                Query = "C0205076",
-                ValidateServerCert = false
-            };
+        var semEHRConfiguration = new SemEHRConfiguration()
+        {
+            Url = RequiresSemEHR.SemEHRTestUrl + "/api/search_anns/myQuery/",
+            Query = "C0205076",
+            ValidateServerCert = false
+        };
 
-            caller.Run(ac, cacheMgr, CancellationToken.None, semEHRConfiguration);
+        caller.Run(ac, cacheMgr, CancellationToken.None, semEHRConfiguration);
 
-            var resultTable = cacheMgr.GetLatestResultsTableUnsafe(ac, AggregateOperation.IndexedExtractionIdentifierList);
+        var resultTable = cacheMgr.GetLatestResultsTableUnsafe(ac, AggregateOperation.IndexedExtractionIdentifierList);
 
-            Assert.IsNotNull(resultTable);
+        Assert.IsNotNull(resultTable);
 
-            var tbl = cacheDb.ExpectTable(resultTable.GetRuntimeName());
-            Assert.AreEqual(75, tbl.GetDataTable().Rows.Count);
-        }
+        var tbl = cacheDb.ExpectTable(resultTable.GetRuntimeName());
+        Assert.AreEqual(75, tbl.GetDataTable().Rows.Count);
     }
 }
