@@ -77,6 +77,7 @@ public class DicomFileCollectionSource : DicomSource, IPipelineRequirement<IDico
                 foreach (var df in file.GetDataset(RetryCount,RetryDelay,listener))
                 {
                     dt.TableName = QuerySyntaxHelper.MakeHeaderNameSensible(Path.GetFileNameWithoutExtension(df.Item1));
+                    Interlocked.Increment(ref _filesProcessedSoFar);
                     ProcessDataset(df.Item1,df.Item2.Dataset,dt,listener);
                 }
             }
