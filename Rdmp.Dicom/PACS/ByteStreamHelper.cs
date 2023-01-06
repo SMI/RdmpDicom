@@ -17,11 +17,7 @@ public static class ByteStreamHelper
         long length;
         try
         {
-            length = stream switch
-            {
-                SharpCompress.Compressors.Deflate.DeflateStream ds => (ds.InputBuffer.Length * 2),
-                _ => stream.Length
-            };
+            length = stream.Length;
         }
         catch
         {

@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using FellowOakDicom;
 using FAnsi.Discovery;
+using LibArchive.Net;
 using ReusableLibraryCode.Progress;
 using Rdmp.Dicom.PipelineComponents.DicomSources.Worklists;
 using Rdmp.Core.Curation.Data;
@@ -15,7 +16,6 @@ using Rdmp.Core.DataFlowPipeline.Requirements;
 using Rdmp.Core.DataFlowPipeline;
 using Rdmp.Dicom.Extraction.FoDicomBased;
 using Rdmp.Dicom.PACS;
-using SharpCompress.Archives;
 
 namespace Rdmp.Dicom.PipelineComponents.DicomSources;
 
@@ -108,18 +108,18 @@ public class DicomFileCollectionSource : DicomSource, IPipelineRequirement<IDico
         _listener.OnProgress(this, new("Processing Files", new(_filesProcessedSoFar, ProgressType.Records), _stopwatch.Elapsed));
     }
 
-    private void ProcessZipArchive(Stream arcStream, DataTable dt, string zipFileName, IDataLoadEventListener listener)
+    private void ProcessZipArchive(DataTable dt, string zipFileName, IDataLoadEventListener listener)
     {
         var skippedEntries = 0;
         var corruptedEntries = 0;
             
         try
         {
-            using var archive = ArchiveFactory.Open(arcStream);
-            foreach (var f in archive.Entries)
+            using var archive=new LibArchiveReader(zipFileName);
+            foreach (var f in archive.Entries())
             {
                 //it's not a dicom file!
-                if (!AmbiguousFilePath.IsDicomReference(f.Key))
+                if (!AmbiguousFilePath.IsDicomReference(f.Name))
                 {
                     skippedEntries++;
                     continue;
@@ -127,17 +127,17 @@ public class DicomFileCollectionSource : DicomSource, IPipelineRequirement<IDico
 
                 try
                 {
-                    var stream = new MemoryStream(ByteStreamHelper.ReadFully(f.OpenEntryStream()));
-                    ProcessFile(stream, dt, $"{zipFileName}!{f.Key}", listener);
+                    var stream = new MemoryStream(ByteStreamHelper.ReadFully(f.Stream));
+                    ProcessFile(stream, dt, $"{zipFileName}!{f.Name}", listener);
                 }
                 catch (Exception e)
                 {
                     corruptedEntries++;
-                    RecordError($"Zip entry '{f.Key}'", e);
+                    RecordError($"Zip entry '{f.Name}'", e);
 
                     if (corruptedEntries <= 3) continue;
                     listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning,
-                        $"Skipping the rest of '{f.Key}'", e));
+                        $"Skipping the rest of '{zipFileName}'", e));
                     break;
                 }
             }
@@ -215,12 +215,12 @@ public class DicomFileCollectionSource : DicomSource, IPipelineRequirement<IDico
         {
             try
             {
-                using var fs = file.OpenRead();
                 if (!AmbiguousFilePath.IsDicomReference(file.FullName))
                 {
-                    ProcessZipArchive(fs, dt, file.FullName, listener);
+                    ProcessZipArchive(dt, file.FullName, listener);
                     continue;
                 }
+                using var fs = file.OpenRead();
                 ProcessFile(fs,dt,file.FullName,listener);
             }
             catch (Exception e)
