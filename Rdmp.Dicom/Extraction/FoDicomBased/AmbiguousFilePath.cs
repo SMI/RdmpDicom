@@ -40,7 +40,7 @@ public class AmbiguousFilePath
 
 
 
-    public AmbiguousFilePath(string fullPath) : this(null,new[]{ (fullPath, (string)null)})
+    public AmbiguousFilePath(string fullPath) : this(null,fullPath)
     {
     }
 
