@@ -64,7 +64,7 @@ public class AmbiguousFilePath
             {
                 _fullPaths = new();
                 using var zip = new LibArchiveReader(absPath);
-                zip.Entries().Each(e => _fullPaths.Add($"{absPath}!{e.Name}",fileName));
+                zip.Entries().Each(e => _fullPaths.Add($"{absPath}!{e.Name}",$"{fileName}!{e.Name}"));
                 return;
             }
         }
