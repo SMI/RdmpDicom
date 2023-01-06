@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -137,7 +138,9 @@ public class AmbiguousFilePath
                                 found = true;
                             _fullPaths.Remove(name);
                             using var s = zipEntry.Stream;
-                            resultQueue.Add((tag,LoadStream(s)));
+                            var f = LoadStream(s);
+                            if (f!=null)
+                                resultQueue.Add((tag,f));
                         }
                 }
                 if (!found)
@@ -162,8 +165,16 @@ public class AmbiguousFilePath
 
     private static DicomFile LoadStream(Stream s)
     {
-        using var ms = new MemoryStream(ByteStreamHelper.ReadFully(s));
-        return DicomFile.Open(ms, FileReadOption.ReadAll);
+        try
+        {
+            using var ms = new MemoryStream(ByteStreamHelper.ReadFully(s));
+            return DicomFile.Open(ms, FileReadOption.ReadAll);
+        }
+        catch (DicomFileException e)
+        {
+            Debug.WriteLine($"DICOM file rejected: {e}");
+        }
+        return null;
     }
 
     public static bool IsDicomReference(string fullPath)
