@@ -61,7 +61,7 @@ public class AmbiguousFilePathTests
             s.Write(bytes, 0, bytes.Length);
         }
 
-        Assert.Throws<AmbiguousFilePathResolutionException>(() => new AmbiguousFilePath(Path.Combine(TestContext.CurrentContext.WorkDirectory, "omgzip.zip!lol")).GetDataset());
+        Assert.Throws<AmbiguousFilePathResolutionException>(() => new AmbiguousFilePath(Path.Combine(TestContext.CurrentContext.WorkDirectory, "omgzip.zip!lol")).GetDataset().ToList());
 
         var a = new AmbiguousFilePath(Path.Combine(TestContext.CurrentContext.WorkDirectory, "omgzip.zip!test.dcm"));
         var ds = a.GetDataset().Single().Item2;
@@ -122,7 +122,7 @@ public class AmbiguousFilePathTests
         Assert.IsNotNull(exists.GetDataset());
 
         var notexists = new AmbiguousFilePath($"{zipFile.FullName}!file2.dcm");
-        var ex = Assert.Throws<AmbiguousFilePathResolutionException>(()=>notexists.GetDataset());
+        var ex = Assert.Throws<AmbiguousFilePathResolutionException>(()=>notexists.GetDataset().ToList());
 
         StringAssert.Contains("Could not find path 'file2.dcm' within zip archive",ex.Message);
 
