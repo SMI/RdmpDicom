@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -6,184 +8,204 @@ using System.Threading;
 using FellowOakDicom;
 using Rdmp.Dicom.PACS;
 using ReusableLibraryCode.Progress;
-using SharpCompress.Archives;
+using LibArchive.Net;
+using Microsoft.IdentityModel.Tokens;
 
-namespace Rdmp.Dicom.Extraction.FoDicomBased
+namespace Rdmp.Dicom.Extraction.FoDicomBased;
+
+/// <summary>
+/// A file path that might be relative or absolute or might be a path to a file in a zip file.  Zip boundary is ! e.g. C:\MassiveImageArchive\DOI\Bah.zip!000000.dcm
+/// 
+/// The following are examples of paths we might get given
+/// 
+/// C:\MassiveImageArchive\DOI\Bah.zip!000000.dcm
+/// C:\MassiveImageArchive\DOI\Calc-Test_P_00202_RIGHT_CC\1.3.6.1.4.1.9590.100.1.2.32737473111512049914158289192624777641\1.3.6.1.4.1.9590.100.1.2.178738814511944891404623704932278059093\000000.dcm
+/// C:\MassiveImageArchive\DOI\Calc-Test_P_00077_LEFT_CC\1.3.6.1.4.1.9590.100.1.2.171237778213286314004831596800955774428\1.3.6.1.4.1.9590.100.1.2.120762895113344405411143779050723940544\000000.dcm
+/// \Mass-Training_P_01983_LEFT_MLO_1\1.3.6.1.4.1.9590.100.1.2.315974405612087965807898763551341558217\1.3.6.1.4.1.9590.100.1.2.35571788212802531401890896782882200908\000000.dcm
+///
+///
+/// Linux paths must follow the following rules:
+///
+/// Absolute path:
+///     Anything starting with '/'
+///
+/// Relative path:
+///     Anything not starting with '/' e.g. "./series1/1.dcm"
+/// 
+/// </summary>
+public class AmbiguousFilePath
 {
-    /// <summary>
-    /// A file path that might be relative or absolute or might be a path to a file in a zip file.  Zip boundary is ! e.g. C:\MassiveImageArchive\DOI\Bah.zip!000000.dcm
-    /// 
-    /// The following are examples of paths we might get given
-    /// 
-    /// C:\MassiveImageArchive\DOI\Bah.zip!000000.dcm
-    /// C:\MassiveImageArchive\DOI\Calc-Test_P_00202_RIGHT_CC\1.3.6.1.4.1.9590.100.1.2.32737473111512049914158289192624777641\1.3.6.1.4.1.9590.100.1.2.178738814511944891404623704932278059093\000000.dcm
-    /// C:\MassiveImageArchive\DOI\Calc-Test_P_00077_LEFT_CC\1.3.6.1.4.1.9590.100.1.2.171237778213286314004831596800955774428\1.3.6.1.4.1.9590.100.1.2.120762895113344405411143779050723940544\000000.dcm
-    /// \Mass-Training_P_01983_LEFT_MLO_1\1.3.6.1.4.1.9590.100.1.2.315974405612087965807898763551341558217\1.3.6.1.4.1.9590.100.1.2.35571788212802531401890896782882200908\000000.dcm
-    ///
-    ///
-    /// Linux paths must follow the following rules:
-    ///
-    /// Absolute path:
-    ///     Anything starting with '/'
-    ///
-    /// Relative path:
-    ///     Anything not starting with '/' e.g. "./series1/1.dcm"
-    /// 
-    /// </summary>
-    public class AmbiguousFilePath
+
+    private readonly SortedDictionary<string, string> _fullPaths;
+    private static readonly Regex RegexDigitsAndDotsOnly = new(@"^[0-9\.]*$");
+
+
+
+    public AmbiguousFilePath(string fullPath) : this(null,fullPath)
     {
-        public string FullPath { get; private set; }
-        
-        private static readonly Regex _regexDigitsAndDotsOnly = new(@"^[0-9\.]*$");
+    }
 
+    public AmbiguousFilePath(string root, IEnumerable<(string,string)> paths)
+    {
+        //if root is provided but is not absolute
+        if(!string.IsNullOrWhiteSpace(root) && !IsAbsolute(root))
+            throw new ArgumentException($"Specified root path '{root}' was not IsAbsolute", nameof(root));
 
+        _fullPaths = new SortedDictionary<string, string>();
+        paths.Select(p => (Combine(root, p.Item1),p.Item2)).Each(p=>_fullPaths.Add(p.Item1,p.Item2));
+    }
 
-        public AmbiguousFilePath(string fullPath)
+    public AmbiguousFilePath(string fullPath, string fileName)
+    {
+        var absPath = Combine(fullPath, fileName);
+        try
         {
-            if(!IsAbsolute(fullPath))
-                throw new ArgumentException(
-                    $"Relative path was encountered without specifying a root, if you want to process relative paths you will need to provide a root path too.  fullPath was '{fullPath}'",nameof(fullPath));
-
-            FullPath = fullPath;
-        }
-
-        public AmbiguousFilePath(string root, string path)
-        {
-            //if root is provided but is not absolute
-            if(!string.IsNullOrWhiteSpace(root) && !IsAbsolute(root))
-                throw new ArgumentException($"Specified root path '{root}' was not IsAbsolute", nameof(root));
-
-            FullPath = Combine(root, path);
-        }
-
-        private string Combine(string root, string path)
-        {
-            if (IsAbsolute(path))
-                return path;
-
-            if (!IsZipReference(path))
-                return Path.Combine(root,path);
-            
-            var bits = path.Split('!');
-            return $"{Path.Combine(root, bits[0])}!{bits[1]}";
-        }
-
-        /// <summary>
-        /// Reads the dataset at the referenced path.  Supports limited retries if your file system is unstable
-        /// </summary>
-        /// <param name="retryCount">Number of times to attempt the read again when encountering an Exception</param>
-        /// <param name="retryDelay">Number of milliseconds to wait after encountering an Exception reading before trying</param>
-        /// <param name="pool"></param>
-        /// <param name="listener"></param>
-        /// <returns></returns>
-        public DicomFile GetDataset(int retryCount = 0, int retryDelay=100, ZipPool pool = null, IDataLoadEventListener listener = null)
-        {
-            if (!IsZipReference(FullPath))
+            // If not a direct zip reference already, try to read as a whole zip:
+            if (!absPath.Contains('!'))
             {
-                if (!IsDicomReference(FullPath))
-                    throw new AmbiguousFilePathResolutionException(
-                        $"Path provided '{FullPath}' was not to either an entry in a zip file or to a dicom file");
+                _fullPaths = new();
+                using var zip = new LibArchiveReader(absPath);
+                zip.Entries().Each(e => _fullPaths.Add($"{absPath}!{e.Name}",$"{fileName}!{e.Name}"));
+                return;
+            }
+        }
+        catch
+        {
+            // Not a zip so ignore, treat as single file
+        }
+        _fullPaths = new() { { absPath, fileName } };
+    }
 
-                return DicomFile.Open(FullPath);
+    private string Combine(string root, string path)
+    {
+        if (IsAbsolute(path))
+            return path;
+
+        if (!IsZipReference(path))
+            return Path.Combine(root,path);
+            
+        var bits = path.Split('!');
+        return $"{Path.Combine(root, bits[0])}!{bits[1]}";
+    }
+
+
+    /// <summary>
+    /// Reads the dataset at the referenced path.  Supports limited retries if your file system is unstable
+    /// </summary>
+    /// <param name="retryCount">Number of times to attempt the read again when encountering an Exception</param>
+    /// <param name="retryDelay">Number of milliseconds to wait after encountering an Exception reading before trying</param>
+    /// <param name="listener"></param>
+    /// <returns></returns>
+    public IEnumerable<ValueTuple<string,DicomFile>> GetDataset(int retryCount = 0, int retryDelay=100, IDataLoadEventListener listener = null)
+    {
+        while (!_fullPaths.IsNullOrEmpty())
+        {
+            var entry = _fullPaths.First();
+            if (!IsZipReference(entry.Key))
+            {
+                if (!IsDicomReference(entry.Key))
+                    throw new AmbiguousFilePathResolutionException(
+                        $"Path provided '{entry.Key}' was not to either an entry in a zip file or to a dicom file");
+                _fullPaths.Remove(entry.Key);
+                yield return new ValueTuple<string,DicomFile>(entry.Value,DicomFile.Open(entry.Key));
+                continue;
             }
 
-            int attempt = 0;
-
+            var attempt = 0;
+            // Can't 'yield return' directly from inside try/catch, so buffer:
+            List<(string tag, DicomFile)> resultQueue = new();
+            var bits = entry.Key.Split('!');
             TryAgain:
-
-            var bits = FullPath.Split('!');
-            IArchive zip = null;
             try
             {
-                zip = pool != null ? pool.OpenRead(bits[0]) : ArchiveFactory.Open(bits[0]);
-
-                var entry = zip.GetEntry(bits[1]);
-
-                if (entry == null)
+                var found = false;
+                using var zip = new LibArchiveReader(bits[0]);
+                foreach (var zipEntry in zip.Entries())
                 {
-                    //Maybe user has formatted it dodgy
-                    //e.g. \2015\3\18\2.25.177481563701402448825228719253578992342.dcm
-                    string adjusted = bits[1].TrimStart('\\','/');
-                    
-                    //if that doesn't work
-                    if ((entry = zip.GetEntry(adjusted)) == null)
+                    var tryNames = new[]
                     {
-                        //try normalizing the slashes
-                        adjusted = adjusted.Replace('\\','/');
-
-                        //nope we just cannot get a legit path in this zip
-                        if ((entry = zip.GetEntry(adjusted)) == null)
-                            throw new AmbiguousFilePathResolutionException($"Could not find path '{bits[1]}' within zip archive '{bits[0]}'");
-                    }
-
-                    //we fixed it to something that actually exists so update our state that we don't make the same mistake again
-                    FullPath = $"{bits[0]}!{adjusted}";
+                        $"{bits[0]}!{zipEntry.Name}",
+                        $"{bits[0]}!/{zipEntry.Name}",
+                        $"{bits[0]}!\\{zipEntry.Name}",
+                        $"{bits[0]}!{zipEntry.Name.Replace('/','\\')}",
+                        $"{bits[0]}!/{zipEntry.Name.Replace('/','\\')}",
+                        $"{bits[0]}!\\{zipEntry.Name.Replace('/','\\')}",
+                    };
+                    foreach(var name in tryNames)
+                        if (_fullPaths.TryGetValue(name,out var tag))
+                        {
+                            if (name.Equals(entry.Key))
+                                found = true;
+                            _fullPaths.Remove(name);
+                            using var s = zipEntry.Stream;
+                            var f = LoadStream(s);
+                            if (f!=null)
+                                resultQueue.Add((tag,f));
+                        }
                 }
-                        
-                if (!IsDicomReference(bits[1]))
-                    throw new AmbiguousFilePathResolutionException(
-                        $"Path provided '{FullPath}' was to a zip file but not to a dicom file entry");
-
-                var buffer = ByteStreamHelper.ReadFully(entry.OpenEntryStream());
-
-                //todo: when GH-627 goes live we can use FileReadOption  https://github.com/fo-dicom/fo-dicom/blob/GH-627/DICOM/DicomFile.cs
-                //using (var memoryStream = new MemoryStream(buffer))
-                var memoryStream = new MemoryStream(buffer);
-
-                return DicomFile.Open(memoryStream);
+                if (!found)
+                    throw new AmbiguousFilePathResolutionException($"Could not find path '{bits[1]}' within zip archive '{bits[0]}'");
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                if (attempt < retryCount)
-                {
-                    listener?.OnNotify(this, new(ProgressEventType.Warning, $"Sleeping for {retryDelay}ms because of encountering Exception : {ex.Message}", ex));
-
-                    Thread.Sleep(retryDelay);
-                    attempt++;
-                    goto TryAgain;
-                }
-                else 
+                if (attempt >= retryCount)
                     throw;
+                listener?.OnNotify(this,
+                    new(ProgressEventType.Warning,
+                        $"Sleeping for {retryDelay}ms because of encountering Exception : {ex.Message} handling {bits[0]}", ex));
+                Thread.Sleep(retryDelay);
+                attempt++;
+                goto TryAgain;
             }
-            finally
-            {
-                if(pool == null)
-                {
-                    zip?.Dispose();
-                }
-            }
-        }
 
-        public static bool IsDicomReference(string fullPath)
+            foreach (var r in resultQueue)
+                yield return r;
+        }
+    }
+
+    private static DicomFile LoadStream(Stream s)
+    {
+        try
         {
-            if(string.IsNullOrWhiteSpace(fullPath))
-                return false;
-
-            var extension = Path.GetExtension(fullPath);
-
-
-            return 
-                string.IsNullOrWhiteSpace(extension) || 
-
-                // The following is a valid dicom file name but looks like it has an extension .5323
-                // 123.3221.23123.5325
-                _regexDigitsAndDotsOnly.IsMatch(extension) ||
-                extension.Equals(".dcm", StringComparison.CurrentCultureIgnoreCase);
+            using var ms = new MemoryStream(ByteStreamHelper.ReadFully(s));
+            return DicomFile.Open(ms, FileReadOption.ReadAll);
         }
-
-        public static bool IsZipReference(string path)
+        catch (DicomFileException e)
         {
-            return path.Count(c => c == '!') switch
-            {
-                0 => false,
-                1 => true,
-                _ => throw new($"Path '{path}' had too many exclamation marks, expected 0 or 1")
-            };
+            Debug.WriteLine($"DICOM file rejected: {e}");
         }
+        return null;
+    }
 
-        private bool IsAbsolute(string path)
+    public static bool IsDicomReference(string fullPath)
+    {
+        if(string.IsNullOrWhiteSpace(fullPath))
+            return false;
+
+        var extension = Path.GetExtension(fullPath);
+
+
+        return 
+            string.IsNullOrWhiteSpace(extension) || 
+
+            // The following is a valid dicom file name but looks like it has an extension .5323
+            // 123.3221.23123.5325
+            RegexDigitsAndDotsOnly.IsMatch(extension) ||
+            extension.Equals(".dcm", StringComparison.CurrentCultureIgnoreCase);
+    }
+
+    public static bool IsZipReference(string path)
+    {
+        return path.Count(c => c == '!') switch
         {
-            return !string.IsNullOrWhiteSpace(path) && Path.IsPathRooted(path);
-        }
+            0 => false,
+            1 => true,
+            _ => throw new($"Path '{path}' had too many exclamation marks, expected 0 or 1")
+        };
+    }
+
+    private bool IsAbsolute(string path)
+    {
+        return !string.IsNullOrWhiteSpace(path) && Path.IsPathRooted(path);
     }
 }
