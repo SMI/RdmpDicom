@@ -171,7 +171,7 @@ public class PrimaryKeyCollisionIsolationMutilation:IPluginMutilateDataTables
                 _fromSql = _fromSql.Replace(tableInfo.GetFullyQualifiedName(), GetRAWTableNameFullyQualified(tableInfo));
 
         if (_joins.Any(j=>j.GetSupplementalJoins().Any()))
-            throw new("Supplemental (2 column) joins are not supported when resolving multi table primary key collisions");
+            throw new($"Supplemental (2 column) joins are not supported when resolving multi table primary key collisions: problem join is {_joins.Select(j=>j.GetSupplementalJoins().FirstOrDefault())}");
 
         //order the tables in order of dependency
         List<TableInfo> tables = new();
