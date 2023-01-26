@@ -313,14 +313,14 @@ public class PrimaryKeyCollisionIsolationMutilation:IPluginMutilateDataTables
                     var result = r[0];
 
                     if(result == DBNull.Value || result == null)
-                        throw new($"Primary key value not found for {d} foreign Key was null");
+                        throw new($"Primary key value not found via '{ sqlSelect }' for {d} foreign Key was null");
 
                     toReturn.Add(result);
                     readOne = true;
                 }
 
                 if(!readOne)
-                    throw new($"Primary key value not found for {d}");
+                    throw new($"Primary key value not found for {d} using '{ sqlSelect }'");
             }
 
         }
