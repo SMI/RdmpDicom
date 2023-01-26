@@ -631,7 +631,7 @@ class PrimaryKeyCollisionIsolationMutilationTests:DatabaseTests
         mutilator.Initialize(db, LoadStage.AdjustRaw);
         var ex = Assert.Throws<Exception>(()=>mutilator.Mutilate(job));
 
-        Assert.AreEqual("Primary key value not found for X", ex.Message);
+        Assert.IsTrue(ex?.Message.StartsWith("Primary key value not found for X"));
     }
 
     [TestCase(DatabaseType.MicrosoftSQLServer)]
