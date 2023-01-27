@@ -266,8 +266,6 @@ public class PrimaryKeyCollisionIsolationMutilation:IPluginMutilateDataTables
 
         foreach (var t in TablesToIsolate.Reverse())
             DeleteRows(t, deleteOnColumnName, deleteValues, con);
-
-        con.Close();
     }
 
     /// <summary>
