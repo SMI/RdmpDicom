@@ -223,26 +223,26 @@ public class PrimaryKeyCollisionIsolationMutilation:IPluginMutilateDataTables
 
         BuildJoinOrder(false);
             
+        using var con = _raw.Server.GetConnection();
+        con.Open();
+
         foreach (var tableInfo in TablesToIsolate)
         {
             var pkCol = tableInfo.ColumnInfos.Single(c => c.IsPrimaryKey);
 
-            var allCollisions = DetectCollisions(pkCol, tableInfo).Distinct().ToArray();
+            var allCollisions = DetectCollisions(con,pkCol, tableInfo).Distinct().ToArray();
 
             if (!allCollisions.Any()) continue;
-            _job.OnNotify(this,new(ProgressEventType.Information, $"Found duplication in column '{pkCol}', duplicate values were '{string.Join(",",allCollisions)}'"));
-            MigrateRecords(pkCol, allCollisions);
+            _job.OnNotify(this,new(ProgressEventType.Information, $"Found duplication in column '{pkCol}' of '{tableInfo.Name}', duplicate values were '{string.Join(",",allCollisions)}'"));
+            MigrateRecords(con, pkCol, allCollisions);
         }
 
         return ExitCodeType.Success;
     }
 
-    private void MigrateRecords(ColumnInfo deleteOn,object[] deleteValues)
+    private void MigrateRecords(DbConnection con,ColumnInfo deleteOn,object[] deleteValues)
     {
         var deleteOnColumnName = GetRAWColumnNameFullyQualified(deleteOn);
-
-        using var con = _raw.Server.GetConnection();
-        con.Open();
 
         //if we are deleting on a child table we need to look up the primary table primary key (e.g. StudyInstanceUID) we should then migrate that data instead (for all tables)
         if (!deleteOn.Equals(_primaryTablePk))
@@ -450,7 +450,7 @@ public class PrimaryKeyCollisionIsolationMutilation:IPluginMutilateDataTables
         return $"DELETE FROM {delTable} {usingsStr} WHERE {sb} {deleteOnColumnName} = @val";
     }
 
-    private IEnumerable<object> DetectCollisions(ColumnInfo pkCol,TableInfo tableInfo)
+    private IEnumerable<object> DetectCollisions(DbConnection con,ColumnInfo pkCol,TableInfo tableInfo)
     {
         var pkColName = pkCol.GetRuntimeName(LoadStage.AdjustRaw);
 
@@ -462,8 +462,6 @@ public class PrimaryKeyCollisionIsolationMutilation:IPluginMutilateDataTables
             tableNameFullyQualified
         );
 
-        using var con = _raw.Server.GetConnection();
-        con.Open();
         using var cmd = _raw.Server.GetCommand(primaryKeysColliding, con);
         cmd.CommandTimeout = TimeoutInSeconds;
 

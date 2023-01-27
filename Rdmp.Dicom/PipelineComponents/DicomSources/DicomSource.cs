@@ -282,7 +282,7 @@ public abstract class DicomSource : IPluginDataFlowSource<DataTable>
 
         lock (_oDataTableLock)
         {
-            var row = dt.Rows.Add();
+            var row = dt.NewRow();
             row[FilenameField] = filename;
 
             if (otherValuesToStoreInRow != null)
@@ -295,6 +295,8 @@ public abstract class DicomSource : IPluginDataFlowSource<DataTable>
 
             foreach (var (key, value) in rowValues)
                 Add(dt, row, key, value);
+            
+            dt.Rows.Add(row);
         }
     }
 
@@ -302,16 +304,14 @@ public abstract class DicomSource : IPluginDataFlowSource<DataTable>
     {
 
         //if there is a whitelist 
-        if (TagWhitelist != null)
-            if (!TagWhitelist.IsMatch(tag.DictionaryEntry.Keyword)) //and the current header isn't matched by it
-                return true;
+        if (TagWhitelist?.IsMatch(tag.DictionaryEntry.Keyword) == false) //and the current header isn't matched by it
+            return true;
 
         //if there is a blacklist
-        if (TagBlacklist != null)
-            if (TagBlacklist.IsMatch(tag.DictionaryEntry.Keyword)) //and the current header matches the blacklist 
-                return true; //skip it
+        if (TagBlacklist?.IsMatch(tag.DictionaryEntry.Keyword) == true) //and the current header matches the blacklist 
+            return true; //skip it
 
-        //if there is an explict mapping to follow
+        //if there is an explicit mapping to follow
         if (FieldMapTableIfAny == null && UseAllTableInfoInLoadAsFieldMap == null) return false;
         //if we don't have the tag in our schema ignore it
         return !dt.Columns.Contains(tag.DictionaryEntry.Keyword);
