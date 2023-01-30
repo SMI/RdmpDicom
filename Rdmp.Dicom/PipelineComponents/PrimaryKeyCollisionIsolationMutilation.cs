@@ -51,7 +51,7 @@ public class PrimaryKeyCollisionIsolationMutilation:IPluginMutilateDataTables
     public void Check(ICheckNotifier notifier)
     {
         //if there is only one or no tables that's fine (mandatory will check for null itself)
-        if (TablesToIsolate == null)
+        if (TablesToIsolate == null || TablesToIsolate.Length==0)
             throw new("No tables have been selected");
              
         //make sure there is only one primary key per table and that it's a string
