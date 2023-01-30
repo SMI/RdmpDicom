@@ -4,6 +4,7 @@
     <AssemblyName>Rdmp.Dicom.Tests</AssemblyName>
     <TargetFramework>net6.0</TargetFramework>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <DebugType>embedded</DebugType>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="TestData\anonResult.xml" />
