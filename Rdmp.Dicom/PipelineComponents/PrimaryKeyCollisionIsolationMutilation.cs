@@ -79,7 +79,7 @@ public class PrimaryKeyCollisionIsolationMutilation:IPluginMutilateDataTables
         }
         catch (Exception e)
         {
-            notifier.OnCheckPerformed(new("Failed to build join order", CheckResult.Fail, e));
+            notifier.OnCheckPerformed(new($"Failed to build join order for {string.Join(",",TablesToIsolate.Select(t=>t.Name))}", CheckResult.Fail, e));
             return;
         }
 
