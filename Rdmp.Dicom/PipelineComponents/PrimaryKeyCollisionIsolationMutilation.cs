@@ -231,10 +231,14 @@ public class PrimaryKeyCollisionIsolationMutilation:IPluginMutilateDataTables
             var pkCol = tableInfo.ColumnInfos.Single(c => c.IsPrimaryKey);
 
             var allCollisions = DetectCollisions(con,pkCol, tableInfo).Distinct().ToArray();
+            if (con.State == ConnectionState.Closed)
+                throw new ApplicationException($"Connection closed after DetectCollisions call");
 
             if (!allCollisions.Any()) continue;
             _job.OnNotify(this,new(ProgressEventType.Information, $"Found duplication in column '{pkCol}' of '{tableInfo.Name}', duplicate values were '{string.Join(",",allCollisions)}'"));
             MigrateRecords(con, pkCol, allCollisions);
+            if (con.State == ConnectionState.Closed)
+                throw new ApplicationException($"Connection closed after MigrateRecords call");
         }
 
         return ExitCodeType.Success;
@@ -242,6 +246,9 @@ public class PrimaryKeyCollisionIsolationMutilation:IPluginMutilateDataTables
 
     private void MigrateRecords(DbConnection con,ColumnInfo deleteOn,object[] deleteValues)
     {
+        if (con.State != ConnectionState.Open)
+            throw new ApplicationException("Connection closed on entry to MigrateRecords");
+
         var deleteOnColumnName = GetRAWColumnNameFullyQualified(deleteOn);
 
         //if we are deleting on a child table we need to look up the primary table primary key (e.g. StudyInstanceUID) we should then migrate that data instead (for all tables)
@@ -287,6 +294,9 @@ public class PrimaryKeyCollisionIsolationMutilation:IPluginMutilateDataTables
     /// <returns></returns>
     private object[] GetPrimaryKeyValuesFor(ColumnInfo deleteOn, object[] deleteValue, DbConnection con)
     {
+        if (con.State != ConnectionState.Open)
+            throw new ApplicationException("Connection closed on entry to GetPrimaryKeyValuesFor");
+
         var deleteOnColumnName = GetRAWColumnNameFullyQualified(deleteOn);
         var pkColumnName = GetRAWColumnNameFullyQualified(_primaryTablePk);
 
