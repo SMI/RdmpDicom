@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.0.0] 2023-02-08
+
+- Replace SharpCompress 0.32.2 with LibArchive.net 0.1.3 due to LZMA bugs
+- Bump HIC.DicomTypeTranslation from 4.0.1 to 4.0.2
+- Bump HIC.RDMP.Plugin from 8.0.5 to 8.0.7
+- Bump Terminal.Gui from 1.8.2 to 1.9.0
+
 ## [6.0.2] 2022-11-04
 
 - Documentation updates
@@ -388,7 +395,8 @@ Updated to be compatible with RDMP 4.2
 
 - Initial commit from private repo
 
-[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v6.0.2...develop
+[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v7.0.0...develop
+[7.0.0]: https://github.com/HicServices/RdmpDicom/compare/v6.0.2...v7.0.0
 [6.0.2]: https://github.com/HicServices/RdmpDicom/compare/v6.0.1...v6.0.2
 [6.0.1]: https://github.com/HicServices/RdmpDicom/compare/v6.0.0...v6.0.1
 [6.0.0]: https://github.com/HicServices/RdmpDicom/compare/v5.0.12...v6.0.0
