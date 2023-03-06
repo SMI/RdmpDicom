@@ -2,8 +2,6 @@ using System;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
-using FellowOakDicom.Imaging.Codec;
-using FellowOakDicom.Log;
 using FellowOakDicom.Network;
 using FellowOakDicom.Network.Client;
 using ReusableLibraryCode.Progress;

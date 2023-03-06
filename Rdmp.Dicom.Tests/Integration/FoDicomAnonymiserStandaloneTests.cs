@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using Rdmp.Dicom.Extraction.FoDicomBased;
 using Rdmp.Dicom.Extraction.FoDicomBased.DirectoryDecisions;
 using ReusableLibraryCode.Progress;

@@ -1,11 +1,8 @@
 ﻿using System;
-using System.IO;
 using System.Net.Http;
-using System.Text;
 using NUnit.Framework;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
-using YamlDotNet.Serialization;
 using System.Threading;
 using System.Net;
 

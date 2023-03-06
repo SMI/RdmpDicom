@@ -12,7 +12,6 @@ using Rdmp.Core.Caching.Requests;
 using Rdmp.Core.DataFlowPipeline;
 using Rdmp.Core.Curation;
 using System.Collections.Concurrent;
-using FellowOakDicom.Imaging.Codec;
 using FellowOakDicom.Log;
 using FellowOakDicom.Network.Client;
 

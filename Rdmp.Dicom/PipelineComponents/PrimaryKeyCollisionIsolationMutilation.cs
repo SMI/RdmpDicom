@@ -12,7 +12,6 @@ using Rdmp.Core.Curation.Data;
 using Rdmp.Core.Curation.Data.DataLoad;
 using Rdmp.Core.Curation.Data.EntityNaming;
 using Rdmp.Core.DataLoad;
-using Rdmp.Core.DataLoad.Engine.DatabaseManagement.EntityNaming;
 using Rdmp.Core.DataLoad.Engine.DatabaseManagement.Operations;
 using Rdmp.Core.DataLoad.Engine.Job;
 using Rdmp.Core.DataLoad.Engine.Mutilators;

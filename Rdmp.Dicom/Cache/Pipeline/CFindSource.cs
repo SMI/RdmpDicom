@@ -7,13 +7,9 @@ using Rdmp.Core.DataFlowPipeline;
 using Rdmp.Core.Curation;
 using CsvHelper;
 using System.IO;
-using CsvHelper.Configuration;
 using System.Globalization;
 using System.Threading;
 using DicomTypeTranslation;
-using System;
-using FellowOakDicom.Imaging.Codec;
-using FellowOakDicom.Log;
 using FellowOakDicom.Network.Client;
 
 namespace Rdmp.Dicom.Cache.Pipeline;

@@ -4,7 +4,6 @@ using NUnit.Framework;
 using Rdmp.Core.CommandExecution.AtomicCommands;
 using Rdmp.Core.CommandLine.Interactive;
 using Rdmp.Core.Curation;
-using Rdmp.Core.Curation.Data;
 using Rdmp.Core.DataLoad.Triggers.Implementations;
 using Rdmp.Dicom.CommandExecution;
 using ReusableLibraryCode.Checks;

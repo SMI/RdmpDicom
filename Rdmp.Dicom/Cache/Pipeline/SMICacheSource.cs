@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using FellowOakDicom;
 using FellowOakDicom.Network;
-using MapsDirectlyToDatabaseTable;
 using ReusableLibraryCode.Checks;
 using ReusableLibraryCode.DataAccess;
 using ReusableLibraryCode.Progress;

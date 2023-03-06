@@ -8,7 +8,6 @@ using Rdmp.Core.Databases;
 using Rdmp.Core.QueryCaching.Aggregation;
 using Rdmp.Dicom.ExternalApis;
 using ReusableLibraryCode.Checks;
-using System;
 using System.Threading;
 using Tests.Common;
 using DatabaseType = FAnsi.DatabaseType;

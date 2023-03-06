@@ -14,7 +14,6 @@ using Rdmp.Core.Curation.Data;
 using Rdmp.Core.DataFlowPipeline;
 using Rdmp.Core.Curation.Data.DataLoad;
 using ReusableLibraryCode.Annotations;
-using TypeGuesser;
 
 namespace Rdmp.Dicom.PipelineComponents.DicomSources;
 

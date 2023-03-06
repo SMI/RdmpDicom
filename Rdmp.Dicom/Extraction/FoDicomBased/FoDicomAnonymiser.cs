@@ -16,7 +16,6 @@ using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using Rdmp.Core.QueryBuilding;
-using TB.ComponentModel;
 
 namespace Rdmp.Dicom.Extraction.FoDicomBased;
 

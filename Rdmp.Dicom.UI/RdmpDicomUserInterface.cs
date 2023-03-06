@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Drawing;
 using ReusableLibraryCode.Icons.IconProvision;
 using Rdmp.Dicom.UI.CommandExecution.AtomicCommands;
 using Rdmp.UI.ItemActivation;
