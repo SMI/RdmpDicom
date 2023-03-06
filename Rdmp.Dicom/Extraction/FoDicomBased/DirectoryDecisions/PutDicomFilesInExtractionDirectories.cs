@@ -32,8 +32,8 @@ public abstract class PutDicomFilesInExtractionDirectories : IPutDicomFilesInExt
             
         if(!path.EndsWith(".dcm"))
         {
-            path = path + ".dcm";
-        }            
+            path += ".dcm";
+        }
 
         var outPath = new FileInfo(path);
         new DicomFile(dicomDataset).Save(outPath.FullName);
