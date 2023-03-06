@@ -414,13 +414,9 @@ public class FoDicomAnonymiser: IPluginDataFlowComponent<DataTable>,IPipelineReq
         }
             
 
+        ArgumentNullException.ThrowIfNull(UIDMappingServer);
         lock(CreateServersOneAtATime)
         {
-            if (UIDMappingServer == null)
-            {
-                throw new($"{nameof(UIDMappingServer)} not set, set it existing UID mapping server or to an empty database to create a new one");
-            }
-
             var patcher = new SMIDatabasePatcher();
 
             if (UIDMappingServer.WasCreatedBy(patcher)) return;

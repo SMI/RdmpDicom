@@ -8,8 +8,7 @@ public abstract class PutDicomFilesInExtractionDirectories : IPutDicomFilesInExt
 {
     public string WriteOutDataset(DirectoryInfo outputDirectory, string releaseIdentifier, DicomDataset dicomDataset)
     {
-        if(dicomDataset == null)
-            throw new ArgumentNullException(nameof(dicomDataset));
+        ArgumentNullException.ThrowIfNull(dicomDataset);
 
         if(!outputDirectory.Exists)
             outputDirectory.Create();
