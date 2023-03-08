@@ -73,7 +73,7 @@ public class SMICacheLayout : CacheLayout
     {
         // removes all non-archive files from the download directory
         var downloadDirectory = GetLoadCacheDirectory(listener);
-        var nonArchiveFiles = downloadDirectory.EnumerateFiles("*").Where(info => info.Extension.ToLower() != ("." + ArchiveType.ToString().ToLower()));
+        var nonArchiveFiles = downloadDirectory.EnumerateFiles("*").Where(info => info.Extension.ToLower() != "." + ArchiveType.ToString().ToLower());
         nonArchiveFiles.ToList().ForEach(info => info.Delete());
     }
 

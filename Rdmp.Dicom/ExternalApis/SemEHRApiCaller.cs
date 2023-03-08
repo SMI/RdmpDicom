@@ -6,9 +6,9 @@ using System;
 using System.Threading;
 using System.Net;
 using System.Net.Http;
-using Newtonsoft.Json;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using Rdmp.Core.Repositories;
 
 namespace Rdmp.Dicom.ExternalApis;
@@ -66,7 +66,7 @@ public class SemEHRApiCaller : PluginCohortCompiler
         {
             //Get the result object and use built in DeserializeObject to concert to SemEHRResponse
             var responseData = response.Content.ReadAsStringAsync(token).Result;
-            var semEHRResponse = JsonConvert.DeserializeObject<SemEHRResponse>(responseData);
+            var semEHRResponse = JsonSerializer.Deserialize<SemEHRResponse>(responseData);
 
             if (semEHRResponse.success)
             {
@@ -98,14 +98,14 @@ public class SemEHRApiCaller : PluginCohortCompiler
             else
             {
                 //If we failed, get the failing error message
-                throw (new($"The SemEHR API has failed: {semEHRResponse.message}"));
+                throw new($"The SemEHR API has failed: {semEHRResponse.message}");
             }
                
         }
         else
         {
-            throw (new(
-                $"The API response returned a HTTP Status Code: ({(int)response.StatusCode}) {response.StatusCode}"));
+            throw new(
+                $"The API response returned a HTTP Status Code: ({(int)response.StatusCode}) {response.StatusCode}");
         }
         #endregion
 
