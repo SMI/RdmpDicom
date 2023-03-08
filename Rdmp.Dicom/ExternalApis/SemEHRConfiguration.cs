@@ -1,8 +1,10 @@
 ﻿using Rdmp.Core.Curation.Data.Aggregation;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using YamlDotNet.Serialization;
-using Newtonsoft.Json.Linq;
 using System.Text.RegularExpressions;
 using System.Web;
 
@@ -58,7 +60,7 @@ public class SemEHRConfiguration
     public string Url { get; set; } = "https://localhost:8485/api/search_anns/myQuery/";
 
     /// <summary>
-    /// TRUE if the <see cref="Url">Url</see> fir tge API should check that the certificate and certificate chain are valid
+    /// TRUE if the <see cref="Url">Url</see> for the API should check that the certificate and certificate chain are valid
     /// </summary>
     public bool ValidateServerCert { get; set; } = true;
 
@@ -178,8 +180,7 @@ public class SemEHRConfiguration
 
     public string Serialize()
     {
-        var s = new Serializer();
-        return s.Serialize(this);
+        return JsonSerializer.Serialize(this);
     }
 
     /// <summary>
@@ -260,10 +261,10 @@ public class SemEHRConfiguration
         return this;
     }
 
-    public JObject GetQueryJson()
+    public JsonObject GetQueryJson()
     {           
         //Set the terms
-        dynamic termsObj = new JObject();
+        dynamic termsObj = new JsonObject();
         if (!string.IsNullOrWhiteSpace(Query))
             termsObj.q = HttpUtility.UrlEncode(Query);
         if(QDepth > -1)
@@ -275,36 +276,38 @@ public class SemEHRConfiguration
         if (!string.IsNullOrWhiteSpace(Experiencer))
             termsObj.experiencer = Experiencer;
         if (Temporality.Count > 0)
-            termsObj.temporality = new JArray(Temporality);
+            termsObj.temporality = new JsonArray(Temporality.Select(s=>JsonValue.Create(s) as JsonNode).ToArray());
 
         //Add terms to terms array
-        JArray termsArray = new();
-        termsArray.Add(termsObj);
+        JsonArray termsArray = new()
+        {
+            termsObj
+        };
 
         //Set the filter
-        dynamic filterObj = new JObject();
+        dynamic filterObj = new JsonObject();
         if (UseStartDate)
             filterObj.start_date = StartDate.ToString(StartEndDateFormat);
         if (UseEndDate)
             filterObj.end_date = EndDate.ToString(StartEndDateFormat);
         if (Modalities.Count > 0)
-            filterObj.modalities = new JArray(Modalities);
+            filterObj.modalities = new JsonArray(Modalities.Select(s => JsonValue.Create(s) as JsonNode).ToArray());
 
         //Create API JSON
-        dynamic apiCallJson = new JObject();
+        dynamic apiCallJson = new JsonObject();
         apiCallJson.terms = termsArray;
         apiCallJson.filter = filterObj;
         /*if (ReturnFields.Count > 0)
             apiCallJson.returnFields = new JArray(ReturnFields);*/
         if (!string.IsNullOrWhiteSpace(ReturnField))
-            apiCallJson.returnFields = new JArray(ReturnField);
+            apiCallJson.returnFields = new JsonArray(ReturnField);
 
         return apiCallJson;
     }
 
     public string GetQueryJsonAsString()
     {
-        return (Regex.Replace(GetQueryJson().ToString(), @"\s+", ""));
+        return Regex.Replace(GetQueryJson().ToString(), @"\s+", "");
             
     }
 
@@ -315,7 +318,7 @@ public class SemEHRConfiguration
         {
             passphraseIfSet = $"passphrase={Passphrase}&";
         }
-        return ($"{this.Url}?{passphraseIfSet}j={GetQueryJsonAsString()}");
+        return $"{this.Url}?{passphraseIfSet}j={GetQueryJsonAsString()}";
     }
 
     public bool ApiUsingHttpAuth()

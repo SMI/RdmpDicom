@@ -410,7 +410,7 @@ public class PrimaryKeyCollisionIsolationMutilation:IPluginMutilateDataTables
         // 1 join per pair of tables
                 
         if(_joins.Count != TablesToIsolate.Length -1)
-            throw new($"Unexpected join count, expected {(TablesToIsolate.Length -1)} but found {_joins.Count}");
+            throw new($"Unexpected join count, expected {TablesToIsolate.Length -1} but found {_joins.Count}");
 
         // Imagine a 3 table query (2 joins)
         // if we are index 2 (child)
