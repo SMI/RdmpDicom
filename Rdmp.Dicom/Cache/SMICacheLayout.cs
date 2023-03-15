@@ -6,7 +6,7 @@ using System.IO;
 using System.Linq;
 using Rdmp.Core.Caching.Layouts;
 using Rdmp.Core.Curation.Data.DataLoad;
-using ReusableLibraryCode.Progress;
+using Rdmp.Core.ReusableLibraryCode.Progress;
 using Rdmp.Core.Caching.Pipeline.Destinations;
 
 namespace Rdmp.Dicom.Cache;

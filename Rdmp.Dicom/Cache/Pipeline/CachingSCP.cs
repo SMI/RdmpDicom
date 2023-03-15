@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using FellowOakDicom.Imaging.Codec;
 using FellowOakDicom.Memory;
-using ReusableLibraryCode.Progress;
+using Rdmp.Core.ReusableLibraryCode.Progress;
 
 namespace Rdmp.Dicom.Cache.Pipeline;
 

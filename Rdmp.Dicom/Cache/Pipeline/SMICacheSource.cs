@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using FellowOakDicom;
 using FellowOakDicom.Network;
-using MapsDirectlyToDatabaseTable;
-using ReusableLibraryCode.Checks;
-using ReusableLibraryCode.DataAccess;
-using ReusableLibraryCode.Progress;
+using Rdmp.Core.MapsDirectlyToDatabaseTable;
+using Rdmp.Core.ReusableLibraryCode.Checks;
+using Rdmp.Core.ReusableLibraryCode.DataAccess;
+using Rdmp.Core.ReusableLibraryCode.Progress;
 using Rdmp.Dicom.Cache.Pipeline.Dicom;
 using Rdmp.Dicom.PACS;
 using Rdmp.Core.Curation.Data;

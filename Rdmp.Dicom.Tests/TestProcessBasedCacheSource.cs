@@ -5,7 +5,7 @@ using Rdmp.Core.Curation.Data;
 using Rdmp.Core.Curation.Data.Cache;
 using Rdmp.Core.DataFlowPipeline;
 using Rdmp.Dicom.Cache.Pipeline;
-using ReusableLibraryCode.Progress;
+using Rdmp.Core.ReusableLibraryCode.Progress;
 using System;
 using System.IO;
 using System.Linq;

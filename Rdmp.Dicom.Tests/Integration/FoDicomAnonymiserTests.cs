@@ -1,5 +1,5 @@
 ﻿using FellowOakDicom;
-using MapsDirectlyToDatabaseTable.Versioning;
+using Rdmp.Core.MapsDirectlyToDatabaseTable.Versioning;
 using Moq;
 using NUnit.Framework;
 using Rdmp.Core.Curation.Data;
@@ -10,8 +10,8 @@ using Rdmp.Core.QueryBuilding;
 using Rdmp.Core.Repositories.Construction;
 using Rdmp.Dicom.Extraction.FoDicomBased;
 using Rdmp.Dicom.Extraction.FoDicomBased.DirectoryDecisions;
-using ReusableLibraryCode.Checks;
-using ReusableLibraryCode.Progress;
+using Rdmp.Core.ReusableLibraryCode.Checks;
+using Rdmp.Core.ReusableLibraryCode.Progress;
 using System;
 using System.Collections.Generic;
 using System.Data;

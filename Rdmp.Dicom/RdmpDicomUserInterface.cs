@@ -2,7 +2,7 @@
 using Rdmp.Core.Curation.Data.Aggregation;
 using Rdmp.Dicom.ExternalApis;
 using Rdmp.Core.CommandExecution;
-using MapsDirectlyToDatabaseTable;
+using Rdmp.Core.MapsDirectlyToDatabaseTable;
 using Terminal.Gui;
 
 namespace Rdmp.Dicom.UI;

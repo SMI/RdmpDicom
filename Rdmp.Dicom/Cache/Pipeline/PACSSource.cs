@@ -4,7 +4,7 @@ using System.IO;
 using System.Threading.Tasks;
 using FellowOakDicom;
 using FellowOakDicom.Network;
-using ReusableLibraryCode.Progress;
+using Rdmp.Core.ReusableLibraryCode.Progress;
 using Rdmp.Dicom.Cache.Pipeline.Dicom;
 using Timer = System.Timers.Timer;
 using Rdmp.Core.Curation.Data;

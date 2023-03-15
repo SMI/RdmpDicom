@@ -1,4 +1,4 @@
-using MapsDirectlyToDatabaseTable.Versioning;
+using Rdmp.Core.MapsDirectlyToDatabaseTable.Versioning;
 
 namespace Rdmp.Dicom;
 

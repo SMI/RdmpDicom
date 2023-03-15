@@ -2,7 +2,7 @@
 using Rdmp.Core.Curation.Data;
 using Rdmp.Core.Repositories.Construction;
 using Rdmp.Dicom.TagPromotionSchema;
-using ReusableLibraryCode.Checks;
+using Rdmp.Core.ReusableLibraryCode.Checks;
 using System;
 using System.Collections.Generic;
 using System.Linq;

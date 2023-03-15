@@ -1,6 +1,6 @@
 ﻿using NUnit.Framework;
 using Rdmp.Dicom.Cache;
-using ReusableLibraryCode.Progress;
+using Rdmp.Core.ReusableLibraryCode.Progress;
 using System.IO;
 
 namespace Rdmp.Dicom.Tests.Integration;

@@ -1,5 +1,5 @@
 ﻿using System.Windows.Forms;
-using ReusableLibraryCode.Icons.IconProvision;
+using Rdmp.Core.ReusableLibraryCode.Icons.IconProvision;
 using Rdmp.Dicom.TagPromotionSchema;
 using Rdmp.UI.CommandExecution.AtomicCommands;
 using Rdmp.Core.CommandExecution.AtomicCommands;

@@ -2,7 +2,7 @@
 using Rdmp.Core.Curation.Data.DataLoad;
 using Rdmp.Core.Repositories;
 using Rdmp.Dicom.PipelineComponents.DicomSources;
-using ReusableLibraryCode.Checks;
+using Rdmp.Core.ReusableLibraryCode.Checks;
 using ScintillaNET;
 using System;
 using System.Runtime.Versioning;

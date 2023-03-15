@@ -1,5 +1,5 @@
 ﻿using FAnsi.Discovery;
-using MapsDirectlyToDatabaseTable.Versioning;
+using Rdmp.Core.MapsDirectlyToDatabaseTable.Versioning;
 using NUnit.Framework;
 using Rdmp.Core.Curation.Data;
 using Rdmp.Core.Curation.Data.Aggregation;
@@ -7,9 +7,10 @@ using Rdmp.Core.Curation.Data.Cohort;
 using Rdmp.Core.Databases;
 using Rdmp.Core.QueryCaching.Aggregation;
 using Rdmp.Dicom.ExternalApis;
-using ReusableLibraryCode.Checks;
+using Rdmp.Core.ReusableLibraryCode.Checks;
 using System;
 using System.Threading;
+using Rdmp.Core.CohortCreation.Execution;
 using Tests.Common;
 using DatabaseType = FAnsi.DatabaseType;
 
@@ -40,7 +41,7 @@ public class SemEHRApiCallerTests : DatabaseTests
         var cacheMgr = SetupCache(dbType, out var cacheDb);
         var caller = new SemEHRApiCaller();
 
-        var cata = new Catalogue(CatalogueRepository, $"{SemEHRApiCaller.ApiPrefix}cata");
+        var cata = new Catalogue(CatalogueRepository, $"{PluginCohortCompiler.ApiPrefix}cata");
         var cic = new CohortIdentificationConfiguration(CatalogueRepository, "my cic");
         cic.CreateRootContainerIfNotExists();
             

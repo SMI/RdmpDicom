@@ -6,7 +6,7 @@ using FellowOakDicom.Imaging.Codec;
 using FellowOakDicom.Log;
 using FellowOakDicom.Network;
 using FellowOakDicom.Network.Client;
-using ReusableLibraryCode.Progress;
+using Rdmp.Core.ReusableLibraryCode.Progress;
 using Rdmp.Dicom.PACS;
 
 namespace Rdmp.Dicom.Cache.Pipeline.Dicom;

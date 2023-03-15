@@ -17,7 +17,7 @@ public class StudyToFetch
 
     public StudyToFetch(string studyUid)
     {
-        this.StudyUid = studyUid;
+        StudyUid = studyUid;
     }
 
     public override bool Equals(object obj)
