@@ -2,8 +2,8 @@ using FellowOakDicom;
 using DicomTypeTranslation;
 using DicomTypeTranslation.Elevation.Exceptions;
 using DicomTypeTranslation.Elevation.Serialization;
-using ReusableLibraryCode.Checks;
-using ReusableLibraryCode.Progress;
+using Rdmp.Core.ReusableLibraryCode.Checks;
+using Rdmp.Core.ReusableLibraryCode.Progress;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -13,8 +13,7 @@ using System.Text.RegularExpressions;
 using Rdmp.Core.Curation.Data;
 using Rdmp.Core.DataFlowPipeline;
 using Rdmp.Core.Curation.Data.DataLoad;
-using ReusableLibraryCode.Annotations;
-using TypeGuesser;
+using Rdmp.Core.ReusableLibraryCode.Annotations;
 
 namespace Rdmp.Dicom.PipelineComponents.DicomSources;
 
@@ -45,13 +44,13 @@ public abstract class DicomSource : IPluginDataFlowSource<DataTable>
         set => _archiveRoot = StandardisePath(value);
     }
 
-    private string StandardisePath(string value)
+    private static string StandardisePath(string value)
     {
         //trim leading and ending whitespace and normalize slashes
         value = value?.TrimStart().TrimEnd(' ', '\t', '\r', '\n');
 
         //Standardize on forward slashes (but don't try to fix \\ e.g. at the start of a UNC path
-        if (!string.IsNullOrEmpty(value)) value = value.StartsWith("\\\\") ? $"\\\\{value.Substring(2).Replace('\\', '/')}" : value.Replace('\\', '/');
+        if (!string.IsNullOrEmpty(value)) value = value.StartsWith("\\\\") ? $"\\\\{value[2..].Replace('\\', '/')}" : value.Replace('\\', '/');
 
         //if it has a trailing slash (but isn't just '/') then trim the end
         if(value != null)
@@ -119,6 +118,7 @@ public abstract class DicomSource : IPluginDataFlowSource<DataTable>
     /// <param name="dt"></param>
     /// <param name="listener"></param>
     /// <param name="otherValuesToStoreInRow"></param>
+    /// <exception cref="ArgumentOutOfRangeException"></exception>
     protected void ProcessDataset(string filename, DicomDataset ds, DataTable dt, IDataLoadEventListener listener, Dictionary<string, string> otherValuesToStoreInRow = null)
     {
         _elevationRequests ??= LoadElevationRequestsFile();
@@ -193,7 +193,8 @@ public abstract class DicomSource : IPluginDataFlowSource<DataTable>
                     }
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    throw new ArgumentOutOfRangeException(
+                        $"{nameof(InvalidDataHandlingStrategy)} had unknown value {InvalidDataHandlingStrategy}");
             }
 
             if (value is string s && DataTooLongHandlingStrategy != DataTooWideHandling.None)
@@ -206,7 +207,7 @@ public abstract class DicomSource : IPluginDataFlowSource<DataTable>
                         case DataTooWideHandling.TruncateAndWarn:
                             lock (_oDictLock)
                             {
-                                value = s.Substring(0, _maxTagLengths[item.Tag]);
+                                value = s[.._maxTagLengths[item.Tag]];
                             }
                             break;
                         case DataTooWideHandling.MarkCorrupt:
@@ -216,7 +217,7 @@ public abstract class DicomSource : IPluginDataFlowSource<DataTable>
                             value = DBNull.Value;
                             break;
                         default:
-                            throw new ArgumentOutOfRangeException();
+                            throw new ArgumentOutOfRangeException($"{nameof(DataTooLongHandlingStrategy)} had unknown value {DataTooLongHandlingStrategy}");
                     }
                 }
 
@@ -262,7 +263,7 @@ public abstract class DicomSource : IPluginDataFlowSource<DataTable>
 
                             break;
                         default:
-                            throw new ArgumentOutOfRangeException();
+                            throw new ArgumentOutOfRangeException($"{nameof(InvalidDataHandlingStrategy)} has unknown value {InvalidDataHandlingStrategy}");
                     }
 
                     rowValues.Add(request.ColumnName, value);
@@ -344,13 +345,13 @@ public abstract class DicomSource : IPluginDataFlowSource<DataTable>
 
     }
 
-    private string GetProblemFileDescription(string filename, Dictionary<string, string> otherValuesToStoreInRow)
+    private static string GetProblemFileDescription(string filename, Dictionary<string, string> otherValuesToStoreInRow)
     {
         var s = $"Problem File:{Environment.NewLine}{filename}";
 
         if (otherValuesToStoreInRow != null)
-            s += Environment.NewLine + string.Join(Environment.NewLine, otherValuesToStoreInRow.Select(kvp =>
-                $"{kvp.Key}:{kvp.Value}"));
+            s +=
+                $"{Environment.NewLine}{string.Join(Environment.NewLine, otherValuesToStoreInRow.Select(kvp => $"{kvp.Key}:{kvp.Value}"))}";
 
         return s.Trim();
     }
@@ -375,12 +376,12 @@ public abstract class DicomSource : IPluginDataFlowSource<DataTable>
 
         //if it is relative to ArchiveRoot then express only the subsection with "./" at start
         if (string.IsNullOrWhiteSpace(ArchiveRoot)) return filename;
-        return filename.StartsWith(ArchiveRoot, StringComparison.CurrentCultureIgnoreCase) ? $"./{filename.Substring(ArchiveRoot.Length).TrimStart('/')}" : filename;
+        return filename.StartsWith(ArchiveRoot, StringComparison.CurrentCultureIgnoreCase) ? $"./{filename[ArchiveRoot.Length..].TrimStart('/')}" : filename;
 
         //otherwise return the original
     }
 
-    private void Add(DataTable dt, DataRow row, string header, object value)
+    private static void Add(DataTable dt, DataRow row, string header, object value)
     {
         //if it is a new header
         if (!dt.Columns.Contains(header))

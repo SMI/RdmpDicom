@@ -18,11 +18,11 @@ public class AmbiguousFilePathTests
         if (!EnvironmentInfo.IsLinux) return;
 
         //in linux this looks like a relative path
-        var ex = Assert.Throws<ArgumentException>(()=>new AmbiguousFilePath(@"c:\temp\my.dcm"));
+        var ex = Assert.Throws<ArgumentException>(()=>_=new AmbiguousFilePath(@"c:\temp\my.dcm"));
         StringAssert.StartsWith("Relative path was encountered without specifying a root",ex?.Message);
 
 
-        ex = Assert.Throws<ArgumentException>(()=>new AmbiguousFilePath(@"c:\temp",@"c:\temp\my.dcm"));
+        ex = Assert.Throws<ArgumentException>(()=>_=new AmbiguousFilePath(@"c:\temp",@"c:\temp\my.dcm"));
         StringAssert.IsMatch("Specified root path '.*' was not IsAbsolute",ex?.Message);
 
     }
@@ -35,7 +35,7 @@ public class AmbiguousFilePathTests
             
         File.Copy(
             Path.Combine(TestContext.CurrentContext.TestDirectory,"TestData","IM-0001-0013.dcm"),
-            f.FullName);
+            f.FullName,true);
 
         var a = new AmbiguousFilePath(f.FullName);
         var ds = a.GetDataset().Single().Item2;
@@ -61,7 +61,7 @@ public class AmbiguousFilePathTests
             s.Write(bytes, 0, bytes.Length);
         }
 
-        Assert.Throws<AmbiguousFilePathResolutionException>(() => new AmbiguousFilePath(Path.Combine(TestContext.CurrentContext.WorkDirectory, "omgzip.zip!lol")).GetDataset().ToList());
+        Assert.Throws<AmbiguousFilePathResolutionException>(() => _=new AmbiguousFilePath(Path.Combine(TestContext.CurrentContext.WorkDirectory, "omgzip.zip!lol")).GetDataset().ToList());
 
         var a = new AmbiguousFilePath(Path.Combine(TestContext.CurrentContext.WorkDirectory, "omgzip.zip!test.dcm"));
         var ds = a.GetDataset().Single().Item2;

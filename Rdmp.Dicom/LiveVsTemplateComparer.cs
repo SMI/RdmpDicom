@@ -1,7 +1,7 @@
 ﻿using DicomTypeTranslation.TableCreation;
 using FAnsi;
 using Rdmp.Core.Curation.Data;
-using ReusableLibraryCode.DataAccess;
+using Rdmp.Core.ReusableLibraryCode.DataAccess;
 using System;
 using System.Linq;
 using System.Text.RegularExpressions;

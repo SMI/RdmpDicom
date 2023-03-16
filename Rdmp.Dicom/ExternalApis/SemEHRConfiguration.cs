@@ -318,7 +318,7 @@ public class SemEHRConfiguration
         {
             passphraseIfSet = $"passphrase={Passphrase}&";
         }
-        return $"{this.Url}?{passphraseIfSet}j={GetQueryJsonAsString()}";
+        return $"{Url}?{passphraseIfSet}j={GetQueryJsonAsString()}";
     }
 
     public bool ApiUsingHttpAuth()

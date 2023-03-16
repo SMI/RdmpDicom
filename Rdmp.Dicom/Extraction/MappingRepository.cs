@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Text;
-using ReusableLibraryCode;
+using Rdmp.Core.ReusableLibraryCode;
 using FAnsi.Discovery;
 using Microsoft.Data.SqlClient;
 using Rdmp.Core.Curation.Data;

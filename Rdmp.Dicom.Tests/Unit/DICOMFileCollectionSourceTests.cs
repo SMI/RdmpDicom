@@ -11,7 +11,7 @@ using Rdmp.Core.DataFlowPipeline;
 using Rdmp.Dicom.PipelineComponents.DicomSources;
 using Tests.Common;
 using Rdmp.Dicom.PipelineComponents.DicomSources.Worklists;
-using ReusableLibraryCode.Progress;
+using Rdmp.Core.ReusableLibraryCode.Progress;
 using Rdmp.Core.DataFlowPipeline.Requirements;
 using Rdmp.Core.DataLoad.Engine.Pipeline.Destinations;
 using FAnsi;

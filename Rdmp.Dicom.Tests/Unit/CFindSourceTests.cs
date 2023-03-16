@@ -1,7 +1,7 @@
 ﻿using NUnit.Framework;
 using Rdmp.Core.CommandLine.Interactive;
 using Rdmp.Dicom.CommandExecution;
-using ReusableLibraryCode.Checks;
+using Rdmp.Core.ReusableLibraryCode.Checks;
 using System.IO;
 using Tests.Common;
 

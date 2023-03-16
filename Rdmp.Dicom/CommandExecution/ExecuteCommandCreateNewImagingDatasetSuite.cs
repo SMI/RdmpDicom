@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using ReusableLibraryCode.Checks;
+using Rdmp.Core.ReusableLibraryCode.Checks;
 using FAnsi.Discovery;
 using Rdmp.Dicom.Attachers.Routing;
 using Rdmp.Core.Curation.Data;
@@ -19,7 +19,7 @@ using DicomTypeTranslation.TableCreation;
 using Rdmp.Core.CommandExecution;
 using Rdmp.Core.Repositories.Construction;
 using Rdmp.Dicom.PipelineComponents.DicomSources;
-using ReusableLibraryCode.Annotations;
+using Rdmp.Core.ReusableLibraryCode.Annotations;
 using NLog;
 using System.Threading;
 

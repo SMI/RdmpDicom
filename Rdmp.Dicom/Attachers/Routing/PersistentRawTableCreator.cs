@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using ReusableLibraryCode.DataAccess;
+using Rdmp.Core.ReusableLibraryCode.DataAccess;
 using FAnsi.Discovery;
-using ReusableLibraryCode.Progress;
+using Rdmp.Core.ReusableLibraryCode.Progress;
 using Rdmp.Core.DataLoad.Engine.Job;
 using Rdmp.Core.DataLoad.Engine;
 using Rdmp.Core.Curation.Data;

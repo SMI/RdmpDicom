@@ -7,7 +7,7 @@ using Rdmp.Core.Curation;
 using Rdmp.Core.Curation.Data;
 using Rdmp.Core.DataLoad.Triggers.Implementations;
 using Rdmp.Dicom.CommandExecution;
-using ReusableLibraryCode.Checks;
+using Rdmp.Core.ReusableLibraryCode.Checks;
 using System;
 using Tests.Common;
 

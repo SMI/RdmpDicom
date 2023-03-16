@@ -1,6 +1,5 @@
 ﻿using System;
-using System.Drawing;
-using ReusableLibraryCode.Icons.IconProvision;
+using Rdmp.Core.ReusableLibraryCode.Icons.IconProvision;
 using Rdmp.Dicom.UI.CommandExecution.AtomicCommands;
 using Rdmp.UI.ItemActivation;
 using Rdmp.UI.Refreshing;
@@ -14,7 +13,7 @@ using Rdmp.Core.Curation.Data.Aggregation;
 using Rdmp.Dicom.ExternalApis;
 using Rdmp.Core.CommandExecution;
 using System.Collections.Generic;
-using MapsDirectlyToDatabaseTable;
+using Rdmp.Core.MapsDirectlyToDatabaseTable;
 using System.Linq;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp;

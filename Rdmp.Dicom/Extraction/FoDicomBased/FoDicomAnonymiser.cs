@@ -1,13 +1,13 @@
 ﻿using FellowOakDicom;
-using ReusableLibraryCode.Checks;
-using ReusableLibraryCode.Progress;
+using Rdmp.Core.ReusableLibraryCode.Checks;
+using Rdmp.Core.ReusableLibraryCode.Progress;
 using Rdmp.Dicom.Extraction.FoDicomBased.DirectoryDecisions;
 using Rdmp.Core.DataExport.DataExtraction.Commands;
 using Rdmp.Core.Curation.Data;
 using Rdmp.Core.DataFlowPipeline.Requirements;
 using Rdmp.Core.DataFlowPipeline;
 using Rdmp.Core.Repositories.Construction;
-using MapsDirectlyToDatabaseTable.Versioning;
+using Rdmp.Core.MapsDirectlyToDatabaseTable.Versioning;
 using System.Data;
 using static FellowOakDicom.DicomAnonymizer;
 using System;
@@ -15,8 +15,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Rdmp.Core.QueryBuilding;
-using TB.ComponentModel;
 
 namespace Rdmp.Dicom.Extraction.FoDicomBased;
 
@@ -143,7 +143,7 @@ public class FoDicomAnonymiser: IPluginDataFlowComponent<DataTable>,IPipelineReq
             if (_errors > 0 && _errors > ErrorThreshold)
                 throw new($"Number of errors reported ({_errors}) reached the threshold ({ErrorThreshold})");
             cancellationToken.ThrowIfAbortRequested();
-            ProcessFile(dicomFile.Item2,listener,pool, releaseIDs[dicomFile.Item1],_putter,fileRows[dicomFile.Item1]);
+            ProcessFile(dicomFile.Item2,listener, releaseIDs[dicomFile.Item1],_putter,fileRows[dicomFile.Item1]);
         }
 
         _sw.Stop();
@@ -156,7 +156,7 @@ public class FoDicomAnonymiser: IPluginDataFlowComponent<DataTable>,IPipelineReq
         return _extractCommand.QueryBuilder.SelectColumns.Select(c => c.IColumn).Single(c => c.IsExtractionIdentifier);
     }
 
-    private DataColumn[] GetMetadataOnlyColumnsToProcess(DataTable toProcess)
+    private static DataColumn[] GetMetadataOnlyColumnsToProcess(DataTable toProcess)
     {
         return toProcess.Columns.Cast<DataColumn>().Where(
                 c => UIDMapping.SupportedTags.Any(k => k.Key.DictionaryEntry.Keyword.Equals(c.ColumnName)))
@@ -236,7 +236,7 @@ public class FoDicomAnonymiser: IPluginDataFlowComponent<DataTable>,IPipelineReq
 
 
     /// <summary>
-    /// Setup class ready to start anonymizing.  Pass in 
+    /// Setup class ready to start anonymising.  Pass in 
     /// </summary>
     /// <param name="projectNumber"></param>
     /// <param name="destinationDirectory">Destination directory to pass to <see cref="IPutDicomFilesInExtractionDirectories"/>
@@ -259,12 +259,10 @@ public class FoDicomAnonymiser: IPluginDataFlowComponent<DataTable>,IPipelineReq
     /// </summary>
     /// <param name="path">Location of the zip file</param>
     /// <param name="listener">Where to report errors/progress to</param>
-    /// <param name="pool">Cache of opened zip files to prevent spam open/closing</param>
     /// <param name="releaseColumnValue">The substitution to enter in for PatientID</param>
     /// <param name="putter">Determines where the anonymous image is written to</param>
     /// <param name="rowIfAny">If a <see cref="System.Data.DataTable"/> is kicking around, pass the row and it's UID fields will be updated.  Otherwise pass null.</param>
-    public void ProcessFile(DicomFile dicomFile,  IDataLoadEventListener listener, 
-        ZipPool pool, string releaseColumnValue,
+    public void ProcessFile(DicomFile dicomFile,  IDataLoadEventListener listener, string releaseColumnValue,
         IPutDicomFilesInExtractionDirectories putter,
         DataRow rowIfAny)
     {
@@ -277,23 +275,23 @@ public class FoDicomAnonymiser: IPluginDataFlowComponent<DataTable>,IPipelineReq
 
             // See: ftp://medical.nema.org/medical/dicom/2011/11_15pu.pdf
             var flags = skipAnon ?
-                //dont anonymise
-                DicomAnonymizer.SecurityProfileOptions.RetainSafePrivate |
-                DicomAnonymizer.SecurityProfileOptions.RetainDeviceIdent |
-                DicomAnonymizer.SecurityProfileOptions.RetainInstitutionIdent |
-                DicomAnonymizer.SecurityProfileOptions.RetainUIDs |
-                DicomAnonymizer.SecurityProfileOptions.RetainLongFullDates |
-                DicomAnonymizer.SecurityProfileOptions.RetainPatientChars :
+                //don't anonymise
+                SecurityProfileOptions.RetainSafePrivate |
+                SecurityProfileOptions.RetainDeviceIdent |
+                SecurityProfileOptions.RetainInstitutionIdent |
+                SecurityProfileOptions.RetainUIDs |
+                SecurityProfileOptions.RetainLongFullDates |
+                SecurityProfileOptions.RetainPatientChars :
                 // do anonymise
-                DicomAnonymizer.SecurityProfileOptions.BasicProfile |
-                DicomAnonymizer.SecurityProfileOptions.CleanStructdCont |
-                DicomAnonymizer.SecurityProfileOptions.CleanDesc |
-                DicomAnonymizer.SecurityProfileOptions.RetainUIDs;
+                SecurityProfileOptions.BasicProfile |
+                SecurityProfileOptions.CleanStructdCont |
+                SecurityProfileOptions.CleanDesc |
+                SecurityProfileOptions.RetainUIDs;
 
             if (RetainDates && !skipAnon)
-                flags |= DicomAnonymizer.SecurityProfileOptions.RetainLongFullDates;
+                flags |= SecurityProfileOptions.RetainLongFullDates;
 
-            var profile = DicomAnonymizer.SecurityProfile.LoadProfile(null, flags);
+            var profile = SecurityProfile.LoadProfile(null, flags);
 
 
             // I know we said skip anonymisation but still remove this stuff cmon
@@ -359,11 +357,12 @@ public class FoDicomAnonymiser: IPluginDataFlowComponent<DataTable>,IPipelineReq
         listener.OnProgress(this, new ProgressEventArgs("Writing ANO images", new ProgressMeasurement(_anonymisedImagesCount, ProgressType.Records), _sw.Elapsed));
     }
 
-    private void RemovePatientNameEtc(DicomAnonymizer.SecurityProfile profile)
+    private static readonly Regex patientLevelRegex = new("0010,.*",RegexOptions.Compiled|RegexOptions.CultureInvariant);
+    private static void RemovePatientNameEtc(SecurityProfile profile)
     {
         // we still want to remove PatientName, PatientAddress etc see these:
         // https://dicom.nema.org/medical/dicom/2015c/output/chtml/part03/sect_C.2.3.html
-        profile.Add(new("0010,.*"), SecurityProfileActions.Z);
+        profile.Add(patientLevelRegex, SecurityProfileActions.Z);
     }
 
     private IEnumerable<DicomTag> GetDeleteTags()
@@ -438,7 +437,7 @@ public class FoDicomAnonymiser: IPluginDataFlowComponent<DataTable>,IPipelineReq
                 "Attempt to create UID mapping schema"));
 
             if (!create) return;
-            var db = UIDMappingServer.Discover(ReusableLibraryCode.DataAccess.DataAccessContext.DataExport);
+            var db = UIDMappingServer.Discover(Core.ReusableLibraryCode.DataAccess.DataAccessContext.DataExport);
 
             if (!db.Exists())
             {

@@ -3,8 +3,8 @@ using NUnit.Framework;
 using Rdmp.Core.DataFlowPipeline;
 using Rdmp.Core.DataFlowPipeline.Requirements;
 using Rdmp.Dicom.PipelineComponents.CFind;
-using ReusableLibraryCode.Checks;
-using ReusableLibraryCode.Progress;
+using Rdmp.Core.ReusableLibraryCode.Checks;
+using Rdmp.Core.ReusableLibraryCode.Progress;
 
 namespace Rdmp.Dicom.Tests.Unit;
 public class CFindDirSourceTests

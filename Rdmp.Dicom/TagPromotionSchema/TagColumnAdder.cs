@@ -2,9 +2,9 @@
 using System.Linq;
 using FellowOakDicom;
 using DicomTypeTranslation;
-using ReusableLibraryCode;
-using ReusableLibraryCode.Checks;
-using ReusableLibraryCode.DataAccess;
+using Rdmp.Core.ReusableLibraryCode;
+using Rdmp.Core.ReusableLibraryCode.Checks;
+using Rdmp.Core.ReusableLibraryCode.DataAccess;
 using FAnsi.Discovery;
 using FAnsi.Discovery.TypeTranslation;
 using Rdmp.Core.Curation.Data;

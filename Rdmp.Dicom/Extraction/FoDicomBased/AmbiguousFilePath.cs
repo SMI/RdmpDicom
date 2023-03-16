@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using FellowOakDicom;
 using Rdmp.Dicom.PACS;
-using ReusableLibraryCode.Progress;
+using Rdmp.Core.ReusableLibraryCode.Progress;
 using LibArchive.Net;
 using Microsoft.IdentityModel.Tokens;
 

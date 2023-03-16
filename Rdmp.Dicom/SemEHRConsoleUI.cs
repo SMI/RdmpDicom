@@ -10,8 +10,8 @@
 namespace Rdmp.Dicom;
 
 using Rdmp.Core.CommandExecution;
-using Rdmp.Core.Curation.Data.Aggregation;
-using Rdmp.Dicom.ExternalApis;
+using Core.Curation.Data.Aggregation;
+using ExternalApis;
 using System.Linq;
 using Terminal.Gui;
 

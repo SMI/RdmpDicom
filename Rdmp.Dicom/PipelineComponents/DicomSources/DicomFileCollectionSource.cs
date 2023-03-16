@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using FellowOakDicom;
 using FAnsi.Discovery;
 using LibArchive.Net;
-using ReusableLibraryCode.Progress;
+using Rdmp.Core.ReusableLibraryCode.Progress;
 using Rdmp.Dicom.PipelineComponents.DicomSources.Worklists;
 using Rdmp.Core.Curation.Data;
 using Rdmp.Core.DataFlowPipeline.Requirements;

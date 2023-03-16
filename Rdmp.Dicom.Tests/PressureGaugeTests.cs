@@ -1,6 +1,6 @@
 ﻿using NUnit.Framework;
 using Rdmp.Dicom.Cache.Pipeline;
-using ReusableLibraryCode.Progress;
+using Rdmp.Core.ReusableLibraryCode.Progress;
 using System;
 
 namespace Rdmp.Dicom.Tests;

@@ -8,7 +8,7 @@ using Rdmp.Core.Curation.Data.DataLoad;
 using Rdmp.Core.DataFlowPipeline;
 using Rdmp.Core.Repositories;
 using Rdmp.Dicom.Cache.Pipeline;
-using ReusableLibraryCode.Progress;
+using Rdmp.Core.ReusableLibraryCode.Progress;
 using System;
 using System.IO;
 

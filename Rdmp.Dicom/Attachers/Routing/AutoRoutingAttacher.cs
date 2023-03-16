@@ -14,10 +14,9 @@ using Rdmp.Core.DataLoad.Engine.Attachers;
 using Rdmp.Core.DataLoad.Engine.Job;
 using Rdmp.Core.DataLoad.Engine.Pipeline.Destinations;
 using Rdmp.Core.Logging;
-using ReusableLibraryCode.Checks;
-using ReusableLibraryCode.Progress;
+using Rdmp.Core.ReusableLibraryCode.Checks;
+using Rdmp.Core.ReusableLibraryCode.Progress;
 using Rdmp.Dicom.PipelineComponents.DicomSources.Worklists;
-using Rdmp.Core.DataFlowPipeline.Requirements;
 using Rdmp.Core.Curation.Checks;
 
 namespace Rdmp.Dicom.Attachers.Routing;
