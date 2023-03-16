@@ -21,7 +21,7 @@ class IsolationReviewTests : DatabaseTests
     {
         var db = GetCleanedServer(dbType);
 
-        var dt = new DataTable();
+        using var dt = new DataTable();
         dt.Columns.Add("A");
         dt.Columns.Add("B");
         dt.Columns.Add("C");
