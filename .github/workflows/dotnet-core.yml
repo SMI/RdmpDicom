@@ -47,7 +47,7 @@ jobs:
           nuget pack ./Rdmp.Dicom.Library.nuspec -Properties Configuration=Release -IncludeReferencedProjects -Symbols -Version ${{ steps.version.outputs.version }}
           
           cp Databases.Integration.yaml .\rdmpcli\Databases.yaml
-          cmd /c rdmpcli\rdmp.exe pack --file Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg
+          cmd /c rdmpcli\rdmp.exe pack -p --file Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg
           cmd /c rdmpcli\rdmp.exe cmd listsupportedcommands
           cmd /c rdmpcli\rdmp.exe cmd describe CreateNewImagingDatasetSuite
       - name: Get Imaging Template
