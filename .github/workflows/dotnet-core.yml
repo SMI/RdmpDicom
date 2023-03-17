@@ -38,10 +38,9 @@ jobs:
       - name: Build
         run: |
           cd Plugin/windows
-          dotnet publish --runtime win-x64 -c Release --self-contained false -nologo
+          dotnet publish -c Release --self-contained false -nologo
           cd ../main
-          dotnet publish --runtime win-x64 -c Release --self-contained false -nologo
-          dotnet publish --runtime linux-x64 -c Release --self-contained false -nologo
+          dotnet publish -c Release --self-contained false -nologo
           cd ../..
           nuget pack ./Rdmp.Dicom.nuspec -Properties Configuration=Release -IncludeReferencedProjects -Symbols -Version ${{ steps.version.outputs.version }}
           nuget pack ./Rdmp.Dicom.Library.nuspec -Properties Configuration=Release -IncludeReferencedProjects -Symbols -Version ${{ steps.version.outputs.version }}
