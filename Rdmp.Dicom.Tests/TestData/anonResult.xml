@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<responses type="C-FIND">
+<data-set xfer="1.2.840.10008.1.2.1" name="Little Endian Explicit">
+<element tag="0008,0020" vr="DA" vm="1" len="8" name="StudyDate">20200416</element>
+<element tag="0008,0052" vr="CS" vm="1" len="6" name="QueryRetrieveLevel">STUDY</element>
+<element tag="0008,0054" vr="AE" vm="1" len="10" name="RetrieveAETitle">someAE</element>
+<element tag="0008,0061" vr="CS" vm="2" len="6" name="ModalitiesInStudy">DX\SR</element>
+<element tag="0008,1030" vr="LO" vm="1" len="16" name="StudyDescription">XR Facial bones</element>
+<element tag="0010,0020" vr="LO" vm="1" len="10" name="PatientID">0102030405</element>
+<element tag="0010,0021" vr="LO" vm="1" len="6" name="IssuerOfPatientID">CHI_G1</element>
+<element tag="0010,0022" vr="CS" vm="1" len="4" name="TypeOfPatientID">TEXT</element>
+<sequence tag="0010,1002" vr="SQ" card="1" len="52" name="OtherPatientIDsSequence">
+<item card="3" len="44">
+<element tag="0010,0020" vr="LO" vm="1" len="8" name="PatientID">999999</element>
+<element tag="0010,0021" vr="LO" vm="1" len="8" name="IssuerOfPatientID">LPID_G1</element>
+<element tag="0010,0022" vr="CS" vm="1" len="4" name="TypeOfPatientID">TEXT</element>
+</item>
+</sequence>
+<element tag="0020,000d" vr="UI" vm="1" len="34" name="StudyInstanceUID">1.2.3.4.50</element>
+</data-set>
+<data-set xfer="1.2.840.10008.1.2.1" name="Little Endian Explicit">
+<element tag="0008,0020" vr="DA" vm="1" len="8" name="StudyDate">20200416</element>
+<element tag="0008,0052" vr="CS" vm="1" len="6" name="QueryRetrieveLevel">STUDY</element>
+<element tag="0008,0054" vr="AE" vm="1" len="10" name="RetrieveAETitle">someAE</element>
+<element tag="0008,0061" vr="CS" vm="2" len="6" name="ModalitiesInStudy">DX\SR</element>
+<element tag="0008,1030" vr="LO" vm="1" len="12" name="StudyDescription">XR Elbow Lt</element>
+<element tag="0010,0020" vr="LO" vm="1" len="10" name="PatientID">0102030405</element>
+<element tag="0010,0021" vr="LO" vm="1" len="6" name="IssuerOfPatientID">CHI_G1</element>
+<element tag="0010,0022" vr="CS" vm="1" len="4" name="TypeOfPatientID">TEXT</element>
+<sequence tag="0010,1002" vr="SQ" card="1" len="52" name="OtherPatientIDsSequence">
+<item card="3" len="44">
+<element tag="0010,0020" vr="LO" vm="1" len="8" name="PatientID">999999</element>
+<element tag="0010,0021" vr="LO" vm="1" len="8" name="IssuerOfPatientID">LPID_G1</element>
+<element tag="0010,0022" vr="CS" vm="1" len="4" name="TypeOfPatientID">TEXT</element>
+</item>
+</sequence>
+<element tag="0020,000d" vr="UI" vm="1" len="34" name="StudyInstanceUID">1.2.3.4.60</element>
+</data-set>
+<data-set xfer="1.2.840.10008.1.2.1" name="Little Endian Explicit">
+<element tag="0008,0020" vr="DA" vm="1" len="8" name="StudyDate">20200416</element>
+<element tag="0008,0052" vr="CS" vm="1" len="6" name="QueryRetrieveLevel">STUDY</element>
+<element tag="0008,0054" vr="AE" vm="1" len="10" name="RetrieveAETitle">someAE</element>
+<element tag="0008,0061" vr="CS" vm="2" len="6" name="ModalitiesInStudy">XA\SR</element>
+<element tag="0008,1030" vr="LO" vm="1" len="26" name="StudyDescription">Fluoroscopy upper limb Lt</element>
+<element tag="0010,0020" vr="LO" vm="1" len="10" name="PatientID">0102030405</element>
+<element tag="0010,0021" vr="LO" vm="1" len="6" name="IssuerOfPatientID">CHI_G1</element>
+<element tag="0010,0022" vr="CS" vm="1" len="4" name="TypeOfPatientID">TEXT</element>
+<sequence tag="0010,1002" vr="SQ" card="1" len="52" name="OtherPatientIDsSequence">
+<item card="3" len="44">
+<element tag="0010,0020" vr="LO" vm="1" len="8" name="PatientID">999999</element>
+<element tag="0010,0021" vr="LO" vm="1" len="8" name="IssuerOfPatientID">LPID_G1</element>
+<element tag="0010,0022" vr="CS" vm="1" len="4" name="TypeOfPatientID">TEXT</element>
+</item>
+</sequence>
+<element tag="0020,000d" vr="UI" vm="1" len="42" name="StudyInstanceUID">1.2.3.4.70</element>
+</data-set>
+</responses>

@@ -3,27 +3,26 @@ using Rdmp.Dicom.PipelineComponents;
 using Rdmp.UI.CommandExecution.AtomicCommands;
 using Rdmp.UI.ItemActivation;
 
-namespace Rdmp.Dicom.UI.CommandExecution.AtomicCommands
+namespace Rdmp.Dicom.UI.CommandExecution.AtomicCommands;
+
+class ExecuteCommandReviewIsolations: BasicUICommandExecution
 {
-    class ExecuteCommandReviewIsolations: BasicUICommandExecution
+    private readonly IsolationReview _reviewer;
+
+    public ExecuteCommandReviewIsolations(IActivateItems activator, ProcessTask processTask) : base(activator)
     {
-        private readonly IsolationReview _reviewer;
+        _reviewer = new(processTask);
 
-        public ExecuteCommandReviewIsolations(IActivateItems activator, ProcessTask processTask) : base(activator)
-        {
-            _reviewer = new IsolationReview(processTask);
+        if (_reviewer.Error != null) 
+            SetImpossible(_reviewer.Error);
 
-            if (_reviewer.Error != null) 
-                SetImpossible(_reviewer.Error);
+    }
 
-        }
+    public override void Execute()
+    {
+        base.Execute();
 
-        public override void Execute()
-        {
-            base.Execute();
-
-            var ui = new IsolationTableUI(_reviewer);
-            ui.Show();
-        }
+        var ui = new IsolationTableUI(_reviewer);
+        ui.Show();
     }
 }

@@ -1,5 +1,10 @@
 version: 2
 updates:
+- package-ecosystem: "github-actions"
+  directory: "/"
+  target-branch: develop
+  schedule:
+    interval: daily
 - package-ecosystem: nuget
   directory: "/"
   schedule:
@@ -7,5 +12,4 @@ updates:
   open-pull-requests-limit: 10
   target-branch: develop
   reviewers:
-  - tznind
   - jas88

@@ -1,11 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{07F9F874-1306-4FE6-A03F-A483592BBC7F}</ProjectGuid>
-    <TargetFramework>net461</TargetFramework>
+    <ProjectGuid>{2C29B565-F0B0-4E5B-B17E-106456933001}</ProjectGuid>
+    <TargetFramework>net6.0-windows</TargetFramework>
     <AssemblyTitle>Rdmp.Dicom.Plugin</AssemblyTitle>
     <Product>Rdmp.Dicom.Plugin</Product>
     <Copyright>Copyright ©  2019</Copyright>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <UseWindowsForms>true</UseWindowsForms>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\..\SharedAssemblyInfo.cs" Link="SharedAssemblyInfo.cs" />

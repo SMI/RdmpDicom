@@ -5,55 +5,54 @@ using Rdmp.Dicom.CommandExecution;
 using System.Linq;
 using Tests.Common;
 
-namespace Rdmp.Dicom.Tests.Integration
+namespace Rdmp.Dicom.Tests.Integration;
+
+public class ImagingTableCreationTests:DatabaseTests
 {
-    public class ImagingTableCreationTests:DatabaseTests
+
+    [TestCase(DatabaseType.MySql)]
+    [TestCase(DatabaseType.MicrosoftSQLServer)]
+    public void TestImageTemplates(DatabaseType type)
     {
+        var db = GetCleanedServer(type);
 
-        [TestCase(DatabaseType.MySql)]
-        [TestCase(DatabaseType.MicrosoftSQLServer)]
-        public void TestImageTemplates(DatabaseType type)
+        var template = new ImageTableTemplate
         {
-            var db = GetCleanedServer(type);
-
-            var template = new ImageTableTemplate
+            TableName = "Fish",
+            Columns = new[]
             {
-                TableName = "Fish",
-                Columns = new[]
+                new ImageColumnTemplate
                 {
-                    new ImageColumnTemplate
-                    {
-                        IsPrimaryKey = true, AllowNulls = true, ColumnName = "RelativeFileArchiveURI"
-                    },
-                    new ImageColumnTemplate
-                    {
-                        IsPrimaryKey = false, AllowNulls = true, ColumnName = "SeriesInstanceUID"
-                    }
+                    IsPrimaryKey = true, AllowNulls = true, ColumnName = "RelativeFileArchiveURI"
+                },
+                new ImageColumnTemplate
+                {
+                    IsPrimaryKey = false, AllowNulls = true, ColumnName = "SeriesInstanceUID"
                 }
-            };
-            var tbl = db.ExpectTable(template.TableName);
-            var cmd = new ExecuteCommandCreateNewImagingDataset(RepositoryLocator,tbl , template);
-            Assert.IsFalse(cmd.IsImpossible);
-            cmd.Execute();
+            }
+        };
+        var tbl = db.ExpectTable(template.TableName);
+        var cmd = new ExecuteCommandCreateNewImagingDataset(RepositoryLocator,tbl , template);
+        Assert.IsFalse(cmd.IsImpossible);
+        cmd.Execute();
 
-            Assert.IsTrue(tbl.Exists());
+        Assert.IsTrue(tbl.Exists());
 
-            var cols = tbl.DiscoverColumns();
-            Assert.AreEqual(2,cols.Length);
+        var cols = tbl.DiscoverColumns();
+        Assert.AreEqual(2,cols.Length);
 
-            var rfa = cols.Single(c => c.GetRuntimeName().Equals("RelativeFileArchiveURI"));
+        var rfa = cols.Single(c => c.GetRuntimeName().Equals("RelativeFileArchiveURI"));
 
-            Assert.IsTrue(rfa.IsPrimaryKey);
-            Assert.IsFalse(rfa.AllowNulls); //because PK!
-
-
-            var sid = cols.Single(c => c.GetRuntimeName().Equals("SeriesInstanceUID"));
-
-            Assert.IsFalse(sid.IsPrimaryKey);
-            Assert.IsTrue(sid.AllowNulls); 
+        Assert.IsTrue(rfa.IsPrimaryKey);
+        Assert.IsFalse(rfa.AllowNulls); //because PK!
 
 
+        var sid = cols.Single(c => c.GetRuntimeName().Equals("SeriesInstanceUID"));
 
-        }
+        Assert.IsFalse(sid.IsPrimaryKey);
+        Assert.IsTrue(sid.AllowNulls); 
+
+
+
     }
 }

@@ -2,10 +2,11 @@
   <PropertyGroup>
     <RootNamespace>Rdmp.Dicom.Tests</RootNamespace>
     <AssemblyName>Rdmp.Dicom.Tests</AssemblyName>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="TestData\anonResult.xml" />
     <None Remove="TestData\FileWithLotsOfTags.dcm" />
     <None Remove="TestData\IM-0001-0013.dcm" />
     <None Remove="TestData\IM-0001-0019.dcm" />
@@ -16,6 +17,9 @@
     <Compile Include="..\SharedAssemblyInfo.cs" Link="SharedAssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="TestData\anonResult.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="TestData\FileWithLotsOfTags.dcm">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -36,12 +40,11 @@
     <ProjectReference Include="..\Rdmp.Dicom\Rdmp.Dicom.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="HIC.BadMedicine.Dicom" Version="0.0.7" />
-    <PackageReference Include="HIC.RDMP.Plugin.Test" Version="4.1.9" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.7.1" />
-    <PackageReference Include="NUnit" Version="3.12.0" />
-    <PackageReference Include="NUnit3TestAdapter" Version="3.17.0" />
-    <PackageReference Include="NunitXml.TestLogger" Version="2.1.62" />
+    <PackageReference Include="HIC.BadMedicine.Dicom" Version="0.0.16-rc1" />
+    <PackageReference Include="HIC.RDMP.Plugin.Test" Version="8.1.0-rc1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.5.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.4.2" />
+    <PackageReference Include="NunitXml.TestLogger" Version="3.0.131" />
   </ItemGroup>
   <ItemGroup>
     <None Update="TestDatabases.txt">

@@ -6,7 +6,164 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-...
+## [7.0.0] 2023-02-08
+
+- Replace SharpCompress 0.32.2 with LibArchive.net 0.1.3 due to LZMA bugs
+- Bump HIC.DicomTypeTranslation from 4.0.1 to 4.0.2
+- Bump HIC.RDMP.Plugin from 8.0.5 to 8.0.7
+- Bump Terminal.Gui from 1.8.2 to 1.9.0
+
+## [6.0.2] 2022-11-04
+
+- Documentation updates
+- Updated to target RDMP version 8.0.5
+- Update for changed CsvHelper API from RDMP
+
+## [6.0.1] 2022-09-27
+
+- Fixed issue running `ExecuteCommandCreateNewImagingDatasetSuite` when using a YamlRepository
+
+## [6.0.0] 2022-09-27
+
+- Updated to target RDMP version 8.0.0
+
+## [5.0.12] 2022-09-09
+
+- Fixed API for new `Bitmap` substitute (see https://github.com/HicServices/RDMP/pull/1355)
+
+## [5.0.11] 2022-08-24
+
+### Added
+
+- Added MetadataOnly property to FoDicomAnonymiser [#64](https://github.com/HicServices/RdmpDicom/issues/64)
+
+## [5.0.10] 2022-06-21
+
+- Refactored FoDicomAnonymiser to be easier for downstream consumption
+- Added HTTP Basic Authentication support to SemEHR API endpoint connection.
+
+## [5.0.9] 2022-05-27
+
+- Added SemEHR Request Timeout property so that the timeout setting can be changed as needed for longer running queries.
+
+## [5.0.8] 2022-05-04
+
+### Changed
+- Corrected resizing for the SemEHR API query builder - [#236](https://github.com/HicServices/RdmpDicom/issues/236)
+
+## [5.0.7] 2022-04-26
+
+### Changed
+
+- Bump SharpCompress from 0.30.1 to 0.31.0
+- Bump HIC.RDMP.Plugin from 7.0.9 to 7.0.10
+
+## [5.0.6] 2022-03-31
+
+### Added
+
+- Support for running CLI `AddTag` command for multiple Catalogues at once
+- Extend repertoire of archive formats to include 7zip, RAR, tar, bz2 via SharpCompress
+- New dependency: SharpCompress 0.30.1
+
+### Changed
+
+- Bump HIC.RDMP.Plugin from 7.0.7 to 7.0.9
+
+## [5.0.5] 2022-03-03
+
+- Bump HIC.RDMP.Plugin from 7.0.6 to 7.0.7
+
+## [5.0.4] 2022-02-04
+
+- Bump HIC.RDMP.Plugin from 7.0.5 to 7.0.6
+- Added support for ignoring validation errors in SSL certificates
+
+## [5.0.3] 2022-01-28
+
+- Bump HIC.RDMP.Plugin from 7.0.3 to 7.0.5
+
+### Added
+
+- Added SkipAnonymisationOnStructuredReports option to FoDicomAnonymiser
+
+## [5.0.2] 2021-11-15
+
+- Added periodic disposal in ZipPool to prevent too many open file handles at once.
+
+## [5.0.1] 2021-11-15
+
+- Bump HIC.RDMP.Plugin from 7.0.1 to 7.0.3
+- Added retry fields to `FoDicomAnonymiser` for when file system is unstable during extractions
+
+## [5.0.0] 2021-11-03
+
+- Added SemEHR cohort building prototype
+- Bump HIC.RDMP.Plugin from 6.0.1 to 6.0.2
+
+## [4.0.2] 2021-08-17
+
+- Bump HIC.RDMP.Plugin from 6.0.0 to 6.0.1
+- Added Verbose flag to PACSSource to cut down on logging
+
+## [4.0.0] 2021-07-29
+
+- Updated to work with RDMP 6.0 and FAnsi 2.0
+
+## [3.0.1] 2021-07-14
+
+### Changed
+
+- Bump NunitXml.TestLogger from 3.0.97 to 3.0.107
+- Bump HIC.RDMP.Plugin from 5.0.0 to 5.0.3
+
+## Added
+
+- Added support for customising `DicomClient` client settings in PACSSource caching component (e.g. `AssociationLingerTimeoutInMs`)
+- Added logging of association requests in PACSSource
+- Added new field MaximumAllowableAssociationEventsPerMinute for shutting down the executing process if the number of Association events crosses the given threshold
+
+## [3.0.0] 2021-06-05
+
+### Changed
+
+- Updated to RDMP 5.0.0 (dotnet5) plugin layout and API
+
+## Added
+
+- FoDicomAnonymiser checks now support automatic database creation/patching for UID mapping server
+
+## [2.2.4] 2021-03-08
+
+### Changed
+
+- When creating new imaging loads `UseAllTableInfoInLoadAsFieldMap` is enabled by default (improves load performance and stability)
+
+## Fixed
+
+- Fixed DLE not not loading files that are missing extensions when processing directory entries
+
+## [2.2.3] 2021-03-05
+
+### Changed
+
+- Bump HIC.RDMP.Plugin from 4.2.1 to 4.2.3
+- Bump HIC.DicomTypeTranslation from 2.3.1 to 2.3.2
+
+## Fixed
+
+- DLE now happily loads files on disk that are missing an extension e.g. USm123.213.432.234 (in the dicom standard the extension is optional)
+
+## [2.2.2] 2021-01-19
+
+## Fixed
+
+- Fixed bug with `AutoRoutingAttacherWithPersistentRaw` data load module when used with RDMP 4.2.1 API
+
+
+## [2.2.1] 2021-01-14
+
+Updated to be compatible with RDMP 4.2
 
 ## [2.1.11] 2020-09-18
 
@@ -238,7 +395,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial commit from private repo
 
-[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v2.1.11...develop
+[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v7.0.0...develop
+[7.0.0]: https://github.com/HicServices/RdmpDicom/compare/v6.0.2...v7.0.0
+[6.0.2]: https://github.com/HicServices/RdmpDicom/compare/v6.0.1...v6.0.2
+[6.0.1]: https://github.com/HicServices/RdmpDicom/compare/v6.0.0...v6.0.1
+[6.0.0]: https://github.com/HicServices/RdmpDicom/compare/v5.0.12...v6.0.0
+[5.0.12]: https://github.com/HicServices/RdmpDicom/compare/v5.0.11...v5.0.12
+[5.0.11]: https://github.com/HicServices/RdmpDicom/compare/v5.0.10...v5.0.11
+[5.0.10]: https://github.com/HicServices/RdmpDicom/compare/v5.0.9...v5.0.10
+[5.0.9]: https://github.com/HicServices/RdmpDicom/compare/v5.0.8...v5.0.9
+[5.0.8]: https://github.com/HicServices/RdmpDicom/compare/v5.0.7...v5.0.8
+[5.0.7]: https://github.com/HicServices/RdmpDicom/compare/v5.0.6...v5.0.7
+[5.0.6]: https://github.com/HicServices/RdmpDicom/compare/v5.0.5...v5.0.6
+[5.0.5]: https://github.com/HicServices/RdmpDicom/compare/v5.0.4...v5.0.5
+[5.0.4]: https://github.com/HicServices/RdmpDicom/compare/v5.0.3...v5.0.4
+[5.0.3]: https://github.com/HicServices/RdmpDicom/compare/v5.0.2...v5.0.3
+[5.0.2]: https://github.com/HicServices/RdmpDicom/compare/v5.0.1...v5.0.2
+[5.0.1]: https://github.com/HicServices/RdmpDicom/compare/v5.0.0...v5.0.1
+[5.0.0]: https://github.com/HicServices/RdmpDicom/compare/v4.0.2...v5.0.0
+[4.0.2]: https://github.com/HicServices/RdmpDicom/compare/v4.0.0...v4.0.2
+[4.0.0]: https://github.com/HicServices/RdmpDicom/compare/v3.0.1...v4.0.0
+[3.0.1]: https://github.com/HicServices/RdmpDicom/compare/v3.0.0...v3.0.1
+[3.0.0]: https://github.com/HicServices/RdmpDicom/compare/v2.2.4...v3.0.0
+[2.2.4]: https://github.com/HicServices/RdmpDicom/compare/v2.2.3...v2.2.4
+[2.2.3]: https://github.com/HicServices/RdmpDicom/compare/v2.2.2...v2.2.3
+[2.2.2]: https://github.com/HicServices/RdmpDicom/compare/v2.2.1...v2.2.2
+[2.2.1]: https://github.com/HicServices/RdmpDicom/compare/v2.1.11...v2.2.1
 [2.1.11]: https://github.com/HicServices/RdmpDicom/compare/v2.1.10...v2.1.11
 [2.1.10]: https://github.com/HicServices/RdmpDicom/compare/v2.1.9...v2.1.10
 [2.1.9]: https://github.com/HicServices/RdmpDicom/compare/v2.1.8...v2.1.9

@@ -1,47 +1,59 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.IO;
-using System.IO.Compression;
+using System.Threading;
+using LibArchive.Net;
 
-namespace Rdmp.Dicom.Extraction.FoDicomBased
+namespace Rdmp.Dicom.Extraction.FoDicomBased;
+
+/// <summary>
+/// Holds multiple ZipArchive open at once to prevent repeated opening and closing
+/// </summary>
+public class ZipPool:IDisposable
 {
+    private int _cacheMisses,_opens;
+    public int CacheMisses => _cacheMisses;
+    public int CacheHits => _opens - _cacheMisses;
+
+    private readonly ConcurrentDictionary<string, LibArchiveReader> _openZipFiles = new();    // No assuming FS is case-insensitive!
+
     /// <summary>
-    /// Holds multiple ZipArchive open at once to prevent repeated opening and closing
+    /// The maximum number of zip files to allow to be open at once.  Defaults to 5
     /// </summary>
-    public class ZipPool:IDisposable
+    private int MaxPoolSize => 5;
+
+    public void Dispose()
     {
-        public int CacheMisses { get; private set; }
-        public int CacheHits { get; private set; }
-
-        readonly Dictionary<string, ZipArchive> _openZipFiles = new Dictionary<string, ZipArchive>(StringComparer.InvariantCultureIgnoreCase);
-
-        public void Dispose()
-        {
-            foreach (var za in _openZipFiles.Values)
-                za.Dispose();
-        }
-
-        public ZipArchive OpenRead(string zipPath)
-        {
-            var key = NormalizePath(zipPath);
-
-            if (_openZipFiles.ContainsKey(key))
-            {
-                CacheHits++;
-                return _openZipFiles[key];
-            }
-
-            var v = ZipFile.OpenRead(key);
-            CacheMisses++;
-            _openZipFiles.Add(key,v);
-            return v;
-        }
-
-        public static string NormalizePath(string path)
-        {
-            return Path.GetFullPath(new Uri(path).LocalPath)
-                       .TrimEnd('\\','/');
-        }
-
+        ClearCache();
+        GC.SuppressFinalize(this);
     }
+
+    private void ClearCache()
+    {
+        foreach (var entry in _openZipFiles)
+        {
+            if (_openZipFiles.TryRemove(entry))
+                entry.Value.Dispose();
+        }
+    }
+
+    public LibArchiveReader OpenRead(string zipPath)
+    {
+        var key = NormalizePath(zipPath);
+        if (_openZipFiles.Count>MaxPoolSize)
+            ClearCache();
+        Interlocked.Increment(ref _opens);
+        return _openZipFiles.GetOrAdd(key, key =>
+        {
+            Interlocked.Increment(ref _cacheMisses);
+            return new LibArchiveReader(key);
+        });
+    }
+
+    private static string NormalizePath(string path)
+    {
+        return Path.GetFullPath(new Uri(path).LocalPath)
+            .TrimEnd('\\','/');
+    }
+
 }

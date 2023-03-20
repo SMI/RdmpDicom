@@ -1,12 +1,11 @@
-using MapsDirectlyToDatabaseTable.Versioning;
+using Rdmp.Core.MapsDirectlyToDatabaseTable.Versioning;
 
-namespace Rdmp.Dicom
+namespace Rdmp.Dicom;
+
+public class SMIDatabasePatcher : PluginPatcher
 {
-    public class SMIDatabasePatcher : PluginPatcher
+    public SMIDatabasePatcher():base("db")
     {
-        public SMIDatabasePatcher():base("db")
-        {
 
-        }
     }
 }
