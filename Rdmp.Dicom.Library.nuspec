@@ -6,8 +6,8 @@
         <title>HIC.RDMP.Dicom</title>
         <authors>Health Informatics Centre, University of Dundee</authors>
         <owners>Health Informatics Centre, University of Dundee</owners>
-        <licenseUrl>https://raw.githubusercontent.com/HicServices/RdmpDicom/master/LICENSE</licenseUrl>
-        <projectUrl>https://github.com/HicServices/RdmpDicom</projectUrl>
+        <licenseUrl>https://raw.githubusercontent.com/SMI/RdmpDicom/master/LICENSE</licenseUrl>
+        <projectUrl>https://github.com/SMI/RdmpDicom</projectUrl>
         <iconUrl>https://raw.githubusercontent.com/HicServices/RDMP/master/Application/ResearchDataManagementPlatform/Icon/main.png</iconUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>Rdmp library containing Dicom attachers, Dicom server cache sources etc.</description>

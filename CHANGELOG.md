@@ -35,7 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added MetadataOnly property to FoDicomAnonymiser [#64](https://github.com/HicServices/RdmpDicom/issues/64)
+- Added MetadataOnly property to FoDicomAnonymiser [#64](https://github.com/SMI/RdmpDicom/issues/64)
 
 ## [5.0.10] 2022-06-21
 
@@ -49,7 +49,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [5.0.8] 2022-05-04
 
 ### Changed
-- Corrected resizing for the SemEHR API query builder - [#236](https://github.com/HicServices/RdmpDicom/issues/236)
+- Corrected resizing for the SemEHR API query builder - [#236](https://github.com/SMI/RdmpDicom/issues/236)
 
 ## [5.0.7] 2022-04-26
 
@@ -395,56 +395,56 @@ Updated to be compatible with RDMP 4.2
 
 - Initial commit from private repo
 
-[Unreleased]: https://github.com/HicServices/RdmpDicom/compare/v7.0.0...develop
-[7.0.0]: https://github.com/HicServices/RdmpDicom/compare/v6.0.2...v7.0.0
-[6.0.2]: https://github.com/HicServices/RdmpDicom/compare/v6.0.1...v6.0.2
-[6.0.1]: https://github.com/HicServices/RdmpDicom/compare/v6.0.0...v6.0.1
-[6.0.0]: https://github.com/HicServices/RdmpDicom/compare/v5.0.12...v6.0.0
-[5.0.12]: https://github.com/HicServices/RdmpDicom/compare/v5.0.11...v5.0.12
-[5.0.11]: https://github.com/HicServices/RdmpDicom/compare/v5.0.10...v5.0.11
-[5.0.10]: https://github.com/HicServices/RdmpDicom/compare/v5.0.9...v5.0.10
-[5.0.9]: https://github.com/HicServices/RdmpDicom/compare/v5.0.8...v5.0.9
-[5.0.8]: https://github.com/HicServices/RdmpDicom/compare/v5.0.7...v5.0.8
-[5.0.7]: https://github.com/HicServices/RdmpDicom/compare/v5.0.6...v5.0.7
-[5.0.6]: https://github.com/HicServices/RdmpDicom/compare/v5.0.5...v5.0.6
-[5.0.5]: https://github.com/HicServices/RdmpDicom/compare/v5.0.4...v5.0.5
-[5.0.4]: https://github.com/HicServices/RdmpDicom/compare/v5.0.3...v5.0.4
-[5.0.3]: https://github.com/HicServices/RdmpDicom/compare/v5.0.2...v5.0.3
-[5.0.2]: https://github.com/HicServices/RdmpDicom/compare/v5.0.1...v5.0.2
-[5.0.1]: https://github.com/HicServices/RdmpDicom/compare/v5.0.0...v5.0.1
-[5.0.0]: https://github.com/HicServices/RdmpDicom/compare/v4.0.2...v5.0.0
-[4.0.2]: https://github.com/HicServices/RdmpDicom/compare/v4.0.0...v4.0.2
-[4.0.0]: https://github.com/HicServices/RdmpDicom/compare/v3.0.1...v4.0.0
-[3.0.1]: https://github.com/HicServices/RdmpDicom/compare/v3.0.0...v3.0.1
-[3.0.0]: https://github.com/HicServices/RdmpDicom/compare/v2.2.4...v3.0.0
-[2.2.4]: https://github.com/HicServices/RdmpDicom/compare/v2.2.3...v2.2.4
-[2.2.3]: https://github.com/HicServices/RdmpDicom/compare/v2.2.2...v2.2.3
-[2.2.2]: https://github.com/HicServices/RdmpDicom/compare/v2.2.1...v2.2.2
-[2.2.1]: https://github.com/HicServices/RdmpDicom/compare/v2.1.11...v2.2.1
-[2.1.11]: https://github.com/HicServices/RdmpDicom/compare/v2.1.10...v2.1.11
-[2.1.10]: https://github.com/HicServices/RdmpDicom/compare/v2.1.9...v2.1.10
-[2.1.9]: https://github.com/HicServices/RdmpDicom/compare/v2.1.8...v2.1.9
-[2.1.8]: https://github.com/HicServices/RdmpDicom/compare/v2.1.7...v2.1.8
-[2.1.7]: https://github.com/HicServices/RdmpDicom/compare/v2.1.6...v2.1.7
-[2.1.6]: https://github.com/HicServices/RdmpDicom/compare/v2.1.5...v2.1.6
-[2.1.5]: https://github.com/HicServices/RdmpDicom/compare/v2.1.4...v2.1.5
-[2.1.4]: https://github.com/HicServices/RdmpDicom/compare/v2.1.3...v2.1.4
-[2.1.3]: https://github.com/HicServices/RdmpDicom/compare/v2.1.2...v2.1.3
-[2.1.2]: https://github.com/HicServices/RdmpDicom/compare/v2.1.1...v2.1.2
-[2.1.1]: https://github.com/HicServices/RdmpDicom/compare/v2.1.0...v2.1.1
-[2.1.0]: https://github.com/HicServices/RdmpDicom/compare/v2.0.9...v2.1.0
-[2.0.9]: https://github.com/HicServices/RdmpDicom/compare/v2.0.8...v2.0.9
-[2.0.8]: https://github.com/HicServices/RdmpDicom/compare/v2.0.7...v2.0.8
-[2.0.7]: https://github.com/HicServices/RdmpDicom/compare/v2.0.6...v2.0.7
-[2.0.6]: https://github.com/HicServices/RdmpDicom/compare/v2.0.5...v2.0.6
-[2.0.5]: https://github.com/HicServices/RdmpDicom/compare/v2.0.4...v2.0.5
-[2.0.4]: https://github.com/HicServices/RdmpDicom/compare/v2.0.3...v2.0.4
-[2.0.3]: https://github.com/HicServices/RdmpDicom/compare/v2.0.2...v2.0.3
-[2.0.2]: https://github.com/HicServices/RdmpDicom/compare/v2.0.1...v2.0.2
-[2.0.1]: https://github.com/HicServices/RdmpDicom/compare/v1.3.2...v2.0.1
-[1.3.2]: https://github.com/HicServices/RdmpDicom/compare/v1.3.1...v1.3.2
-[1.3.1]: https://github.com/HicServices/RdmpDicom/compare/v1.3.0...v1.3.1
-[1.3.0]: https://github.com/HicServices/RdmpDicom/compare/v1.1.0...v1.3.0
-[1.1.0]: https://github.com/HicServices/RdmpDicom/compare/v1.0.2...v1.1.0
-[1.0.2]: https://github.com/HicServices/RdmpDicom/compare/1581c5ae3a12db1873f4cf1a930215750ad2ae14...v1.0.2
-[Tag Elevation]:https://github.com/HicServices/DicomTypeTranslation/tree/develop/DicomTypeTranslation/Elevation
+[Unreleased]: https://github.com/SMI/RdmpDicom/compare/v7.0.0...develop
+[7.0.0]: https://github.com/SMI/RdmpDicom/compare/v6.0.2...v7.0.0
+[6.0.2]: https://github.com/SMI/RdmpDicom/compare/v6.0.1...v6.0.2
+[6.0.1]: https://github.com/SMI/RdmpDicom/compare/v6.0.0...v6.0.1
+[6.0.0]: https://github.com/SMI/RdmpDicom/compare/v5.0.12...v6.0.0
+[5.0.12]: https://github.com/SMI/RdmpDicom/compare/v5.0.11...v5.0.12
+[5.0.11]: https://github.com/SMI/RdmpDicom/compare/v5.0.10...v5.0.11
+[5.0.10]: https://github.com/SMI/RdmpDicom/compare/v5.0.9...v5.0.10
+[5.0.9]: https://github.com/SMI/RdmpDicom/compare/v5.0.8...v5.0.9
+[5.0.8]: https://github.com/SMI/RdmpDicom/compare/v5.0.7...v5.0.8
+[5.0.7]: https://github.com/SMI/RdmpDicom/compare/v5.0.6...v5.0.7
+[5.0.6]: https://github.com/SMI/RdmpDicom/compare/v5.0.5...v5.0.6
+[5.0.5]: https://github.com/SMI/RdmpDicom/compare/v5.0.4...v5.0.5
+[5.0.4]: https://github.com/SMI/RdmpDicom/compare/v5.0.3...v5.0.4
+[5.0.3]: https://github.com/SMI/RdmpDicom/compare/v5.0.2...v5.0.3
+[5.0.2]: https://github.com/SMI/RdmpDicom/compare/v5.0.1...v5.0.2
+[5.0.1]: https://github.com/SMI/RdmpDicom/compare/v5.0.0...v5.0.1
+[5.0.0]: https://github.com/SMI/RdmpDicom/compare/v4.0.2...v5.0.0
+[4.0.2]: https://github.com/SMI/RdmpDicom/compare/v4.0.0...v4.0.2
+[4.0.0]: https://github.com/SMI/RdmpDicom/compare/v3.0.1...v4.0.0
+[3.0.1]: https://github.com/SMI/RdmpDicom/compare/v3.0.0...v3.0.1
+[3.0.0]: https://github.com/SMI/RdmpDicom/compare/v2.2.4...v3.0.0
+[2.2.4]: https://github.com/SMI/RdmpDicom/compare/v2.2.3...v2.2.4
+[2.2.3]: https://github.com/SMI/RdmpDicom/compare/v2.2.2...v2.2.3
+[2.2.2]: https://github.com/SMI/RdmpDicom/compare/v2.2.1...v2.2.2
+[2.2.1]: https://github.com/SMI/RdmpDicom/compare/v2.1.11...v2.2.1
+[2.1.11]: https://github.com/SMI/RdmpDicom/compare/v2.1.10...v2.1.11
+[2.1.10]: https://github.com/SMI/RdmpDicom/compare/v2.1.9...v2.1.10
+[2.1.9]: https://github.com/SMI/RdmpDicom/compare/v2.1.8...v2.1.9
+[2.1.8]: https://github.com/SMI/RdmpDicom/compare/v2.1.7...v2.1.8
+[2.1.7]: https://github.com/SMI/RdmpDicom/compare/v2.1.6...v2.1.7
+[2.1.6]: https://github.com/SMI/RdmpDicom/compare/v2.1.5...v2.1.6
+[2.1.5]: https://github.com/SMI/RdmpDicom/compare/v2.1.4...v2.1.5
+[2.1.4]: https://github.com/SMI/RdmpDicom/compare/v2.1.3...v2.1.4
+[2.1.3]: https://github.com/SMI/RdmpDicom/compare/v2.1.2...v2.1.3
+[2.1.2]: https://github.com/SMI/RdmpDicom/compare/v2.1.1...v2.1.2
+[2.1.1]: https://github.com/SMI/RdmpDicom/compare/v2.1.0...v2.1.1
+[2.1.0]: https://github.com/SMI/RdmpDicom/compare/v2.0.9...v2.1.0
+[2.0.9]: https://github.com/SMI/RdmpDicom/compare/v2.0.8...v2.0.9
+[2.0.8]: https://github.com/SMI/RdmpDicom/compare/v2.0.7...v2.0.8
+[2.0.7]: https://github.com/SMI/RdmpDicom/compare/v2.0.6...v2.0.7
+[2.0.6]: https://github.com/SMI/RdmpDicom/compare/v2.0.5...v2.0.6
+[2.0.5]: https://github.com/SMI/RdmpDicom/compare/v2.0.4...v2.0.5
+[2.0.4]: https://github.com/SMI/RdmpDicom/compare/v2.0.3...v2.0.4
+[2.0.3]: https://github.com/SMI/RdmpDicom/compare/v2.0.2...v2.0.3
+[2.0.2]: https://github.com/SMI/RdmpDicom/compare/v2.0.1...v2.0.2
+[2.0.1]: https://github.com/SMI/RdmpDicom/compare/v1.3.2...v2.0.1
+[1.3.2]: https://github.com/SMI/RdmpDicom/compare/v1.3.1...v1.3.2
+[1.3.1]: https://github.com/SMI/RdmpDicom/compare/v1.3.0...v1.3.1
+[1.3.0]: https://github.com/SMI/RdmpDicom/compare/v1.1.0...v1.3.0
+[1.1.0]: https://github.com/SMI/RdmpDicom/compare/v1.0.2...v1.1.0
+[1.0.2]: https://github.com/SMI/RdmpDicom/compare/1581c5ae3a12db1873f4cf1a930215750ad2ae14...v1.0.2
+[Tag Elevation]:https://github.com/SMI/DicomTypeTranslation/tree/develop/DicomTypeTranslation/Elevation
