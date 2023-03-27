@@ -1,4 +1,4 @@
-[![Build status](https://github.com/HicServices/RdmpDicom/actions/workflows/dotnet-core.yml/badge.svg)](https://github.com/HicServices/RdmpDicom/actions/workflows/dotnet-core.yml) [![Total alerts](https://img.shields.io/lgtm/alerts/g/HicServices/RdmpDicom.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/HicServices/RdmpDicom/alerts/) [![NuGet Badge](https://buildstats.info/nuget/HIC.RDMP.Dicom)](https://buildstats.info/nuget/HIC.RDMP.Dicom)
+[![Build status](https://github.com/SMI/RdmpDicom/actions/workflows/dotnet-core.yml/badge.svg)](https://github.com/SMI/RdmpDicom/actions/workflows/dotnet-core.yml) [![Total alerts](https://img.shields.io/lgtm/alerts/g/SMI/RdmpDicom.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/SMI/RdmpDicom/alerts/) [![NuGet Badge](https://buildstats.info/nuget/HIC.RDMP.Dicom)](https://buildstats.info/nuget/HIC.RDMP.Dicom)
 
 # RdmpDicom
 Plugin for [RDMP](https://github.com/HicServices/RDMP) that adds support for load, linking (with EHR data in relational databases) and extracting anonymous DICOM images for researchers.
@@ -9,7 +9,7 @@ Plugin for [RDMP](https://github.com/HicServices/RDMP) that adds support for loa
 The following demo shows how to deploy and use the RDMP dicom plugin:
 https://youtu.be/j42hmVZKRb4
 
-Releases of the Rdmp.Dicom plugin are hosted in the [Releases section of this Github Repository](https://github.com/HicServices/RdmpDicom/releases).  Once you have downloaded the plugin you can add it to your RDMP instance through the Plugins node in the Tables collection:
+Releases of the Rdmp.Dicom plugin are hosted in the [Releases section of this Github Repository](https://github.com/SMI/RdmpDicom/releases).  Once you have downloaded the plugin you can add it to your RDMP instance through the Plugins node in the Tables collection:
 
 ![Overview](./Documentation/Images/AddPlugin.png)
 
