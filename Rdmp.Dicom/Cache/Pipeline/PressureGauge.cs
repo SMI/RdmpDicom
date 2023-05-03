@@ -15,8 +15,8 @@ public class PressureGauge
     /// </summary>
     public long ThresholdBeatsPerMinute { get; set; }
 
-    List<DateTime> collection = new();
-    object oLock = new();
+    private List<DateTime> collection = new();
+    private object oLock = new();
 
     /// <summary>
     /// Marks that an event happened at the current date time

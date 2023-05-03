@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Data;
+﻿using System.Data;
 using System.Linq;
 using FAnsi;
 using NUnit.Framework;
@@ -10,7 +9,7 @@ using Tests.Common;
 
 namespace Rdmp.Dicom.Tests;
 
-class IsolationReviewTests : DatabaseTests
+internal class IsolationReviewTests : DatabaseTests
 {
 
     [TestCase(DatabaseType.MicrosoftSQLServer)]

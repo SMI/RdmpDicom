@@ -5,8 +5,9 @@ using System;
 
 namespace Rdmp.Dicom.Tests;
 
-class PressureGaugeTests
+internal class PressureGaugeTests
 {
+    private static readonly ThrowImmediatelyDataLoadEventListener Thrower = new();
     [Test]
     public void TestGauge_NotReached()
     {
@@ -16,7 +17,7 @@ class PressureGaugeTests
         {
             ThresholdBeatsPerMinute = 4
         };
-        g.Tick(new DateTime(2001, 01, 01, 01, 01, 01), new ThrowImmediatelyDataLoadEventListener(), () => someFact = true);
+        g.Tick(new DateTime(2001, 01, 01, 01, 01, 01), Thrower, () => someFact = true);
         Assert.IsFalse(someFact);
     }
     [Test]
@@ -29,12 +30,12 @@ class PressureGaugeTests
             ThresholdBeatsPerMinute = 1
         };
 
-        // events are 1 minute appart so does not trigger
-        g.Tick(new(2001, 01, 01, 01, 01, 01), new ThrowImmediatelyDataLoadEventListener(), () => someFact = true);
+        // events are 1 minute apart so does not trigger
+        g.Tick(new DateTime(2001, 01, 01, 01, 01, 01), Thrower, () => someFact = true);
         Assert.IsFalse(someFact);
-        g.Tick(new(2001, 01, 01, 01, 02, 01), new ThrowImmediatelyDataLoadEventListener(), () => someFact = true);
+        g.Tick(new DateTime(2001, 01, 01, 01, 02, 01), Thrower, () => someFact = true);
         Assert.IsFalse(someFact);
-        g.Tick(new(2001, 01, 01, 01, 03, 01), new ThrowImmediatelyDataLoadEventListener(), () => someFact = true);
+        g.Tick(new DateTime(2001, 01, 01, 01, 03, 01), Thrower, () => someFact = true);
         Assert.IsFalse(someFact);
     }
     [Test]
@@ -46,15 +47,15 @@ class PressureGaugeTests
         {
             ThresholdBeatsPerMinute = 4
         };
-        g.Tick(new DateTime(2001, 01, 01, 01, 01, 01), new ThrowImmediatelyDataLoadEventListener(), () => someFact = true);
+        g.Tick(new DateTime(2001, 01, 01, 01, 01, 01), Thrower, () => someFact = true);
         Assert.IsFalse(someFact);
-        g.Tick(new(2001, 01, 01, 01, 01, 01), new ThrowImmediatelyDataLoadEventListener(), () => someFact = true);
+        g.Tick(new DateTime(2001, 01, 01, 01, 01, 01), Thrower, () => someFact = true);
         Assert.IsFalse(someFact);
-        g.Tick(new(2001, 01, 01, 01, 01, 01), new ThrowImmediatelyDataLoadEventListener(), () => someFact = true);
+        g.Tick(new DateTime(2001, 01, 01, 01, 01, 01), Thrower, () => someFact = true);
         Assert.IsFalse(someFact);
-        g.Tick(new(2001, 01, 01, 01, 01, 01), new ThrowImmediatelyDataLoadEventListener(), () => someFact = true);
+        g.Tick(new DateTime(2001, 01, 01, 01, 01, 01), Thrower, () => someFact = true);
         Assert.IsFalse(someFact);
-        g.Tick(new(2001, 01, 01, 01, 01, 01), new ThrowImmediatelyDataLoadEventListener(), () => someFact = true);
+        g.Tick(new DateTime(2001, 01, 01, 01, 01, 01), Thrower, () => someFact = true);
         Assert.IsTrue(someFact);
     }
 
@@ -67,9 +68,9 @@ class PressureGaugeTests
         {
             ThresholdBeatsPerMinute = 1
         };
-        g.Tick(new DateTime(2001, 01, 01, 01, 01, 01), new ThrowImmediatelyDataLoadEventListener(), () => someFact = true);
+        g.Tick(new DateTime(2001, 01, 01, 01, 01, 01), Thrower, () => someFact = true);
         Assert.IsFalse(someFact);
-        g.Tick(new(2001, 01, 01, 01, 01, 30), new ThrowImmediatelyDataLoadEventListener(), () => someFact = true);
+        g.Tick(new DateTime(2001, 01, 01, 01, 01, 30), Thrower, () => someFact = true);
         Assert.IsTrue(someFact);
     }
     [Test]
@@ -81,9 +82,9 @@ class PressureGaugeTests
         {
             ThresholdBeatsPerMinute = 1
         };
-        g.Tick(new DateTime(2001, 01, 01, 01, 01, 30), new ThrowImmediatelyDataLoadEventListener(), () => someFact = true);
+        g.Tick(new DateTime(2001, 01, 01, 01, 01, 30), Thrower, () => someFact = true);
         Assert.IsFalse(someFact);
-        g.Tick(new(2001, 01, 01, 01, 02, 29), new ThrowImmediatelyDataLoadEventListener(), () => someFact = true);
+        g.Tick(new DateTime(2001, 01, 01, 01, 02, 29), Thrower, () => someFact = true);
         Assert.IsTrue(someFact);
     }
 }

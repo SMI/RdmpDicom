@@ -14,7 +14,7 @@ namespace Rdmp.Dicom.Tests.Unit;
 
 internal class PacsFetch
 {
-    class QRService : DicomService, IDicomServiceProvider, IDicomCFindProvider, IDicomCEchoProvider,
+    private class QRService : DicomService, IDicomServiceProvider, IDicomCFindProvider, IDicomCEchoProvider,
         IDicomCMoveProvider
     {
         private static readonly DicomServiceDependencies Deps = new(new ConsoleLogManager(),

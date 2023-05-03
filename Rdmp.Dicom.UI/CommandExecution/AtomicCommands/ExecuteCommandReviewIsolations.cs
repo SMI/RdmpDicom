@@ -5,13 +5,13 @@ using Rdmp.UI.ItemActivation;
 
 namespace Rdmp.Dicom.UI.CommandExecution.AtomicCommands;
 
-class ExecuteCommandReviewIsolations: BasicUICommandExecution
+internal class ExecuteCommandReviewIsolations: BasicUICommandExecution
 {
     private readonly IsolationReview _reviewer;
 
     public ExecuteCommandReviewIsolations(IActivateItems activator, ProcessTask processTask) : base(activator)
     {
-        _reviewer = new(processTask);
+        _reviewer = new IsolationReview(processTask);
 
         if (_reviewer.Error != null) 
             SetImpossible(_reviewer.Error);

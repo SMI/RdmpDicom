@@ -32,16 +32,16 @@ public class DicomFileCollectionSourceTests : DatabaseTests
         if (expressRelative)
             source.ArchiveRoot = TestContext.CurrentContext.TestDirectory;
 
-        var f = new FlatFileToLoad(new(Path.Combine(TestContext.CurrentContext.TestDirectory,@"TestData/IM-0001-0013.dcm")));
+        var f = new FlatFileToLoad(new FileInfo(Path.Combine(TestContext.CurrentContext.TestDirectory,@"TestData/IM-0001-0013.dcm")));
             
         source.PreInitialize(new FlatFileToLoadDicomFileWorklist(f), new ThrowImmediatelyDataLoadEventListener());
 
-        var tbl = source.GetChunk(new ThrowImmediatelyDataLoadEventListener(), new());
+        var tbl = source.GetChunk(new ThrowImmediatelyDataLoadEventListener(), new GracefulCancellationToken());
         var destination = new DataTableUploadDestination();
             
         destination.PreInitialize(db,new ThrowImmediatelyDataLoadEventListener());
         destination.AllowResizingColumnsAtUploadTime = true;
-        destination.ProcessPipelineData(tbl, new ThrowImmediatelyDataLoadEventListener(), new());
+        destination.ProcessPipelineData(tbl, new ThrowImmediatelyDataLoadEventListener(), new GracefulCancellationToken());
         destination.Dispose(new ThrowImmediatelyDataLoadEventListener(), null);
 
         var finalTable = db.ExpectTable(destination.TargetTableName);
@@ -81,7 +81,7 @@ public class DicomFileCollectionSourceTests : DatabaseTests
         DicomDataGenerator generator = new(r, dirToLoad.FullName, "CT") {MaximumImages = 5};
         var people = new PersonCollection();
         people.GeneratePeople(1,r);
-        generator.GenerateTestDataFile(people,new("./inventory.csv"),1);
+        generator.GenerateTestDataFile(people,new FileInfo("./inventory.csv"),1);
 
         //This generates
         // Test_ZipFile
@@ -117,12 +117,12 @@ public class DicomFileCollectionSourceTests : DatabaseTests
 
         source.PreInitialize(new FlatFileToLoadDicomFileWorklist(f), new ThrowImmediatelyDataLoadEventListener());
 
-        var tbl = source.GetChunk(new ThrowImmediatelyDataLoadEventListener(), new());
+        var tbl = source.GetChunk(new ThrowImmediatelyDataLoadEventListener(), new GracefulCancellationToken());
         var destination = new DataTableUploadDestination();
             
         destination.PreInitialize(db,new ThrowImmediatelyDataLoadEventListener());
         destination.AllowResizingColumnsAtUploadTime = true;
-        destination.ProcessPipelineData(tbl, new ThrowImmediatelyDataLoadEventListener(), new());
+        destination.ProcessPipelineData(tbl, new ThrowImmediatelyDataLoadEventListener(), new GracefulCancellationToken());
         destination.Dispose(new ThrowImmediatelyDataLoadEventListener(), null);
 
         var finalTable = db.ExpectTable(destination.TargetTableName);
@@ -175,7 +175,7 @@ public class DicomFileCollectionSourceTests : DatabaseTests
         DicomDataGenerator generator = new(r, dirToLoad.FullName, "CT") {MaximumImages = 5};
         var people = new PersonCollection();
         people.GeneratePeople(1,r);
-        generator.GenerateTestDataFile(people,new("./inventory.csv"),1);
+        generator.GenerateTestDataFile(people,new FileInfo("./inventory.csv"),1);
 
         //This generates
         // Test_ZipFile
@@ -239,7 +239,7 @@ public class DicomFileCollectionSourceTests : DatabaseTests
         //run pipeline
         var pipe = new DataFlowPipelineEngine<DataTable>(context,source,destination,new ThrowImmediatelyDataLoadEventListener());
         pipe.Initialize(db,worklist);
-        pipe.ExecutePipeline(new());
+        pipe.ExecutePipeline(new GracefulCancellationToken());
 
         var finalTable = db.ExpectTable(destination.TargetTableName);
             

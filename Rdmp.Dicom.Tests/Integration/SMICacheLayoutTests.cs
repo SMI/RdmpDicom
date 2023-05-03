@@ -5,13 +5,13 @@ using System.IO;
 
 namespace Rdmp.Dicom.Tests.Integration;
 
-class SMICacheLayoutTests
+internal class SMICacheLayoutTests
 {
     [Test]
     public void TestFactoryConstruction()
     {
         var rootDirectory = new DirectoryInfo(TestContext.CurrentContext.WorkDirectory);
-        var layout = new SMICacheLayout(rootDirectory,new("CT"));
+        var layout = new SMICacheLayout(rootDirectory,new SMICachePathResolver("CT"));
 
         var downloadDirectory = layout.GetLoadCacheDirectory(new ThrowImmediatelyDataLoadEventListener());
 

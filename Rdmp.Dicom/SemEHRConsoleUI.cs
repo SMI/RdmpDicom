@@ -7,6 +7,9 @@
 //      You can make changes to this file and they will not be overwritten when saving.
 //  </auto-generated>
 // -----------------------------------------------------------------------------
+
+using System.Collections.Generic;
+
 namespace Rdmp.Dicom;
 
 using Rdmp.Core.CommandExecution;
@@ -69,7 +72,7 @@ public partial class SemEHRConsoleUI {
         _configuration.StartEndDateFormat = tbDateFormat.Text.ToString();
         _configuration.Query = tbQuery.Text.ToString();
 
-        _configuration.Temporality = new();
+        _configuration.Temporality = new List<string>();
 
         if (cbRecent.Checked)
             _configuration.Temporality.Add(cbRecent.Text.ToString());
@@ -85,7 +88,7 @@ public partial class SemEHRConsoleUI {
         _configuration.UseEndDate = cbUseEndDate.Checked;
         _configuration.EndDate = dptEndDate.Date;
 
-        _configuration.Modalities = new();
+        _configuration.Modalities = new List<string>();
         if(!string.IsNullOrEmpty(tbModalities.Text.ToString()))
             foreach(var m in tbModalities.Text.ToString().Split(","))
             {

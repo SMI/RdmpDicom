@@ -9,12 +9,12 @@ using Tests.Common;
 
 namespace Rdmp.Dicom.Tests.Integration;
 
-class ExecuteCommandCreateNewImagingDatasetSuiteTests : DatabaseTests
+internal class ExecuteCommandCreateNewImagingDatasetSuiteTests : DatabaseTests
 {
 
   #region Template
 
-  const string TemplateYaml = @"
+  private const string TemplateYaml = @"
 #Last Modified: 2020-04-07
 Tables:
 - TableName: StudyTable
@@ -152,10 +152,10 @@ Tables:
     File.WriteAllText(template,TemplateYaml);
 
     var cmd = new ExecuteCommandCreateNewImagingDatasetSuite(RepositoryLocator,db,
-      new(TestContext.CurrentContext.WorkDirectory),
+      new DirectoryInfo(TestContext.CurrentContext.WorkDirectory),
       typeof(DicomFileCollectionSource),
       "CT_",
-      new(template),
+      new FileInfo(template),
       persistentRaw: false,
       createLoad: true);
 

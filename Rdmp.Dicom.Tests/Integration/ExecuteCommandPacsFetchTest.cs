@@ -6,7 +6,7 @@ using Tests.Common;
 
 namespace Rdmp.Dicom.Tests.Integration;
 
-class ExecuteCommandPacsFetchTest : DatabaseTests
+internal class ExecuteCommandPacsFetchTest : DatabaseTests
 {
     [Ignore("Can be run manually, but that's a lot of data to pull!")]
     [Test]

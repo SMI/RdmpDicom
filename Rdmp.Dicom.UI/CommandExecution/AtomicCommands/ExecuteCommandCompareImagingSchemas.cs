@@ -15,7 +15,7 @@ namespace Rdmp.Dicom.UI.CommandExecution.AtomicCommands;
 /// <summary>
 /// Shows the differences made to a table after creation from a given imaging template
 /// </summary>
-class ExecuteCommandCompareImagingSchemas : BasicUICommandExecution
+internal class ExecuteCommandCompareImagingSchemas : BasicUICommandExecution
 {
     private readonly ITableInfo _tableInfo;
 

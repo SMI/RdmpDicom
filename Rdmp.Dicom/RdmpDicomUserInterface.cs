@@ -9,7 +9,7 @@ namespace Rdmp.Dicom.UI;
 
 public class RdmpDicomConsoleUserInterface : PluginUserInterface
 {
-    readonly IBasicActivateItems _activator;
+    private readonly IBasicActivateItems _activator;
 
     public RdmpDicomConsoleUserInterface(IBasicActivateItems itemActivator) : base(itemActivator)
     {
@@ -19,10 +19,8 @@ public class RdmpDicomConsoleUserInterface : PluginUserInterface
     public override bool CustomActivate(IMapsDirectlyToDatabaseTable o)
     {
         // if its not a terminal gui don't run a terminal gui UI!
-        if(_activator == null || !_activator.GetType().Name.Equals("ConsoleGuiActivator"))
-        {
+        if(_activator?.GetType().Name.Equals("ConsoleGuiActivator") != true)
             return false;
-        }
 
         if (o is not AggregateConfiguration ac) return base.CustomActivate(o);
         var api = new SemEHRApiCaller();
@@ -31,6 +29,5 @@ public class RdmpDicomConsoleUserInterface : PluginUserInterface
         var ui = new SemEHRConsoleUI(_activator, api, ac);
         Application.Run(ui);
         return true;
-
     }
 }

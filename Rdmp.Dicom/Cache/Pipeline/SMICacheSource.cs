@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using FellowOakDicom;
 using FellowOakDicom.Network;
-using Rdmp.Core.MapsDirectlyToDatabaseTable;
 using Rdmp.Core.ReusableLibraryCode.Checks;
 using Rdmp.Core.ReusableLibraryCode.DataAccess;
 using Rdmp.Core.ReusableLibraryCode.Progress;
@@ -10,6 +9,7 @@ using Rdmp.Dicom.Cache.Pipeline.Dicom;
 using Rdmp.Dicom.PACS;
 using Rdmp.Core.Curation.Data;
 using Rdmp.Core.Caching.Pipeline.Sources;
+using Rdmp.Core.MapsDirectlyToDatabaseTable;
 using Rdmp.Core.QueryBuilding;
 
 namespace Rdmp.Dicom.Cache.Pipeline;
@@ -65,7 +65,7 @@ public abstract class SMICacheSource : CacheSource<SMIDataChunk>
     protected DicomCMoveRequest CreateCMoveByStudyUid(string destination, string studyUid, IDataLoadEventListener listener)
     {
         var request = new DicomCMoveRequest(destination, studyUid);
-        listener.OnNotify(this, new(ProgressEventType.Information,
+        listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information,
             $"DicomRetriever.CreateCMoveByStudyUid created request for: {studyUid}"));
         // no more dicomtags have to be set
         return request;
@@ -92,15 +92,15 @@ public abstract class SMICacheSource : CacheSource<SMIDataChunk>
         var echoRequestSender = new DicomRequestSender(GetConfiguration(), new FromCheckNotifierToDataLoadEventListener(notifier),true);
         echoRequestSender.OnRequestException += ex =>
         {
-            notifier.OnCheckPerformed(new("Error sending ECHO", CheckResult.Fail, ex));
+            notifier.OnCheckPerformed(new CheckEventArgs("Error sending ECHO", CheckResult.Fail, ex));
         };
         echoRequestSender.OnRequestTimeout += () =>
         {
-            notifier.OnCheckPerformed(new("Failed to get response from server after timeout", CheckResult.Fail));
+            notifier.OnCheckPerformed(new CheckEventArgs("Failed to get response from server after timeout", CheckResult.Fail));
         };
         echoRequestSender.OnRequestSucess += () =>
         {
-            notifier.OnCheckPerformed(new("Successfully received C-ECHO response from remote PACS", CheckResult.Success));
+            notifier.OnCheckPerformed(new CheckEventArgs("Successfully received C-ECHO response from remote PACS", CheckResult.Success));
         };
 
         try
@@ -109,7 +109,7 @@ public abstract class SMICacheSource : CacheSource<SMIDataChunk>
         }
         catch (Exception e)
         {
-            notifier.OnCheckPerformed(new("Error when sending C-ECHO to remote PACS", CheckResult.Fail, e));
+            notifier.OnCheckPerformed(new CheckEventArgs("Error when sending C-ECHO to remote PACS", CheckResult.Fail, e));
         }
     }
     #endregion
@@ -121,7 +121,7 @@ public abstract class SMICacheSource : CacheSource<SMIDataChunk>
         var request = new DicomCFindRequest(DicomQueryRetrieveLevel.Study, priority);
 
         // always add the encoding - with agnostic encoding
-        request.Dataset.AddOrUpdate(new(0x8, 0x5), "ISO_IR 100");
+        request.Dataset.AddOrUpdate(new DicomTag(0x8, 0x5), "ISO_IR 100");
 
         // add the dicom tags with empty values that should be included in the result of the QR Server
         request.Dataset.AddOrUpdate(DicomTag.PatientID, "");
@@ -151,7 +151,7 @@ public abstract class SMICacheSource : CacheSource<SMIDataChunk>
         // you realy need pro process your data and not to cause unneccessary traffic and IO load:
         var request = new DicomCFindRequest(DicomQueryRetrieveLevel.Series, priority);
 
-        request.Dataset.AddOrUpdate(new(0x8, 0x5), "ISO_IR 100");
+        request.Dataset.AddOrUpdate(new DicomTag(0x8, 0x5), "ISO_IR 100");
 
         // add the dicom tags with empty values that should be included in the result
         request.Dataset.AddOrUpdate(DicomTag.SeriesInstanceUID, "");
@@ -173,7 +173,7 @@ public abstract class SMICacheSource : CacheSource<SMIDataChunk>
         // you realy need pro process your data and not to cause unneccessary traffic and IO load:
         var request = new DicomCFindRequest(DicomQueryRetrieveLevel.Image, priority);
 
-        request.Dataset.AddOrUpdate(new(0x8, 0x5), "ISO_IR 100");
+        request.Dataset.AddOrUpdate(new DicomTag(0x8, 0x5), "ISO_IR 100");
 
         // add the dicom tags with empty values that should be included in the result
         request.Dataset.AddOrUpdate(DicomTag.PatientID, "");
@@ -191,7 +191,7 @@ public abstract class SMICacheSource : CacheSource<SMIDataChunk>
     #region GetConfiguration
     protected DicomConfiguration GetConfiguration()
     {
-        return new()
+        return new DicomConfiguration
         {
             LocalAetTitle = LocalAETitle,
             LocalAetUri = DicomConfiguration.MakeUriUsePort(LocalAEUri, LocalAEPort),
@@ -214,17 +214,17 @@ public abstract class SMICacheSource : CacheSource<SMIDataChunk>
     /// <param name="listener"></param>
     protected void GetWhitelist(IDataLoadEventListener listener)
     {
-        Whitelist = new();
+        Whitelist = new HashSet<string>();
 
         var db = DataAccessPortal.GetInstance().ExpectDatabase(PatientIdWhitelistColumnInfo.TableInfo, DataAccessContext.DataLoad);
         var server = db.Server;
 
         var qb = new QueryBuilder("distinct", null);
-        qb.AddColumn(new ColumnInfoToIColumn(new(), PatientIdWhitelistColumnInfo));
+        qb.AddColumn(new ColumnInfoToIColumn(new MemoryRepository(), PatientIdWhitelistColumnInfo));
 
         var sql = qb.SQL;
 
-        listener.OnNotify(this, new(ProgressEventType.Information,
+        listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information,
             $"Downloading Whitelist with SQL:{sql}"));
 
         using (var con = server.GetConnection())
@@ -242,7 +242,7 @@ public abstract class SMICacheSource : CacheSource<SMIDataChunk>
             }
         }
 
-        listener.OnNotify(this, new(Whitelist.Count == 0 ? ProgressEventType.Error : ProgressEventType.Information,
+        listener.OnNotify(this, new NotifyEventArgs(Whitelist.Count == 0 ? ProgressEventType.Error : ProgressEventType.Information,
             $"Whitelist contained {Whitelist.Count} identifiers"));
     }
     #endregion

@@ -88,7 +88,7 @@ public partial class SemEHRUI : Form
         _configuration.StartEndDateFormat = tbStartEndDateFormat.Text;
         _configuration.Query = tbQuery.Text;
 
-        _configuration.Temporality = new();
+        _configuration.Temporality = new List<string>();
         foreach (KeyValuePair<string, string> item in cblTemporality.CheckedItems)
         {
             _configuration.Temporality.Add(item.Value.ToString());                
@@ -105,7 +105,7 @@ public partial class SemEHRUI : Form
         _configuration.UseEndDate = cbUseEndDate.Checked;
         _configuration.EndDate = dtpEndDate.Value;
 
-        _configuration.Modalities = new();
+        _configuration.Modalities = new List<string>();
         foreach (KeyValuePair<string, string> item in cblModalities.CheckedItems)
         {
             _configuration.Modalities.Add(item.Value);

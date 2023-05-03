@@ -6,7 +6,7 @@ namespace Rdmp.Dicom.Tests.Unit;
 /// <summary>
 /// Helper class for writing unit tests that use DataTable objects.
 /// </summary>
-class DataTableTestHelper
+internal class DataTableTestHelper
 {
     /// <summary>
     /// Creates a new DataTable object where all data values are strings.

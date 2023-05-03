@@ -75,7 +75,7 @@ public class TagColumnAdder: ICheckable
 
         if(ColumnAlreadyExists())
         {
-            notifier.OnCheckPerformed(new(
+            notifier.OnCheckPerformed(new CheckEventArgs(
                 $"There is already a column called '{_tagName}' in TableInfo {_tableInfo}.  No column will be created.",CheckResult.Warning));
             return;
         }
@@ -84,11 +84,11 @@ public class TagColumnAdder: ICheckable
         try
         {
             var cSharpType = db.Server.GetQuerySyntaxHelper().TypeTranslater.GetCSharpTypeForSQLDBType(_datatype);
-            notifier.OnCheckPerformed(new($"Datatype { _datatype } is compatible with TypeTranslater as { cSharpType }",CheckResult.Success));
+            notifier.OnCheckPerformed(new CheckEventArgs($"Datatype { _datatype } is compatible with TypeTranslater as { cSharpType }",CheckResult.Success));
         }
         catch (Exception ex)
         {
-            notifier.OnCheckPerformed(new($"Datatype '{_datatype}' is not supported",CheckResult.Fail, ex));
+            notifier.OnCheckPerformed(new CheckEventArgs($"Datatype '{_datatype}' is not supported",CheckResult.Fail, ex));
         }
     }
 

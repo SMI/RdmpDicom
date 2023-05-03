@@ -5,16 +5,16 @@ using Rdmp.Core.Curation;
 using Rdmp.Core.Curation.Data;
 using Rdmp.Core.Curation.Data.Cache;
 using Rdmp.Core.Curation.Data.DataLoad;
-using Rdmp.Core.DataFlowPipeline;
 using Rdmp.Core.Repositories;
 using Rdmp.Dicom.Cache.Pipeline;
 using Rdmp.Core.ReusableLibraryCode.Progress;
 using System;
 using System.IO;
+using Rdmp.Core.DataFlowPipeline;
 
 namespace Rdmp.Dicom.CommandExecution;
 
-class ExecuteCommandPacsFetch : BasicCommandExecution, ICacheFetchRequestProvider
+internal class ExecuteCommandPacsFetch : BasicCommandExecution, ICacheFetchRequestProvider
 {
     private BackfillCacheFetchRequest _request;
     private PACSSource _source;
@@ -37,12 +37,12 @@ class ExecuteCommandPacsFetch : BasicCommandExecution, ICacheFetchRequestProvide
         var cp = new CacheProgress(memory,lp);
 
         //Create the source component only and a valid request range to fetch
-        _source = new()
+        _source = new PACSSource
         {
-            RemoteAEUri = new($"http://{remoteAeUri}"),
+            RemoteAEUri = new Uri($"http://{remoteAeUri}"),
             RemoteAEPort = remotePort,
             RemoteAETitle = remoteAeTitle,
-            LocalAEUri = new($"http://{localAeUri}"),
+            LocalAEUri = new Uri($"http://{localAeUri}"),
             LocalAEPort = localPort,
             LocalAETitle = localAeTitle,
             TransferTimeOutInSeconds = 50000,
@@ -51,7 +51,7 @@ class ExecuteCommandPacsFetch : BasicCommandExecution, ICacheFetchRequestProvide
         };
         //<- rly? its not gonna pass without an http!?
 
-        _request = new(BasicActivator.RepositoryLocator.CatalogueRepository, startDate)
+        _request = new BackfillCacheFetchRequest(BasicActivator.RepositoryLocator.CatalogueRepository, startDate)
         {
             ChunkPeriod = endDate.Subtract(startDate), CacheProgress = cp
         };
@@ -67,7 +67,7 @@ class ExecuteCommandPacsFetch : BasicCommandExecution, ICacheFetchRequestProvide
     {
         base.Execute();
 
-        _source.GetChunk(new ThrowImmediatelyDataLoadEventListener {WriteToConsole = true},new());
+        _source.GetChunk(new ThrowImmediatelyDataLoadEventListener {WriteToConsole = true},new GracefulCancellationToken());
 
     }
     public ICacheFetchRequest Current => _request;

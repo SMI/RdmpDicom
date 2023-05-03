@@ -22,7 +22,7 @@ namespace Rdmp.Dicom.UI;
 
 public class RdmpDicomUserInterface : PluginUserInterface, IRefreshBusSubscriber
 {
-    readonly IActivateItems _activator;
+    private readonly IActivateItems _activator;
 
     public RdmpDicomUserInterface(IBasicActivateItems itemActivator) : base(itemActivator)
     {

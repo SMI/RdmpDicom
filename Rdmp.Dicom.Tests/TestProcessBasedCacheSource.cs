@@ -3,24 +3,28 @@ using Rdmp.Core.Caching.Requests.FetchRequestProvider;
 using Rdmp.Core.Curation;
 using Rdmp.Core.Curation.Data;
 using Rdmp.Core.Curation.Data.Cache;
-using Rdmp.Core.DataFlowPipeline;
 using Rdmp.Dicom.Cache.Pipeline;
 using Rdmp.Core.ReusableLibraryCode.Progress;
 using System;
 using System.IO;
 using System.Linq;
+using Rdmp.Core.DataFlowPipeline;
 using Tests.Common;
 
 namespace Rdmp.Dicom.Tests;
 
-class TestProcessBasedCacheSource : UnitTests
+internal class TestProcessBasedCacheSource : UnitTests
 {
     [Test]
     public void TestWithEcho()
     {
-        var source = new ProcessBasedCacheSource();
+        var source = new ProcessBasedCacheSource
+        {
+            TimeFormat = "dd/MM/yy",
+            ThrowOnNonZeroExitCode = true
+        };
 
-        if(IsLinux)
+        if (IsLinux)
         {
             source.Command = "/bin/echo";
             source.Args = "Hey Thomas go get %s and store in %d";
@@ -30,8 +34,6 @@ class TestProcessBasedCacheSource : UnitTests
             source.Command = "cmd.exe";
             source.Args = "/c echo Hey Thomas go get %s and store in %d";
         }
-        source.TimeFormat = "dd/MM/yy";
-        source.ThrowOnNonZeroExitCode = true;
 
         // What dates to load
         var cp = WhenIHaveA<CacheProgress>();
@@ -46,28 +48,19 @@ class TestProcessBasedCacheSource : UnitTests
 
         lmd.LocationOfFlatFiles = loadDir.RootPath.FullName;            
         lmd.SaveToDatabase();
-            
-        source.PreInitialize(new CacheFetchRequestProvider(cp), new ThrowImmediatelyDataLoadEventListener());
-        source.PreInitialize(cp.CatalogueRepository,new ThrowImmediatelyDataLoadEventListener());
-        source.PreInitialize(new PermissionWindow(cp.CatalogueRepository),new ThrowImmediatelyDataLoadEventListener());
+
+        var thrower = new ThrowImmediatelyDataLoadEventListener();
+        source.PreInitialize(new CacheFetchRequestProvider(cp), thrower);
+        source.PreInitialize(cp.CatalogueRepository,thrower);
+        source.PreInitialize(new PermissionWindow(cp.CatalogueRepository),thrower);
             
         var toMem = new ToMemoryDataLoadEventListener(true);
-        var fork = new ForkDataLoadEventListener(toMem,new ThrowImmediatelyDataLoadEventListener {WriteToConsole = true});
+        var fork = new ForkDataLoadEventListener(toMem,thrower);
 
-        source.GetChunk(fork,new());
+        source.GetChunk(fork,new GracefulCancellationToken());
 
         Assert.Contains($"Hey Thomas go get 24/12/01 and store in {Path.Combine(loadDir.Cache.FullName,"ALL")}",toMem.GetAllMessagesByProgressEventType()[ProgressEventType.Information].Select(v=>v.Message).ToArray());
-            
-            
-
     }
 
-    public static bool IsLinux
-    {
-        get
-        {
-            var p = (int) Environment.OSVersion.Platform;
-            return p is 4 or 6 or 128;
-        }
-    }
+    private static bool IsLinux => Environment.OSVersion.Platform is PlatformID.MacOSX or PlatformID.Other or PlatformID.Unix;
 }

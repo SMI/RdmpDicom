@@ -14,16 +14,16 @@ public class ExecuteCommandBuildExtractionView : BasicCommandExecution
     /// <summary>
     /// A top level table e.g. CT_StudyTable
     /// </summary>
-    TableInfo primaryTable;
+    private TableInfo primaryTable;
     /// <summary>
     /// <para>Tables that can be linked to with study instance UID e.g. CT_SeriesTable.</para>
     /// <para>Also includes any aggregate tables e.g. aggregate statistics captured at Series level</para>
     /// </summary>
-    List<TableInfo> SeriesLevelTables = new List<TableInfo>();
+    private List<TableInfo> SeriesLevelTables = new();
     /// <summary>
     /// Tables that can be linked to with SeriesInstanceUID e.g. CT_ImageTable
     /// </summary>
-    List<TableInfo> ImageLevelTables = new List<TableInfo>();
+    private List<TableInfo> ImageLevelTables = new();
 
     public string CatalogueName { get; }
 

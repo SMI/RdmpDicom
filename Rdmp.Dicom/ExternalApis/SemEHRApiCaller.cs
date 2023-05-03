@@ -49,7 +49,7 @@ public class SemEHRApiCaller : PluginCohortCompiler
         //Currently the API only support data in the querystring so adding to the URL
         #region Get data as GET
 
-        //If the ValidateServerCert isn't required then set the handeler.ServerCertificateCustomValidationCallback to DangerousAcceptAnyServerCertificateValidator
+        //If the ValidateServerCert isn't required then set the handler.ServerCertificateCustomValidationCallback to DangerousAcceptAnyServerCertificateValidator
         if (!config.ValidateServerCert)
         {
             httpClientHandler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
@@ -99,13 +99,13 @@ public class SemEHRApiCaller : PluginCohortCompiler
             else
             {
                 //If we failed, get the failing error message
-                throw new($"The SemEHR API has failed: {semEHRResponse.message}");
+                throw new Exception($"The SemEHR API has failed: {semEHRResponse.message}");
             }
                
         }
         else
         {
-            throw new(
+            throw new Exception(
                 $"The API response returned a HTTP Status Code: ({(int)response.StatusCode}) {response.StatusCode}");
         }
         #endregion

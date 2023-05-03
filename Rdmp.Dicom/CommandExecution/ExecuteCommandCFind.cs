@@ -5,16 +5,16 @@ using Rdmp.Core.Curation;
 using Rdmp.Core.Curation.Data;
 using Rdmp.Core.Curation.Data.Cache;
 using Rdmp.Core.Curation.Data.DataLoad;
-using Rdmp.Core.DataFlowPipeline;
 using Rdmp.Core.Repositories;
 using Rdmp.Dicom.Cache.Pipeline;
 using Rdmp.Core.ReusableLibraryCode.Progress;
 using System;
 using System.IO;
+using Rdmp.Core.DataFlowPipeline;
 
 namespace Rdmp.Dicom.CommandExecution;
 
-class ExecuteCommandCFind : BasicCommandExecution, ICacheFetchRequestProvider
+internal class ExecuteCommandCFind : BasicCommandExecution, ICacheFetchRequestProvider
 {
     private BackfillCacheFetchRequest _request;
     private CFindSource _source;
@@ -37,9 +37,9 @@ class ExecuteCommandCFind : BasicCommandExecution, ICacheFetchRequestProvider
         var cp = new CacheProgress(memory, lp);
 
         //Create the source component only and a valid request range to fetch
-        _source = new()
+        _source = new CFindSource
         {
-            RemoteAEUri = new($"http://{remoteAeUri}"),
+            RemoteAEUri = new Uri($"http://{remoteAeUri}"),
             RemoteAEPort = remotePort,
             RemoteAETitle = remoteAeTitle,
             LocalAETitle = localAeTitle,
@@ -48,7 +48,7 @@ class ExecuteCommandCFind : BasicCommandExecution, ICacheFetchRequestProvider
         };
         //<- rly? its not gonna pass without an http!?
 
-        _request = new(BasicActivator.RepositoryLocator.CatalogueRepository, startDate)
+        _request = new BackfillCacheFetchRequest(BasicActivator.RepositoryLocator.CatalogueRepository, startDate)
         {
             ChunkPeriod = endDate.Subtract(startDate),
             CacheProgress = cp
@@ -65,7 +65,7 @@ class ExecuteCommandCFind : BasicCommandExecution, ICacheFetchRequestProvider
     {
         base.Execute();
 
-        _source.GetChunk(new ThrowImmediatelyDataLoadEventListener { WriteToConsole = true }, new());
+        _source.GetChunk(new ThrowImmediatelyDataLoadEventListener { WriteToConsole = true }, new GracefulCancellationToken());
 
     }
     public ICacheFetchRequest Current => _request;

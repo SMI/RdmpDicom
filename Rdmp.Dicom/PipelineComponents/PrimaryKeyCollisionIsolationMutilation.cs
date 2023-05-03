@@ -12,6 +12,7 @@ using Rdmp.Core.Curation.Data;
 using Rdmp.Core.Curation.Data.DataLoad;
 using Rdmp.Core.Curation.Data.EntityNaming;
 using Rdmp.Core.DataLoad;
+using Rdmp.Core.DataLoad.Engine.DatabaseManagement.EntityNaming;
 using Rdmp.Core.DataLoad.Engine.DatabaseManagement.Operations;
 using Rdmp.Core.DataLoad.Engine.Job;
 using Rdmp.Core.DataLoad.Engine.Mutilators;
@@ -51,13 +52,13 @@ public class PrimaryKeyCollisionIsolationMutilation:IPluginMutilateDataTables
     {
         //if there is only one or no tables that's fine (mandatory will check for null itself)
         if (TablesToIsolate == null)
-            throw new("No tables have been selected");
+            throw new Exception("No tables have been selected");
              
         //make sure there is only one primary key per table and that it's a string
         foreach (var t in TablesToIsolate)
         {
             if (t.ColumnInfos.Count(c => c.IsPrimaryKey) != 1)
-                throw new($"Table '{t}' did not have exactly 1 IsPrimaryKey column");
+                throw new Exception($"Table '{t}' did not have exactly 1 IsPrimaryKey column");
         }
 
         //if there are multiple tables then we must know how to join them
@@ -66,7 +67,7 @@ public class PrimaryKeyCollisionIsolationMutilation:IPluginMutilateDataTables
             var primaryTables = TablesToIsolate.Where(t => t.IsPrimaryExtractionTable).ToArray();
                 
             notifier.OnCheckPerformed(
-                new(
+                new CheckEventArgs(
                     $"There are {TablesToIsolate.Length} tables to operate on but {primaryTables.Length} are marked IsPrimaryExtractionTable ({string.Join(",",primaryTables.Select(t=>t.Name))}).  This should be set on a single top level table only e.g. Study",
                     CheckResult.Fail));
         }
@@ -78,7 +79,7 @@ public class PrimaryKeyCollisionIsolationMutilation:IPluginMutilateDataTables
         }
         catch (Exception e)
         {
-            notifier.OnCheckPerformed(new("Failed to build join order", CheckResult.Fail, e));
+            notifier.OnCheckPerformed(new CheckEventArgs("Failed to build join order", CheckResult.Fail, e));
             return;
         }
 
@@ -86,7 +87,7 @@ public class PrimaryKeyCollisionIsolationMutilation:IPluginMutilateDataTables
         var db = IsolationDatabase.Discover(DataAccessContext.DataLoad);
 
         if(!db.Exists())
-            throw new("IsolationDatabase did not exist");
+            throw new Exception("IsolationDatabase did not exist");
 
         //Make sure the isolation tables exist and the schema matches RAW
         foreach (var tableInfo in TablesToIsolate)
@@ -96,13 +97,13 @@ public class PrimaryKeyCollisionIsolationMutilation:IPluginMutilateDataTables
             if (!table.Exists())
             {
                 var fix = notifier.OnCheckPerformed(
-                    new($"Isolation table '{table.GetFullyQualifiedName()}' did not exist",
+                    new CheckEventArgs($"Isolation table '{table.GetFullyQualifiedName()}' did not exist",
                         CheckResult.Fail, null, "Create isolation table?"));
 
                 if (fix)
                     CreateIsolationTable(table, tableInfo);
                 else
-                    throw new("User rejected change");
+                    throw new Exception("User rejected change");
             }
             else
                 ValidateIsolationTableSchema(table,tableInfo,notifier);
@@ -121,12 +122,12 @@ public class PrimaryKeyCollisionIsolationMutilation:IPluginMutilateDataTables
 
         foreach (var missingFromIsolation in expected.Except(found, StringComparer.CurrentCultureIgnoreCase))
             notifier.OnCheckPerformed(
-                new(
+                new CheckEventArgs(
                     $"Isolation table '{toValidate}' did not contain expected column'{missingFromIsolation}'", CheckResult.Fail));
 
         foreach (var unexpectedInIsolation in found.Except(expected, StringComparer.CurrentCultureIgnoreCase))
             notifier.OnCheckPerformed(
-                new(
+                new CheckEventArgs(
                     $"Isolation table '{toValidate}' contained an unexpected column'{unexpectedInIsolation}'", CheckResult.Fail));
     }
 
@@ -135,11 +136,11 @@ public class PrimaryKeyCollisionIsolationMutilation:IPluginMutilateDataTables
         var from = tableInfo.Discover(DataAccessContext.DataLoad);
 
         //create a RAW table schema called TableName_Isolation
-        var cloner = new TableInfoCloneOperation(new(toCreate.Database.Server),tableInfo,LoadBubble.Live,_job ?? (IDataLoadEventListener)new ThrowImmediatelyDataLoadEventListener());
+        var cloner = new TableInfoCloneOperation(new HICDatabaseConfiguration(toCreate.Database.Server),tableInfo,LoadBubble.Live,_job ?? (IDataLoadEventListener)new ThrowImmediatelyDataLoadEventListener());
         cloner.CloneTable(from.Database, toCreate.Database, from, toCreate.GetRuntimeName(), true, true, true, tableInfo.PreLoadDiscardedColumns);
             
         if(!toCreate.Exists())
-            throw new($"Table '{toCreate}' did not exist after issuing create command");
+            throw new Exception($"Table '{toCreate}' did not exist after issuing create command");
 
         //Add the data load run id
         toCreate.AddColumn(SpecialFieldNames.DataLoadRunID,new DatabaseTypeRequest(typeof(int)),false,10);
@@ -147,7 +148,7 @@ public class PrimaryKeyCollisionIsolationMutilation:IPluginMutilateDataTables
 
     private void BuildJoinOrder(bool isChecks)
     {
-        _qb = new(null, null);
+        _qb = new QueryBuilder(null, null);
 
         var memory = new MemoryRepository();
 
@@ -170,7 +171,7 @@ public class PrimaryKeyCollisionIsolationMutilation:IPluginMutilateDataTables
                 _fromSql = _fromSql.Replace(tableInfo.GetFullyQualifiedName(), GetRAWTableNameFullyQualified(tableInfo));
 
         if (_joins.Any(j=>j.GetSupplementalJoins().Any()))
-            throw new("Supplemental (2 column) joins are not supported when resolving multi table primary key collisions");
+            throw new Exception("Supplemental (2 column) joins are not supported when resolving multi table primary key collisions");
 
         //order the tables in order of dependency
         List<TableInfo> tables = new();
@@ -188,7 +189,7 @@ public class PrimaryKeyCollisionIsolationMutilation:IPluginMutilateDataTables
             next = jnext.ForeignKey.TableInfo;
                 
             if(overflow-- ==0)
-                throw new("Joins resulted in a loop overflow");
+                throw new Exception("Joins resulted in a loop overflow");
         }
 
         TablesToIsolate = tables.ToArray();
@@ -211,7 +212,7 @@ public class PrimaryKeyCollisionIsolationMutilation:IPluginMutilateDataTables
         _syntaxHelper = _raw.Server.GetQuerySyntaxHelper();
 
         if(loadStage != LoadStage.AdjustRaw)
-            throw new("This component should only run in AdjustRaw");
+            throw new Exception("This component should only run in AdjustRaw");
     }
 
     public ExitCodeType Mutilate(IDataLoadJob job)
@@ -229,7 +230,7 @@ public class PrimaryKeyCollisionIsolationMutilation:IPluginMutilateDataTables
             var allCollisions = DetectCollisions(pkCol, tableInfo).Distinct().ToArray();
 
             if (!allCollisions.Any()) continue;
-            _job.OnNotify(this,new(ProgressEventType.Information, $"Found duplication in column '{pkCol}', duplicate values were '{string.Join(",",allCollisions)}'"));
+            _job.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information, $"Found duplication in column '{pkCol}', duplicate values were '{string.Join(",",allCollisions)}'"));
             MigrateRecords(pkCol, allCollisions);
         }
 
@@ -312,14 +313,14 @@ public class PrimaryKeyCollisionIsolationMutilation:IPluginMutilateDataTables
                     var result = r[0];
 
                     if(result == DBNull.Value || result == null)
-                        throw new($"Primary key value not found for {d} foreign Key was null");
+                        throw new Exception($"Primary key value not found for {d} foreign Key was null");
 
                     toReturn.Add(result);
                     readOne = true;
                 }
 
                 if(!readOne)
-                    throw new($"Primary key value not found for {d}");
+                    throw new Exception($"Primary key value not found for {d}");
             }
 
         }
@@ -375,7 +376,7 @@ public class PrimaryKeyCollisionIsolationMutilation:IPluginMutilateDataTables
             sqlDelete = GetPostgreSqlDeleteCommand(toDelete,deleteOnColumnName,syntax);
         }
 
-        _job.OnNotify(this,new(ProgressEventType.Information, $"Running:{sqlDelete}"));
+        _job.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information, $"Running:{sqlDelete}"));
 
         using var cmdDelete = _raw.Server.GetCommand(sqlDelete, con);
         var p2 = cmdDelete.CreateParameter();
@@ -390,7 +391,7 @@ public class PrimaryKeyCollisionIsolationMutilation:IPluginMutilateDataTables
             //then delete it
             var affectedRows = cmdDelete.ExecuteNonQuery();
 
-            _job.OnNotify(this,new(ProgressEventType.Information,
+            _job.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,
                 $"{affectedRows} affected rows"));
 
         }
@@ -409,7 +410,7 @@ public class PrimaryKeyCollisionIsolationMutilation:IPluginMutilateDataTables
         // 1 join per pair of tables
                 
         if(_joins.Count != TablesToIsolate.Length -1)
-            throw new($"Unexpected join count, expected {TablesToIsolate.Length -1} but found {_joins.Count}");
+            throw new Exception($"Unexpected join count, expected {TablesToIsolate.Length -1} but found {_joins.Count}");
 
         // Imagine a 3 table query (2 joins)
         // if we are index 2 (child)

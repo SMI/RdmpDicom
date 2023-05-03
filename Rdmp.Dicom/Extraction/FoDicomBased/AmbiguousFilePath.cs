@@ -63,7 +63,7 @@ public class AmbiguousFilePath
             // If not a direct zip reference already, try to read as a whole zip:
             if (!absPath.Contains('!'))
             {
-                _fullPaths = new();
+                _fullPaths = new SortedDictionary<string, string>();
                 using var zip = new LibArchiveReader(absPath);
                 zip.Entries().Each(e => _fullPaths.Add($"{absPath}!{e.Name}",$"{fileName}!{e.Name}"));
                 return;
@@ -73,7 +73,7 @@ public class AmbiguousFilePath
         {
             // Not a zip so ignore, treat as single file
         }
-        _fullPaths = new() { { absPath, fileName } };
+        _fullPaths = new SortedDictionary<string, string> { { absPath, fileName } };
     }
 
     private string Combine(string root, string path)
@@ -129,7 +129,7 @@ public class AmbiguousFilePath
                         $"{bits[0]}!\\{zipEntry.Name}",
                         $"{bits[0]}!{zipEntry.Name.Replace('/','\\')}",
                         $"{bits[0]}!/{zipEntry.Name.Replace('/','\\')}",
-                        $"{bits[0]}!\\{zipEntry.Name.Replace('/','\\')}",
+                        $"{bits[0]}!\\{zipEntry.Name.Replace('/','\\')}"
                     };
                     foreach(var name in tryNames)
                         if (_fullPaths.TryGetValue(name,out var tag))
@@ -151,7 +151,7 @@ public class AmbiguousFilePath
                 if (attempt >= retryCount)
                     throw;
                 listener?.OnNotify(this,
-                    new(ProgressEventType.Warning,
+                    new NotifyEventArgs(ProgressEventType.Warning,
                         $"Sleeping for {retryDelay}ms because of encountering Exception : {ex.Message} handling {bits[0]}", ex));
                 Thread.Sleep(retryDelay);
                 attempt++;
@@ -200,7 +200,7 @@ public class AmbiguousFilePath
         {
             0 => false,
             1 => true,
-            _ => throw new($"Path '{path}' had too many exclamation marks, expected 0 or 1")
+            _ => throw new Exception($"Path '{path}' had too many exclamation marks, expected 0 or 1")
         };
     }
 

@@ -43,7 +43,7 @@ public class MappingRepository : IMappingRepository
             builder.Password = server.GetDecryptedPassword();
         }
 
-        return new(builder);
+        return new DiscoveredServer(builder);
     }
 
     private SqlConnection GetConnection()
@@ -75,7 +75,7 @@ public class MappingRepository : IMappingRepository
 
     private UIDMapping HydrateMapping(DbDataReader reader)
     {
-        return new()
+        return new UIDMapping
         {
             PrivateUID = reader["PrivateUID"].ToString(),
             ReleaseUID = reader["ReleaseUID"].ToString(),
@@ -176,7 +176,7 @@ public class MappingRepository : IMappingRepository
         return m.ReleaseUID;
     }
 
-    static readonly Random r = new();
+    private static readonly Random r = new();
         
     private string GetKindaUid()
     {

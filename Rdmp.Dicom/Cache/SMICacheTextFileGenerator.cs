@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 using System.Text;
 using FAnsi.Discovery;
@@ -17,7 +15,7 @@ namespace Rdmp.Dicom.Cache;
 /// Looks in the cache folder and generates a file "LoadMe.txt" which lists all the zip files matching the
 /// fetch date
 /// </summary>
-class SMICacheTextFileGenerator:CachedFileRetriever
+internal class SMICacheTextFileGenerator:CachedFileRetriever
 {
     private DirectoryInfo _forLoading;
 

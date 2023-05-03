@@ -8,7 +8,6 @@ using Rdmp.Core.Databases;
 using Rdmp.Core.QueryCaching.Aggregation;
 using Rdmp.Dicom.ExternalApis;
 using Rdmp.Core.ReusableLibraryCode.Checks;
-using System;
 using System.Threading;
 using Rdmp.Core.CohortCreation.Execution;
 using Tests.Common;
@@ -30,7 +29,7 @@ public class SemEHRApiCallerTests : DatabaseTests
         var eds = new ExternalDatabaseServer(CatalogueRepository, "cache", patcher);
         eds.SetProperties(cacheDb);
 
-        return new(eds);
+        return new CachedAggregateConfigurationResultsManager(eds);
     }
 
 

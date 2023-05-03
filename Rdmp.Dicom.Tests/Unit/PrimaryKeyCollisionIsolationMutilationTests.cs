@@ -17,7 +17,7 @@ using TypeGuesser;
 
 namespace Rdmp.Dicom.Tests.Unit;
 
-class PrimaryKeyCollisionIsolationMutilationTests:DatabaseTests
+internal class PrimaryKeyCollisionIsolationMutilationTests:DatabaseTests
 {
     [TestCase(DatabaseType.MicrosoftSQLServer)]
     [TestCase(DatabaseType.MySql)]
@@ -917,7 +917,8 @@ class PrimaryKeyCollisionIsolationMutilationTests:DatabaseTests
         Assert.AreEqual(3, dtChildIsolation.Rows.Count);
 
     }
-    class ReturnSameString : INameDatabasesAndTablesDuringLoads
+
+    private class ReturnSameString : INameDatabasesAndTablesDuringLoads
     {
         public string GetDatabaseName(string rootDatabaseName, LoadBubble convention)
         {

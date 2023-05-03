@@ -17,6 +17,8 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
+using Rdmp.Core.DataFlowPipeline;
+using Rdmp.Core.MapsDirectlyToDatabaseTable;
 using Tests.Common;
 using DatabaseType = FAnsi.DatabaseType;
 
@@ -125,7 +127,7 @@ public class FoDicomAnonymiserTests:DatabaseTests
         anonymiser.RetainDates = keepDates;
         anonymiser.DeleteTags = "AlgorithmName";
 
-        var anoDt = anonymiser.ProcessPipelineData(dt,new ThrowImmediatelyDataLoadEventListener(),new());
+        var anoDt = anonymiser.ProcessPipelineData(dt,new ThrowImmediatelyDataLoadEventListener(),new GracefulCancellationToken());
 
         Assert.AreEqual(1,anoDt.Rows.Count);
             
@@ -138,19 +140,19 @@ public class FoDicomAnonymiserTests:DatabaseTests
 
         FileInfo expectedFile = null;
         if(putterType == typeof(PutInRoot))
-            expectedFile = new(Path.Combine(TestContext.CurrentContext.WorkDirectory,"Images",
+            expectedFile = new FileInfo(Path.Combine(TestContext.CurrentContext.WorkDirectory,"Images",
                 $"{anoDt.Rows[0]["SOPInstanceUID"]}.dcm"));
 
         if (putterType == typeof(PutInReleaseIdentifierSubfolders))
-            expectedFile = new(Path.Combine(TestContext.CurrentContext.WorkDirectory, "Images","Hank",
+            expectedFile = new FileInfo(Path.Combine(TestContext.CurrentContext.WorkDirectory, "Images","Hank",
                 $"{anoDt.Rows[0]["SOPInstanceUID"]}.dcm"));
 
         if (putterType == typeof(PutInUidSeriesFolders))
-            expectedFile = new(Path.Combine(TestContext.CurrentContext.WorkDirectory, "Images", "Hank", anoDt.Rows[0]["SeriesInstanceUID"].ToString(),
+            expectedFile = new FileInfo(Path.Combine(TestContext.CurrentContext.WorkDirectory, "Images", "Hank", anoDt.Rows[0]["SeriesInstanceUID"].ToString(),
                 $"{anoDt.Rows[0]["SOPInstanceUID"]}.dcm"));
 
         if (putterType == typeof(PutInUidStudySeriesFolders))
-            expectedFile = new(Path.Combine(TestContext.CurrentContext.WorkDirectory, "Images", "Hank", anoDt.Rows[0]["StudyInstanceUID"].ToString(), anoDt.Rows[0]["SeriesInstanceUID"].ToString(),
+            expectedFile = new FileInfo(Path.Combine(TestContext.CurrentContext.WorkDirectory, "Images", "Hank", anoDt.Rows[0]["StudyInstanceUID"].ToString(), anoDt.Rows[0]["SeriesInstanceUID"].ToString(),
                 $"{anoDt.Rows[0]["SOPInstanceUID"]}.dcm"));
 
         Assert.IsTrue(expectedFile.Exists);
@@ -211,7 +213,7 @@ public class FoDicomAnonymiserTests:DatabaseTests
         {
             //Things we would want to disappear
             {DicomTag.PatientName,"Moscow"},
-            {DicomTag.PatientBirthDate,"20010101"},
+            {DicomTag.PatientBirthDate,"20010101"}
         };
 
         Dictionary<DicomTag, string> thingsThatShouldRemain = new()
@@ -220,7 +222,7 @@ public class FoDicomAnonymiserTests:DatabaseTests
             {DicomTag.StudyDescription,"Frank has lots of problems, he lives at 60 Pancake road"},
             {DicomTag.SeriesDescription,"Coconuts"},
             {DicomTag.AlgorithmName,"Chessnuts"}, // would not normally be dropped by anonymisation
-            {DicomTag.StudyDate,"20020101"},
+            {DicomTag.StudyDate,"20020101"}
         };
 
         var dicom = new DicomDataset
@@ -269,7 +271,7 @@ public class FoDicomAnonymiserTests:DatabaseTests
         anonymiser.RetainDates = false;
         anonymiser.SkipAnonymisationOnStructuredReports = true; // <- the thing we are testing
 
-        var anoDt = anonymiser.ProcessPipelineData(dt, new ThrowImmediatelyDataLoadEventListener(), new());
+        var anoDt = anonymiser.ProcessPipelineData(dt, new ThrowImmediatelyDataLoadEventListener(), new GracefulCancellationToken());
 
         Assert.AreEqual(1, anoDt.Rows.Count);
 
@@ -344,20 +346,20 @@ public class FoDicomAnonymiserTests:DatabaseTests
 
         FileInfo expectedFile = null;
         if (putterType == typeof(PutInRoot))
-            expectedFile = new(Path.Combine(outputDirectory.FullName,
+            expectedFile = new FileInfo(Path.Combine(outputDirectory.FullName,
                 $"{dicomDataset.GetValue<string>(DicomTag.SOPInstanceUID, 0)}.dcm"));
 
         if (putterType == typeof(PutInReleaseIdentifierSubfolders))
-            expectedFile = new(Path.Combine(outputDirectory.FullName, releaseIdentifier,
+            expectedFile = new FileInfo(Path.Combine(outputDirectory.FullName, releaseIdentifier,
                 $"{dicomDataset.GetValue<string>(DicomTag.SOPInstanceUID, 0)}.dcm"));
 
         if (putterType == typeof(PutInUidSeriesFolders))
-            expectedFile = new(Path.Combine(outputDirectory.FullName, releaseIdentifier,
+            expectedFile = new FileInfo(Path.Combine(outputDirectory.FullName, releaseIdentifier,
                 dicomDataset.GetValue<string>(DicomTag.SeriesInstanceUID, 0),
                 $"{dicomDataset.GetValue<string>(DicomTag.SOPInstanceUID, 0)}.dcm"));
 
         if (putterType == typeof(PutInUidStudySeriesFolders))
-            expectedFile = new(Path.Combine(outputDirectory.FullName, releaseIdentifier,
+            expectedFile = new FileInfo(Path.Combine(outputDirectory.FullName, releaseIdentifier,
                 dicomDataset.GetValue<string>(DicomTag.StudyInstanceUID, 0), 
                 dicomDataset.GetValue<string>(DicomTag.SeriesInstanceUID, 0),
                 $"{dicomDataset.GetValue<string>(DicomTag.SOPInstanceUID, 0)}.dcm"));
@@ -475,7 +477,7 @@ public class FoDicomAnonymiserTests:DatabaseTests
             // the thing we are actually testing
             anonymiser.MetadataOnly = i == 0;
 
-            var anoDt = anonymiser.ProcessPipelineData(dt, new ThrowImmediatelyDataLoadEventListener(), new());
+            var anoDt = anonymiser.ProcessPipelineData(dt, new ThrowImmediatelyDataLoadEventListener(), new GracefulCancellationToken());
 
             Assert.AreEqual(1, anoDt.Rows.Count);
 
@@ -518,7 +520,7 @@ public class FoDicomAnonymiserTests:DatabaseTests
             
         //mock the prochi/release id columnvar cohort = MockRepository.GenerateMock<IExtractableCohort>();
         var queryBuilder = Mock.Of<ISqlQueryBuilder>(q=>
-            q.SelectColumns == new List<QueryTimeColumn> { new(new SpontaneouslyInventedColumn(new(), "Pat","[db]..[tb].[Pat]"){IsExtractionIdentifier = true}) });
+            q.SelectColumns == new List<QueryTimeColumn> { new(new SpontaneouslyInventedColumn(new MemoryRepository(), "Pat","[db]..[tb].[Pat]"){IsExtractionIdentifier = true}) });
                        
             
         //mock the extraction directory

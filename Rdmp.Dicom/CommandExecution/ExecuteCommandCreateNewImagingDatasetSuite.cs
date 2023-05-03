@@ -22,6 +22,8 @@ using Rdmp.Dicom.PipelineComponents.DicomSources;
 using Rdmp.Core.ReusableLibraryCode.Annotations;
 using NLog;
 using System.Threading;
+using Rdmp.Core.DataLoad.Engine.DatabaseManagement.EntityNaming;
+using Rdmp.Core.DataLoad.Engine.LoadProcess;
 
 namespace Rdmp.Dicom.CommandExecution;
 
@@ -78,7 +80,7 @@ public class ExecuteCommandCreateNewImagingDatasetSuite : BasicCommandExecution
         _catalogueRepository = repositoryLocator.CatalogueRepository;
         _databaseToCreateInto = databaseToCreateInto;
         _projectDirectory = projectDirectory;
-        NewCataloguesCreated = new();
+        NewCataloguesCreated = new List<ICatalogue>();
 
         _loggingServer = _catalogueRepository.GetDefaultFor(PermissableDefaults.LiveLoggingServer_ID);
 
@@ -158,7 +160,7 @@ public class ExecuteCommandCreateNewImagingDatasetSuite : BasicCommandExecution
             }
         }
         else
-            throw new("No Template provided");
+            throw new Exception("No Template provided");
 
         //that's us done if we aren't creating a load
         if(!CreateLoad)
@@ -166,7 +168,7 @@ public class ExecuteCommandCreateNewImagingDatasetSuite : BasicCommandExecution
 
         var loadName = GetNameWithPrefixInBracketsIfAny("SMI Image Loading");
 
-        NewLoadMetadata = new(_catalogueRepository, loadName);
+        NewLoadMetadata = new LoadMetadata(_catalogueRepository, loadName);
 
         //tell all the catalogues that they are part of this load and where to log under the same task
         foreach (var c in NewCataloguesCreated)
@@ -192,7 +194,7 @@ public class ExecuteCommandCreateNewImagingDatasetSuite : BasicCommandExecution
         name = MakeUniqueName(_catalogueRepository.GetAllObjects<Pipeline>().Select(p=>p.Name).ToArray(),name);
 
         var pipe = new Pipeline(_catalogueRepository, name);
-        DicomSourcePipelineComponent = new(_catalogueRepository, pipe, DicomSourceType, 0, DicomSourceType.Name);
+        DicomSourcePipelineComponent = new PipelineComponent(_catalogueRepository, pipe, DicomSourceType, 0, DicomSourceType.Name);
         DicomSourcePipelineComponent.CreateArgumentsForClassIfNotExists(DicomSourceType);
 
         // Set the argument for only populating tags who appear in the end tables of the load (no need for source to read all the tags only those we are actually loading)
@@ -278,7 +280,7 @@ public class ExecuteCommandCreateNewImagingDatasetSuite : BasicCommandExecution
 
         ////////////////////////////////////////////////////////////////////////////////////////////////
             
-        var checker = new CheckEntireDataLoadProcess(NewLoadMetadata, new(NewLoadMetadata), new(), _catalogueRepository.MEF);
+        var checker = new CheckEntireDataLoadProcess(NewLoadMetadata, new HICDatabaseConfiguration(NewLoadMetadata), new HICLoadConfigurationFlags(), _catalogueRepository.MEF);
         checker.Check(new AcceptAllCheckNotifier());
     }
 

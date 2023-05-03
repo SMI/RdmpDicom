@@ -2,13 +2,11 @@
 
 namespace Rdmp.Dicom.ExternalApis;
 
-class SemEHRResponse
+internal class SemEHRResponse
 {
     public bool success { get; set; }
     public int num_results { get; set; }
     public string message { get; set; } = "Message not set.";
-
-    //public IList<SemneHDRReponseResult> results { get; set; }
 
     public IList<string> results { get; set; }
 
@@ -22,13 +20,13 @@ class SemEHRResponse
         return (results.Select(t => t.study_uid).ToList());
     }
 
-    public List<string> GetResultseriesUids()
+    public List<string> GetResultSeriesUids()
     {
         return (results.Select(t => t.series_uid).ToList());
     }*/
 }
 
-/*class SemneHDRReponseResult
+/*class HDRResponseResult
 {
     public string sop_uid { get; set; }
     public string study_uid { get; set; }

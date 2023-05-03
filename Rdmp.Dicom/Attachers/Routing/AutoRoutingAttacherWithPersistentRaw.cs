@@ -4,7 +4,7 @@ using Rdmp.Core.DataLoad.Engine.Job;
 
 namespace Rdmp.Dicom.Attachers.Routing;
 
-class AutoRoutingAttacherWithPersistentRaw : AutoRoutingAttacher
+internal class AutoRoutingAttacherWithPersistentRaw : AutoRoutingAttacher
 {
     public AutoRoutingAttacherWithPersistentRaw():base(false)
     {

@@ -86,7 +86,7 @@ public partial class CreateNewImagingDatasetUI : Form
             //if we are creating a load we need to know where to store load scripts etc
             if (cbCreateLoad.Checked)
                 if (dialog.ShowDialog() == DialogResult.OK)
-                    dir = new(dialog.SelectedPath);
+                    dir = new DirectoryInfo(dialog.SelectedPath);
                 else
                     return;
         }
