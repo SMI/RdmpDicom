@@ -9,6 +9,7 @@ using System.Net.Http;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
+using Rdmp.Core.MapsDirectlyToDatabaseTable;
 using Rdmp.Core.Repositories;
 
 namespace Rdmp.Dicom.ExternalApis;
@@ -22,19 +23,19 @@ public class SemEHRApiCaller : PluginCohortCompiler
         Run(ac, cache, token, SemEHRConfiguration.LoadFrom(ac));
     }
 
-    private string GetAuthString(ICatalogueRepository repo, SemEHRConfiguration config)
+    private static string GetAuthString(IRepository repo, SemEHRConfiguration config)
     {
         if (config.ApiHttpDataAccessCredentials == 0)
             return null;
 
-        var creds = repo.GetObjectByID<DataAccessCredentials>(config.ApiHttpDataAccessCredentials);
+        var credentials = repo.GetObjectByID<DataAccessCredentials>(config.ApiHttpDataAccessCredentials);
 
-        return Convert.ToBase64String(Encoding.UTF8.GetBytes($"{creds.Username}:{creds.GetDecryptedPassword()}"));
+        return Convert.ToBase64String(Encoding.UTF8.GetBytes($"{credentials.Username}:{credentials.GetDecryptedPassword()}"));
     }
 
     internal void Run(AggregateConfiguration ac, CachedAggregateConfigurationResultsManager cache, CancellationToken token, SemEHRConfiguration config)
     {
-        var httpClientHandler = new HttpClientHandler();
+        using var httpClientHandler = new HttpClientHandler();
 
         //Get data as post - not currently used
         //In the future we'll enable getting the data with POST maybe. Here for reference
@@ -53,7 +54,7 @@ public class SemEHRApiCaller : PluginCohortCompiler
         {
             httpClientHandler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
         }
-        HttpClient httpClient = new(httpClientHandler);
+        using var httpClient = new HttpClient(httpClientHandler);
         if(config.ApiUsingHttpAuth())
             httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", GetAuthString(ac.CatalogueRepository,config));
         httpClient.Timeout = TimeSpan.FromSeconds(config.RequestTimeout);
