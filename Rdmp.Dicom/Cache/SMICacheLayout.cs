@@ -90,7 +90,7 @@ public class SMICacheLayout : CacheLayout
 
     private DateTime ConvertFilenameToDateTime(FileInfo fileInfo)
     {
-        var nameWithoutExtension = fileInfo.Name.Substring(0, fileInfo.Name.Length - fileInfo.Extension.Length);
+        var nameWithoutExtension = fileInfo.Name[..^fileInfo.Extension.Length];
 
         if (!DateTime.TryParseExact(nameWithoutExtension, DateFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out var dt))
             throw new Exception(

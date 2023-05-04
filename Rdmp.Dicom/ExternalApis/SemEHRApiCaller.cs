@@ -10,7 +10,6 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using Rdmp.Core.MapsDirectlyToDatabaseTable;
-using Rdmp.Core.Repositories;
 
 namespace Rdmp.Dicom.ExternalApis;
 
@@ -72,7 +71,7 @@ public class SemEHRApiCaller : PluginCohortCompiler
             if (semEHRResponse.success)
             {
                 SubmitIdentifierList(config.ReturnField,
-                    semEHRResponse.results.Count == 0 ? new string[] { } : semEHRResponse.results.ToArray(), ac,
+                    semEHRResponse.results.Count == 0 ? Array.Empty<string>() : semEHRResponse.results.ToArray(), ac,
                     cache);
 
                 /*If we can cope with the return field with multiple types this will handle that

@@ -19,11 +19,11 @@ public class DicomRequestSender : IDicomRequestSender
     private readonly Stopwatch _moveRequestTimer = new();
     public delegate void OnCheckExceptionDelegate(Exception ex);
     public delegate void OnCheckTimeoutDelegate();
-    public delegate void OnCheckSucessDelegate();
+    public delegate void OnCheckSuccessDelegate();
 
     public OnCheckExceptionDelegate OnRequestException;
     public OnCheckTimeoutDelegate OnRequestTimeout;
-    public OnCheckSucessDelegate OnRequestSucess;
+    public OnCheckSuccessDelegate OnRequestSuccess;
 
     public DicomRequestSender(DicomConfiguration dicomConfiguration, IDataLoadEventListener listener,bool verbose)
     {
@@ -45,7 +45,7 @@ public class DicomRequestSender : IDicomRequestSender
 
 
     /// <summary>
-    ///    Throttle requests using W(O) = mO(t) + c where W is the wait period, O is the opertaion duration, m and c are positive constants 
+    ///    Throttle requests using W(O) = mO(t) + c where W is the wait period, O is the operation duration, m and c are positive constants 
     ///    The request is added to the client which is unreleased at the end of this request send.
     /// </summary>
     /// 
@@ -58,7 +58,7 @@ public class DicomRequestSender : IDicomRequestSender
     #endregion
 
     /// <summary>
-    ///    Throttle requests using W(O) = mO(t) + c where W is the wait period, O is the opertaion duration, m and c are positive constants 
+    ///    Throttle requests using W(O) = mO(t) + c where W is the wait period, O is the operation duration, m and c are positive constants 
     ///    Sends requests added to the client is unreleased at the end of this request send.
     /// </summary>
     /// 
@@ -82,7 +82,7 @@ public class DicomRequestSender : IDicomRequestSender
 
     /// <summary>
     ///     Blocks until the request is received so calling code doesn't have to deal with asynchrony (see the EventWaitHandle in TrySend).
-    ///     Only the timeout is applied no Throtelling
+    ///     Only the timeout is applied no Throttling
     /// </summary>
     /// <param name="dicomRequest"></param>
     /// <param name="token"></param>
@@ -100,7 +100,7 @@ public class DicomRequestSender : IDicomRequestSender
 
     /// <summary>
     ///     Blocks until the request is received so calling code doesn't have to deal with asynchrony (see the EventWaitHandle in TrySend).
-    ///     Only the timeout is applied no Throtelling, the client is unreleased on return 
+    ///     Only the timeout is applied no Throttling, the client is unreleased on return 
     /// </summary>
     /// <param name="dicomRequest"></param>
     /// <param name="client"></param>
@@ -116,7 +116,7 @@ public class DicomRequestSender : IDicomRequestSender
 
     /// <summary>
     ///     Blocks until the request is received so calling code doesn't have to deal with asynchrony (see the EventWaitHandle in TrySend).
-    ///     Only the timeout is applied no Throtelling, the client is unreleased on return 
+    ///     Only the timeout is applied no Throttling, the client is unreleased on return 
     /// </summary>
     /// <param name="client"></param>
     /// <param name="token"></param>
@@ -140,7 +140,7 @@ public class DicomRequestSender : IDicomRequestSender
         }
 
         if(completed)
-            OnRequestSucess?.Invoke();
+            OnRequestSuccess?.Invoke();
         else
             OnRequestTimeout?.Invoke();
 

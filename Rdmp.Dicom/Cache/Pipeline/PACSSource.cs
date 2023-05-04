@@ -100,12 +100,12 @@ public class PACSSource : SMICacheSource
         };
         client.AssociationReleased += (s, e) => {
             gauge.Tick(listener, () => Process.GetCurrentProcess().Kill());
-            listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Trace, $"AssociationReleased"));
+            listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Trace, "AssociationReleased"));
         };
         client.AssociationRejected += (s, e) =>
         {
             gauge.Tick(listener, () => Process.GetCurrentProcess().Kill());
-            listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Trace, $"AssociationRejected"));
+            listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Trace, "AssociationRejected"));
         };
 
         if (AssociationLingerTimeoutInMs is > 0)
@@ -231,7 +231,7 @@ public class PACSSource : SMICacheSource
 
                 if (hasTransferTimedOut)
                     listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information,
-                        $"Abandonning fetch of study {current.StudyUid}"));
+                        $"Abandoning fetch of study {current.StudyUid}"));
 
                 switch (consecutiveFailures)
                 {

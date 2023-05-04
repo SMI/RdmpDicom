@@ -1,11 +1,11 @@
 ﻿using Rdmp.Core;
-using Rdmp.Core.Curation.Data.Aggregation;
-using Rdmp.Dicom.ExternalApis;
 using Rdmp.Core.CommandExecution;
+using Rdmp.Core.Curation.Data.Aggregation;
 using Rdmp.Core.MapsDirectlyToDatabaseTable;
+using Rdmp.Dicom.ExternalApis;
 using Terminal.Gui;
 
-namespace Rdmp.Dicom.UI;
+namespace Rdmp.Dicom;
 
 public class RdmpDicomConsoleUserInterface : PluginUserInterface
 {

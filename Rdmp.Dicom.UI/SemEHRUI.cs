@@ -62,7 +62,7 @@ public partial class SemEHRUI : Form
         cbUseEndDate.Checked = _configuration.UseEndDate;
         dtpEndDate.Value = _configuration.EndDate;
         SetCheckedListBox(cblModalities, _configuration.Modalities.ToList());
-        //SetCheckedListBox(cblReturnFields, _configuration.ReturnFeilds);
+        //SetCheckedListBox(cblReturnFields, _configuration.ReturnFields);
         cbReturnFeild.SelectedIndex = cbReturnFeild.FindString(_configuration.ReturnField);
     }
 
@@ -88,11 +88,7 @@ public partial class SemEHRUI : Form
         _configuration.StartEndDateFormat = tbStartEndDateFormat.Text;
         _configuration.Query = tbQuery.Text;
 
-        _configuration.Temporality = new List<string>();
-        foreach (KeyValuePair<string, string> item in cblTemporality.CheckedItems)
-        {
-            _configuration.Temporality.Add(item.Value.ToString());                
-        }
+        _configuration.Temporality = cblTemporality.CheckedItems.Cast<KeyValuePair<string,string>>().Select(item => item.Value).ToList();
 
         _configuration.Negation = "";
         if (cbNegation.SelectedItem != null)
@@ -105,11 +101,7 @@ public partial class SemEHRUI : Form
         _configuration.UseEndDate = cbUseEndDate.Checked;
         _configuration.EndDate = dtpEndDate.Value;
 
-        _configuration.Modalities = new List<string>();
-        foreach (KeyValuePair<string, string> item in cblModalities.CheckedItems)
-        {
-            _configuration.Modalities.Add(item.Value);
-        }
+        _configuration.Modalities = cblModalities.CheckedItems.Cast<KeyValuePair<string, string>>().Select(item => item.Value).ToList();
 
         /*_configuration.ReturnFields = new List<string>();
         foreach (KeyValuePair<string, string> item in cblReturnFields.CheckedItems)

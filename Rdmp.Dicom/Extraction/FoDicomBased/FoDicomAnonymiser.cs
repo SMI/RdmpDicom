@@ -16,6 +16,7 @@ using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Microsoft.Data.SqlClient;
 using Rdmp.Core.QueryBuilding;
 
 namespace Rdmp.Dicom.Extraction.FoDicomBased;
@@ -37,7 +38,7 @@ public class FoDicomAnonymiser: IPluginDataFlowComponent<DataTable>,IPipelineReq
     [DemandsInitialization("The mapping database for UID fields", Mandatory=true)]
     public ExternalDatabaseServer UIDMappingServer { get; set; }
 
-    [DemandsInitialization("Determines how dicom files are written to the project ouput directory",TypeOf = typeof(IPutDicomFilesInExtractionDirectories),Mandatory=true)]
+    [DemandsInitialization("Determines how dicom files are written to the project output directory",TypeOf = typeof(IPutDicomFilesInExtractionDirectories),Mandatory=true)]
     public Type PutterType { get; set; }
 
     [DemandsInitialization("Retain Full Dates in dicom tags during anonymisation")]
@@ -167,46 +168,39 @@ public class FoDicomAnonymiser: IPluginDataFlowComponent<DataTable>,IPipelineReq
     {
         if(MetadataOnly)
         {
-            if(GetMetadataOnlyColumnsToProcess(toProcess).Length == 0)
-            {
-                listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information, "Ignoring non imaging dataset, it had no UID columns"));
-                return true;
-            }
+            if (GetMetadataOnlyColumnsToProcess(toProcess).Length != 0) return false;
+            listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information, "Ignoring non imaging dataset, it had no UID columns"));
+            return true;
 
             // metadata only and some legit columns yay
-            return false;
         }
 
         //if it isn't a dicom dataset don't process it
-        if (!toProcess.Columns.Contains(RelativeArchiveColumnName))
-        {
-            listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning,
-                $"Dataset {_extractCommand.DatasetBundle.DataSet} did not contain field '{RelativeArchiveColumnName}' so we will not attempt to extract images"));
-            return true;
-        }
-
-        return false;
+        if (toProcess.Columns.Contains(RelativeArchiveColumnName)) return false;
+        listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning,
+            $"Dataset {_extractCommand.DatasetBundle.DataSet} did not contain field '{RelativeArchiveColumnName}' so we will not attempt to extract images"));
+        return true;
     }
 
-    private void SubstituteMetadataOnly(DataRow row, Dictionary<DataColumn, KeyValuePair<DicomTag, UIDType>> dictionary, DataColumn releaseIdentifierCol)
+    private void SubstituteMetadataOnly(SqlConnection con,DataRow row, Dictionary<DataColumn, KeyValuePair<DicomTag, UIDType>> dictionary, DataColumn releaseIdentifierCol)
     {
         string studyUid = null;
         string seriesUid = null;
         string sopUid = null;
 
+        // no UID substitution server so no UID subs
+        if (_uidSubstitutionLookup == null)
+            throw new Exception($"{nameof(MetadataOnly)} is on but there is no UID lookup server configured");
+
         //rewrite the UIDs
         foreach (var kvp in dictionary)
         {
-            // no UID substitution server so no UID subs
-            if (_uidSubstitutionLookup == null)
-                throw new Exception($"{nameof(MetadataOnly)} is on but there is no UID lookup server configured");
-
             var value = row[kvp.Key].ToString();
 
             //if it has a value for this UID
             if (value == null) continue;
 
-            row[kvp.Key] = _uidSubstitutionLookup.GetOrAllocateMapping(value, _projectNumber, kvp.Value.Value);
+            row[kvp.Key] = _uidSubstitutionLookup.GetOrAllocateMapping(con,value, _projectNumber, kvp.Value.Value);
 
             if (kvp.Value.Key == DicomTag.StudyInstanceUID)
                 studyUid = row[kvp.Key].ToString();
@@ -221,16 +215,14 @@ public class FoDicomAnonymiser: IPluginDataFlowComponent<DataTable>,IPipelineReq
         var releaseIdentifier = row[releaseIdentifierCol].ToString();
 
         // if we have RelativeArchiveUri then we had better make sure that matches too
-        if (row.Table.Columns.Contains(RelativeArchiveColumnName))
-        {
-            var outPath = _putter.PredictOutputPath(_destinationDirectory, releaseIdentifier,studyUid,seriesUid, sopUid);
+        if (!row.Table.Columns.Contains(RelativeArchiveColumnName)) return;
+        var outPath = _putter.PredictOutputPath(_destinationDirectory, releaseIdentifier,studyUid,seriesUid, sopUid);
 
-            // if we are able to calculate the 'would be' output path from the metadata alone
-            if(!string.IsNullOrWhiteSpace(outPath))
-            {
-                // then update the row
-                row[RelativeArchiveColumnName] = outPath;
-            }
+        // if we are able to calculate the 'would be' output path from the metadata alone
+        if(!string.IsNullOrWhiteSpace(outPath))
+        {
+            // then update the row
+            row[RelativeArchiveColumnName] = outPath;
         }
     }
 
@@ -240,7 +232,7 @@ public class FoDicomAnonymiser: IPluginDataFlowComponent<DataTable>,IPipelineReq
     /// </summary>
     /// <param name="projectNumber"></param>
     /// <param name="destinationDirectory">Destination directory to pass to <see cref="IPutDicomFilesInExtractionDirectories"/>
-    /// instances later on or null your putter does not require it</destinationDirectory>
+    /// instances later on or null your putter does not require it</param>
     /// <param name="uidSubstitutionLookup">Custom IMappingRepository or null to use <see cref="UIDMappingServer"/></param>
     public void Initialize(int projectNumber, DirectoryInfo destinationDirectory, IMappingRepository uidSubstitutionLookup = null)
     {
@@ -255,9 +247,9 @@ public class FoDicomAnonymiser: IPluginDataFlowComponent<DataTable>,IPipelineReq
     }
 
     /// <summary>
-    /// Anonymises a dicom file at <paramref name="path"/> (which may be in a zip file)
+    /// Anonymises a dicom file at <paramref name="dicomFile"/> (which may be in a zip file)
     /// </summary>
-    /// <param name="path">Location of the zip file</param>
+    /// <param name="dicomFile">Location of the file</param>
     /// <param name="listener">Where to report errors/progress to</param>
     /// <param name="releaseColumnValue">The substitution to enter in for PatientID</param>
     /// <param name="putter">Determines where the anonymous image is written to</param>
@@ -306,7 +298,7 @@ public class FoDicomAnonymiser: IPluginDataFlowComponent<DataTable>,IPipelineReq
         }
         catch (Exception e)
         {
-            listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Error, $"Failed to anonymize image", e));
+            listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Error, "Failed to anonymize image", e));
             _errors++;
             return;
         }

@@ -29,7 +29,7 @@ public class FoDicomAnonymiserStandaloneTests
         var testFile = new FileInfo(Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestData/IM-0001-0013.dcm"));
         testFile.CopyTo(Path.Combine(inPath.FullName, "blah.dcm"),true);
 
-        anon.Initialize(1, outPath,null /*no UID mapping*/);
+        anon.Initialize(1, outPath /*no UID mapping*/);
 
         var putter = new PutInRoot();
 

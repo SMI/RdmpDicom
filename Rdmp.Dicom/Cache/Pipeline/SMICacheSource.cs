@@ -98,7 +98,7 @@ public abstract class SMICacheSource : CacheSource<SMIDataChunk>
         {
             notifier.OnCheckPerformed(new CheckEventArgs("Failed to get response from server after timeout", CheckResult.Fail));
         };
-        echoRequestSender.OnRequestSucess += () =>
+        echoRequestSender.OnRequestSuccess += () =>
         {
             notifier.OnCheckPerformed(new CheckEventArgs("Successfully received C-ECHO response from remote PACS", CheckResult.Success));
         };
@@ -148,7 +148,7 @@ public abstract class SMICacheSource : CacheSource<SMIDataChunk>
     protected DicomCFindRequest CreateSeriesRequestByStudyUid(string studyInstanceUid, DicomPriority priority = DicomPriority.Low)
     {
         //create your own request that contains exactly those DicomTags that
-        // you realy need pro process your data and not to cause unneccessary traffic and IO load:
+        // you really need pro process your data and not to cause unnecessary traffic and IO load:
         var request = new DicomCFindRequest(DicomQueryRetrieveLevel.Series, priority);
 
         request.Dataset.AddOrUpdate(new DicomTag(0x8, 0x5), "ISO_IR 100");
@@ -170,7 +170,7 @@ public abstract class SMICacheSource : CacheSource<SMIDataChunk>
     protected DicomCFindRequest CreateSopRequestBySeriesUid(string seriesInstanceUid, DicomPriority priority = DicomPriority.Low)
     {
         //create your own request that contains exactly those DicomTags that
-        // you realy need pro process your data and not to cause unneccessary traffic and IO load:
+        // you really need pro process your data and not to cause unnecessary traffic and IO load:
         var request = new DicomCFindRequest(DicomQueryRetrieveLevel.Image, priority);
 
         request.Dataset.AddOrUpdate(new DicomTag(0x8, 0x5), "ISO_IR 100");

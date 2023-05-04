@@ -1,8 +1,8 @@
 ﻿using DicomTypeTranslation.TableCreation;
-using FAnsi;
 using Rdmp.Core.Curation.Data;
 using Rdmp.Core.ReusableLibraryCode.DataAccess;
 using System;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -22,19 +22,18 @@ public class LiveVsTemplateComparer
         var discoveredTable = table.Discover(DataAccessContext.InternalDataProcessing);
         LiveSql = discoveredTable.ScriptTableCreation(false,false,false);
 
-        LiveSql = TailorLiveSql(LiveSql,discoveredTable.Database.Server.DatabaseType);
+        LiveSql = TailorLiveSql(LiveSql);
 
         // The live table name e.g. CT_StudyTable
         var liveTableName = discoveredTable.GetRuntimeName();
         // Without the prefix e.g. StudyTable
-        var liveTableNameWithoutPrefix = liveTableName.Substring(liveTableName.IndexOf("_", StringComparison.Ordinal)+1);
+        var liveTableNameWithoutPrefix = liveTableName[(liveTableName.IndexOf("_", StringComparison.Ordinal)+1)..];
 
         var template = templateCollection.Tables.FirstOrDefault(
             c=>c.TableName.Equals(liveTableName,StringComparison.CurrentCultureIgnoreCase) ||
-               c.TableName.Equals(liveTableNameWithoutPrefix,StringComparison.CurrentCultureIgnoreCase));
-
-        if(template == null)
-            throw new Exception($"Could not find a Template called '{liveTableName}' or '{liveTableNameWithoutPrefix}'.  Templates in file were {string.Join(",",templateCollection.Tables.Select(t=>t.TableName))}");
+               c.TableName.Equals(liveTableNameWithoutPrefix, StringComparison.CurrentCultureIgnoreCase)) ??
+                       throw new Exception(
+                           $"Could not find a Template called '{liveTableName}' or '{liveTableNameWithoutPrefix}'.  Templates in file were {string.Join(",", templateCollection.Tables.Select(t => t.TableName))}");
 
         //script the template
         var creator = new ImagingTableCreation(discoveredTable.Database.Server.GetQuerySyntaxHelper());            
@@ -42,15 +41,16 @@ public class LiveVsTemplateComparer
 
         TemplateSql  = TailorTemplateSql(TemplateSql );
     }
-    private string TailorTemplateSql(string templateSql)
+
+    [Pure]
+    private static string TailorTemplateSql(string templateSql)
     {
         //condense all multiple spaces to single spaces
-        templateSql = Regex.Replace(templateSql,"  +"," ");
-            
-        return templateSql;
+        return Regex.Replace(templateSql,"  +"," ");
     }
 
-    private string TailorLiveSql(string liveSql, DatabaseType databaseType)
+    [Pure]
+    private static string TailorLiveSql(string liveSql)
     {
         // get rid of collation
         liveSql = Regex.Replace(liveSql,"\\bCOLLATE \\w+","");

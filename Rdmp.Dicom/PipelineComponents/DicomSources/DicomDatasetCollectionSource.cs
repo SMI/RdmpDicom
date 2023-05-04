@@ -42,12 +42,11 @@ public class DicomDatasetCollectionSource : DicomSource, IPipelineRequirement<ID
         }
 
         var currentBatch = BatchSize;
-        DicomDataset ds;
-            
+
         var dt = GetDataTable();
 
         dt.BeginLoadData();
-        while (currentBatch > 0 && (ds = _datasetListWorklist.GetNextDatasetToProcess(out var filename,out var otherValuesToStoreInRow)) != null)
+        while (currentBatch > 0 && _datasetListWorklist.GetNextDatasetToProcess(out var filename,out var otherValuesToStoreInRow) is { } ds)
         {
             ProcessDataset(filename, ds, dt, listener, otherValuesToStoreInRow);
             currentBatch--;

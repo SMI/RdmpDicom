@@ -106,12 +106,12 @@ public class SemEHRConfiguration
     public List<string> Temporality { get; set; } = new();
 
     /// <summary>
-    /// Whether the comment was a confrimation or negation of the presence/absence of the search term - "Any" or "Negated" or "Affirmed"
+    /// Whether the comment was a confirmation or negation of the presence/absence of the search term - "Any" or "Negated" or "Affirmed"
     /// </summary>
     public string Negation { get; set; } = "";
 
     /// <summary>
-    /// Who experianced the condition - "Patient" or "Other"
+    /// Who experienced the condition - "Patient" or "Other"
     /// </summary>
     public string Experiencer { get; set; } = "";
 
@@ -142,10 +142,10 @@ public class SemEHRConfiguration
     public List<string> Modalities { get; set; } = new();
 
     //API Return Fields
-    /// <summary>
-    /// The list of fields that should be returned - "SOPInstanceUID", "SeriesInstanceUID", "StudyInstanceUID" 
-    /// </summary>
-    //Currently only supporting one return feild which is all we need from an RDMP point of view
+    // / <summary>
+    // / The list of fields that should be returned - "SOPInstanceUID", "SeriesInstanceUID", "StudyInstanceUID" 
+    // / </summary>
+    //Currently only supporting one return field which is all we need from an RDMP point of view
     //public List<string> ReturnFields { get; set; } = new List<string>();
 
     //API Return Field

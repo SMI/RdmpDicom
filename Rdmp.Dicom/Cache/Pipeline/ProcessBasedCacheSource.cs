@@ -25,7 +25,7 @@ Example:. './GetImages.exe ""%s"" ""%e%""'")]
     [DemandsInitialization("The datetime format for %s and %e.",Mandatory = true,DefaultValue = "yyyy-MM-dd HH:mm:ss")]
     public string TimeFormat {get;set;}
 
-    [DemandsInitialization("True to throw an Exception if the process run returns a nonzero exit code", DefaultValue = true)]
+    [DemandsInitialization("True to throw an Exception if the process run returns a non-zero exit code", DefaultValue = true)]
     public bool ThrowOnNonZeroExitCode {get;set;}
 
     public override void Abort(IDataLoadEventListener listener)

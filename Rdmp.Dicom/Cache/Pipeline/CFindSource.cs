@@ -62,44 +62,37 @@ public class CFindSource : SMICacheSource
         var filepath = Path.Combine(workingDirectory.FullName, filename);
 
         var sw = new StreamWriter(filepath);
-        var writer = new CsvWriter(sw,CultureInfo.CurrentCulture);
+        using var writer = new CsvWriter(sw,CultureInfo.CurrentCulture);
 
         WriteHeaders(writer);
 
         var client = DicomClientFactory.Create(dicomConfiguration.RemoteAetUri.Host,
             dicomConfiguration.RemoteAetUri.Port, false, dicomConfiguration.LocalAetTitle,
             dicomConfiguration.RemoteAetTitle);
-                
-        try
+
+        // Find a list of studies
+
+        #region Query
+
+        listener.OnNotify(this,
+            new NotifyEventArgs(ProgressEventType.Information,
+                $"Requesting Studies from {dateFrom} to {dateTo}"));
+        var responses = 0;
+
+        var request = CreateStudyRequestByDateRangeForModality(dateFrom, dateTo, Modality);
+        request.OnResponseReceived += (req, response) =>
         {
-            // Find a list of studies
-            #region Query
+            if (!Filter(Whitelist, response)) return;
+            Interlocked.Increment(ref responses);
+            WriteResult(writer, response);
 
-            listener.OnNotify(this,
-                new NotifyEventArgs(ProgressEventType.Information,
-                    $"Requesting Studies from {dateFrom} to {dateTo}"));
-            var responses = 0;
+        };
+        requestSender.ThrottleRequest(request, client, cancellationToken.AbortToken);
+        listener.OnNotify(this,
+            new NotifyEventArgs(ProgressEventType.Debug,
+                $"Total filtered studies for {dateFrom} to {dateTo} is {responses}"));
 
-            var request = CreateStudyRequestByDateRangeForModality(dateFrom, dateTo, Modality);
-            request.OnResponseReceived += (req, response) =>
-            {
-                if (!Filter(Whitelist, response)) return;
-                Interlocked.Increment(ref responses);
-                WriteResult(writer,response);
-
-            };
-            requestSender.ThrottleRequest(request,client, cancellationToken.AbortToken);
-            listener.OnNotify(this,
-                new NotifyEventArgs(ProgressEventType.Debug,
-                    $"Total filtered studies for {dateFrom} to {dateTo} is {responses}"));
-            #endregion
-
-        }
-        finally
-        {
-            writer.Dispose();
-        }
-            
+        #endregion
 
         return Chunk;
     }

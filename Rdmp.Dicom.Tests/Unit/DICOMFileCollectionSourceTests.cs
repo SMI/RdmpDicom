@@ -197,8 +197,8 @@ public class DicomFileCollectionSourceTests : DatabaseTests
 
         //e.g. \2015\3\18\2.25.223398837779449245317520567111874824918.dcm
         //e.g. \2015\3\18\2.25.179610809676265137473873365625829826423.dcm
-        var relativePathWithinZip1 = dicomFiles[0].FullName.Substring(dirToLoad.FullName.Length);
-        var relativePathWithinZip2 = dicomFiles[1].FullName.Substring(dirToLoad.FullName.Length);
+        var relativePathWithinZip1 = dicomFiles[0].FullName[dirToLoad.FullName.Length..];
+        var relativePathWithinZip2 = dicomFiles[1].FullName[dirToLoad.FullName.Length..];
             
         //zip them up
         FileInfo zip = new(Path.Combine(TestContext.CurrentContext.TestDirectory,
@@ -263,11 +263,8 @@ public class DicomFileCollectionSourceTests : DatabaseTests
             StringAssert.Contains(yearDir.Name,pathInDbToDicomFile,"Expected zip file to have subdirectories and for them to be loaded correctly");
 
             //confirm we can read that out again
-            using (var pool = new ZipPool())
-            {
-                var path = new AmbiguousFilePath(TestContext.CurrentContext.TestDirectory, pathInDbToDicomFile);
-                Assert.IsNotNull(path.GetDataset(0,0));
-            }
+            var path = new AmbiguousFilePath(TestContext.CurrentContext.TestDirectory, pathInDbToDicomFile);
+            Assert.IsNotNull(path.GetDataset(0,0));
         }
 
         Assert.IsTrue(finalTable.Exists());

@@ -33,7 +33,7 @@ public class ExecuteCommandAddTag : BasicCommandExecution
     /// Overload for use with the command line or for when adding the same column to multiple Catalogues
     /// </summary>
     /// <param name="activator">UI abstraction layer</param>
-    /// <param name="catalogue">The Catalogue you want to add the tag to.  Must have a single table under it.</param>
+    /// <param name="catalogues">The Catalogue you want to add the tag to.  Must have a single table under it.</param>
     /// <param name="column">The name of a dicom tag</param>
     /// <param name="dataType">Optional.  Pass null to lookup the dicom tags datatype automatically (recommended).  Pass a value to use an explicit SQL DBMS datatype instead.</param>
     [UseWithObjectConstructor]
@@ -72,34 +72,32 @@ public class ExecuteCommandAddTag : BasicCommandExecution
         var syntax = tables[0].GetQuerySyntaxHelper();
 
         //if user hasn't listed a specific datatype, guess it from the column 
-        if (string.IsNullOrWhiteSpace(dataType))
+        if (!string.IsNullOrWhiteSpace(dataType))
+            return new TagColumnAdder(column, dataType, (TableInfo)tables[0], new AcceptAllCheckNotifier());
+        var available = TagColumnAdder.GetAvailableTags();
+
+        if (!available.Contains(column))
         {
-            var available = TagColumnAdder.GetAvailableTags();
+            var similar = available.Where(c => c.Contains(column)).ToArray();
 
-            if (!available.Contains(column))
+            if (similar.Any())
             {
-                var similar = available.Where(c => c.Contains(column)).ToArray();
-
-                if (similar.Any())
-                {
-                    SetImpossible(
-                        $"Could not find a tag called '{column}'. Possibly  you meant:{Environment.NewLine}{string.Join(Environment.NewLine, similar)}");
-                    return null;
-                }
-
-                SetImpossible($"Could not find a tag called '{column}' or any like it");
+                SetImpossible(
+                    $"Could not find a tag called '{column}'. Possibly  you meant:{Environment.NewLine}{string.Join(Environment.NewLine, similar)}");
                 return null;
             }
 
-            try
-            {
-                dataType = TagColumnAdder.GetDataTypeForTag(column, syntax.TypeTranslater);
-            }
-            catch (Exception e)
-            {
-                throw new Exception("No dataType was specified and column name could not be resolved to a DicomTag", e);
-            }
+            SetImpossible($"Could not find a tag called '{column}' or any like it");
+            return null;
+        }
 
+        try
+        {
+            dataType = TagColumnAdder.GetDataTypeForTag(column, syntax.TypeTranslater);
+        }
+        catch (Exception e)
+        {
+            throw new Exception("No dataType was specified and column name could not be resolved to a DicomTag", e);
         }
 
         return new TagColumnAdder(column, dataType, (TableInfo)tables[0], new AcceptAllCheckNotifier());

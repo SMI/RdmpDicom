@@ -47,7 +47,7 @@ public class SemEHRApiCallerTests : DatabaseTests
         var ac = new AggregateConfiguration(CatalogueRepository, cata, "blah");
         cic.RootCohortAggregateContainer.AddChild(ac,0);
 
-        var semEHRConfiguration = new SemEHRConfiguration()
+        var semEHRConfiguration = new SemEHRConfiguration
         {
             Url = RequiresSemEHR.SemEHRTestUrl + "/api/search_anns/myQuery/",
             Query = "C0205076",

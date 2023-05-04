@@ -74,12 +74,7 @@ public class ExecuteCommandBuildExtractionView : BasicCommandExecution
     {
         foreach(var t in tables)
         {
-            var match = GetColumnInfoCalled(t, col);
-
-            if(match == null)
-            {
-                throw new Exception($"Expected to find a column called {col} in {t}");
-            }
+            _ = GetColumnInfoCalled(t, col) ?? throw new Exception($"Expected to find a column called {col} in {t}");
         }
     }
 
@@ -126,6 +121,7 @@ public class ExecuteCommandBuildExtractionView : BasicCommandExecution
     /// <summary>
     /// Identify study table because it has a primary key of StudyInstanceUID
     /// </summary>
+    /// <param name="name"></param>
     /// <param name="fromTables"></param>
     /// <returns></returns>
     private TableInfo TryClassifyByPrimaryKey(string name, params TableInfo[] fromTables)
@@ -145,6 +141,7 @@ public class ExecuteCommandBuildExtractionView : BasicCommandExecution
     /// <summary>
     /// Identify study table based on its name 
     /// </summary>
+    /// <param name="name"></param>
     /// <param name="fromTables"></param>
     /// <returns></returns>
     private TableInfo TryClassifyByName(string name, params TableInfo[] fromTables)

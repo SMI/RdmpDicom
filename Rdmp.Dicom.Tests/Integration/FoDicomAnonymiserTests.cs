@@ -103,7 +103,7 @@ public class FoDicomAnonymiserTests:DatabaseTests
         DicomFile df = new(dicom);
         df.Save(fi.FullName);
 
-        var dt = new DataTable();
+        using var dt = new DataTable();
         dt.Columns.Add("Filepath");
         dt.Columns.Add("SOPInstanceUID");
         dt.Columns.Add("SeriesInstanceUID");
@@ -133,10 +133,10 @@ public class FoDicomAnonymiserTests:DatabaseTests
             
         //Data table should contain new UIDs
         Assert.AreNotEqual("123.4.4", anoDt.Rows[0]["SOPInstanceUID"]);
-        Assert.AreEqual(56, anoDt.Rows[0]["SOPInstanceUID"].ToString().Length);
+        Assert.AreEqual(56, anoDt.Rows[0]["SOPInstanceUID"].ToString()?.Length);
 
         Assert.AreNotEqual("123.4.6", anoDt.Rows[0]["StudyInstanceUID"]);
-        Assert.AreEqual(56, anoDt.Rows[0]["StudyInstanceUID"].ToString().Length);
+        Assert.AreEqual(56, anoDt.Rows[0]["StudyInstanceUID"].ToString()?.Length);
 
         FileInfo expectedFile = null;
         if(putterType == typeof(PutInRoot))
@@ -155,8 +155,8 @@ public class FoDicomAnonymiserTests:DatabaseTests
             expectedFile = new FileInfo(Path.Combine(TestContext.CurrentContext.WorkDirectory, "Images", "Hank", anoDt.Rows[0]["StudyInstanceUID"].ToString(), anoDt.Rows[0]["SeriesInstanceUID"].ToString(),
                 $"{anoDt.Rows[0]["SOPInstanceUID"]}.dcm"));
 
-        Assert.IsTrue(expectedFile.Exists);
-        var anoDicom = DicomFile.Open(expectedFile.FullName);
+        Assert.IsTrue(expectedFile?.Exists);
+        var anoDicom = DicomFile.Open(expectedFile?.FullName);
             
         Assert.AreEqual("Hank",anoDicom.Dataset.GetValue<string>(DicomTag.PatientID,0));
 
@@ -166,7 +166,7 @@ public class FoDicomAnonymiserTests:DatabaseTests
         Assert.AreEqual(anoDt.Rows[0]["StudyInstanceUID"], anoDicom.Dataset.GetValue<string>(DicomTag.StudyInstanceUID, 0));
 
 
-        foreach (var (key, _) in thingThatShouldDisappear)
+        foreach (var key in thingThatShouldDisappear.Keys)
         {
             //if it chopped out the entire tag
             if(!anoDicom.Dataset.Contains(key))
@@ -197,7 +197,7 @@ public class FoDicomAnonymiserTests:DatabaseTests
             Assert.AreEqual(value, anoDicom.Dataset.GetValue<string>(key, 0));
     }
 
-    [TestCase()]
+    [TestCase]
     public void TestSkipAnonymisationOnStructuredReports()
     {
         var uidMapDb = GetCleanedServer(DatabaseType.MicrosoftSQLServer, "TESTUIDMapp");

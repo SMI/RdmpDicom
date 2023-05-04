@@ -43,7 +43,7 @@ This Grouping will be used to extract the Modality code when deciding which tabl
     [DemandsInitialization("This attacher expects multiple flat files that will be loaded this pattern should match them (file pattern not regex e.g. *.csv)")]
     public string ListPattern { get; set; }
 
-    private readonly Dictionary<string, bool> _columnNamesRoutedSuccesfully = new(StringComparer.CurrentCultureIgnoreCase);
+    private readonly Dictionary<string, bool> _columnNamesRoutedSuccessfully = new(StringComparer.CurrentCultureIgnoreCase);
 
     private readonly Stopwatch _sw = new();
     private Dictionary<DataTable, string> _modalityMap;
@@ -85,11 +85,11 @@ This Grouping will be used to extract the Modality code when deciding which tabl
             }
         }
 
-        var unmatchedColumns = string.Join($",{Environment.NewLine}", _columnNamesRoutedSuccesfully.Where(kvp => kvp.Value == false).Select(k => k.Key));
+        var unmatchedColumns = string.Join($",{Environment.NewLine}", _columnNamesRoutedSuccessfully.Where(kvp => kvp.Value == false).Select(k => k.Key));
 
         if (!string.IsNullOrWhiteSpace(unmatchedColumns))
         {
-            //for each column see in an input table that was not succesfully routed somewhere
+            //for each column see in an input table that was not successfully routed somewhere
             job.OnNotify(this,new NotifyEventArgs(ProgressEventType.Warning,
                 $"Ignored input columns:{unmatchedColumns}"));
         }
@@ -146,7 +146,7 @@ This Grouping will be used to extract the Modality code when deciding which tabl
         {
             new PipelineChecker(LoadPipeline).Check(notifier);
                 
-            //don't check this since we are our own Fixed source for the engine so we just end up in a loop! but do instantiate it incase there are construction/context errors
+            //don't check this since we are our own Fixed source for the engine so we just end up in a loop! but do instantiate it in case there are construction/context errors
                 
             PipelineChecker c = new(LoadPipeline);
             c.Check(notifier);
@@ -238,8 +238,8 @@ This Grouping will be used to extract the Modality code when deciding which tabl
     private void AddRows(DataTable toProcess)
     {
         foreach (DataColumn dc in toProcess.Columns)
-            if (!_columnNamesRoutedSuccesfully.ContainsKey(dc.ColumnName))
-                _columnNamesRoutedSuccesfully.Add(dc.ColumnName, false);
+            if (!_columnNamesRoutedSuccessfully.ContainsKey(dc.ColumnName))
+                _columnNamesRoutedSuccessfully.Add(dc.ColumnName, false);
 
 
         //for every row in the input table
@@ -272,7 +272,7 @@ This Grouping will be used to extract the Modality code when deciding which tabl
                     addedToAtLeastOneTable = true;
                 }
 
-                _columnNamesRoutedSuccesfully[column.ColumnName] = true;
+                _columnNamesRoutedSuccessfully[column.ColumnName] = true;
             }
 
             //we didn't add the row to any tables yet
@@ -288,7 +288,7 @@ This Grouping will be used to extract the Modality code when deciding which tabl
                         AddCellValue(inputRow, column, destinationTable, newDestinationRows);
                         addedToAtLeastOneTable = true;
                     }
-                    _columnNamesRoutedSuccesfully[column.ColumnName] = true;
+                    _columnNamesRoutedSuccessfully[column.ColumnName] = true;
                 }
             }
 

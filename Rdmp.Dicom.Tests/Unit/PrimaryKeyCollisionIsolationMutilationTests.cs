@@ -250,7 +250,7 @@ internal class PrimaryKeyCollisionIsolationMutilationTests:DatabaseTests
         StringAssert.Contains("join", ex.Message); //should be complaining about missing join infos
 
         //tell RDMP about how to join tables
-        new JoinInfo(CatalogueRepository,childColumnInfosCreated.Single(
+        _=new JoinInfo(CatalogueRepository,childColumnInfosCreated.Single(
                 c => c.GetRuntimeName().Equals("SeriesInstanceUID")),
             parentColumnInfosCreated.Single(c => c.GetRuntimeName().Equals("SeriesInstanceUID")),
             ExtractionJoinType.Right, null);
@@ -345,10 +345,8 @@ internal class PrimaryKeyCollisionIsolationMutilationTests:DatabaseTests
         var mutilator = GetMutilator(db, parentTableInfo, childTableInfo);
 
         //tell RDMP about how to join tables
-        new JoinInfo(CatalogueRepository,childColumnInfosCreated.Single(
-                c => c.GetRuntimeName().Equals("Fk")),
-            parentColumnInfosCreated.Single(c => c.GetRuntimeName().Equals("Pk")),
-            ExtractionJoinType.Right, null);
+        _ = new JoinInfo(CatalogueRepository, childColumnInfosCreated.Single(c => c.GetRuntimeName().Equals("Fk")),
+            parentColumnInfosCreated.Single(c => c.GetRuntimeName().Equals("Pk")), ExtractionJoinType.Right, null);
 
         //now that we have a join it should pass checks
         mutilator.Check(new AcceptAllCheckNotifier());
@@ -437,10 +435,8 @@ internal class PrimaryKeyCollisionIsolationMutilationTests:DatabaseTests
         var mutilator = GetMutilator(db, parentTableInfo, childTableInfo);
 
         //tell RDMP about how to join tables
-        new JoinInfo(CatalogueRepository,childColumnInfosCreated.Single(
-                c => c.GetRuntimeName().Equals("Fk")),
-            parentColumnInfosCreated.Single(c => c.GetRuntimeName().Equals("Pk")),
-            ExtractionJoinType.Right, null);
+        _ = new JoinInfo(CatalogueRepository, childColumnInfosCreated.Single(c => c.GetRuntimeName().Equals("Fk")),
+            parentColumnInfosCreated.Single(c => c.GetRuntimeName().Equals("Pk")), ExtractionJoinType.Right, null);
 
         //now that we have a join it should pass checks
         mutilator.Check(new AcceptAllCheckNotifier());
@@ -529,10 +525,8 @@ internal class PrimaryKeyCollisionIsolationMutilationTests:DatabaseTests
         var mutilator = GetMutilator(db, parentTableInfo, childTableInfo);
 
         //tell RDMP about how to join tables
-        new JoinInfo(CatalogueRepository,childColumnInfosCreated.Single(
-                c => c.GetRuntimeName().Equals("Fk")),
-            parentColumnInfosCreated.Single(c => c.GetRuntimeName().Equals("Pk")),
-            ExtractionJoinType.Right, null);
+        _ = new JoinInfo(CatalogueRepository, childColumnInfosCreated.Single(c => c.GetRuntimeName().Equals("Fk")),
+            parentColumnInfosCreated.Single(c => c.GetRuntimeName().Equals("Pk")), ExtractionJoinType.Right, null);
 
         //now that we have a join it should pass checks
         mutilator.Check(new AcceptAllCheckNotifier());
@@ -617,10 +611,8 @@ internal class PrimaryKeyCollisionIsolationMutilationTests:DatabaseTests
         var mutilator = GetMutilator(db, parentTableInfo, childTableInfo);
 
         //tell RDMP about how to join tables
-        new JoinInfo(CatalogueRepository,childColumnInfosCreated.Single(
-                c => c.GetRuntimeName().Equals("Fk")),
-            parentColumnInfosCreated.Single(c => c.GetRuntimeName().Equals("Pk")),
-            ExtractionJoinType.Right, null);
+        _ = new JoinInfo(CatalogueRepository, childColumnInfosCreated.Single(c => c.GetRuntimeName().Equals("Fk")),
+            parentColumnInfosCreated.Single(c => c.GetRuntimeName().Equals("Pk")), ExtractionJoinType.Right, null);
 
         //now that we have a join it should pass checks
         mutilator.Check(new AcceptAllCheckNotifier());
@@ -691,10 +683,8 @@ internal class PrimaryKeyCollisionIsolationMutilationTests:DatabaseTests
         var mutilator = GetMutilator(db, parentTableInfo, childTableInfo);
 
         //tell RDMP about how to join tables
-        new JoinInfo(CatalogueRepository,childColumnInfosCreated.Single(
-                c => c.GetRuntimeName().Equals("Fk")),
-            parentColumnInfosCreated.Single(c => c.GetRuntimeName().Equals("Pk")),
-            ExtractionJoinType.Right, null);
+        _ = new JoinInfo(CatalogueRepository, childColumnInfosCreated.Single(c => c.GetRuntimeName().Equals("Fk")),
+            parentColumnInfosCreated.Single(c => c.GetRuntimeName().Equals("Pk")), ExtractionJoinType.Right, null);
 
         //now that we have a join it should pass checks
         mutilator.Check(new AcceptAllCheckNotifier());
@@ -794,10 +784,8 @@ internal class PrimaryKeyCollisionIsolationMutilationTests:DatabaseTests
         var mutilator = GetMutilator(db, parentTableInfo, childTableInfo);
 
         //tell RDMP about how to join tables
-        new JoinInfo(CatalogueRepository,childColumnInfosCreated.Single(
-                c => c.GetRuntimeName().Equals("Fk")),
-            parentColumnInfosCreated.Single(c => c.GetRuntimeName().Equals("Pk")),
-            ExtractionJoinType.Right, null);
+        _ = new JoinInfo(CatalogueRepository, childColumnInfosCreated.Single(c => c.GetRuntimeName().Equals("Fk")),
+            parentColumnInfosCreated.Single(c => c.GetRuntimeName().Equals("Pk")), ExtractionJoinType.Right, null);
 
         //now that we have a join it should pass checks
         mutilator.Check(new AcceptAllCheckNotifier());
@@ -886,10 +874,8 @@ internal class PrimaryKeyCollisionIsolationMutilationTests:DatabaseTests
         var mutilator = GetMutilator(db, parentTableInfo, childTableInfo);
 
         //tell RDMP about how to join tables
-        new JoinInfo(CatalogueRepository,childColumnInfosCreated.Single(
-                c => c.GetRuntimeName().Equals("Fk")),
-            parentColumnInfosCreated.Single(c => c.GetRuntimeName().Equals("Pk")),
-            ExtractionJoinType.Right, null);
+        _ = new JoinInfo(CatalogueRepository, childColumnInfosCreated.Single(c => c.GetRuntimeName().Equals("Fk")),
+            parentColumnInfosCreated.Single(c => c.GetRuntimeName().Equals("Pk")), ExtractionJoinType.Right, null);
 
         //now that we have a join it should pass checks
         mutilator.Check(new AcceptAllCheckNotifier());

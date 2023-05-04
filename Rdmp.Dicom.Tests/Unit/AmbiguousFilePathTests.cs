@@ -94,7 +94,7 @@ public class AmbiguousFilePathTests
 
         //we want to read one out of the middle
         var a = new AmbiguousFilePath(Path.Combine(TestContext.CurrentContext.WorkDirectory, "omgzip.zip!test750.dcm"));
-        a.GetDataset();
+        _=a.GetDataset().ToList();
 
         Console.WriteLine($"No Caching:{sw.ElapsedMilliseconds}ms");
     }
@@ -121,10 +121,10 @@ public class AmbiguousFilePathTests
         var exists = new AmbiguousFilePath($"{zipFile.FullName}!file1.dcm");
         Assert.IsNotNull(exists.GetDataset());
 
-        var notexists = new AmbiguousFilePath($"{zipFile.FullName}!file2.dcm");
-        var ex = Assert.Throws<AmbiguousFilePathResolutionException>(()=>notexists.GetDataset().ToList());
+        var nonExistent = new AmbiguousFilePath($"{zipFile.FullName}!file2.dcm");
+        var ex = Assert.Throws<AmbiguousFilePathResolutionException>(()=>_=nonExistent.GetDataset().ToList());
 
-        StringAssert.Contains("Could not find path 'file2.dcm' within zip archive",ex.Message);
+        StringAssert.Contains("Could not find path 'file2.dcm' within zip archive",ex?.Message);
 
         var existsRelative = new AmbiguousFilePath(zipFile.DirectoryName,"my.zip!file1.dcm"); 
         Assert.IsNotNull(existsRelative.GetDataset());

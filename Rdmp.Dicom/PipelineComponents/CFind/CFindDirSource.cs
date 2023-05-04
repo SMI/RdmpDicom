@@ -27,7 +27,7 @@ public class CFindDirSource : IPluginDataFlowSource<DataTable>, IPipelineRequire
     public string SearchPattern { get; set; } = "*.xml";
 
 
-    [DemandsInitialization("Comma seperated list of dicom tags to read from the CFind results", Mandatory = true, DefaultValue = DefaultHeaders)]
+    [DemandsInitialization("Comma separated list of dicom tags to read from the CFind results", Mandatory = true, DefaultValue = DefaultHeaders)]
     public string HeadersToRead { get; set; } = DefaultHeaders;
 
     private int filesRead = 0;

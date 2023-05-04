@@ -52,7 +52,7 @@ public class ExecuteCommandCreateNewImagingDataset:BasicCommandExecution
         }
             
         //make it extractable
-        new ExtractableDataSet(_repositoryLocator.DataExportRepository, cata);
+        _=new ExtractableDataSet(_repositoryLocator.DataExportRepository, cata);
 
         NewCatalogueCreated = cata;
     }

@@ -85,25 +85,17 @@ public class MappingRepository : IMappingRepository
         };
     }
 
-    public void InsertMapping(UIDMapping mapping)
-    {
-        InsertMappings(new[] {mapping});
-    }
-
-    public void InsertMappings(UIDMapping[] newMappings)
+    public void InsertMappings(SqlConnection conn,params UIDMapping[] newMappings)
     {
         // Set up a bulk insert
         var table = _database.ExpectTable(_tableName);
 
         // Create data table
         using var dt = new DataTable(_tableName);
-        using (var conn = (SqlConnection)_server.GetConnection())
-        {
-            conn.Open();
+        dt.BeginLoadData();
 
-            using var da = new SqlDataAdapter(table.GetTopXSql(0), conn);
-            da.Fill(dt);
-        }
+        using var da = new SqlDataAdapter(table.GetTopXSql(0), conn);
+        da.Fill(dt);
 
         // Fill up the data table
         foreach (var mapping in newMappings)
@@ -118,12 +110,9 @@ public class MappingRepository : IMappingRepository
         }
 
         // Perform the bulk copy
-        using (var conn = (SqlConnection)_server.GetConnection())
-        {
-            conn.Open();
-            using var bulkCopy = table.BeginBulkInsert();
-            bulkCopy.Upload(dt);
-        }
+        dt.EndLoadData();
+        using var bulkCopy = table.BeginBulkInsert();
+        bulkCopy.Upload(dt);
     }
 
     public void Update(UIDMapping mapping)
@@ -145,11 +134,8 @@ public class MappingRepository : IMappingRepository
         cmd.ExecuteNonQuery();
     }
 
-    public string GetOrAllocateMapping(string value, int projectNumber, UIDType uidType)
+    public string GetOrAllocateMapping(SqlConnection con,string value, int projectNumber, UIDType uidType)
     {
-        using var con = _database.Server.GetConnection();
-        con.Open();
-
         var cmd =
             _server.GetCommand(
                 "SELECT ReleaseUID from UIDMapping WHERE ProjectNumber = @ProjectNumber AND UIDType = @UIDType AND PrivateUID = @PrivateUID",
@@ -171,22 +157,22 @@ public class MappingRepository : IMappingRepository
             IsExternalReference = false
         };
 
-        InsertMapping(m);
+        InsertMappings(con,m);
 
         return m.ReleaseUID;
     }
 
     private static readonly Random r = new();
         
-    private string GetKindaUid()
+    private static string GetKindaUid()
     {
-        StringBuilder sb = new();
-        while (sb.Length < 51)
+        StringBuilder sb = new("2.25.");
+        while (sb.Length < 56)
         {
             var d = r.Next(int.MaxValue);
             sb.Append(d);
         }
 
-        return $"2.25.{sb.ToString(0, 51)}";
+        return sb.ToString(0, 56);
     }
 }

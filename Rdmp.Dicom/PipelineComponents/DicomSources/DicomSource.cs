@@ -313,7 +313,7 @@ public abstract class DicomSource : IPluginDataFlowSource<DataTable>
             if (TagBlacklist.IsMatch(tag.DictionaryEntry.Keyword)) //and the current header matches the blacklist 
                 return true; //skip it
 
-        //if there is an explict mapping to follow
+        //if there is an explicit mapping to follow
         if (FieldMapTableIfAny == null && UseAllTableInfoInLoadAsFieldMap == null) return false;
         //if we don't have the tag in our schema ignore it
         return !dt.Columns.Contains(tag.DictionaryEntry.Keyword);

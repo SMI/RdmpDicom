@@ -133,7 +133,7 @@ public class ExecuteCommandCreateNewImagingDatasetSuite : BasicCommandExecution
             logging.Info($"Creating '{create}'");
             _databaseToCreateInto.Server.CreateDatabase(create);
 
-            logging.Info($"Database Created, now waiting");
+            logging.Info("Database Created, now waiting");
             Thread.Sleep(5000);
 
             if(!_databaseToCreateInto.Exists())

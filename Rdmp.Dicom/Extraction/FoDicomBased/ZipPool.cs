@@ -43,10 +43,10 @@ public class ZipPool:IDisposable
         if (_openZipFiles.Count>MaxPoolSize)
             ClearCache();
         Interlocked.Increment(ref _opens);
-        return _openZipFiles.GetOrAdd(key, key =>
+        return _openZipFiles.GetOrAdd(key, k =>
         {
             Interlocked.Increment(ref _cacheMisses);
-            return new LibArchiveReader(key);
+            return new LibArchiveReader(k);
         });
     }
 

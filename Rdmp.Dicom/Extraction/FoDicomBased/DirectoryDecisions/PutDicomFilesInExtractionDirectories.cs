@@ -8,8 +8,7 @@ public abstract class PutDicomFilesInExtractionDirectories : IPutDicomFilesInExt
 {
     public string WriteOutDataset(DirectoryInfo outputDirectory, string releaseIdentifier, DicomDataset dicomDataset)
     {
-        if(dicomDataset == null)
-            throw new ArgumentNullException(nameof(dicomDataset));
+        ArgumentNullException.ThrowIfNull(dicomDataset, nameof(dicomDataset));
 
         if(!outputDirectory.Exists)
             outputDirectory.Create();
@@ -19,7 +18,7 @@ public abstract class PutDicomFilesInExtractionDirectories : IPutDicomFilesInExt
 
     protected abstract string WriteOutDatasetImpl(DirectoryInfo outputDirectory, string releaseIdentifier,DicomDataset dicomDataset);
 
-    protected DirectoryInfo SubDirectoryCreate(DirectoryInfo parent, string child)
+    protected static DirectoryInfo SubDirectoryCreate(DirectoryInfo parent, string child)
     {
         var childDir = new DirectoryInfo(Path.Combine(parent.FullName, child));
         //If the directory already exists, this method does nothing.
@@ -27,14 +26,11 @@ public abstract class PutDicomFilesInExtractionDirectories : IPutDicomFilesInExt
         return childDir;
     }
 
-    protected string SaveDicomData(DirectoryInfo outputDirectory,DicomDataset dicomDataset)
+    protected static string SaveDicomData(DirectoryInfo outputDirectory,DicomDataset dicomDataset)
     {
         var path = Path.Combine(outputDirectory.FullName, dicomDataset.GetValue<string>(DicomTag.SOPInstanceUID, 0));
             
-        if(!path.EndsWith(".dcm"))
-        {
-            path = path + ".dcm";
-        }            
+        if(!path.EndsWith(".dcm")) path += ".dcm";
 
         var outPath = new FileInfo(path);
         new DicomFile(dicomDataset).Save(outPath.FullName);
@@ -48,10 +44,7 @@ public abstract class PutDicomFilesInExtractionDirectories : IPutDicomFilesInExt
 
         var path = Path.Combine(outputDirectory.FullName, sopUid);
             
-        if (!path.EndsWith(".dcm"))
-        {
-            path = path + ".dcm";
-        }
+        if (!path.EndsWith(".dcm")) path += ".dcm";
 
         return new FileInfo(path).FullName;
     }
