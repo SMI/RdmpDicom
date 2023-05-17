@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <RootNamespace>Rdmp.Dicom.Tests</RootNamespace>
     <AssemblyName>Rdmp.Dicom.Tests</AssemblyName>
@@ -42,7 +42,7 @@
   <ItemGroup>
     <PackageReference Include="HIC.BadMedicine.Dicom" Version="0.0.16-rc1" />
     <PackageReference Include="HIC.RDMP.Plugin.Test" Version="8.1.0-rc1" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.5.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.6.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.4.2" />
     <PackageReference Include="NunitXml.TestLogger" Version="3.0.131" />
   </ItemGroup>
