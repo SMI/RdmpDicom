@@ -37,7 +37,7 @@ jobs:
       - name: Build
         shell: bash
         run: |
-          wget https://raw.githubusercontent.com/SMI/DicomTypeTranslation/main/Templates/CT.it -OutFile CT.it
+          wget https://raw.githubusercontent.com/SMI/DicomTypeTranslation/main/Templates/CT.it
           cd Plugin/windows
           dotnet publish -c Release --self-contained false -nologo
           cd ../main
