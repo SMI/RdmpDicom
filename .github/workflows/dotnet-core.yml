@@ -20,7 +20,6 @@ jobs:
         shell: cmd
         run: |
           for /f tokens^=1^,2^ delims^=^" %%i in (SharedAssemblyInfo.cs) do @if "%%i"=="[assembly: AssemblyVersion(" echo ::set-output name=version::%%j
-          for /f tokens^=2^,4^ delims^=^" %%i in (Rdmp.Dicom/Rdmp.Dicom.csproj) do @if "%%i"=="HIC.RDMP.Plugin" echo ::set-output name=rdmpversion::%%j
       - name: Install MS SQL 2019
         uses: crazy-max/ghaction-chocolatey@v2
         with:
@@ -28,10 +27,8 @@ jobs:
       - name: Set up database
         run: |
           SqlLocalDB.exe create MSSQLLocalDB -s
-          Invoke-WebRequest -Uri https://github.com/HicServices/RDMP/releases/download/v${{ steps.version.outputs.rdmpversion }}/rdmp-${{ steps.version.outputs.rdmpversion }}-cli-win-x64.zip -OutFile rdmp.zip
-          Expand-Archive -Path rdmp.zip -DestinationPath .\rdmpcli
           sqlcmd -l 180 -S "(localdb)\MSSQLLocalDB" -Q "SELECT @@VERSION;"
-          cmd.exe /c rdmpcli\rdmp.exe install --createdatabasetimeout 180  "(localdb)\MSSQLLocalDB" TEST_
+          dotnet run --project RDMP\Tools\rdmp\rdmp.csproj -c Release -- install --createdatabasetimeout 180  "(localdb)\MSSQLLocalDB" TEST_
       - name: Test
         run: |
           dotnet test -c Release
