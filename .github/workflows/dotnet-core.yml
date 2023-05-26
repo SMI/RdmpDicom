@@ -21,7 +21,7 @@ jobs:
         id: version
         shell: cmd
         run: |
-          for /f tokens^=1^,2^ delims^=^" %%i in (SharedAssemblyInfo.cs) do @if "%%i"=="[assembly: AssemblyVersion(" echo ::set-output name=version::%%j
+          for /f tokens^=1^,2^ delims^=^" %%i in (SharedAssemblyInfo.cs) do @if "%%i"=="[assembly: AssemblyVersion(" echo version=%%j >> %GITHUB_OUTPUT%
       - name: Install MS SQL 2019
         uses: crazy-max/ghaction-chocolatey@v2
         with:
@@ -35,7 +35,9 @@ jobs:
         run: |
           dotnet test -c Release
       - name: Build
+        shell: bash
         run: |
+          wget https://raw.githubusercontent.com/SMI/DicomTypeTranslation/main/Templates/CT.it -OutFile CT.it
           cd Plugin/windows
           dotnet publish -c Release --self-contained false -nologo
           cd ../main
@@ -44,23 +46,22 @@ jobs:
           nuget pack ./Rdmp.Dicom.nuspec -Properties Configuration=Release -IncludeReferencedProjects -Symbols -Version ${{ steps.version.outputs.version }}
           nuget pack ./Rdmp.Dicom.Library.nuspec -Properties Configuration=Release -IncludeReferencedProjects -Symbols -Version ${{ steps.version.outputs.version }}
           
-          cp Databases.Integration.yaml .\rdmpcli\Databases.yaml
-          cmd /c rdmpcli\rdmp.exe pack -p --file Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg
-          cmd /c rdmpcli\rdmp.exe cmd listsupportedcommands
-          cmd /c rdmpcli\rdmp.exe cmd describe CreateNewImagingDatasetSuite
-      - name: Get Imaging Template
-        run: |
-          Invoke-WebRequest -Uri https://raw.githubusercontent.com/SMI/DicomTypeTranslation/main/Templates/CT.it -OutFile D:\a\RdmpDicom\CT.it
-      - name: Integration Tests
-        run: |
-          cmd /c rdmpcli\rdmp.exe cmd NewObject ConnectionStringKeyword MicrosoftSqlServer TrustServerCertificate yes
-          cmd /c rdmpcli\rdmp.exe cmd NewObject ConnectionStringKeyword MicrosoftSqlServer Encrypt yes
-          cmd /c rdmpcli\rdmp.exe cmd CreateNewImagingDatasetSuite "DatabaseType:MicrosoftSqlServer:Name:ImagingTest:Server=(localdb)\MSSQLLocalDB;Integrated Security=true;Encrypt=yes;TrustServerCertificate=true" ./data DicomFileCollectionSource CT_ ../CT.it false true
-          cmd /c rdmpcli\rdmp.exe cmd AddTag Catalogue:CT_ImageTable StudyDate null
-          cmd /c rdmpcli\rdmp.exe cmd AddTag Catalogue:CT_*Table SeriesDate null
-          cmd /c rdmpcli\rdmp.exe cmd AddTag Catalogue:CT_*Table SeriesDate null
-          cmd /c rdmpcli\rdmp.exe cmd AddTag Catalogue:CT_*Table SeriesDate null          
-          cmd /c rdmpcli\rdmp.exe cmd CreateNewImagingDatasetSuite "DatabaseType:MicrosoftSqlServer:Name:ImagingTest2:Server=(localdb)\MSSQLLocalDB;Integrated Security=true;Encrypt=yes;TrustServerCertificate=true" ./data DicomFileCollectionSource CT_ ../CT.it false true
+          
+          cp Databases.Integration.yaml RDMP\Tools\rdmp\Databases.yaml
+          dotnet run --project RDMP\Tools\rdmp\rdmp.csproj -c Release -- -f <<-EOC
+          pack -p --file Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg
+          cmd listsupportedcommands
+          cmd describe CreateNewImagingDatasetSuite
+
+          cmd NewObject ConnectionStringKeyword MicrosoftSqlServer TrustServerCertificate yes
+          cmd NewObject ConnectionStringKeyword MicrosoftSqlServer Encrypt yes
+          cmd CreateNewImagingDatasetSuite "DatabaseType:MicrosoftSqlServer:Name:ImagingTest:Server=(localdb)\MSSQLLocalDB;Integrated Security=true;Encrypt=yes;TrustServerCertificate=true" ./data DicomFileCollectionSource CT_ ../CT.it false true
+          cmd AddTag Catalogue:CT_ImageTable StudyDate null
+          cmd AddTag Catalogue:CT_*Table SeriesDate null
+          cmd AddTag Catalogue:CT_*Table SeriesDate null
+          cmd AddTag Catalogue:CT_*Table SeriesDate null          
+          cmd CreateNewImagingDatasetSuite "DatabaseType:MicrosoftSqlServer:Name:ImagingTest2:Server=(localdb)\MSSQLLocalDB;Integrated Security=true;Encrypt=yes;TrustServerCertificate=true" ./data DicomFileCollectionSource CT_ ../CT.it false true
+          EOC
       - name: Nuget push
         if: contains(github.ref,'refs/tags/')
         run: nuget push HIC.Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg -Source https://api.nuget.org/v3/index.json -ApiKey ${{ secrets.NUGET_KEY }} -SkipDuplicate
@@ -76,3 +77,4 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ github.ref }}
           file: 'Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg'
+    
