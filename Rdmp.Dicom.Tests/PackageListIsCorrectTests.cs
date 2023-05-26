@@ -35,11 +35,11 @@ public class PackageListIsCorrectTests
         var undocumented = new StringBuilder();
 
         // Extract the named packages from PACKAGES.md
-        var packagesMarkdown = File.ReadAllLines(GetPackagesMarkdown(root))
+        var packagesMarkdown = GetPackagesMarkdown(root).SelectMany(File.ReadAllLines)
             .Select(line => RMarkdownEntry.Match(line))
             .Where(m=>m.Success)
-            .Skip(2)    // Jump over the header
             .Select(m => m.Groups[1].Value)
+            .Except(new[]{"Package", "-------" })
             .ToHashSet(StringComparer.InvariantCultureIgnoreCase);
 
         // Extract the named packages from csproj files
@@ -98,10 +98,10 @@ public class PackageListIsCorrectTests
     /// </summary>
     /// <param name="root"></param>
     /// <returns></returns>
-    private static string GetPackagesMarkdown(DirectoryInfo root)
+    private static string[] GetPackagesMarkdown(DirectoryInfo root)
     {
-        var path = root.EnumerateFiles("packages.md", EnumerationOptions).Select(f => f.FullName).SingleOrDefault();
-        Assert.IsNotNull(path, "Could not find packages.md");
+        var path = root.EnumerateFiles("packages.md", EnumerationOptions).Select(f => f.FullName).ToArray();
+        Assert.False(path.Length==0, "Could not find packages.md");
         return path;
     }
 
