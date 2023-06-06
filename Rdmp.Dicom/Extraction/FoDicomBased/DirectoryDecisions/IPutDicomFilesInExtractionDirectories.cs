@@ -1,10 +1,8 @@
-﻿using System.ComponentModel.Composition;
-using System.IO;
+﻿using System.IO;
 using FellowOakDicom;
 
 namespace Rdmp.Dicom.Extraction.FoDicomBased.DirectoryDecisions;
 
-[InheritedExport(typeof(IPutDicomFilesInExtractionDirectories))]
 public interface IPutDicomFilesInExtractionDirectories
 {
     /// <summary>
@@ -13,6 +11,7 @@ public interface IPutDicomFilesInExtractionDirectories
     /// table being extracted some of these may be null (e.g. if SOPInstanceUID is not part of the extracted metadata).
     /// If this is required to calculate output path then return null;
     /// </summary>
+    /// <param name="outputDirectory"></param>
     /// <param name="releaseIdentifier"></param>
     /// <param name="studyUid"></param>
     /// <param name="seriesUid"></param>

@@ -197,8 +197,8 @@ public class DicomFileCollectionSourceTests : DatabaseTests
 
         //e.g. \2015\3\18\2.25.223398837779449245317520567111874824918.dcm
         //e.g. \2015\3\18\2.25.179610809676265137473873365625829826423.dcm
-        var relativePathWithinZip1 = dicomFiles[0].FullName.Substring(dirToLoad.FullName.Length);
-        var relativePathWithinZip2 = dicomFiles[1].FullName.Substring(dirToLoad.FullName.Length);
+        var relativePathWithinZip1 = dicomFiles[0].FullName[dirToLoad.FullName.Length..];
+        var relativePathWithinZip2 = dicomFiles[1].FullName[dirToLoad.FullName.Length..];
             
         //zip them up
         FileInfo zip = new(Path.Combine(TestContext.CurrentContext.TestDirectory,

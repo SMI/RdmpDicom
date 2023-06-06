@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.Composition;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -11,7 +10,6 @@ using Rdmp.Core.Caching.Pipeline.Destinations;
 
 namespace Rdmp.Dicom.Cache;
 
-[Export(typeof(ICacheLayout))]
 public class SMICacheLayout : CacheLayout
 {
     public SMICacheLayout(DirectoryInfo cacheDirectory, SMICachePathResolver resolver): base(cacheDirectory, "yyyyMMddHH", CacheArchiveType.Zip, CacheFileGranularity.Hour, resolver)
@@ -90,10 +88,10 @@ public class SMICacheLayout : CacheLayout
 
     private DateTime ConvertFilenameToDateTime(FileInfo fileInfo)
     {
-        var nameWithoutExtension = fileInfo.Name.Substring(0, fileInfo.Name.Length - fileInfo.Extension.Length);
+        var nameWithoutExtension = fileInfo.Name[..^fileInfo.Extension.Length];
 
         if (!DateTime.TryParseExact(nameWithoutExtension, DateFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out var dt))
-            throw new(
+            throw new Exception(
                 $"Dodgy file in cache. Could not parse '{nameWithoutExtension}' using DateFormat={DateFormat} : {fileInfo.FullName}");
 
         return dt;

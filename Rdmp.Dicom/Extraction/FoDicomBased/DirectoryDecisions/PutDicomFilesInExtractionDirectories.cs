@@ -35,7 +35,7 @@ public abstract class PutDicomFilesInExtractionDirectories : IPutDicomFilesInExt
             
         if(!path.EndsWith(".dcm"))
         {
-            path = path + ".dcm";
+            path += ".dcm";
         }            
 
         var outPath = new FileInfo(path);
@@ -52,7 +52,7 @@ public abstract class PutDicomFilesInExtractionDirectories : IPutDicomFilesInExt
             
         if (!path.EndsWith(".dcm"))
         {
-            path = path + ".dcm";
+            path += ".dcm";
         }
 
         return new FileInfo(path).FullName;

@@ -30,7 +30,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Terminal.Gui" Version="1.11.2" />
+    <PackageReference Include="Terminal.Gui" Version="1.12.1" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\RDMP\Rdmp.Core\Rdmp.Core.csproj" />

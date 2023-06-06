@@ -232,7 +232,7 @@ public class PACSSource : SMICacheSource
 
                 if (hasTransferTimedOut)
                     listener.OnNotify(this, new(ProgressEventType.Information,
-                        $"Abandonning fetch of study {current.StudyUid}"));
+                        $"Abandoning fetch of study {current.StudyUid}"));
 
                 switch (consecutiveFailures)
                 {
