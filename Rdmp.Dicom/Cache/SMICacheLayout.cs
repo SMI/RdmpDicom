@@ -80,7 +80,7 @@ public class SMICacheLayout : CacheLayout
         // todo: This enumerates all files in the entire cache! Could be very expensive
 
         // This cache is laid out by <modality>/<year>/<month>/<day>/yyyyMMddHH.<type>
-        var allFiles = GetLoadCacheDirectory(listener).EnumerateFiles($"*.{ArchiveType}", SearchOption.AllDirectories).ToList();
+        var allFiles = GetLoadCacheDirectory(listener).EnumerateFiles($"*.{ArchiveType}", SearchOption.AllDirectories);
         var dateTimes = allFiles.Select(ConvertFilenameToDateTime).ToList();
         dateTimes.Sort((a, b) => a.CompareTo(b));
         return new(dateTimes);

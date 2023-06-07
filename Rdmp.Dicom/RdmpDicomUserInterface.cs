@@ -1,15 +1,15 @@
 ﻿using Rdmp.Core;
-using Rdmp.Core.Curation.Data.Aggregation;
-using Rdmp.Dicom.ExternalApis;
 using Rdmp.Core.CommandExecution;
+using Rdmp.Core.Curation.Data.Aggregation;
 using Rdmp.Core.MapsDirectlyToDatabaseTable;
+using Rdmp.Dicom.ExternalApis;
 using Terminal.Gui;
 
-namespace Rdmp.Dicom.UI;
+namespace Rdmp.Dicom;
 
 public class RdmpDicomConsoleUserInterface : PluginUserInterface
 {
-    readonly IBasicActivateItems _activator;
+    private readonly IBasicActivateItems _activator;
 
     public RdmpDicomConsoleUserInterface(IBasicActivateItems itemActivator) : base(itemActivator)
     {
@@ -18,8 +18,8 @@ public class RdmpDicomConsoleUserInterface : PluginUserInterface
 
     public override bool CustomActivate(IMapsDirectlyToDatabaseTable o)
     {
-        // if its not a terminal gui don't run a terminal gui UI!
-        if(_activator == null || !_activator.GetType().Name.Equals("ConsoleGuiActivator"))
+        // if it's not a terminal gui don't run a terminal gui UI!
+        if(_activator?.GetType().Name.Equals("ConsoleGuiActivator")!=true)
         {
             return false;
         }

@@ -222,8 +222,7 @@ This Grouping will be used to extract the Modality code when deciding which tabl
 
             var modality = m.Groups[1].Value;
             
-            if(!_modalityMap.ContainsKey(dt))
-                _modalityMap.Add(dt,modality);
+            _modalityMap.TryAdd(dt, modality);
         }
     }
 
@@ -236,9 +235,7 @@ This Grouping will be used to extract the Modality code when deciding which tabl
 
     private void AddRows(DataTable toProcess)
     {
-        foreach (DataColumn dc in toProcess.Columns)
-            if (!_columnNamesRoutedSuccesfully.ContainsKey(dc.ColumnName))
-                _columnNamesRoutedSuccesfully.Add(dc.ColumnName, false);
+        foreach (DataColumn dc in toProcess.Columns) _columnNamesRoutedSuccesfully.TryAdd(dc.ColumnName, false);
 
 
         //for every row in the input table

@@ -23,8 +23,8 @@ public class UIDMapping
 
     public void SetUIDType(DicomTag tag)
     {
-        if (SupportedTags.ContainsKey(tag))
-            UIDType = SupportedTags[tag];
+        if (SupportedTags.TryGetValue(tag, out var supportedTag))
+            UIDType = supportedTag;
         else 
             throw new InvalidOperationException(
                 $"UIDMapping does not handle this tag type: {tag.DictionaryEntry.Keyword}");

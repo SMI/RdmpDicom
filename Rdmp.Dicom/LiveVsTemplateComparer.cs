@@ -31,10 +31,7 @@ public class LiveVsTemplateComparer
 
         var template = templateCollection.Tables.FirstOrDefault(
             c=>c.TableName.Equals(liveTableName,StringComparison.CurrentCultureIgnoreCase) ||
-               c.TableName.Equals(liveTableNameWithoutPrefix,StringComparison.CurrentCultureIgnoreCase));
-
-        if(template == null)
-            throw new($"Could not find a Template called '{liveTableName}' or '{liveTableNameWithoutPrefix}'.  Templates in file were {string.Join(",",templateCollection.Tables.Select(t=>t.TableName))}");
+               c.TableName.Equals(liveTableNameWithoutPrefix,StringComparison.CurrentCultureIgnoreCase)) ?? throw new($"Could not find a Template called '{liveTableName}' or '{liveTableNameWithoutPrefix}'.  Templates in file were {string.Join(",",templateCollection.Tables.Select(t=>t.TableName))}");
 
         //script the template
         var creator = new ImagingTableCreation(discoveredTable.Database.Server.GetQuerySyntaxHelper());            

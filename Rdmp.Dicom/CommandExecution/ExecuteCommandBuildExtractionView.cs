@@ -74,12 +74,7 @@ public class ExecuteCommandBuildExtractionView : BasicCommandExecution
     {
         foreach(var t in tables)
         {
-            var match = GetColumnInfoCalled(t, col);
-
-            if(match == null)
-            {
-                throw new Exception($"Expected to find a column called {col} in {t}");
-            }
+            var match = GetColumnInfoCalled(t, col) ?? throw new Exception($"Expected to find a column called {col} in {t}");
         }
     }
 

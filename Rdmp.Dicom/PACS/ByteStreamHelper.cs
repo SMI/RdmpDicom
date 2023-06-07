@@ -26,7 +26,7 @@ public static class ByteStreamHelper
         }
         using var ms = new MemoryStream((int)length);
         while (true)
-        {;
+        {
             var read = stream.Read(buffer, 0, buffer.Length);
             if (read <= 0)
                 return ms.ToArray();
