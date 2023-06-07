@@ -25,7 +25,7 @@ jobs:
       - name: Install MS SQL 2019
         uses: crazy-max/ghaction-chocolatey@v2
         with:
-          args: install -y sqllocaldb wget
+          args: install -ry sqllocaldb wget
       - name: Set up database
         run: |
           SqlLocalDB.exe create MSSQLLocalDB -s
