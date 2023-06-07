@@ -50,7 +50,8 @@ public class SemEHRConfiguration
     {
         { "SOPInstanceUID", "SOPInstanceUID" },
         { "SeriesInstanceUID", "SeriesInstanceUID" },
-        { "StudyInstanceUID", "StudyInstanceUID" }
+        { "StudyInstanceUID", "StudyInstanceUID" },
+        { "PatientID", "PatientID" }
     };
 
     //API Settings
