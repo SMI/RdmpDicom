@@ -24,7 +24,7 @@ jobs:
         id: version
         shell: cmd
         run: |
-          for /f tokens^=1^,2^ delims^=^" %%i in (SharedAssemblyInfo.cs) do @if "%%i"=="[assembly: AssemblyVersion(" echo version=%%j >> %GITHUB_OUTPUT%
+          for /f tokens^=1^,2^ delims^=^" %%i in (SharedAssemblyInfo.cs) do @if "%%i"=="[assembly: AssemblyVersion(" echo version=%%j>> %GITHUB_OUTPUT%
       - name: Install MS SQL 2019
         uses: crazy-max/ghaction-chocolatey@v2
         with:
