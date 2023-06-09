@@ -1,5 +1,6 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <PackageId>HIC.Rdmp.Dicom</PackageId>
     <RootNamespace>Rdmp.Dicom</RootNamespace>
     <AssemblyName>Rdmp.Dicom</AssemblyName>
     <TargetFramework>net6.0</TargetFramework>

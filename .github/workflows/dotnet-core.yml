@@ -41,14 +41,10 @@ jobs:
         shell: bash
         run: |
           wget https://raw.githubusercontent.com/SMI/DicomTypeTranslation/main/Templates/CT.it
-          cd Plugin/windows
-          dotnet publish -c Release --self-contained false -nologo
-          cd ../main
-          dotnet publish -c Release --self-contained false -nologo
-          cd ../..
-          nuget pack ./Rdmp.Dicom.nuspec -Properties Configuration=Release -IncludeReferencedProjects -Symbols -Version ${{ steps.version.outputs.version }}
-          nuget pack ./Rdmp.Dicom.Library.nuspec -Properties Configuration=Release -IncludeReferencedProjects -Symbols -Version ${{ steps.version.outputs.version }}
-          
+          dotnet publish Rdmp.Dicom/Rdmp.Dicom.csproj -o p/core -c Release --self-contained false -nologo
+          dotnet publish Rdmp.Dicom.UI/Rdmp.Dicom.UI.csproj -o p/win -c Release --self-contained false -nologo
+          7z a -tzip Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg Rdmp.Dicom.nuspec p
+          dotnet pack Rdmp.Dicom/Rdmp.Dicom.csproj -c Release -p:Version=${{ steps.version.outputs.version }} --include-source --include-symbols -o .
           
           cp Databases.Integration.yaml RDMP\Tools\rdmp\Databases.yaml
           dotnet run --project RDMP\Tools\rdmp\rdmp.csproj -c Release -- -f <<-EOC
@@ -67,7 +63,7 @@ jobs:
           EOC
       - name: Nuget push
         if: contains(github.ref,'refs/tags/')
-        run: nuget push HIC.Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg -Source https://api.nuget.org/v3/index.json -ApiKey ${{ secrets.NUGET_KEY }} -SkipDuplicate
+        run: dotnet nuget push HIC.Rdmp.Dicom.*.nupkg -k ${{ secrets.NUGET_KEY }} --skip-duplicate --source https://api.nuget.org/v3/index.json
       - name: Store created nupkg files
         uses: actions/upload-artifact@v3
         with:
