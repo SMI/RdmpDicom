@@ -46,7 +46,7 @@ jobs:
           7z a -tzip Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg Rdmp.Dicom.nuspec p
           dotnet pack Rdmp.Dicom/Rdmp.Dicom.csproj -c Release -p:Version=${{ steps.version.outputs.version }} --include-source --include-symbols -o .
           
-          dotnet run --project RDMP\\Tools\\rdmp\\rdmp.csproj -c Release -- -f --dir yaml <<-EOC
+          dotnet run --project RDMP\\Tools\\rdmp\\rdmp.csproj -c Release -- --dir yaml -f <<-EOC
           pack -p --file Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg
           cmd listsupportedcommands
           cmd describe CreateNewImagingDatasetSuite
