@@ -47,7 +47,7 @@ jobs:
           dotnet pack Rdmp.Dicom/Rdmp.Dicom.csproj -c Release -p:Version=${{ steps.version.outputs.version }} --include-source --include-symbols -o .
           
           cp Databases.Integration.yaml RDMP\Tools\rdmp\Databases.yaml
-          dotnet run --project RDMP\Tools\rdmp\rdmp.csproj -c Release -- -f <<-EOC
+          dotnet run --project RDMP\\Tools\\rdmp\\rdmp.csproj -c Release -- -f <<-EOC
           pack -p --file Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg
           cmd listsupportedcommands
           cmd describe CreateNewImagingDatasetSuite
