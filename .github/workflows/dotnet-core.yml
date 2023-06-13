@@ -46,7 +46,7 @@ jobs:
           7z a -tzip Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg Rdmp.Dicom.nuspec p
           dotnet pack Rdmp.Dicom/Rdmp.Dicom.csproj -c Release -p:Version=${{ steps.version.outputs.version }} --include-source --include-symbols -o .
           
-          dotnet run --project RDMP\\Tools\\rdmp\\rdmp.csproj -c Release -- --dir yaml -f <<-EOC
+          cat > testcmd.yaml <<-EOC
           pack -p --file Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg
           cmd listsupportedcommands
           cmd describe CreateNewImagingDatasetSuite
@@ -60,6 +60,7 @@ jobs:
           cmd AddTag Catalogue:CT_*Table SeriesDate null          
           cmd CreateNewImagingDatasetSuite "DatabaseType:MicrosoftSqlServer:Name:ImagingTest2:Server=(localdb)\MSSQLLocalDB;Integrated Security=true;Encrypt=yes;TrustServerCertificate=true" ./data DicomFileCollectionSource CT_ ../CT.it false true
           EOC
+          dotnet run --project RDMP\\Tools\\rdmp\\rdmp.csproj -c Release -- --dir yaml -f testcmd.yaml
       - name: Nuget push
         if: contains(github.ref,'refs/tags/')
         run: dotnet nuget push HIC.Rdmp.Dicom.*.nupkg -k ${{ secrets.NUGET_KEY }} --skip-duplicate --source https://api.nuget.org/v3/index.json
