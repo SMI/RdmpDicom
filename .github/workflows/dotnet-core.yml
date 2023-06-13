@@ -48,10 +48,8 @@ jobs:
           
           cat > testcmd.yaml <<-EOC
           Commands:
-          - pack -p --file Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg
           - cmd listsupportedcommands
           - cmd describe CreateNewImagingDatasetSuite
-
           - cmd NewObject ConnectionStringKeyword MicrosoftSqlServer TrustServerCertificate yes
           - cmd NewObject ConnectionStringKeyword MicrosoftSqlServer Encrypt yes
           - cmd CreateNewImagingDatasetSuite "DatabaseType:MicrosoftSqlServer:Name:ImagingTest:Server=(localdb)\MSSQLLocalDB;Integrated Security=true;Encrypt=yes;TrustServerCertificate=true" ./data DicomFileCollectionSource CT_ ../CT.it false true
@@ -61,6 +59,7 @@ jobs:
           - cmd AddTag Catalogue:CT_*Table SeriesDate null      -   
           - cmd CreateNewImagingDatasetSuite "DatabaseType:MicrosoftSqlServer:Name:ImagingTest2:Server=(localdb)\MSSQLLocalDB;Integrated Security=true;Encrypt=yes;TrustServerCertificate=true" ./data DicomFileCollectionSource CT_ ../CT.it false true
           EOC
+          dotnet run --project RDMP\\Tools\\rdmp\\rdmp.csproj -c Release -- --dir yaml pack -p --file Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg
           dotnet run --project RDMP\\Tools\\rdmp\\rdmp.csproj -c Release -- --dir yaml -f testcmd.yaml
       - name: Nuget push
         if: contains(github.ref,'refs/tags/')
