@@ -66,9 +66,9 @@ jobs:
         run: |
           dotnet test -c Release
           echo Loading plugin
-          dotnet run --project RDMP\\Tools\\rdmp\\rdmp.csproj -c Release -- --dir yaml pack -p --file Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg
+          dotnet run --project RDMP\\Tools\\rdmp\\rdmp.csproj -c Release -- pack -p --file Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg --dir yaml
           echo Running plugin test script
-          dotnet run --project RDMP\\Tools\\rdmp\\rdmp.csproj -c Release -- --dir yaml -f testcmd.yaml
+          dotnet run --project RDMP\\Tools\\rdmp\\rdmp.csproj -c Release -- -f testcmd.yaml --dir yaml 
       - name: Nuget push
         if: contains(github.ref,'refs/tags/')
         run: dotnet nuget push HIC.Rdmp.Dicom.*.nupkg -k ${{ secrets.NUGET_KEY }} --skip-duplicate --source https://api.nuget.org/v3/index.json
