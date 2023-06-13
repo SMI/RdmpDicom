@@ -29,15 +29,14 @@ jobs:
         uses: crazy-max/ghaction-chocolatey@v2
         with:
           args: install -ry sqllocaldb wget
+      - name: Build
+        run: dotnet build -c Release --nologo
       - name: Set up database
         run: |
           SqlLocalDB.exe create MSSQLLocalDB -s
           sqlcmd -l 180 -S "(localdb)\MSSQLLocalDB" -Q "SELECT @@VERSION;"
           dotnet run --project RDMP\Tools\rdmp\rdmp.csproj -c Release -- install --createdatabasetimeout 180  "(localdb)\MSSQLLocalDB" TEST_
-      - name: Test
-        run: |
-          dotnet test -c Release
-      - name: Build
+      - name: Package
         shell: bash
         run: |
           wget https://raw.githubusercontent.com/SMI/DicomTypeTranslation/main/Templates/CT.it
@@ -45,7 +44,6 @@ jobs:
           dotnet publish Rdmp.Dicom.UI/Rdmp.Dicom.UI.csproj -o p/win -c Release --self-contained false -nologo
           7z a -tzip Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg Rdmp.Dicom.nuspec p
           dotnet pack Rdmp.Dicom/Rdmp.Dicom.csproj -c Release -p:Version=${{ steps.version.outputs.version }} --include-source --include-symbols -o .
-          
           cat > testcmd.yaml <<-EOC
           Commands:
           - cmd listsupportedcommands
@@ -59,16 +57,21 @@ jobs:
           - cmd AddTag Catalogue:CT_*Table SeriesDate null      -   
           - cmd CreateNewImagingDatasetSuite "DatabaseType:MicrosoftSqlServer:Name:ImagingTest2:Server=(localdb)\MSSQLLocalDB;Integrated Security=true;Encrypt=yes;TrustServerCertificate=true" ./data DicomFileCollectionSource CT_ ../CT.it false true
           EOC
-          dotnet run --project RDMP\\Tools\\rdmp\\rdmp.csproj -c Release -- --dir yaml pack -p --file Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg
-          dotnet run --project RDMP\\Tools\\rdmp\\rdmp.csproj -c Release -- --dir yaml -f testcmd.yaml
-      - name: Nuget push
-        if: contains(github.ref,'refs/tags/')
-        run: dotnet nuget push HIC.Rdmp.Dicom.*.nupkg -k ${{ secrets.NUGET_KEY }} --skip-duplicate --source https://api.nuget.org/v3/index.json
       - name: Store created nupkg files
         uses: actions/upload-artifact@v3
         with:
           path: ./*.nupkg
           retention-days: 1
+      - name: Test
+        run: |
+          dotnet test -c Release
+          echo Loading plugin
+          dotnet run --project RDMP\\Tools\\rdmp\\rdmp.csproj -c Release -- --dir yaml pack -p --file Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg
+          echo Running plugin test script
+          dotnet run --project RDMP\\Tools\\rdmp\\rdmp.csproj -c Release -- --dir yaml -f testcmd.yaml
+      - name: Nuget push
+        if: contains(github.ref,'refs/tags/')
+        run: dotnet nuget push HIC.Rdmp.Dicom.*.nupkg -k ${{ secrets.NUGET_KEY }} --skip-duplicate --source https://api.nuget.org/v3/index.json
       - name: Upload release binaries
         if: contains(github.ref,'refs/tags/')
         uses: svenstaro/upload-release-action@v2
