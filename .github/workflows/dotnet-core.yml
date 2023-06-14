@@ -48,7 +48,7 @@ jobs:
           <package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
               <metadata>
                   <id>Rdmp.Dicom</id>
-                  <version>{{ steps.version.outputs.version }}</version>
+                  <version>${{ steps.version.outputs.version }}</version>
                   <authors>Health Informatics Service, University of Dundee</authors>
                   <description>Imaging plugin for Research Data Management Platform </description>
                   <dependencies>
