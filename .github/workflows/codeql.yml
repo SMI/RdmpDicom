@@ -44,3 +44,14 @@ jobs:
         uses: github/codeql-action/analyze@v2
         with:
           category: "/language:${{ matrix.language }}"
+          upload: False
+          output: sarif-results
+
+      - name: filter-sarif
+        uses: advanced-security/filter-sarif@v1
+        with:
+          patterns: |
+            +**/*
+            -**/RDMP/**
+          input: sarif-results/csharp.sarif
+          output: sarif-results/csharp.sarif
