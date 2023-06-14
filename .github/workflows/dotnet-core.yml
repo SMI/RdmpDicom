@@ -65,12 +65,12 @@ jobs:
           - describe CreateNewImagingDatasetSuite
           - NewObject ConnectionStringKeyword MicrosoftSqlServer TrustServerCertificate yes
           - NewObject ConnectionStringKeyword MicrosoftSqlServer Encrypt yes
-          - CreateNewImagingDatasetSuite "DatabaseType:MicrosoftSqlServer:Name:ImagingTest:Server=(localdb)\MSSQLLocalDB;Integrated Security=true;Encrypt=yes;TrustServerCertificate=true" ./data DicomFileCollectionSource CT_ ../CT.it false true
+          - CreateNewImagingDatasetSuite "DatabaseType:MicrosoftSqlServer:Name:ImagingTest:Server=(localdb)\MSSQLLocalDB;Integrated Security=true;Encrypt=yes;TrustServerCertificate=true" ./data DicomFileCollectionSource CT_ CT.it false true
           - AddTag Catalogue:CT_ImageTable StudyDate null
           - AddTag Catalogue:CT_*Table SeriesDate null
           - AddTag Catalogue:CT_*Table SeriesDate null
           - AddTag Catalogue:CT_*Table SeriesDate null      -   
-          - CreateNewImagingDatasetSuite "DatabaseType:MicrosoftSqlServer:Name:ImagingTest2:Server=(localdb)\MSSQLLocalDB;Integrated Security=true;Encrypt=yes;TrustServerCertificate=true" ./data DicomFileCollectionSource CT_ ../CT.it false true
+          - CreateNewImagingDatasetSuite "DatabaseType:MicrosoftSqlServer:Name:ImagingTest2:Server=(localdb)\MSSQLLocalDB;Integrated Security=true;Encrypt=yes;TrustServerCertificate=true" ./data DicomFileCollectionSource CT_ CT.it false true
           EOC
       - name: Store created nupkg files
         uses: actions/upload-artifact@v3
