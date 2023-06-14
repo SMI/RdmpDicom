@@ -25,6 +25,7 @@ jobs:
         shell: cmd
         run: |
           for /f tokens^=1^,2^ delims^=^" %%i in (SharedAssemblyInfo.cs) do @if "%%i"=="[assembly: AssemblyVersion(" echo version=%%j>> %GITHUB_OUTPUT%
+          perl -ne "print """rdmpversion=""".$1."""\n""" if /version>(.+)</i"  RDMP\directory.build.props >>%GITHUB_OUTPUT%
       - name: Install MS SQL 2019
         uses: crazy-max/ghaction-chocolatey@v2
         with:
@@ -42,7 +43,21 @@ jobs:
           wget https://raw.githubusercontent.com/SMI/DicomTypeTranslation/main/Templates/CT.it
           dotnet publish Rdmp.Dicom/Rdmp.Dicom.csproj -o p/core -c Release --self-contained false -nologo
           dotnet publish Rdmp.Dicom.UI/Rdmp.Dicom.UI.csproj -o p/win -c Release --self-contained false -nologo
-          7z a -tzip Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg Rdmp.Dicom.nuspec p
+          cat > plugin.nuspec <<EOP
+          <?xml version="1.0" encoding="utf-8"?>
+          <package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+              <metadata>
+                  <id>Rdmp.Dicom</id>
+                  <version>{{ steps.version.outputs.version }}</version>
+                  <authors>Health Informatics Service, University of Dundee</authors>
+                  <description>Imaging plugin for Research Data Management Platform </description>
+                  <dependencies>
+                      <dependency id="HIC.RDMP.Plugin" version="${{ steps.version.outputs.rdmpversion }}" />
+                  </dependencies>
+              </metadata>
+          </package>
+          EOP
+          7z a -tzip Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg plugin.nuspec p
           dotnet pack Rdmp.Dicom/Rdmp.Dicom.csproj -c Release -p:Version=${{ steps.version.outputs.version }} --include-source --include-symbols -o .
           cat > testcmd.yaml <<-EOC
           Commands:
