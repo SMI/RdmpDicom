@@ -41,8 +41,8 @@ jobs:
         shell: bash
         run: |
           wget https://raw.githubusercontent.com/SMI/DicomTypeTranslation/main/Templates/CT.it
-          dotnet publish Rdmp.Dicom/Rdmp.Dicom.csproj -o p/core -c Release --self-contained false -nologo
-          dotnet publish Rdmp.Dicom.UI/Rdmp.Dicom.UI.csproj -o p/win -c Release --self-contained false -nologo
+          dotnet publish Rdmp.Dicom/Rdmp.Dicom.csproj -o p/main -c Release --self-contained false -nologo
+          dotnet publish Rdmp.Dicom.UI/Rdmp.Dicom.UI.csproj -o p/windows -c Release --self-contained false -nologo
           cat > plugin.nuspec <<EOP
           <?xml version="1.0" encoding="utf-8"?>
           <package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
@@ -80,9 +80,10 @@ jobs:
       - name: Test
         run: |
           dotnet test -c Release
-          echo Loading plugin
+          echo "Loading plugin"
           dotnet run --project RDMP\\Tools\\rdmp\\rdmp.csproj -c Release -- pack -p --file Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg --dir yaml
-          echo Running plugin test script
+          7z t Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg
+          echo "Running plugin test script"
           dotnet run --project RDMP\\Tools\\rdmp\\rdmp.csproj -c Release -- -f testcmd.yaml --dir yaml 
       - name: Nuget push
         if: contains(github.ref,'refs/tags/')
