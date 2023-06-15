@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Rdmp.Dicom.Cache.Pipeline;
+﻿namespace Rdmp.Dicom.Cache.Pipeline;
 
 public class StudyToFetch
 {
@@ -20,14 +18,7 @@ public class StudyToFetch
         StudyUid = studyUid;
     }
 
-    public override bool Equals(object obj)
-    {
-        return obj is StudyToFetch fetch &&
-               StudyUid == fetch.StudyUid;
-    }
+    public override bool Equals(object obj) => obj?.GetType()==typeof(StudyToFetch) && ((StudyToFetch)obj).StudyUid==StudyUid;
 
-    public override int GetHashCode()
-    {
-        return -1281949388 + EqualityComparer<string>.Default.GetHashCode(StudyUid);
-    }
+    public override int GetHashCode() => System.HashCode.Combine(StudyUid);
 }

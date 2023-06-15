@@ -277,9 +277,9 @@ This Grouping will be used to extract the Modality code when deciding which tabl
                 //Try again but put it in OTHER
                 foreach (DataColumn column in toProcess.Columns)
                 {
-                    if (!_columnNameToTargetTablesDictionary.ContainsKey(column.ColumnName)) continue;
+                    if (!_columnNameToTargetTablesDictionary.TryGetValue(column.ColumnName,out var tables)) continue;
                     //there is a matching destination column in one or more destination tables in RAW
-                    foreach (var destinationTable in _columnNameToTargetTablesDictionary[column.ColumnName].Where(destinationTable => _modalityMap[destinationTable].Equals("OTHER",StringComparison.CurrentCultureIgnoreCase)))
+                    foreach (var destinationTable in tables.Where(destinationTable => _modalityMap[destinationTable].Equals("OTHER",StringComparison.CurrentCultureIgnoreCase)))
                     {
                         AddCellValue(inputRow, column, destinationTable, newDestinationRows);
                         addedToAtLeastOneTable = true;

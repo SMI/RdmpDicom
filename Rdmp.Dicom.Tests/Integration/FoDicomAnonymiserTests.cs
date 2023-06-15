@@ -153,7 +153,7 @@ public class FoDicomAnonymiserTests:DatabaseTests
             expectedFile = new(Path.Combine(TestContext.CurrentContext.WorkDirectory, "Images", "Hank", anoDt.Rows[0]["StudyInstanceUID"].ToString(), anoDt.Rows[0]["SeriesInstanceUID"].ToString(),
                 $"{anoDt.Rows[0]["SOPInstanceUID"]}.dcm"));
 
-        Assert.IsTrue(expectedFile.Exists);
+        Assert.IsTrue(expectedFile?.Exists);
         var anoDicom = DicomFile.Open(expectedFile.FullName);
             
         Assert.AreEqual("Hank",anoDicom.Dataset.GetValue<string>(DicomTag.PatientID,0));
@@ -363,7 +363,7 @@ public class FoDicomAnonymiserTests:DatabaseTests
                 $"{dicomDataset.GetValue<string>(DicomTag.SOPInstanceUID, 0)}.dcm"));
             
 
-        Assert.IsTrue(expectedFile.Exists);
+        Assert.IsTrue(expectedFile?.Exists);
 
     }
 

@@ -14,8 +14,6 @@ public class DicomDatasetCollectionSource : DicomSource, IPipelineRequirement<ID
 
     private const int BatchSize = 50000;
 
-    readonly Stopwatch _sw = new();
-
     public void PreInitialize(IDicomWorklist value, IDataLoadEventListener listener)
     {
         _datasetListWorklist = value as IDicomDatasetWorklist;
@@ -33,30 +31,30 @@ public class DicomDatasetCollectionSource : DicomSource, IPipelineRequirement<ID
         
     public override DataTable GetChunk(IDataLoadEventListener listener, GracefulCancellationToken cancellationToken)
     {
-        _sw.Start();
-
         if(_datasetListWorklist == null)
         {
             listener.OnNotify(this, new(ProgressEventType.Warning, "Skipping component because _datasetListWorklist is null"));
             return null;
         }
 
+        var sw = Stopwatch.StartNew();
         var currentBatch = BatchSize;
-        DicomDataset ds;
-            
         var dt = GetDataTable();
 
-        while (currentBatch > 0 && (ds = _datasetListWorklist.GetNextDatasetToProcess(out var filename,out var otherValuesToStoreInRow)) != null)
+        while (currentBatch > 0 && _datasetListWorklist.GetNextDatasetToProcess(out var filename,out var otherValuesToStoreInRow) is { } ds)
         {
             ProcessDataset(filename, ds, dt, listener, otherValuesToStoreInRow);
             currentBatch--;
         }
             
-        _sw.Stop();
+        sw.Stop();
         listener.OnNotify(this, new(ProgressEventType.Information,
-            $"GetChunk cumulative total time is {_sw.ElapsedMilliseconds}ms"));
+            $"GetChunk cumulative total time is {sw.ElapsedMilliseconds}ms"));
 
-        return dt.Rows.Count > 0 ? dt : null;
+        if (dt.Rows.Count > 0)
+            return dt;
+        dt.Dispose();
+        return null;
     }
 
     public override DataTable TryGetPreview()
