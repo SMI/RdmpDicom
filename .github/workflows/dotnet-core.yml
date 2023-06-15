@@ -65,6 +65,7 @@ jobs:
           - describe CreateNewImagingDatasetSuite
           - NewObject ConnectionStringKeyword MicrosoftSqlServer TrustServerCertificate yes
           - NewObject ConnectionStringKeyword MicrosoftSqlServer Encrypt yes
+          - createnewexternaldatabaseserver LiveLoggingServer_ID "DatabaseType:MicrosoftSqlServer:Name:ImagingTest:Server=(localdb)\MSSQLLocalDB;Integrated Security=true;Encrypt=yes;TrustServerCertificate=true"
           - CreateNewImagingDatasetSuite "DatabaseType:MicrosoftSqlServer:Name:ImagingTest:Server=(localdb)\MSSQLLocalDB;Integrated Security=true;Encrypt=yes;TrustServerCertificate=true" ./data DicomFileCollectionSource CT_ CT.it false true
           - AddTag Catalogue:CT_ImageTable StudyDate null
           - AddTag Catalogue:CT_*Table SeriesDate null
