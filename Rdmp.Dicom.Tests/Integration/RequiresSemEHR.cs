@@ -1,11 +1,8 @@
 ﻿using System;
-using System.IO;
 using System.Net.Http;
-using System.Text;
 using NUnit.Framework;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
-using YamlDotNet.Serialization;
 using System.Threading;
 using System.Net;
 
@@ -15,33 +12,26 @@ namespace Rdmp.Dicom.Tests.Integration;
                 AttributeTargets.Assembly, AllowMultiple = true)]
 public class RequiresSemEHR : Attribute, IApplyToContext
 {
-    static HttpClient httpClient = new HttpClient();
-    public const string SemEHRTestUrl = "https://localhost:8485";
+    static readonly HttpClient HttpClient = new();
+    public const string SemEhrTestUrl = "https://localhost:8485";
 
     public void ApplyToContext(TestExecutionContext context)
     {
-        var cts = new CancellationTokenSource(TimeSpan.FromSeconds(3));
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(3));
 
         try
         {
-            var response = httpClient.GetAsync(SemEHRTestUrl, cts.Token).Result;
+            var response = HttpClient.GetAsync(SemEhrTestUrl, cts.Token).Result;
 
             //Check the status code is 200 success
             if (response.StatusCode != HttpStatusCode.OK)
             {
-                Assert.Ignore($"SemEHR did not respond correctly on {SemEHRTestUrl}: {response.StatusCode}");
+                Assert.Ignore($"SemEHR did not respond correctly on {SemEhrTestUrl}: {response.StatusCode}");
             }
         }
         catch (Exception)
         {
-            Assert.Ignore($"SemEHR not running on {SemEHRTestUrl}");
-        }
-        finally
-        {
-            if (cts != null)
-            {
-                cts.Dispose();
-            }
+            Assert.Ignore($"SemEHR not running on {SemEhrTestUrl}");
         }
     }
 }

@@ -5,8 +5,6 @@ using System.Linq;
 using System.Xml;
 using DicomTypeTranslation.Elevation.Exceptions;
 using NUnit.Framework;
-using Rdmp.Core.DataFlowPipeline;
-using Rdmp.Core.DataFlowPipeline.Requirements;
 using Rdmp.Core.DataLoad.Engine.Job;
 using Rdmp.Dicom.PipelineComponents.DicomSources;
 using Rdmp.Dicom.PipelineComponents.DicomSources.Worklists;

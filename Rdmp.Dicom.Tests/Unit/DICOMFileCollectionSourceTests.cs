@@ -78,7 +78,7 @@ public class DicomFileCollectionSourceTests : DatabaseTests
 
         //generate some random dicoms
         var r = new Random(999);
-        DicomDataGenerator generator = new(r, dirToLoad.FullName, "CT") {MaximumImages = 5};
+        using DicomDataGenerator generator = new(r, dirToLoad.FullName, "CT") {MaximumImages = 5};
         var people = new PersonCollection();
         people.GeneratePeople(1,r);
         generator.GenerateTestDataFile(people,new("./inventory.csv"),1);
@@ -99,8 +99,7 @@ public class DicomFileCollectionSourceTests : DatabaseTests
 
         //zip them up
         FileInfo zip = new(Path.Combine(TestContext.CurrentContext.TestDirectory,
-            $"{nameof(Test_ZipFile)}.zip"));Path.Combine(TestContext.CurrentContext.TestDirectory,
-            $"{nameof(Test_ZipFile)}.zip");
+            $"{nameof(Test_ZipFile)}.zip"));
 
         if(zip.Exists)
             zip.Delete();
@@ -172,7 +171,7 @@ public class DicomFileCollectionSourceTests : DatabaseTests
 
         //generate some random dicoms
         var r = new Random(999);
-        DicomDataGenerator generator = new(r, dirToLoad.FullName, "CT") {MaximumImages = 5};
+        using DicomDataGenerator generator = new(r, dirToLoad.FullName, "CT") {MaximumImages = 5};
         var people = new PersonCollection();
         people.GeneratePeople(1,r);
         generator.GenerateTestDataFile(people,new("./inventory.csv"),1);

@@ -27,7 +27,7 @@ class PrimaryKeyCollisionIsolationMutilationTests:DatabaseTests
         var db = GetCleanedServer(dbType);
 
         //Create a table in 'RAW' (has no constraints)
-        var dt = new DataTable();
+        using var dt = new DataTable();
         dt.Columns.Add("A");
         dt.Columns.Add("B");
         dt.Rows.Add("Fish", 12);
@@ -78,7 +78,7 @@ class PrimaryKeyCollisionIsolationMutilationTests:DatabaseTests
         var db = GetCleanedServer(dbType);
 
         //Create a table in 'RAW' (has no constraints)
-        var dt = new DataTable();
+        using var dt = new DataTable();
         dt.Columns.Add("A");
         dt.Columns.Add("B");
 
@@ -107,10 +107,10 @@ class PrimaryKeyCollisionIsolationMutilationTests:DatabaseTests
         mutilator.Initialize(db,LoadStage.AdjustRaw);
         mutilator.Mutilate(job);
 
-        dt = tbl.GetDataTable();
-        Assert.AreEqual(2,dt.Rows.Count); 
+        using var dt2 = tbl.GetDataTable();
+        Assert.AreEqual(2,dt2.Rows.Count); 
 
-        var dtIsolation = tbl.Database.ExpectTable("MyCoolTable2_Isolation").GetDataTable();
+        using var dtIsolation = tbl.Database.ExpectTable("MyCoolTable2_Isolation").GetDataTable();
         Assert.AreEqual(3, dtIsolation.Rows.Count); 
     }
 
@@ -126,7 +126,7 @@ class PrimaryKeyCollisionIsolationMutilationTests:DatabaseTests
         var db = GetCleanedServer(DatabaseType.MicrosoftSQLServer);
 
         //Create a table in 'RAW' (has no constraints)
-        var dt = new DataTable();
+        using var dt = new DataTable();
         dt.Columns.Add("A");
         dt.Columns.Add("B");
 
@@ -171,10 +171,10 @@ class PrimaryKeyCollisionIsolationMutilationTests:DatabaseTests
         mutilator.Initialize(db,LoadStage.AdjustRaw);
         mutilator.Mutilate(job);
 
-        dt = tbl.GetDataTable();
-        Assert.AreEqual(2,dt.Rows.Count); 
+        using var dt2 = tbl.GetDataTable();
+        Assert.AreEqual(2,dt2.Rows.Count); 
 
-        var dtIsolation = tbl.Database.ExpectTable("MyCoolTable2_Isolation").GetDataTable();
+        using var dtIsolation = tbl.Database.ExpectTable("MyCoolTable2_Isolation").GetDataTable();
         Assert.AreEqual(3, dtIsolation.Rows.Count); 
     }
     [TestCase(DatabaseType.MicrosoftSQLServer)]
@@ -185,7 +185,7 @@ class PrimaryKeyCollisionIsolationMutilationTests:DatabaseTests
         var db = GetCleanedServer(dbType);
 
         //Create a table in 'RAW' (has no constraints)
-        var dt = new DataTable();
+        using var dt = new DataTable();
         dt.Columns.Add("SeriesInstanceUID");
         dt.Columns.Add("Seriesly");
 
@@ -197,7 +197,7 @@ class PrimaryKeyCollisionIsolationMutilationTests:DatabaseTests
         dt.Rows.Add("9.9.9", 2); // not a collision but should be deleted because of child collision
 
         //Create a table in 'RAW' (has no constraints)
-        var dt2 = new DataTable();
+        using var dt2 = new DataTable();
         dt2.Columns.Add("SeriesInstanceUID");
         dt2.Columns.Add("SOPInstanceUID");
         dt2.Columns.Add("PatientName");
@@ -250,7 +250,7 @@ class PrimaryKeyCollisionIsolationMutilationTests:DatabaseTests
         StringAssert.Contains("join", ex.Message); //should be complaining about missing join infos
 
         //tell RDMP about how to join tables
-        new JoinInfo(CatalogueRepository,childColumnInfosCreated.Single(
+        _=new JoinInfo(CatalogueRepository,childColumnInfosCreated.Single(
                 c => c.GetRuntimeName().Equals("SeriesInstanceUID")),
             parentColumnInfosCreated.Single(c => c.GetRuntimeName().Equals("SeriesInstanceUID")),
             ExtractionJoinType.Right, null);
@@ -265,15 +265,15 @@ class PrimaryKeyCollisionIsolationMutilationTests:DatabaseTests
         mutilator.Mutilate(job);
 
         //parent should now only have "5.2.1"
-        var dtParent = parentTableInfo.Discover(DataAccessContext.InternalDataProcessing).GetDataTable();
+        using var dtParent = parentTableInfo.Discover(DataAccessContext.InternalDataProcessing).GetDataTable();
         Assert.AreEqual(1, dtParent.Rows.Count);
 
         //isolation should have 5 ("1.2.3", "2.3.4" and "9.9.9")
-        var dtParentIsolation = db.ExpectTable("Parent_Isolation").GetDataTable();
+        using var dtParentIsolation = db.ExpectTable("Parent_Isolation").GetDataTable();
         Assert.AreEqual(5, dtParentIsolation.Rows.Count); 
 
         //child table should now only have 3 ("1.1.1", "1.1.2" and "1.1.3")
-        var dtChild = childTableInfo.Discover(DataAccessContext.InternalDataProcessing).GetDataTable();
+        using var dtChild = childTableInfo.Discover(DataAccessContext.InternalDataProcessing).GetDataTable();
         Assert.AreEqual(3, dtChild.Rows.Count);
 
         //child isolation table should have 4:
@@ -284,7 +284,7 @@ class PrimaryKeyCollisionIsolationMutilationTests:DatabaseTests
           "9.9.9", "1.1.5", "zzb"
          */
 
-        var dtChildIsolation = db.ExpectTable("Child_Isolation").GetDataTable();
+        using var dtChildIsolation = db.ExpectTable("Child_Isolation").GetDataTable();
         Assert.AreEqual(4, dtChildIsolation.Rows.Count);
     }
 
@@ -301,7 +301,7 @@ class PrimaryKeyCollisionIsolationMutilationTests:DatabaseTests
         var db = GetCleanedServer(dbType);
 
         //Create a table in 'RAW' (has no constraints)
-        var dt = new DataTable();
+        using var dt = new DataTable();
         dt.Columns.Add("Pk");
         dt.Columns.Add("OtherCol");
 
@@ -309,7 +309,7 @@ class PrimaryKeyCollisionIsolationMutilationTests:DatabaseTests
         dt.Rows.Add(whitespace? "A " :"A",2);
 
         //Create a table in 'RAW' (has no constraints)
-        var dt2 = new DataTable();
+        using var dt2 = new DataTable();
         dt2.Columns.Add("Pk2");
         dt2.Columns.Add("Fk");
         dt2.Columns.Add("OtherCol2");
@@ -360,19 +360,19 @@ class PrimaryKeyCollisionIsolationMutilationTests:DatabaseTests
         mutilator.Mutilate(job);
 
         //parent should now be empty
-        var dtParent = parentTableInfo.Discover(DataAccessContext.InternalDataProcessing).GetDataTable();
+        using var dtParent = parentTableInfo.Discover(DataAccessContext.InternalDataProcessing).GetDataTable();
         Assert.AreEqual(0, dtParent.Rows.Count);
 
         //isolation should have 2
-        var dtParentIsolation = db.ExpectTable("Parent_Isolation").GetDataTable();
+        using var dtParentIsolation = db.ExpectTable("Parent_Isolation").GetDataTable();
         Assert.AreEqual(2, dtParentIsolation.Rows.Count); 
 
         //child table should also be empty
-        var dtChild = childTableInfo.Discover(DataAccessContext.InternalDataProcessing).GetDataTable();
+        using var dtChild = childTableInfo.Discover(DataAccessContext.InternalDataProcessing).GetDataTable();
         Assert.AreEqual(0, dtChild.Rows.Count);
 
         //child isolation table should have 4:
-        var dtChildIsolation = db.ExpectTable("Child_Isolation").GetDataTable();
+        using var dtChildIsolation = db.ExpectTable("Child_Isolation").GetDataTable();
         Assert.AreEqual(4, dtChildIsolation.Rows.Count);
     }
         
@@ -392,7 +392,7 @@ class PrimaryKeyCollisionIsolationMutilationTests:DatabaseTests
         var db = GetCleanedServer(dbType);
 
         //Create a table in 'RAW' (has no constraints)
-        var dt = new DataTable();
+        using var dt = new DataTable();
         dt.Columns.Add("Pk");
         dt.Columns.Add("OtherCol");
 
@@ -400,7 +400,7 @@ class PrimaryKeyCollisionIsolationMutilationTests:DatabaseTests
         dt.Rows.Add(5,2); 
 
         //Create a table in 'RAW' (has no constraints)
-        var dt2 = new DataTable();
+        using var dt2 = new DataTable();
         dt2.Columns.Add("Pk2");
         dt2.Columns.Add("Fk");
         dt2.Columns.Add("OtherCol");
@@ -452,19 +452,19 @@ class PrimaryKeyCollisionIsolationMutilationTests:DatabaseTests
         mutilator.Mutilate(job);
 
         //parent should now have 1
-        var dtParent = parentTableInfo.Discover(DataAccessContext.InternalDataProcessing).GetDataTable();
+        using var dtParent = parentTableInfo.Discover(DataAccessContext.InternalDataProcessing).GetDataTable();
         Assert.AreEqual(1, dtParent.Rows.Count);
 
         //isolation should have 1
-        var dtParentIsolation = db.ExpectTable("Parent_Isolation").GetDataTable();
+        using var dtParentIsolation = db.ExpectTable("Parent_Isolation").GetDataTable();
         Assert.AreEqual(1, dtParentIsolation.Rows.Count); 
 
         //child table should have the good 1
-        var dtChild = childTableInfo.Discover(DataAccessContext.InternalDataProcessing).GetDataTable();
+        using var dtChild = childTableInfo.Discover(DataAccessContext.InternalDataProcessing).GetDataTable();
         Assert.AreEqual(1, dtChild.Rows.Count);
 
         //child isolation table should have 2:
-        var dtChildIsolation = db.ExpectTable("Child_Isolation").GetDataTable();
+        using var dtChildIsolation = db.ExpectTable("Child_Isolation").GetDataTable();
         Assert.AreEqual(2, dtChildIsolation.Rows.Count);
     }
 
@@ -487,14 +487,14 @@ class PrimaryKeyCollisionIsolationMutilationTests:DatabaseTests
         var db = GetCleanedServer(dbType);
 
         //Create a table in 'RAW' (has no constraints)
-        var dt = new DataTable();
+        using var dt = new DataTable();
         dt.Columns.Add("Pk");
         dt.Columns.Add("OtherCol");
 
         dt.Rows.Add("A",1); 
 
         //Create a table in 'RAW' (has no constraints)
-        var dt2 = new DataTable();
+        using var dt2 = new DataTable();
         dt2.Columns.Add("Pk2");
         dt2.Columns.Add("Fk");
         dt2.Columns.Add("OtherCol");
@@ -544,19 +544,19 @@ class PrimaryKeyCollisionIsolationMutilationTests:DatabaseTests
         mutilator.Mutilate(job);
 
         //parent should now have 0...
-        var dtParent = parentTableInfo.Discover(DataAccessContext.InternalDataProcessing).GetDataTable();
+        using var dtParent = parentTableInfo.Discover(DataAccessContext.InternalDataProcessing).GetDataTable();
         Assert.AreEqual(0, dtParent.Rows.Count);
 
         //isolation should have 1
-        var dtParentIsolation = db.ExpectTable("Parent_Isolation").GetDataTable();
+        using var dtParentIsolation = db.ExpectTable("Parent_Isolation").GetDataTable();
         Assert.AreEqual(1, dtParentIsolation.Rows.Count); 
 
         //child table should also be empty
-        var dtChild = childTableInfo.Discover(DataAccessContext.InternalDataProcessing).GetDataTable();
+        using var dtChild = childTableInfo.Discover(DataAccessContext.InternalDataProcessing).GetDataTable();
         Assert.AreEqual(0, dtChild.Rows.Count);
 
         //child isolation table should have 4:
-        var dtChildIsolation = db.ExpectTable("Child_Isolation").GetDataTable();
+        using var dtChildIsolation = db.ExpectTable("Child_Isolation").GetDataTable();
         Assert.AreEqual(4, dtChildIsolation.Rows.Count);
     }
     [TestCase(DatabaseType.MicrosoftSQLServer)]
@@ -575,7 +575,7 @@ class PrimaryKeyCollisionIsolationMutilationTests:DatabaseTests
          **********************************/
 
         //Create a table in 'RAW' (has no constraints)
-        var dt = new DataTable();
+        using var dt = new DataTable();
         dt.Columns.Add("Pk");
         dt.Columns.Add("OtherCol");
 
@@ -583,7 +583,7 @@ class PrimaryKeyCollisionIsolationMutilationTests:DatabaseTests
         dt.Rows.Add("A",2);
 
         //Create a table in 'RAW' (has no constraints)
-        var dt2 = new DataTable();
+        using var dt2 = new DataTable();
         dt2.Columns.Add("Pk2");
         dt2.Columns.Add("Fk");
         dt2.Columns.Add("OtherCol2");
@@ -650,14 +650,14 @@ class PrimaryKeyCollisionIsolationMutilationTests:DatabaseTests
          **********************************/
 
         //Create a table in 'RAW' (has no constraints)
-        var dt = new DataTable();
+        using var dt = new DataTable();
         dt.Columns.Add("Pk");
         dt.Columns.Add("OtherCol");
 
         dt.Rows.Add("A",1); //these are colliding on pk "A" with different values of "OtherCol"
             
         //Create a table in 'RAW' (has no constraints)
-        var dt2 = new DataTable();
+        using var dt2 = new DataTable();
         dt2.Columns.Add("Pk2");
         dt2.Columns.Add("Fk");
         dt2.Columns.Add("OtherCol2");
@@ -706,21 +706,21 @@ class PrimaryKeyCollisionIsolationMutilationTests:DatabaseTests
         mutilator.Mutilate(job);
             
         //parent should now have 0...
-        var dtParent = parentTableInfo.Discover(DataAccessContext.InternalDataProcessing).GetDataTable();
+        using var dtParent = parentTableInfo.Discover(DataAccessContext.InternalDataProcessing).GetDataTable();
         Assert.AreEqual(0, dtParent.Rows.Count);
 
         //isolation should have 1 (A)
-        var dtParentIsolation = db.ExpectTable("Parent_Isolation").GetDataTable();
+        using var dtParentIsolation = db.ExpectTable("Parent_Isolation").GetDataTable();
         Assert.AreEqual(1, dtParentIsolation.Rows.Count);
         AssertContains(dtParentIsolation,"A",true,0);
 
         //child table should have the null record only
-        var dtChild = childTableInfo.Discover(DataAccessContext.InternalDataProcessing).GetDataTable();
+        using var dtChild = childTableInfo.Discover(DataAccessContext.InternalDataProcessing).GetDataTable();
         Assert.AreEqual(1, dtChild.Rows.Count);
         AssertContains(dtChild,"X",DBNull.Value,"GG",DBNull.Value);
 
         //child isolation table should have 1 record (the X,A,FF)
-        var dtChildIsolation = db.ExpectTable("Child_Isolation").GetDataTable();
+        using var dtChildIsolation = db.ExpectTable("Child_Isolation").GetDataTable();
         Assert.AreEqual(1, dtChildIsolation.Rows.Count);
         AssertContains(dtChildIsolation,"X","A","FF",DBNull.Value,0);
 
@@ -729,10 +729,8 @@ class PrimaryKeyCollisionIsolationMutilationTests:DatabaseTests
     private void AssertContains(DataTable dt, params object[] rowValues)
     {
         Assert.IsTrue(dt.Rows.Cast<DataRow>().Any(r=>
-                rowValues.All(v=>r.ItemArray.Contains(v))),"Did not find expected row " + string.Join("," , rowValues)
-            + Environment.NewLine + "Rows seen were:" + 
-            string.Join(Environment.NewLine,
-                dt.Rows.Cast<DataRow>().Select(r=>string.Join(",",r.ItemArray))));
+                rowValues.All(v=>r.ItemArray.Contains(v))),"Did not find expected row {0}{1}Rows seen were:{2}", string.Join("," , rowValues), Environment.NewLine, string.Join(Environment.NewLine,
+            dt.Rows.Cast<DataRow>().Select(r=>string.Join(",",r.ItemArray))));
     }
 
     [TestCase(DatabaseType.MicrosoftSQLServer)]
@@ -751,7 +749,7 @@ class PrimaryKeyCollisionIsolationMutilationTests:DatabaseTests
          **********************************/
 
         //Create a table in 'RAW' (has no constraints)
-        var dt = new DataTable();
+        using var dt = new DataTable();
         dt.Columns.Add("Pk");
         dt.Columns.Add("OtherCol");
 
@@ -759,7 +757,7 @@ class PrimaryKeyCollisionIsolationMutilationTests:DatabaseTests
         dt.Rows.Add("B",2);
 
         //Create a table in 'RAW' (has no constraints)
-        var dt2 = new DataTable();
+        using var dt2 = new DataTable();
         dt2.Columns.Add("Pk2");
         dt2.Columns.Add("Fk");
         dt2.Columns.Add("OtherCol2");
@@ -810,19 +808,19 @@ class PrimaryKeyCollisionIsolationMutilationTests:DatabaseTests
 
             
         //parent should now have 0...
-        var dtParent = parentTableInfo.Discover(DataAccessContext.InternalDataProcessing).GetDataTable();
+        using var dtParent = parentTableInfo.Discover(DataAccessContext.InternalDataProcessing).GetDataTable();
         Assert.AreEqual(0, dtParent.Rows.Count);
 
         //isolation should have 2 (A and B)
-        var dtParentIsolation = db.ExpectTable("Parent_Isolation").GetDataTable();
+        using var dtParentIsolation = db.ExpectTable("Parent_Isolation").GetDataTable();
         Assert.AreEqual(2, dtParentIsolation.Rows.Count); 
 
         //child table should also be empty
-        var dtChild = childTableInfo.Discover(DataAccessContext.InternalDataProcessing).GetDataTable();
+        using var dtChild = childTableInfo.Discover(DataAccessContext.InternalDataProcessing).GetDataTable();
         Assert.AreEqual(0, dtChild.Rows.Count);
 
         //child isolation table should have 3 (both bad records and the good record that would otherwise be an orphan in live)
-        var dtChildIsolation = db.ExpectTable("Child_Isolation").GetDataTable();
+        using var dtChildIsolation = db.ExpectTable("Child_Isolation").GetDataTable();
         Assert.AreEqual(3, dtChildIsolation.Rows.Count);
 
     }
@@ -844,14 +842,14 @@ class PrimaryKeyCollisionIsolationMutilationTests:DatabaseTests
          **********************************/
 
         //Create a table in 'RAW' (has no constraints)
-        var dt = new DataTable();
+        using var dt = new DataTable();
         dt.Columns.Add("Pk");
         dt.Columns.Add("OtherCol");
 
         dt.Rows.Add("A",1);
 
         //Create a table in 'RAW' (has no constraints)
-        var dt2 = new DataTable();
+        using var dt2 = new DataTable();
         dt2.Columns.Add("Pk2");
         dt2.Columns.Add("Fk");
         dt2.Columns.Add("OtherCol2");
@@ -901,19 +899,19 @@ class PrimaryKeyCollisionIsolationMutilationTests:DatabaseTests
         Assert.DoesNotThrow(()=>mutilator.Mutilate(job));
 
         //parent should now have 0...
-        var dtParent = parentTableInfo.Discover(DataAccessContext.InternalDataProcessing).GetDataTable();
+        using var dtParent = parentTableInfo.Discover(DataAccessContext.InternalDataProcessing).GetDataTable();
         Assert.AreEqual(0, dtParent.Rows.Count);
 
         //isolation should have 1
-        var dtParentIsolation = db.ExpectTable("Parent_Isolation").GetDataTable();
+        using var dtParentIsolation = db.ExpectTable("Parent_Isolation").GetDataTable();
         Assert.AreEqual(1, dtParentIsolation.Rows.Count); 
 
         //child table should also be empty
-        var dtChild = childTableInfo.Discover(DataAccessContext.InternalDataProcessing).GetDataTable();
+        using var dtChild = childTableInfo.Discover(DataAccessContext.InternalDataProcessing).GetDataTable();
         Assert.AreEqual(0, dtChild.Rows.Count);
 
         //child isolation table should have 3 (both bad records and the good record that would otherwise be an orphan in live)
-        var dtChildIsolation = db.ExpectTable("Child_Isolation").GetDataTable();
+        using var dtChildIsolation = db.ExpectTable("Child_Isolation").GetDataTable();
         Assert.AreEqual(3, dtChildIsolation.Rows.Count);
 
     }

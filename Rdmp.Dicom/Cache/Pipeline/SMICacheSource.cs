@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using FellowOakDicom;
 using FellowOakDicom.Network;
-using Rdmp.Core.MapsDirectlyToDatabaseTable;
 using Rdmp.Core.ReusableLibraryCode.Checks;
 using Rdmp.Core.ReusableLibraryCode.DataAccess;
 using Rdmp.Core.ReusableLibraryCode.Progress;

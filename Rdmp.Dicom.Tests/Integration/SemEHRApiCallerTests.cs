@@ -8,7 +8,6 @@ using Rdmp.Core.Databases;
 using Rdmp.Core.QueryCaching.Aggregation;
 using Rdmp.Dicom.ExternalApis;
 using Rdmp.Core.ReusableLibraryCode.Checks;
-using System;
 using System.Threading;
 using Rdmp.Core.CohortCreation.Execution;
 using Tests.Common;
@@ -50,7 +49,7 @@ public class SemEHRApiCallerTests : DatabaseTests
 
         var semEHRConfiguration = new SemEHRConfiguration()
         {
-            Url = RequiresSemEHR.SemEHRTestUrl + "/api/search_anns/myQuery/",
+            Url = RequiresSemEHR.SemEhrTestUrl + "/api/search_anns/myQuery/",
             Query = "C0205076",
             ValidateServerCert = false
         };

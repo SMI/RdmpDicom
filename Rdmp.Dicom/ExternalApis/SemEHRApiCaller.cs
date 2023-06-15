@@ -10,7 +10,6 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using Rdmp.Core.MapsDirectlyToDatabaseTable;
-using Rdmp.Core.Repositories;
 
 namespace Rdmp.Dicom.ExternalApis;
 

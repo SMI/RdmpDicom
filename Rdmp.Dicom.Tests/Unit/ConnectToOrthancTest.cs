@@ -1,6 +1,4 @@
-﻿using FellowOakDicom.Imaging.Codec;
-using FellowOakDicom.Log;
-using FellowOakDicom.Network;
+﻿using FellowOakDicom.Network;
 using FellowOakDicom.Network.Client;
 using NUnit.Framework;
 

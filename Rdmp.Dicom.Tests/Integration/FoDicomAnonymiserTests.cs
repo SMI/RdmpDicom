@@ -101,7 +101,7 @@ public class FoDicomAnonymiserTests:DatabaseTests
         DicomFile df = new(dicom);
         df.Save(fi.FullName);
 
-        var dt = new DataTable();
+        using var dt = new DataTable();
         dt.Columns.Add("Filepath");
         dt.Columns.Add("SOPInstanceUID");
         dt.Columns.Add("SeriesInstanceUID");
@@ -125,7 +125,7 @@ public class FoDicomAnonymiserTests:DatabaseTests
         anonymiser.RetainDates = keepDates;
         anonymiser.DeleteTags = "AlgorithmName";
 
-        var anoDt = anonymiser.ProcessPipelineData(dt,new ThrowImmediatelyDataLoadEventListener(),new());
+        using var anoDt = anonymiser.ProcessPipelineData(dt,new ThrowImmediatelyDataLoadEventListener(),new());
 
         Assert.AreEqual(1,anoDt.Rows.Count);
             
@@ -245,7 +245,7 @@ public class FoDicomAnonymiserTests:DatabaseTests
         DicomFile df = new(dicom);
         df.Save(fi.FullName);
 
-        var dt = new DataTable();
+        using var dt = new DataTable();
         dt.Columns.Add("Filepath");
         dt.Columns.Add("SOPInstanceUID");
         dt.Columns.Add("SeriesInstanceUID");
@@ -269,16 +269,16 @@ public class FoDicomAnonymiserTests:DatabaseTests
         anonymiser.RetainDates = false;
         anonymiser.SkipAnonymisationOnStructuredReports = true; // <- the thing we are testing
 
-        var anoDt = anonymiser.ProcessPipelineData(dt, new ThrowImmediatelyDataLoadEventListener(), new());
+        using var anoDt = anonymiser.ProcessPipelineData(dt, new ThrowImmediatelyDataLoadEventListener(), new());
 
         Assert.AreEqual(1, anoDt.Rows.Count);
 
         //Data table should contain new UIDs
         Assert.AreNotEqual("123.4.4", anoDt.Rows[0]["SOPInstanceUID"]);
-        Assert.AreEqual(56, anoDt.Rows[0]["SOPInstanceUID"].ToString().Length);
+        Assert.AreEqual(56, anoDt.Rows[0]["SOPInstanceUID"].ToString()?.Length);
 
         Assert.AreNotEqual("123.4.6", anoDt.Rows[0]["StudyInstanceUID"]);
-        Assert.AreEqual(56, anoDt.Rows[0]["StudyInstanceUID"].ToString().Length);
+        Assert.AreEqual(56, anoDt.Rows[0]["StudyInstanceUID"].ToString()?.Length);
             
         var expectedFile = new FileInfo(Path.Combine(TestContext.CurrentContext.WorkDirectory, "Images",
             $"{anoDt.Rows[0]["SOPInstanceUID"]}.dcm"));
@@ -449,7 +449,7 @@ public class FoDicomAnonymiserTests:DatabaseTests
 
         for (var i = 0; i < 2; i++)
         {
-            var dt = new DataTable();
+            using var dt = new DataTable();
             dt.Columns.Add("Filepath");
             dt.Columns.Add("SOPInstanceUID");
             dt.Columns.Add("SeriesInstanceUID");
@@ -475,16 +475,16 @@ public class FoDicomAnonymiserTests:DatabaseTests
             // the thing we are actually testing
             anonymiser.MetadataOnly = i == 0;
 
-            var anoDt = anonymiser.ProcessPipelineData(dt, new ThrowImmediatelyDataLoadEventListener(), new());
+            using var anoDt = anonymiser.ProcessPipelineData(dt, new ThrowImmediatelyDataLoadEventListener(), new());
 
             Assert.AreEqual(1, anoDt.Rows.Count);
 
             //Data table should contain new UIDs
             Assert.AreNotEqual("123.4.4", anoDt.Rows[0]["SOPInstanceUID"]);
-            Assert.AreEqual(56, anoDt.Rows[0]["SOPInstanceUID"].ToString().Length);
+            Assert.AreEqual(56, anoDt.Rows[0]["SOPInstanceUID"].ToString()?.Length);
 
             Assert.AreNotEqual("123.4.6", anoDt.Rows[0]["StudyInstanceUID"]);
-            Assert.AreEqual(56, anoDt.Rows[0]["StudyInstanceUID"].ToString().Length);
+            Assert.AreEqual(56, anoDt.Rows[0]["StudyInstanceUID"].ToString()?.Length);
 
             // second time
             if(dtFirstTime != null)
