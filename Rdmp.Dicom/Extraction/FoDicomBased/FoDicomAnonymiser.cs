@@ -91,7 +91,7 @@ public class FoDicomAnonymiser: IPluginDataFlowComponent<DataTable>,IPipelineReq
             return toProcess;
         }
 
-        _putter ??= (IPutDicomFilesInExtractionDirectories)new ObjectConstructor().Construct(PutterType);
+        _putter ??= (IPutDicomFilesInExtractionDirectories)ObjectConstructor.Construct(PutterType);
 
         if (!initialized)
         {

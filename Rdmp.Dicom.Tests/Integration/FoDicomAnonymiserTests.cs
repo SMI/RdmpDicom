@@ -116,7 +116,7 @@ public class FoDicomAnonymiserTests:DatabaseTests
         IExtractCommand cmd = MockExtractionCommand();
 
         //give the mock to anonymiser
-        anonymiser.PreInitialize(cmd,new ThrowImmediatelyDataLoadEventListener());
+        anonymiser.PreInitialize(cmd,ThrowImmediatelyDataLoadEventListener.Quiet);
 
         anonymiser.PutterType = putterType;
         anonymiser.ArchiveRootIfAny = TestContext.CurrentContext.WorkDirectory;
@@ -125,7 +125,7 @@ public class FoDicomAnonymiserTests:DatabaseTests
         anonymiser.RetainDates = keepDates;
         anonymiser.DeleteTags = "AlgorithmName";
 
-        using var anoDt = anonymiser.ProcessPipelineData(dt,new ThrowImmediatelyDataLoadEventListener(),new());
+        using var anoDt = anonymiser.ProcessPipelineData(dt,ThrowImmediatelyDataLoadEventListener.Quiet,new());
 
         Assert.AreEqual(1,anoDt.Rows.Count);
             
@@ -260,7 +260,7 @@ public class FoDicomAnonymiserTests:DatabaseTests
         IExtractCommand cmd = MockExtractionCommand();
 
         //give the mock to anonymiser
-        anonymiser.PreInitialize(cmd, new ThrowImmediatelyDataLoadEventListener());
+        anonymiser.PreInitialize(cmd, ThrowImmediatelyDataLoadEventListener.Quiet);
 
         anonymiser.PutterType = typeof(PutInRoot);
         anonymiser.ArchiveRootIfAny = TestContext.CurrentContext.WorkDirectory;
@@ -269,7 +269,7 @@ public class FoDicomAnonymiserTests:DatabaseTests
         anonymiser.RetainDates = false;
         anonymiser.SkipAnonymisationOnStructuredReports = true; // <- the thing we are testing
 
-        using var anoDt = anonymiser.ProcessPipelineData(dt, new ThrowImmediatelyDataLoadEventListener(), new());
+        using var anoDt = anonymiser.ProcessPipelineData(dt, ThrowImmediatelyDataLoadEventListener.Quiet, new());
 
         Assert.AreEqual(1, anoDt.Rows.Count);
 
@@ -329,7 +329,7 @@ public class FoDicomAnonymiserTests:DatabaseTests
     {
         var outputDirectory = new DirectoryInfo(Path.Combine(TestContext.CurrentContext.WorkDirectory, "Images"));
         const string releaseIdentifier = "Hank";
-        var putter = (IPutDicomFilesInExtractionDirectories) new ObjectConstructor().Construct(putterType);
+        var putter = (IPutDicomFilesInExtractionDirectories)ObjectConstructor.Construct(putterType);
             
         var dicomDataset = new DicomDataset
         {
@@ -464,7 +464,7 @@ public class FoDicomAnonymiserTests:DatabaseTests
             IExtractCommand cmd = MockExtractionCommand();
 
             //give the mock to anonymiser
-            anonymiser.PreInitialize(cmd, new ThrowImmediatelyDataLoadEventListener());
+            anonymiser.PreInitialize(cmd, ThrowImmediatelyDataLoadEventListener.Quiet);
 
             anonymiser.PutterType = putterType;
             anonymiser.ArchiveRootIfAny = TestContext.CurrentContext.WorkDirectory;
@@ -475,7 +475,7 @@ public class FoDicomAnonymiserTests:DatabaseTests
             // the thing we are actually testing
             anonymiser.MetadataOnly = i == 0;
 
-            using var anoDt = anonymiser.ProcessPipelineData(dt, new ThrowImmediatelyDataLoadEventListener(), new());
+            using var anoDt = anonymiser.ProcessPipelineData(dt, ThrowImmediatelyDataLoadEventListener.Quiet, new());
 
             Assert.AreEqual(1, anoDt.Rows.Count);
 

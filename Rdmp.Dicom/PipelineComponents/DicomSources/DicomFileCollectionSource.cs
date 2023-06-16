@@ -282,7 +282,7 @@ public class DicomFileCollectionSource : DicomSource, IPipelineRequirement<IDico
         try
         {
             //todo timeout 10s
-            return GetChunk(new ThrowImmediatelyDataLoadEventListener(), new());
+            return GetChunk(ThrowImmediatelyDataLoadEventListener.Quiet, new());
         }
         finally
         {

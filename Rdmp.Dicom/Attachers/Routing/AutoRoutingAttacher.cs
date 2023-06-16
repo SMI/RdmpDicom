@@ -313,7 +313,7 @@ This Grouping will be used to extract the Modality code when deciding which tabl
     {
         foreach (var (item1, item2) in _uploaders.Values)
         {
-            item1.Dispose(new ThrowImmediatelyDataLoadEventListener(), exception);
+            item1.Dispose(ThrowImmediatelyDataLoadEventListener.Quiet, exception);
             item2.CloseAndArchive();
         }
             

@@ -18,7 +18,7 @@ class ExecuteCommandPacsFetch : BasicCommandExecution, ICacheFetchRequestProvide
     private BackfillCacheFetchRequest _request;
     private PACSSource _source;
 
-    public ExecuteCommandPacsFetch(IBasicActivateItems activator,string start, string end, string remoteAeUri, int remotePort,string remoteAeTitle, string localAeUri, int localPort, string localAeTitle, string outDir, int maxRetries):base(activator)
+    public ExecuteCommandPacsFetch(IBasicActivateItems activator,string start, string end, string remoteAeHost, ushort remotePort,string remoteAeTitle, string localAeHost, ushort localPort, string localAeTitle, string outDir, int maxRetries):base(activator)
     {
         var startDate = DateTime.Parse(start);   
         var endDate =  DateTime.Parse(end);   
@@ -38,10 +38,10 @@ class ExecuteCommandPacsFetch : BasicCommandExecution, ICacheFetchRequestProvide
         //Create the source component only and a valid request range to fetch
         _source = new()
         {
-            RemoteAEUri = new($"http://{remoteAeUri}"),
+            RemoteAEHost = remoteAeHost,
             RemoteAEPort = remotePort,
             RemoteAETitle = remoteAeTitle,
-            LocalAEUri = new($"http://{localAeUri}"),
+            LocalAEHost = localAeHost,
             LocalAEPort = localPort,
             LocalAETitle = localAeTitle,
             TransferTimeOutInSeconds = 50000,
@@ -56,8 +56,8 @@ class ExecuteCommandPacsFetch : BasicCommandExecution, ICacheFetchRequestProvide
         };
 
         //Initialize it
-        _source.PreInitialize(BasicActivator.RepositoryLocator.CatalogueRepository, new ThrowImmediatelyDataLoadEventListener {WriteToConsole=true });
-        _source.PreInitialize(this,new ThrowImmediatelyDataLoadEventListener {WriteToConsole=true});
+        _source.PreInitialize(BasicActivator.RepositoryLocator.CatalogueRepository, ThrowImmediatelyDataLoadEventListener.Quiet);
+        _source.PreInitialize(this, ThrowImmediatelyDataLoadEventListener.Quiet);
 
     }
 
@@ -66,7 +66,7 @@ class ExecuteCommandPacsFetch : BasicCommandExecution, ICacheFetchRequestProvide
     {
         base.Execute();
 
-        _source.GetChunk(new ThrowImmediatelyDataLoadEventListener {WriteToConsole = true},new());
+        _source.GetChunk(ThrowImmediatelyDataLoadEventListener.Quiet,new());
 
     }
     public ICacheFetchRequest Current => _request;

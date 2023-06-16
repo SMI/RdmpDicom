@@ -35,7 +35,7 @@ public class FoDicomAnonymiserStandaloneTests
 
         anon.ProcessFile(
             new AmbiguousFilePath(inPath.FullName, "blah.dcm").GetDataset().Single().Item2,
-            new ThrowImmediatelyDataLoadEventListener(),
+            ThrowImmediatelyDataLoadEventListener.Quiet,
             "fffff",
             putter, null);
     }

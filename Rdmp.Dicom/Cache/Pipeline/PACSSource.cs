@@ -91,8 +91,8 @@ public class PACSSource : SMICacheSource
 
         //helps with tidying up resources if we abort or through an exception and neatly avoids ->  Access to disposed closure
         using var server = new DicomServer<CachingSCP>(new DicomServerDependencies(new DesktopNetworkManager(),new ConsoleLogManager()));
-        var client = DicomClientFactory.Create(dicomConfiguration.RemoteAetUri.Host,
-            dicomConfiguration.RemoteAetUri.Port, false, dicomConfiguration.LocalAetTitle,
+        var client = DicomClientFactory.Create(dicomConfiguration.RemoteAetHost,
+            dicomConfiguration.RemoteAetPort, false, dicomConfiguration.LocalAetTitle,
             dicomConfiguration.RemoteAetTitle);
         client.AssociationAccepted += (s, e) => {
             gauge.Tick(listener, () => Process.GetCurrentProcess().Kill());

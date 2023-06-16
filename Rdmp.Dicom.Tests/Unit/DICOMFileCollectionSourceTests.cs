@@ -34,15 +34,15 @@ public class DicomFileCollectionSourceTests : DatabaseTests
 
         var f = new FlatFileToLoad(new(Path.Combine(TestContext.CurrentContext.TestDirectory,@"TestData/IM-0001-0013.dcm")));
             
-        source.PreInitialize(new FlatFileToLoadDicomFileWorklist(f), new ThrowImmediatelyDataLoadEventListener());
+        source.PreInitialize(new FlatFileToLoadDicomFileWorklist(f), ThrowImmediatelyDataLoadEventListener.Quiet);
 
-        var tbl = source.GetChunk(new ThrowImmediatelyDataLoadEventListener(), new());
+        var tbl = source.GetChunk(ThrowImmediatelyDataLoadEventListener.Quiet, new());
         var destination = new DataTableUploadDestination();
             
-        destination.PreInitialize(db,new ThrowImmediatelyDataLoadEventListener());
+        destination.PreInitialize(db,ThrowImmediatelyDataLoadEventListener.Quiet);
         destination.AllowResizingColumnsAtUploadTime = true;
-        destination.ProcessPipelineData(tbl, new ThrowImmediatelyDataLoadEventListener(), new());
-        destination.Dispose(new ThrowImmediatelyDataLoadEventListener(), null);
+        destination.ProcessPipelineData(tbl, ThrowImmediatelyDataLoadEventListener.Quiet, new());
+        destination.Dispose(ThrowImmediatelyDataLoadEventListener.Quiet, null);
 
         var finalTable = db.ExpectTable(destination.TargetTableName);
 
@@ -114,15 +114,15 @@ public class DicomFileCollectionSourceTests : DatabaseTests
         if (expressRelative)
             source.ArchiveRoot = TestContext.CurrentContext.TestDirectory;
 
-        source.PreInitialize(new FlatFileToLoadDicomFileWorklist(f), new ThrowImmediatelyDataLoadEventListener());
+        source.PreInitialize(new FlatFileToLoadDicomFileWorklist(f), ThrowImmediatelyDataLoadEventListener.Quiet);
 
-        var tbl = source.GetChunk(new ThrowImmediatelyDataLoadEventListener(), new());
+        var tbl = source.GetChunk(ThrowImmediatelyDataLoadEventListener.Quiet, new());
         var destination = new DataTableUploadDestination();
             
-        destination.PreInitialize(db,new ThrowImmediatelyDataLoadEventListener());
+        destination.PreInitialize(db,ThrowImmediatelyDataLoadEventListener.Quiet);
         destination.AllowResizingColumnsAtUploadTime = true;
-        destination.ProcessPipelineData(tbl, new ThrowImmediatelyDataLoadEventListener(), new());
-        destination.Dispose(new ThrowImmediatelyDataLoadEventListener(), null);
+        destination.ProcessPipelineData(tbl, ThrowImmediatelyDataLoadEventListener.Quiet, new());
+        destination.Dispose(ThrowImmediatelyDataLoadEventListener.Quiet, null);
 
         var finalTable = db.ExpectTable(destination.TargetTableName);
             
@@ -236,7 +236,7 @@ public class DicomFileCollectionSourceTests : DatabaseTests
         var context = contextFactory.Create(PipelineUsage.FixedDestination | PipelineUsage.FixedDestination);
 
         //run pipeline
-        var pipe = new DataFlowPipelineEngine<DataTable>(context,source,destination,new ThrowImmediatelyDataLoadEventListener());
+        var pipe = new DataFlowPipelineEngine<DataTable>(context,source,destination,ThrowImmediatelyDataLoadEventListener.Quiet);
         pipe.Initialize(db,worklist);
         pipe.ExecutePipeline(new());
 

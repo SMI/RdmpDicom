@@ -66,8 +66,8 @@ public class CFindSource : SMICacheSource
 
         WriteHeaders(writer);
 
-        var client = DicomClientFactory.Create(dicomConfiguration.RemoteAetUri.Host,
-            dicomConfiguration.RemoteAetUri.Port, false, dicomConfiguration.LocalAetTitle,
+        var client = DicomClientFactory.Create(dicomConfiguration.RemoteAetHost,
+            dicomConfiguration.RemoteAetPort, false, dicomConfiguration.LocalAetTitle,
             dicomConfiguration.RemoteAetTitle);
 
         // Find a list of studies

@@ -114,7 +114,7 @@ internal class PacsFetch
             new Item("patientId","studyUid","seriesUid","sopInstanceUid1"),
             new Item("patientId","studyUid","seriesUid","sopInstanceUid2")
         };
-        var hbo=new HierarchyBasedOrder(new DateTime(2020,1,1),new DateTime(2020,12,31),PlacementMode.PlaceThenFill,OrderLevel.Study,new ThrowImmediatelyDataLoadEventListener());
+        var hbo=new HierarchyBasedOrder(new DateTime(2020,1,1),new DateTime(2020,12,31),PlacementMode.PlaceThenFill,OrderLevel.Study,ThrowImmediatelyDataLoadEventListener.Quiet);
         hbo.Place(target[0]);
         hbo.Place(target[1]);
 
