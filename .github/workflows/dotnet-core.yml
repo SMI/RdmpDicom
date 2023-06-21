@@ -73,11 +73,6 @@ jobs:
           - AddTag Catalogue:CT_*Table SeriesDate null
           - CreateNewImagingDatasetSuite "DatabaseType:MicrosoftSqlServer:Name:ImagingTest2:Server=(localdb)\MSSQLLocalDB;Integrated Security=true;Encrypt=yes;TrustServerCertificate=true" ./data DicomFileCollectionSource CT_ CT.it false true
           EOC
-      - name: Store created nupkg files
-        uses: actions/upload-artifact@v3
-        with:
-          path: ./*.nupkg
-          retention-days: 1
       - name: Test
         run: |
           dotnet test -c Release
@@ -86,6 +81,11 @@ jobs:
           7z t Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg
           echo "Running plugin test script"
           dotnet run --project RDMP\\Tools\\rdmp\\rdmp.csproj -c Release -- -f testcmd.yaml --dir yaml 
+      - name: Store created nupkg files
+        uses: actions/upload-artifact@v3
+        with:
+          path: ./*.nupkg
+          retention-days: 1
       - name: Nuget push
         if: contains(github.ref,'refs/tags/')
         run: dotnet nuget push HIC.Rdmp.Dicom.*.nupkg -k ${{ secrets.NUGET_KEY }} --skip-duplicate --source https://api.nuget.org/v3/index.json
