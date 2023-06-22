@@ -12,7 +12,7 @@ using Tests.Common;
 
 namespace Rdmp.Dicom.Tests.Integration;
 
-class ExecuteCommandAddTagTests : DatabaseTests
+internal class ExecuteCommandAddTagTests : DatabaseTests
 {
     [TestCase(DatabaseType.MySql)]
     [TestCase(DatabaseType.MicrosoftSQLServer)]
