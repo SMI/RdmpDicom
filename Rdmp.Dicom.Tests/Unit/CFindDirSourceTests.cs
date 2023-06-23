@@ -21,7 +21,7 @@ public class CFindDirSourceTests
         File.WriteAllText(inventory, anonxml);
         source.SearchPattern = "anonResult.xml";
 
-        Assert.DoesNotThrow(() => source.Check(new ThrowImmediatelyCheckNotifier()));
+        Assert.DoesNotThrow(() => source.Check(ThrowImmediatelyCheckNotifier.Quiet));
 
         source.PreInitialize(new(new(inventory)), ThrowImmediatelyDataLoadEventListener.Quiet);
 

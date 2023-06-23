@@ -382,14 +382,14 @@ public class FoDicomAnonymiserTests:DatabaseTests
             UIDMappingServer = eds
         };
 
-        var ex = Assert.Throws<Exception>(()=>anon.Check(new ThrowImmediatelyCheckNotifier { ThrowOnWarning = true }));
+        var ex = Assert.Throws<Exception>(()=>anon.Check(ThrowImmediatelyCheckNotifier.QuietPicky));
 
         StringAssert.AreEqualIgnoringCase("UIDMappingServer is not set up yet", ex?.Message);
 
         anon.Check(new AcceptAllCheckNotifier());
 
         // no warnings after it has been created
-        Assert.DoesNotThrow(() => anon.Check(new ThrowImmediatelyCheckNotifier { ThrowOnWarning = true }));
+        Assert.DoesNotThrow(() => anon.Check(ThrowImmediatelyCheckNotifier.QuietPicky));
 
     }
 

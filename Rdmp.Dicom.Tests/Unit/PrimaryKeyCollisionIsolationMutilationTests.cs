@@ -53,7 +53,7 @@ class PrimaryKeyCollisionIsolationMutilationTests:DatabaseTests
         Assert.IsTrue(isolationTable.DiscoverColumns().Any(c => c.GetRuntimeName().Equals("hic_dataLoadRunID")));
 
         //the check should pass second time without needing to accept any fixes
-        mutilator.Check(new ThrowImmediatelyCheckNotifier());
+        mutilator.Check(ThrowImmediatelyCheckNotifier.Quiet);
     }
 
     private PrimaryKeyCollisionIsolationMutilation GetMutilator(DiscoveredDatabase db, params ITableInfo[] tableInfoCreated)

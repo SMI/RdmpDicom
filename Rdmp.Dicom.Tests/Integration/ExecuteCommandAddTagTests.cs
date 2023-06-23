@@ -56,13 +56,13 @@ internal class ExecuteCommandAddTagTests : DatabaseTests
         // Create an archive table and backup trigger like we would have if this were the target of a data load
         var triggerImplementerFactory = new TriggerImplementerFactory(type);
         var implementer = triggerImplementerFactory.Create(tbl);
-        implementer.CreateTrigger(new ThrowImmediatelyCheckNotifier());
+        implementer.CreateTrigger(ThrowImmediatelyCheckNotifier.Quiet);
 
         var archive = tbl.Database.ExpectTable($"{tbl.GetRuntimeName()}_Archive");
 
         Assert.IsTrue(archive.Exists());
 
-        var activator = new ConsoleInputManager(RepositoryLocator,new ThrowImmediatelyCheckNotifier())
+        var activator = new ConsoleInputManager(RepositoryLocator,ThrowImmediatelyCheckNotifier.Quiet)
         {
             DisallowInput = true
         };
