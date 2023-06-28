@@ -37,7 +37,7 @@ public class FoDicomAnonymiser: IPluginDataFlowComponent<DataTable>,IPipelineReq
     [DemandsInitialization("The mapping database for UID fields", Mandatory=true)]
     public ExternalDatabaseServer UIDMappingServer { get; set; }
 
-    [DemandsInitialization("Determines how dicom files are written to the project ouput directory",TypeOf = typeof(IPutDicomFilesInExtractionDirectories),Mandatory=true)]
+    [DemandsInitialization("Determines how dicom files are written to the project output directory",TypeOf = typeof(IPutDicomFilesInExtractionDirectories),Mandatory=true)]
     public Type PutterType { get; set; }
 
     [DemandsInitialization("Retain Full Dates in dicom tags during anonymisation")]
@@ -91,7 +91,7 @@ public class FoDicomAnonymiser: IPluginDataFlowComponent<DataTable>,IPipelineReq
             return toProcess;
         }
 
-        _putter ??= (IPutDicomFilesInExtractionDirectories)new ObjectConstructor().Construct(PutterType);
+        _putter ??= (IPutDicomFilesInExtractionDirectories)ObjectConstructor.Construct(PutterType);
 
         if (!initialized)
         {

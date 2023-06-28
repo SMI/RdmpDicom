@@ -31,7 +31,7 @@ public abstract class DicomSource : IPluginDataFlowSource<DataTable>
     [DemandsInitialization("By default all encountered tags are turned into columns in the DataTable, setting this will discard tags that match the blacklist regex.  This is compatible with other tag selection strategy arguments and is applied afterwards")]
     public Regex TagBlacklist { get; set; }
 
-    [DemandsInitialization("Optional - Lets you specify deeply burried tags which should be fetched out and put into columns of the DataTable being generated")]
+    [DemandsInitialization("Optional - Lets you specify deeply buried tags which should be fetched out and put into columns of the DataTable being generated")]
     public FileInfo TagElevationConfigurationFile { get; set; }
 
     [DemandsInitialization("Optional - Alternative to TagElevationConfigurationFile property.  Use this property to store the elevation XML directly in RDMP instead of a file on disk")]

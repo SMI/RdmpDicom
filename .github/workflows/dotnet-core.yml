@@ -11,7 +11,14 @@ jobs:
   package:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout RdmpDicom source
+        uses: actions/checkout@v3
+      - name: Checkout RDMP source
+        uses: actions/checkout@v3
+        with:
+          repository: HicServices/RDMP
+          ref: feature/rc4
+          path: RDMP
       - uses: actions/setup-dotnet@v3
         with:
           dotnet-version: 6.0.x
@@ -19,57 +26,71 @@ jobs:
         id: version
         shell: cmd
         run: |
-          for /f tokens^=1^,2^ delims^=^" %%i in (SharedAssemblyInfo.cs) do @if "%%i"=="[assembly: AssemblyVersion(" echo ::set-output name=version::%%j
-          for /f tokens^=2^,4^ delims^=^" %%i in (Rdmp.Dicom/Rdmp.Dicom.csproj) do @if "%%i"=="HIC.RDMP.Plugin" echo ::set-output name=rdmpversion::%%j
+          for /f tokens^=1^,2^ delims^=^" %%i in (SharedAssemblyInfo.cs) do @if "%%i"=="[assembly: AssemblyVersion(" echo version=%%j>> %GITHUB_OUTPUT%
+          perl -ne "print """rdmpversion=""".$1."""\n""" if /version>(.+)</i"  RDMP\directory.build.props >>%GITHUB_OUTPUT%
       - name: Install MS SQL 2019
         uses: crazy-max/ghaction-chocolatey@v2
         with:
-          args: install sqllocaldb
+          args: install -ry sqllocaldb wget
+      - name: Build
+        run: dotnet build -c Release --nologo
       - name: Set up database
         run: |
           SqlLocalDB.exe create MSSQLLocalDB -s
-          Invoke-WebRequest -Uri https://github.com/HicServices/RDMP/releases/download/v${{ steps.version.outputs.rdmpversion }}/rdmp-${{ steps.version.outputs.rdmpversion }}-cli-win-x64.zip -OutFile rdmp.zip
-          Expand-Archive -Path rdmp.zip -DestinationPath .\rdmpcli
           sqlcmd -l 180 -S "(localdb)\MSSQLLocalDB" -Q "SELECT @@VERSION;"
-          cmd.exe /c rdmpcli\rdmp.exe install --createdatabasetimeout 180  "(localdb)\MSSQLLocalDB" TEST_
+          dotnet run --project RDMP\Tools\rdmp\rdmp.csproj -c Release -- install --createdatabasetimeout 180  "(localdb)\MSSQLLocalDB" TEST_
+      - name: Package
+        shell: bash
+        run: |
+          wget https://raw.githubusercontent.com/SMI/DicomTypeTranslation/main/Templates/CT.it
+          dotnet publish Rdmp.Dicom/Rdmp.Dicom.csproj -o p/main -c Release --self-contained false -nologo
+          dotnet publish Rdmp.Dicom.UI/Rdmp.Dicom.UI.csproj -o p/windows -c Release --self-contained false -nologo
+          cat > plugin.nuspec <<EOP
+          <?xml version="1.0" encoding="utf-8"?>
+          <package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+              <metadata>
+                  <id>Rdmp.Dicom</id>
+                  <version>${{ steps.version.outputs.version }}</version>
+                  <authors>Health Informatics Service, University of Dundee</authors>
+                  <description>Imaging plugin for Research Data Management Platform </description>
+                  <dependencies>
+                      <dependency id="HIC.RDMP.Plugin" version="${{ steps.version.outputs.rdmpversion }}" />
+                  </dependencies>
+              </metadata>
+          </package>
+          EOP
+          7z a -tzip Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg plugin.nuspec p
+          dotnet pack Rdmp.Dicom/Rdmp.Dicom.csproj -c Release -p:Version=${{ steps.version.outputs.version }} --include-source --include-symbols -o .
+          cat > testcmd.yaml <<-EOC
+          Commands:
+          - listsupportedcommands
+          - describe CreateNewImagingDatasetSuite
+          - NewObject ConnectionStringKeyword MicrosoftSqlServer TrustServerCertificate yes
+          - NewObject ConnectionStringKeyword MicrosoftSqlServer Encrypt yes
+          - createnewexternaldatabaseserver LiveLoggingServer_ID "DatabaseType:MicrosoftSqlServer:Name:ImagingTest:Server=(localdb)\MSSQLLocalDB;Integrated Security=true;Encrypt=yes;TrustServerCertificate=true"
+          - CreateNewImagingDatasetSuite "DatabaseType:MicrosoftSqlServer:Name:ImagingTest:Server=(localdb)\MSSQLLocalDB;Integrated Security=true;Encrypt=yes;TrustServerCertificate=true" ./data DicomFileCollectionSource CT_ CT.it false true
+          - AddTag Catalogue:CT_ImageTable StudyDate null
+          - AddTag Catalogue:CT_*Table SeriesDate null
+          - AddTag Catalogue:CT_*Table SeriesDate null
+          - AddTag Catalogue:CT_*Table SeriesDate null
+          - CreateNewImagingDatasetSuite "DatabaseType:MicrosoftSqlServer:Name:ImagingTest2:Server=(localdb)\MSSQLLocalDB;Integrated Security=true;Encrypt=yes;TrustServerCertificate=true" ./data DicomFileCollectionSource CT_ CT.it false true
+          EOC
       - name: Test
         run: |
           dotnet test -c Release
-      - name: Build
-        run: |
-          cd Plugin/windows
-          dotnet publish -c Release --self-contained false -nologo
-          cd ../main
-          dotnet publish -c Release --self-contained false -nologo
-          cd ../..
-          nuget pack ./Rdmp.Dicom.nuspec -Properties Configuration=Release -IncludeReferencedProjects -Symbols -Version ${{ steps.version.outputs.version }}
-          nuget pack ./Rdmp.Dicom.Library.nuspec -Properties Configuration=Release -IncludeReferencedProjects -Symbols -Version ${{ steps.version.outputs.version }}
-          
-          cp Databases.Integration.yaml .\rdmpcli\Databases.yaml
-          cmd /c rdmpcli\rdmp.exe pack -p --file Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg
-          cmd /c rdmpcli\rdmp.exe cmd listsupportedcommands
-          cmd /c rdmpcli\rdmp.exe cmd describe CreateNewImagingDatasetSuite
-      - name: Get Imaging Template
-        run: |
-          Invoke-WebRequest -Uri https://raw.githubusercontent.com/SMI/DicomTypeTranslation/main/Templates/CT.it -OutFile D:\a\RdmpDicom\CT.it
-      - name: Integration Tests
-        run: |
-          cmd /c rdmpcli\rdmp.exe cmd NewObject ConnectionStringKeyword MicrosoftSqlServer TrustServerCertificate yes
-          cmd /c rdmpcli\rdmp.exe cmd NewObject ConnectionStringKeyword MicrosoftSqlServer Encrypt yes
-          cmd /c rdmpcli\rdmp.exe cmd CreateNewImagingDatasetSuite "DatabaseType:MicrosoftSqlServer:Name:ImagingTest:Server=(localdb)\MSSQLLocalDB;Integrated Security=true;Encrypt=yes;TrustServerCertificate=true" ./data DicomFileCollectionSource CT_ ../CT.it false true
-          cmd /c rdmpcli\rdmp.exe cmd AddTag Catalogue:CT_ImageTable StudyDate null
-          cmd /c rdmpcli\rdmp.exe cmd AddTag Catalogue:CT_*Table SeriesDate null
-          cmd /c rdmpcli\rdmp.exe cmd AddTag Catalogue:CT_*Table SeriesDate null
-          cmd /c rdmpcli\rdmp.exe cmd AddTag Catalogue:CT_*Table SeriesDate null          
-          cmd /c rdmpcli\rdmp.exe cmd CreateNewImagingDatasetSuite "DatabaseType:MicrosoftSqlServer:Name:ImagingTest2:Server=(localdb)\MSSQLLocalDB;Integrated Security=true;Encrypt=yes;TrustServerCertificate=true" ./data DicomFileCollectionSource CT_ ../CT.it false true
-      - name: Nuget push
-        if: contains(github.ref,'refs/tags/')
-        run: nuget push HIC.Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg -Source https://api.nuget.org/v3/index.json -ApiKey ${{ secrets.NUGET_KEY }} -SkipDuplicate
+          echo "Loading plugin"
+          dotnet run --project RDMP\\Tools\\rdmp\\rdmp.csproj -c Release -- pack -p --file Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg --dir yaml
+          7z t Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg
+          echo "Running plugin test script"
+          dotnet run --project RDMP\\Tools\\rdmp\\rdmp.csproj -c Release -- -f testcmd.yaml --dir yaml 
       - name: Store created nupkg files
         uses: actions/upload-artifact@v3
         with:
           path: ./*.nupkg
           retention-days: 1
+      - name: Nuget push
+        if: contains(github.ref,'refs/tags/')
+        run: dotnet nuget push HIC.Rdmp.Dicom.*.nupkg -k ${{ secrets.NUGET_KEY }} --skip-duplicate --source https://api.nuget.org/v3/index.json
       - name: Upload release binaries
         if: contains(github.ref,'refs/tags/')
         uses: svenstaro/upload-release-action@v2
@@ -77,3 +98,4 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ github.ref }}
           file: 'Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg'
+    

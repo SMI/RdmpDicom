@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using Rdmp.Dicom.Extraction.FoDicomBased;
 using Rdmp.Dicom.Extraction.FoDicomBased.DirectoryDecisions;
 using Rdmp.Core.ReusableLibraryCode.Progress;
@@ -36,7 +35,7 @@ public class FoDicomAnonymiserStandaloneTests
 
         anon.ProcessFile(
             new AmbiguousFilePath(inPath.FullName, "blah.dcm").GetDataset().Single().Item2,
-            new ThrowImmediatelyDataLoadEventListener(),
+            ThrowImmediatelyDataLoadEventListener.Quiet,
             "fffff",
             putter, null);
     }

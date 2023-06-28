@@ -222,8 +222,7 @@ This Grouping will be used to extract the Modality code when deciding which tabl
 
             var modality = m.Groups[1].Value;
             
-            if(!_modalityMap.ContainsKey(dt))
-                _modalityMap.Add(dt,modality);
+            _modalityMap.TryAdd(dt, modality);
         }
     }
 
@@ -236,9 +235,7 @@ This Grouping will be used to extract the Modality code when deciding which tabl
 
     private void AddRows(DataTable toProcess)
     {
-        foreach (DataColumn dc in toProcess.Columns)
-            if (!_columnNamesRoutedSuccesfully.ContainsKey(dc.ColumnName))
-                _columnNamesRoutedSuccesfully.Add(dc.ColumnName, false);
+        foreach (DataColumn dc in toProcess.Columns) _columnNamesRoutedSuccesfully.TryAdd(dc.ColumnName, false);
 
 
         //for every row in the input table
@@ -280,9 +277,9 @@ This Grouping will be used to extract the Modality code when deciding which tabl
                 //Try again but put it in OTHER
                 foreach (DataColumn column in toProcess.Columns)
                 {
-                    if (!_columnNameToTargetTablesDictionary.ContainsKey(column.ColumnName)) continue;
+                    if (!_columnNameToTargetTablesDictionary.TryGetValue(column.ColumnName,out var tables)) continue;
                     //there is a matching destination column in one or more destination tables in RAW
-                    foreach (var destinationTable in _columnNameToTargetTablesDictionary[column.ColumnName].Where(destinationTable => _modalityMap[destinationTable].Equals("OTHER",StringComparison.CurrentCultureIgnoreCase)))
+                    foreach (var destinationTable in tables.Where(destinationTable => _modalityMap[destinationTable].Equals("OTHER",StringComparison.CurrentCultureIgnoreCase)))
                     {
                         AddCellValue(inputRow, column, destinationTable, newDestinationRows);
                         addedToAtLeastOneTable = true;
@@ -316,7 +313,7 @@ This Grouping will be used to extract the Modality code when deciding which tabl
     {
         foreach (var (item1, item2) in _uploaders.Values)
         {
-            item1.Dispose(new ThrowImmediatelyDataLoadEventListener(), exception);
+            item1.Dispose(ThrowImmediatelyDataLoadEventListener.Quiet, exception);
             item2.CloseAndArchive();
         }
             

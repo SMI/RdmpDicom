@@ -1,7 +1,5 @@
 ﻿using System.IO;
 using NUnit.Framework;
-using Rdmp.Core.DataFlowPipeline;
-using Rdmp.Core.DataFlowPipeline.Requirements;
 using Rdmp.Dicom.PipelineComponents.CFind;
 using Rdmp.Core.ReusableLibraryCode.Checks;
 using Rdmp.Core.ReusableLibraryCode.Progress;
@@ -23,11 +21,11 @@ public class CFindDirSourceTests
         File.WriteAllText(inventory, anonxml);
         source.SearchPattern = "anonResult.xml";
 
-        Assert.DoesNotThrow(() => source.Check(new ThrowImmediatelyCheckNotifier()));
+        Assert.DoesNotThrow(() => source.Check(ThrowImmediatelyCheckNotifier.Quiet));
 
-        source.PreInitialize(new(new(inventory)), new ThrowImmediatelyDataLoadEventListener());
+        source.PreInitialize(new(new(inventory)), ThrowImmediatelyDataLoadEventListener.Quiet);
 
-        var dt = source.GetChunk(new ThrowImmediatelyDataLoadEventListener(), new());
+        var dt = source.GetChunk(ThrowImmediatelyDataLoadEventListener.Quiet, new());
 
         /*
      * 
@@ -73,9 +71,9 @@ someAE	XA\SR	Fluoroscopy upper limb Lt	0102030405	TEXT	1.2.3.4.70	20200416
 
         Assert.DoesNotThrow(() => source.Check(new ThrowImmediatelyCheckNotifier()));
 
-        source.PreInitialize(new(new(inventory)), new ThrowImmediatelyDataLoadEventListener());
+        source.PreInitialize(new(new(inventory)), ThrowImmediatelyDataLoadEventListener.Quiet);
 
-        var dt = source.GetChunk(new ThrowImmediatelyDataLoadEventListener(), new());
+        var dt = source.GetChunk(ThrowImmediatelyDataLoadEventListener.Quiet, new());
 
         Assert.AreEqual(3, dt.Rows.Count);
     }

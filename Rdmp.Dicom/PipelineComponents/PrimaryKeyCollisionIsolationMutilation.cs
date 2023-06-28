@@ -135,7 +135,7 @@ public class PrimaryKeyCollisionIsolationMutilation:IPluginMutilateDataTables
         var from = tableInfo.Discover(DataAccessContext.DataLoad);
 
         //create a RAW table schema called TableName_Isolation
-        var cloner = new TableInfoCloneOperation(new(toCreate.Database.Server),tableInfo,LoadBubble.Live,_job ?? (IDataLoadEventListener)new ThrowImmediatelyDataLoadEventListener());
+        var cloner = new TableInfoCloneOperation(new(toCreate.Database.Server),tableInfo,LoadBubble.Live,_job ?? (IDataLoadEventListener)ThrowImmediatelyDataLoadEventListener.Quiet);
         cloner.CloneTable(from.Database, toCreate.Database, from, toCreate.GetRuntimeName(), true, true, true, tableInfo.PreLoadDiscardedColumns);
             
         if(!toCreate.Exists())

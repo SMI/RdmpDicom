@@ -15,7 +15,7 @@ class CFindSourceTests : UnitTests
         var dir = new DirectoryInfo(TestContext.CurrentContext.WorkDirectory);
 
         var cmd = new ExecuteCommandCFind(
-            new ConsoleInputManager(RepositoryLocator, new ThrowImmediatelyCheckNotifier()) { DisallowInput = true },
+            new ConsoleInputManager(RepositoryLocator, ThrowImmediatelyCheckNotifier.Quiet) { DisallowInput = true },
             "2001-01-01",
             "2002-01-01",
             "www.dicomserver.co.uk",

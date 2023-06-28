@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using FellowOakDicom;
 using FellowOakDicom.Network;
-using Rdmp.Core.MapsDirectlyToDatabaseTable;
 using Rdmp.Core.ReusableLibraryCode.Checks;
 using Rdmp.Core.ReusableLibraryCode.DataAccess;
 using Rdmp.Core.ReusableLibraryCode.Progress;
@@ -23,22 +22,42 @@ public abstract class SMICacheSource : CacheSource<SMIDataChunk>
     public string RemoteAETitle { get; set; }
 
     [DemandsInitialization("Where the remote PACS server is", mandatory: true)]
-    public Uri RemoteAEUri { get; set; }
+    public string RemoteAEHost { get; set; }
+
+    [Obsolete("Use RemoteAEHost instead - this needs a hostname/IP not a URI")]
+    public Uri RemoteAEUri
+    {
+        get => new($"dicom://{RemoteAEHost}:{RemoteAEPort}");
+        set
+        {
+            RemoteAEHost = value.Host;
+            RemoteAEPort = (ushort)value.Port;
+        }
+    }
 
     [DemandsInitialization("The port to send the request to on the remote PACS server", mandatory: true)]
-    public int RemoteAEPort { get; set; }
+    public ushort RemoteAEPort { get; set; }
 
     [DemandsInitialization("Local Application Entity title of your computer/software", mandatory: true)]
     public string LocalAETitle { get; set; }
 
-    [DemandsInitialization("Local AE Uri of your computer", mandatory: true)]
-    public Uri LocalAEUri { get; set; }
+    [DemandsInitialization("Local AE hostname/IP of your computer", mandatory: true)]
+    public string LocalAEHost { get; set; }
+    [Obsolete("Use LocalAEHost instead - this needs a hostname/IP not a URI")]
+    public Uri LocalAEUri
+    {
+        get => new($"dicom://{LocalAEHost}:{LocalAEPort}");
+        set  {
+            LocalAEHost = value.Host;
+            LocalAEPort = (ushort)value.Port;
+        }
+    }
 
     [DemandsInitialization("The type of imaging to be cached, using the relevant acronym from the DICOM standard. e.g. CT,MR", mandatory: true)]
     public string Modality { get; set; }
 
     [DemandsInitialization("The port to listen on for responses", defaultValue: 2104, mandatory: true)]
-    public int LocalAEPort { get; set; }
+    public ushort LocalAEPort { get; set; }
 
     [DemandsInitialization("Cooldown (in seconds) after a successful request", defaultValue: 60, mandatory: true)]
     public int RequestCooldownInSeconds { get; set; }
@@ -194,9 +213,11 @@ public abstract class SMICacheSource : CacheSource<SMIDataChunk>
         return new()
         {
             LocalAetTitle = LocalAETitle,
-            LocalAetUri = DicomConfiguration.MakeUriUsePort(LocalAEUri, LocalAEPort),
+            LocalAetHost = LocalAEHost,
+            LocalAetPort = LocalAEPort,
             RemoteAetTitle = RemoteAETitle,
-            RemoteAetUri = DicomConfiguration.MakeUriUsePort(RemoteAEUri, RemoteAEPort),
+            RemoteAetHost = RemoteAEHost,
+            RemoteAetPort = RemoteAEPort,
             RequestCooldownInMilliseconds = 1000 * RequestCooldownInSeconds,
             TransferCooldownInMilliseconds = 1000 * TransferCooldownInSeconds,
             TransferPollingInMilliseconds = 1000 * TransferPollingInSeconds,

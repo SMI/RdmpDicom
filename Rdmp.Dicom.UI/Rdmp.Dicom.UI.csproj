@@ -12,9 +12,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Rdmp.Dicom\Rdmp.Dicom.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="HIC.RDMP.Plugin.UI" Version="8.1.0-rc2" />
+    <ProjectReference Include="..\RDMP\Rdmp.UI\Rdmp.UI.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="CreateNewImagingDatasetUI.cs" />
@@ -33,5 +31,11 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 </Project>

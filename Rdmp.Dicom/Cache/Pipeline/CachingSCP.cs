@@ -57,8 +57,8 @@ public class CachingSCP : DicomService, IDicomServiceProvider, IDicomCStoreProvi
     public static IDataLoadEventListener Listener { get; set; }
     public static bool Verbose { get; set; } = true;
     public static Action<DicomCStoreRequest, DicomCStoreResponse> OnEndProcessingCStoreRequest;
-    private String CalledAE = String.Empty;
-    private String CallingAE = String.Empty;
+    private string CalledAE = string.Empty;
+    private string CallingAE = string.Empty;
 
     private static DicomServiceDependencies Deps = new(new ConsoleLogManager(),new DesktopNetworkManager(),new DefaultTranscoderManager(),new ArrayPoolMemoryProvider());
     public CachingSCP(INetworkStream stream, Encoding encoding, Logger logger): base(stream, encoding, logger, Deps)

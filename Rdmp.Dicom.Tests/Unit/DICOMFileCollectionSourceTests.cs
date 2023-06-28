@@ -34,15 +34,15 @@ public class DicomFileCollectionSourceTests : DatabaseTests
 
         var f = new FlatFileToLoad(new(Path.Combine(TestContext.CurrentContext.TestDirectory,@"TestData/IM-0001-0013.dcm")));
             
-        source.PreInitialize(new FlatFileToLoadDicomFileWorklist(f), new ThrowImmediatelyDataLoadEventListener());
+        source.PreInitialize(new FlatFileToLoadDicomFileWorklist(f), ThrowImmediatelyDataLoadEventListener.Quiet);
 
-        var tbl = source.GetChunk(new ThrowImmediatelyDataLoadEventListener(), new());
+        var tbl = source.GetChunk(ThrowImmediatelyDataLoadEventListener.Quiet, new());
         var destination = new DataTableUploadDestination();
             
-        destination.PreInitialize(db,new ThrowImmediatelyDataLoadEventListener());
+        destination.PreInitialize(db,ThrowImmediatelyDataLoadEventListener.Quiet);
         destination.AllowResizingColumnsAtUploadTime = true;
-        destination.ProcessPipelineData(tbl, new ThrowImmediatelyDataLoadEventListener(), new());
-        destination.Dispose(new ThrowImmediatelyDataLoadEventListener(), null);
+        destination.ProcessPipelineData(tbl, ThrowImmediatelyDataLoadEventListener.Quiet, new());
+        destination.Dispose(ThrowImmediatelyDataLoadEventListener.Quiet, null);
 
         var finalTable = db.ExpectTable(destination.TargetTableName);
 
@@ -78,7 +78,7 @@ public class DicomFileCollectionSourceTests : DatabaseTests
 
         //generate some random dicoms
         var r = new Random(999);
-        DicomDataGenerator generator = new(r, dirToLoad.FullName, "CT") {MaximumImages = 5};
+        using DicomDataGenerator generator = new(r, dirToLoad.FullName, "CT") {MaximumImages = 5};
         var people = new PersonCollection();
         people.GeneratePeople(1,r);
         generator.GenerateTestDataFile(people,new("./inventory.csv"),1);
@@ -99,8 +99,7 @@ public class DicomFileCollectionSourceTests : DatabaseTests
 
         //zip them up
         FileInfo zip = new(Path.Combine(TestContext.CurrentContext.TestDirectory,
-            $"{nameof(Test_ZipFile)}.zip"));Path.Combine(TestContext.CurrentContext.TestDirectory,
-            $"{nameof(Test_ZipFile)}.zip");
+            $"{nameof(Test_ZipFile)}.zip"));
 
         if(zip.Exists)
             zip.Delete();
@@ -115,15 +114,15 @@ public class DicomFileCollectionSourceTests : DatabaseTests
         if (expressRelative)
             source.ArchiveRoot = TestContext.CurrentContext.TestDirectory;
 
-        source.PreInitialize(new FlatFileToLoadDicomFileWorklist(f), new ThrowImmediatelyDataLoadEventListener());
+        source.PreInitialize(new FlatFileToLoadDicomFileWorklist(f), ThrowImmediatelyDataLoadEventListener.Quiet);
 
-        var tbl = source.GetChunk(new ThrowImmediatelyDataLoadEventListener(), new());
+        var tbl = source.GetChunk(ThrowImmediatelyDataLoadEventListener.Quiet, new());
         var destination = new DataTableUploadDestination();
             
-        destination.PreInitialize(db,new ThrowImmediatelyDataLoadEventListener());
+        destination.PreInitialize(db,ThrowImmediatelyDataLoadEventListener.Quiet);
         destination.AllowResizingColumnsAtUploadTime = true;
-        destination.ProcessPipelineData(tbl, new ThrowImmediatelyDataLoadEventListener(), new());
-        destination.Dispose(new ThrowImmediatelyDataLoadEventListener(), null);
+        destination.ProcessPipelineData(tbl, ThrowImmediatelyDataLoadEventListener.Quiet, new());
+        destination.Dispose(ThrowImmediatelyDataLoadEventListener.Quiet, null);
 
         var finalTable = db.ExpectTable(destination.TargetTableName);
             
@@ -172,7 +171,7 @@ public class DicomFileCollectionSourceTests : DatabaseTests
 
         //generate some random dicoms
         var r = new Random(999);
-        DicomDataGenerator generator = new(r, dirToLoad.FullName, "CT") {MaximumImages = 5};
+        using DicomDataGenerator generator = new(r, dirToLoad.FullName, "CT") {MaximumImages = 5};
         var people = new PersonCollection();
         people.GeneratePeople(1,r);
         generator.GenerateTestDataFile(people,new("./inventory.csv"),1);
@@ -197,8 +196,8 @@ public class DicomFileCollectionSourceTests : DatabaseTests
 
         //e.g. \2015\3\18\2.25.223398837779449245317520567111874824918.dcm
         //e.g. \2015\3\18\2.25.179610809676265137473873365625829826423.dcm
-        var relativePathWithinZip1 = dicomFiles[0].FullName.Substring(dirToLoad.FullName.Length);
-        var relativePathWithinZip2 = dicomFiles[1].FullName.Substring(dirToLoad.FullName.Length);
+        var relativePathWithinZip1 = dicomFiles[0].FullName[dirToLoad.FullName.Length..];
+        var relativePathWithinZip2 = dicomFiles[1].FullName[dirToLoad.FullName.Length..];
             
         //zip them up
         FileInfo zip = new(Path.Combine(TestContext.CurrentContext.TestDirectory,
@@ -237,7 +236,7 @@ public class DicomFileCollectionSourceTests : DatabaseTests
         var context = contextFactory.Create(PipelineUsage.FixedDestination | PipelineUsage.FixedDestination);
 
         //run pipeline
-        var pipe = new DataFlowPipelineEngine<DataTable>(context,source,destination,new ThrowImmediatelyDataLoadEventListener());
+        var pipe = new DataFlowPipelineEngine<DataTable>(context,source,destination,ThrowImmediatelyDataLoadEventListener.Quiet);
         pipe.Initialize(db,worklist);
         pipe.ExecutePipeline(new());
 
@@ -263,11 +262,8 @@ public class DicomFileCollectionSourceTests : DatabaseTests
             StringAssert.Contains(yearDir.Name,pathInDbToDicomFile,"Expected zip file to have subdirectories and for them to be loaded correctly");
 
             //confirm we can read that out again
-            using (var pool = new ZipPool())
-            {
-                var path = new AmbiguousFilePath(TestContext.CurrentContext.TestDirectory, pathInDbToDicomFile);
-                Assert.IsNotNull(path.GetDataset(0,0));
-            }
+            var path = new AmbiguousFilePath(TestContext.CurrentContext.TestDirectory, pathInDbToDicomFile);
+            Assert.IsNotNull(path.GetDataset(0, 0));
         }
 
         Assert.IsTrue(finalTable.Exists());

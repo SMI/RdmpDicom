@@ -12,7 +12,6 @@ using Rdmp.Core.Caching.Requests;
 using Rdmp.Core.DataFlowPipeline;
 using Rdmp.Core.Curation;
 using System.Collections.Concurrent;
-using FellowOakDicom.Imaging.Codec;
 using FellowOakDicom.Log;
 using FellowOakDicom.Network.Client;
 
@@ -92,8 +91,8 @@ public class PACSSource : SMICacheSource
 
         //helps with tidying up resources if we abort or through an exception and neatly avoids ->  Access to disposed closure
         using var server = new DicomServer<CachingSCP>(new DicomServerDependencies(new DesktopNetworkManager(),new ConsoleLogManager()));
-        var client = DicomClientFactory.Create(dicomConfiguration.RemoteAetUri.Host,
-            dicomConfiguration.RemoteAetUri.Port, false, dicomConfiguration.LocalAetTitle,
+        var client = DicomClientFactory.Create(dicomConfiguration.RemoteAetHost,
+            dicomConfiguration.RemoteAetPort, false, dicomConfiguration.LocalAetTitle,
             dicomConfiguration.RemoteAetTitle);
         client.AssociationAccepted += (s, e) => {
             gauge.Tick(listener, () => Process.GetCurrentProcess().Kill());
@@ -232,7 +231,7 @@ public class PACSSource : SMICacheSource
 
                 if (hasTransferTimedOut)
                     listener.OnNotify(this, new(ProgressEventType.Information,
-                        $"Abandonning fetch of study {current.StudyUid}"));
+                        $"Abandoning fetch of study {current.StudyUid}"));
 
                 switch (consecutiveFailures)
                 {

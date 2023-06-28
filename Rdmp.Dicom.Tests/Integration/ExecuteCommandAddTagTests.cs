@@ -4,7 +4,6 @@ using NUnit.Framework;
 using Rdmp.Core.CommandExecution.AtomicCommands;
 using Rdmp.Core.CommandLine.Interactive;
 using Rdmp.Core.Curation;
-using Rdmp.Core.Curation.Data;
 using Rdmp.Core.DataLoad.Triggers.Implementations;
 using Rdmp.Dicom.CommandExecution;
 using Rdmp.Core.ReusableLibraryCode.Checks;
@@ -13,7 +12,7 @@ using Tests.Common;
 
 namespace Rdmp.Dicom.Tests.Integration;
 
-class ExecuteCommandAddTagTests : DatabaseTests
+internal class ExecuteCommandAddTagTests : DatabaseTests
 {
     [TestCase(DatabaseType.MySql)]
     [TestCase(DatabaseType.MicrosoftSQLServer)]
@@ -57,13 +56,13 @@ class ExecuteCommandAddTagTests : DatabaseTests
         // Create an archive table and backup trigger like we would have if this were the target of a data load
         var triggerImplementerFactory = new TriggerImplementerFactory(type);
         var implementer = triggerImplementerFactory.Create(tbl);
-        implementer.CreateTrigger(new ThrowImmediatelyCheckNotifier());
+        implementer.CreateTrigger(ThrowImmediatelyCheckNotifier.Quiet);
 
         var archive = tbl.Database.ExpectTable($"{tbl.GetRuntimeName()}_Archive");
 
         Assert.IsTrue(archive.Exists());
 
-        var activator = new ConsoleInputManager(RepositoryLocator,new ThrowImmediatelyCheckNotifier())
+        var activator = new ConsoleInputManager(RepositoryLocator,ThrowImmediatelyCheckNotifier.Quiet)
         {
             DisallowInput = true
         };

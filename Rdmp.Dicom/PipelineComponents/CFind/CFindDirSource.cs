@@ -168,6 +168,6 @@ public class CFindDirSource : IPluginDataFlowSource<DataTable>, IPipelineRequire
 
     public DataTable TryGetPreview()
     {
-        return GetChunk(new ThrowImmediatelyDataLoadEventListener(), new());
+        return GetChunk(ThrowImmediatelyDataLoadEventListener.Quiet, new());
     }
 }

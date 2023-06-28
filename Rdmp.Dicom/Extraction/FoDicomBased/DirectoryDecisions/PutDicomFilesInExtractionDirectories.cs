@@ -1,8 +1,6 @@
 ﻿using System;
 using System.IO;
-using System.Text;
 using FellowOakDicom;
-using FAnsi.Extensions;
 
 namespace Rdmp.Dicom.Extraction.FoDicomBased.DirectoryDecisions;
 
@@ -35,7 +33,7 @@ public abstract class PutDicomFilesInExtractionDirectories : IPutDicomFilesInExt
             
         if(!path.EndsWith(".dcm"))
         {
-            path = path + ".dcm";
+            path += ".dcm";
         }            
 
         var outPath = new FileInfo(path);
@@ -52,7 +50,7 @@ public abstract class PutDicomFilesInExtractionDirectories : IPutDicomFilesInExt
             
         if (!path.EndsWith(".dcm"))
         {
-            path = path + ".dcm";
+            path += ".dcm";
         }
 
         return new FileInfo(path).FullName;

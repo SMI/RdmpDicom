@@ -13,7 +13,7 @@ class SMICacheLayoutTests
         var rootDirectory = new DirectoryInfo(TestContext.CurrentContext.WorkDirectory);
         var layout = new SMICacheLayout(rootDirectory,new("CT"));
 
-        var downloadDirectory = layout.GetLoadCacheDirectory(new ThrowImmediatelyDataLoadEventListener());
+        var downloadDirectory = layout.GetLoadCacheDirectory(ThrowImmediatelyDataLoadEventListener.Quiet);
 
         Assert.AreEqual(downloadDirectory.FullName, Path.Combine(rootDirectory.FullName, "CT"));
     }

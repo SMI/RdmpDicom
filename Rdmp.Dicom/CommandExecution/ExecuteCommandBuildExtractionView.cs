@@ -1,4 +1,5 @@
-﻿using Rdmp.Core.CommandExecution;
+﻿using NPOI.SS.Formula.Functions;
+using Rdmp.Core.CommandExecution;
 using Rdmp.Core.CommandExecution.AtomicCommands;
 using Rdmp.Core.Curation.Data;
 using Rdmp.Core.Repositories.Construction;
@@ -72,15 +73,9 @@ public class ExecuteCommandBuildExtractionView : BasicCommandExecution
 
     private void EnsureAllHave(string col, params TableInfo[] tables)
     {
-        foreach(var t in tables)
-        {
-            var match = GetColumnInfoCalled(t, col);
-
-            if(match == null)
-            {
-                throw new Exception($"Expected to find a column called {col} in {t}");
-            }
-        }
+        var bad = tables.FirstOrDefault(t => GetColumnInfoCalled(t, col) == null);
+        if (bad!=null)
+            throw new Exception($"Expected to find a column called {col} in {bad}");
     }
 
     private ColumnInfo GetColumnInfoCalled(TableInfo t, string expectedColumnNamed)

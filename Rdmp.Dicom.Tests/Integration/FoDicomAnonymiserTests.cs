@@ -101,7 +101,7 @@ public class FoDicomAnonymiserTests:DatabaseTests
         DicomFile df = new(dicom);
         df.Save(fi.FullName);
 
-        var dt = new DataTable();
+        using var dt = new DataTable();
         dt.Columns.Add("Filepath");
         dt.Columns.Add("SOPInstanceUID");
         dt.Columns.Add("SeriesInstanceUID");
@@ -116,7 +116,7 @@ public class FoDicomAnonymiserTests:DatabaseTests
         IExtractCommand cmd = MockExtractionCommand();
 
         //give the mock to anonymiser
-        anonymiser.PreInitialize(cmd,new ThrowImmediatelyDataLoadEventListener());
+        anonymiser.PreInitialize(cmd,ThrowImmediatelyDataLoadEventListener.Quiet);
 
         anonymiser.PutterType = putterType;
         anonymiser.ArchiveRootIfAny = TestContext.CurrentContext.WorkDirectory;
@@ -125,7 +125,7 @@ public class FoDicomAnonymiserTests:DatabaseTests
         anonymiser.RetainDates = keepDates;
         anonymiser.DeleteTags = "AlgorithmName";
 
-        var anoDt = anonymiser.ProcessPipelineData(dt,new ThrowImmediatelyDataLoadEventListener(),new());
+        using var anoDt = anonymiser.ProcessPipelineData(dt,ThrowImmediatelyDataLoadEventListener.Quiet,new());
 
         Assert.AreEqual(1,anoDt.Rows.Count);
             
@@ -153,7 +153,7 @@ public class FoDicomAnonymiserTests:DatabaseTests
             expectedFile = new(Path.Combine(TestContext.CurrentContext.WorkDirectory, "Images", "Hank", anoDt.Rows[0]["StudyInstanceUID"].ToString(), anoDt.Rows[0]["SeriesInstanceUID"].ToString(),
                 $"{anoDt.Rows[0]["SOPInstanceUID"]}.dcm"));
 
-        Assert.IsTrue(expectedFile.Exists);
+        Assert.IsTrue(expectedFile?.Exists);
         var anoDicom = DicomFile.Open(expectedFile.FullName);
             
         Assert.AreEqual("Hank",anoDicom.Dataset.GetValue<string>(DicomTag.PatientID,0));
@@ -245,7 +245,7 @@ public class FoDicomAnonymiserTests:DatabaseTests
         DicomFile df = new(dicom);
         df.Save(fi.FullName);
 
-        var dt = new DataTable();
+        using var dt = new DataTable();
         dt.Columns.Add("Filepath");
         dt.Columns.Add("SOPInstanceUID");
         dt.Columns.Add("SeriesInstanceUID");
@@ -260,7 +260,7 @@ public class FoDicomAnonymiserTests:DatabaseTests
         IExtractCommand cmd = MockExtractionCommand();
 
         //give the mock to anonymiser
-        anonymiser.PreInitialize(cmd, new ThrowImmediatelyDataLoadEventListener());
+        anonymiser.PreInitialize(cmd, ThrowImmediatelyDataLoadEventListener.Quiet);
 
         anonymiser.PutterType = typeof(PutInRoot);
         anonymiser.ArchiveRootIfAny = TestContext.CurrentContext.WorkDirectory;
@@ -269,16 +269,16 @@ public class FoDicomAnonymiserTests:DatabaseTests
         anonymiser.RetainDates = false;
         anonymiser.SkipAnonymisationOnStructuredReports = true; // <- the thing we are testing
 
-        var anoDt = anonymiser.ProcessPipelineData(dt, new ThrowImmediatelyDataLoadEventListener(), new());
+        using var anoDt = anonymiser.ProcessPipelineData(dt, ThrowImmediatelyDataLoadEventListener.Quiet, new());
 
         Assert.AreEqual(1, anoDt.Rows.Count);
 
         //Data table should contain new UIDs
         Assert.AreNotEqual("123.4.4", anoDt.Rows[0]["SOPInstanceUID"]);
-        Assert.AreEqual(56, anoDt.Rows[0]["SOPInstanceUID"].ToString().Length);
+        Assert.AreEqual(56, anoDt.Rows[0]["SOPInstanceUID"].ToString()?.Length);
 
         Assert.AreNotEqual("123.4.6", anoDt.Rows[0]["StudyInstanceUID"]);
-        Assert.AreEqual(56, anoDt.Rows[0]["StudyInstanceUID"].ToString().Length);
+        Assert.AreEqual(56, anoDt.Rows[0]["StudyInstanceUID"].ToString()?.Length);
             
         var expectedFile = new FileInfo(Path.Combine(TestContext.CurrentContext.WorkDirectory, "Images",
             $"{anoDt.Rows[0]["SOPInstanceUID"]}.dcm"));
@@ -329,7 +329,7 @@ public class FoDicomAnonymiserTests:DatabaseTests
     {
         var outputDirectory = new DirectoryInfo(Path.Combine(TestContext.CurrentContext.WorkDirectory, "Images"));
         const string releaseIdentifier = "Hank";
-        var putter = (IPutDicomFilesInExtractionDirectories) new ObjectConstructor().Construct(putterType);
+        var putter = (IPutDicomFilesInExtractionDirectories)ObjectConstructor.Construct(putterType);
             
         var dicomDataset = new DicomDataset
         {
@@ -363,7 +363,7 @@ public class FoDicomAnonymiserTests:DatabaseTests
                 $"{dicomDataset.GetValue<string>(DicomTag.SOPInstanceUID, 0)}.dcm"));
             
 
-        Assert.IsTrue(expectedFile.Exists);
+        Assert.IsTrue(expectedFile?.Exists);
 
     }
 
@@ -382,14 +382,14 @@ public class FoDicomAnonymiserTests:DatabaseTests
             UIDMappingServer = eds
         };
 
-        var ex = Assert.Throws<Exception>(()=>anon.Check(new ThrowImmediatelyCheckNotifier { ThrowOnWarning = true }));
+        var ex = Assert.Throws<Exception>(()=>anon.Check(ThrowImmediatelyCheckNotifier.QuietPicky));
 
         StringAssert.AreEqualIgnoringCase("UIDMappingServer is not set up yet", ex?.Message);
 
         anon.Check(new AcceptAllCheckNotifier());
 
         // no warnings after it has been created
-        Assert.DoesNotThrow(() => anon.Check(new ThrowImmediatelyCheckNotifier { ThrowOnWarning = true }));
+        Assert.DoesNotThrow(() => anon.Check(ThrowImmediatelyCheckNotifier.QuietPicky));
 
     }
 
@@ -449,7 +449,7 @@ public class FoDicomAnonymiserTests:DatabaseTests
 
         for (var i = 0; i < 2; i++)
         {
-            var dt = new DataTable();
+            using var dt = new DataTable();
             dt.Columns.Add("Filepath");
             dt.Columns.Add("SOPInstanceUID");
             dt.Columns.Add("SeriesInstanceUID");
@@ -464,7 +464,7 @@ public class FoDicomAnonymiserTests:DatabaseTests
             IExtractCommand cmd = MockExtractionCommand();
 
             //give the mock to anonymiser
-            anonymiser.PreInitialize(cmd, new ThrowImmediatelyDataLoadEventListener());
+            anonymiser.PreInitialize(cmd, ThrowImmediatelyDataLoadEventListener.Quiet);
 
             anonymiser.PutterType = putterType;
             anonymiser.ArchiveRootIfAny = TestContext.CurrentContext.WorkDirectory;
@@ -475,16 +475,16 @@ public class FoDicomAnonymiserTests:DatabaseTests
             // the thing we are actually testing
             anonymiser.MetadataOnly = i == 0;
 
-            var anoDt = anonymiser.ProcessPipelineData(dt, new ThrowImmediatelyDataLoadEventListener(), new());
+            using var anoDt = anonymiser.ProcessPipelineData(dt, ThrowImmediatelyDataLoadEventListener.Quiet, new());
 
             Assert.AreEqual(1, anoDt.Rows.Count);
 
             //Data table should contain new UIDs
             Assert.AreNotEqual("123.4.4", anoDt.Rows[0]["SOPInstanceUID"]);
-            Assert.AreEqual(56, anoDt.Rows[0]["SOPInstanceUID"].ToString().Length);
+            Assert.AreEqual(56, anoDt.Rows[0]["SOPInstanceUID"].ToString()?.Length);
 
             Assert.AreNotEqual("123.4.6", anoDt.Rows[0]["StudyInstanceUID"]);
-            Assert.AreEqual(56, anoDt.Rows[0]["StudyInstanceUID"].ToString().Length);
+            Assert.AreEqual(56, anoDt.Rows[0]["StudyInstanceUID"].ToString()?.Length);
 
             // second time
             if(dtFirstTime != null)

@@ -35,23 +35,30 @@ public class ExecuteCommandPromoteNewTag:BasicUICommandExecution,IAtomicCommandW
         var ui = new TagColumnAdderUI(_tableInfo);
 
         if (ui.ShowDialog() != DialogResult.OK) return;
-        var checks = new PopupChecksUI("Adding Column", false);
-                
-        var columnAdder = new TagColumnAdder(ui.ColumnName, ui.ColumnDataType, _tableInfo, checks);
+        PopupChecksUI checks=null;
+        try
+        {
+            checks = new PopupChecksUI("Adding Column", false);
 
-        columnAdder.Execute();
-        Publish(_tableInfo);
+            var columnAdder = new TagColumnAdder(ui.ColumnName, ui.ColumnDataType, _tableInfo, checks);
 
-        //Checks have likely been popped up as a non modal dialogue by the execute action (allowing the user to review the events)
-        if(checks.Visible)
-            checks.FormClosed += (s,e)=>
-            {
-                //schedule disposal of the control for when the user closes it
-                if(!checks.IsDisposed)
-                    checks.Dispose();
-            };                        
-        else
-            checks.Dispose(); // for some reason the checks were not spawned so explicitly dispose of the resources
+            columnAdder.Execute();
+            Publish(_tableInfo);
+        }
+        finally
+        {
+            //Checks have likely been popped up as a non modal dialogue by the execute action (allowing the user to review the events)
+            if (checks?.Visible==true)
+                checks.FormClosed += (s, e) =>
+                {
+                    //schedule disposal of the control for when the user closes it
+                    if (!checks.IsDisposed)
+                        checks.Dispose();
+                };
+            else
+                checks?.Dispose(); // for some reason the checks were not spawned so explicitly dispose of the resources
+        }
+
     }
 
     public IAtomicCommandWithTarget SetTarget(DatabaseEntity target)

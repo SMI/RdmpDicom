@@ -5,7 +5,6 @@ using Rdmp.Core.Curation;
 using Rdmp.Core.Curation.Data;
 using Rdmp.Core.Curation.Data.Cache;
 using Rdmp.Core.Curation.Data.DataLoad;
-using Rdmp.Core.DataFlowPipeline;
 using Rdmp.Core.Repositories;
 using Rdmp.Dicom.Cache.Pipeline;
 using Rdmp.Core.ReusableLibraryCode.Progress;
@@ -19,7 +18,7 @@ class ExecuteCommandCFind : BasicCommandExecution, ICacheFetchRequestProvider
     private BackfillCacheFetchRequest _request;
     private CFindSource _source;
 
-    public ExecuteCommandCFind(IBasicActivateItems activator, string start, string end, string remoteAeUri, int remotePort, string remoteAeTitle, string localAeTitle, string outDir) : base(activator)
+    public ExecuteCommandCFind(IBasicActivateItems activator, string start, string end, string remoteAeHost, ushort remotePort, string remoteAeTitle, string localAeTitle, string outDir) : base(activator)
     {
         var startDate = DateTime.Parse(start);
         var endDate = DateTime.Parse(end);
@@ -37,9 +36,9 @@ class ExecuteCommandCFind : BasicCommandExecution, ICacheFetchRequestProvider
         var cp = new CacheProgress(memory, lp);
 
         //Create the source component only and a valid request range to fetch
-        _source = new()
+        _source = new CFindSource
         {
-            RemoteAEUri = new($"http://{remoteAeUri}"),
+            RemoteAEHost = remoteAeHost,
             RemoteAEPort = remotePort,
             RemoteAETitle = remoteAeTitle,
             LocalAETitle = localAeTitle,
@@ -55,8 +54,8 @@ class ExecuteCommandCFind : BasicCommandExecution, ICacheFetchRequestProvider
         };
 
         //Initialize it
-        _source.PreInitialize(BasicActivator.RepositoryLocator.CatalogueRepository, new ThrowImmediatelyDataLoadEventListener { WriteToConsole = true });
-        _source.PreInitialize(this, new ThrowImmediatelyDataLoadEventListener { WriteToConsole = true });
+        _source.PreInitialize(BasicActivator.RepositoryLocator.CatalogueRepository, ThrowImmediatelyDataLoadEventListener.Quiet);
+        _source.PreInitialize(this, ThrowImmediatelyDataLoadEventListener.Quiet);
 
     }
 
@@ -65,7 +64,7 @@ class ExecuteCommandCFind : BasicCommandExecution, ICacheFetchRequestProvider
     {
         base.Execute();
 
-        _source.GetChunk(new ThrowImmediatelyDataLoadEventListener { WriteToConsole = true }, new());
+        _source.GetChunk(ThrowImmediatelyDataLoadEventListener.Quiet, new());
 
     }
     public ICacheFetchRequest Current => _request;

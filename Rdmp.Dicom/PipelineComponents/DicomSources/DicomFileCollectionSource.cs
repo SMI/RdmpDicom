@@ -233,7 +233,7 @@ public class DicomFileCollectionSource : DicomSource, IPipelineRequirement<IDico
 
     private void ProcessFile(Stream stream, DataTable dt, string filename, IDataLoadEventListener listener)
     {
-        try
+        using(stream)
         {
             DicomFile file;
             try
@@ -259,10 +259,6 @@ public class DicomFileCollectionSource : DicomSource, IPipelineRequirement<IDico
             ProcessDataset(filename,ds,dt,listener);
                 
         }
-        finally
-        {
-            stream.Dispose();
-        }
     }
 
     public void PreInitialize(IDicomWorklist value, IDataLoadEventListener listener)
@@ -286,7 +282,7 @@ public class DicomFileCollectionSource : DicomSource, IPipelineRequirement<IDico
         try
         {
             //todo timeout 10s
-            return GetChunk(new ThrowImmediatelyDataLoadEventListener(), new());
+            return GetChunk(ThrowImmediatelyDataLoadEventListener.Quiet, new());
         }
         finally
         {

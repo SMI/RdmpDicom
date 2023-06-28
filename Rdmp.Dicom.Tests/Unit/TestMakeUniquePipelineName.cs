@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using System;
+using NUnit.Framework;
 using Rdmp.Dicom.CommandExecution;
 
 namespace Rdmp.Dicom.Tests.Unit;
@@ -9,7 +10,7 @@ internal class ExecuteCommandCreateNewImagingDatasetSuiteUnitTests
     public void TestMakeUniqueName()
     {
         Assert.AreEqual("ff",
-            ExecuteCommandCreateNewImagingDatasetSuite.MakeUniqueName(new string[0], "ff")
+            ExecuteCommandCreateNewImagingDatasetSuite.MakeUniqueName(Array.Empty<string>(), "ff")
         );
 
         Assert.AreEqual("ff2",

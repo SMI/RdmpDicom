@@ -2,8 +2,6 @@ using System;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
-using FellowOakDicom.Imaging.Codec;
-using FellowOakDicom.Log;
 using FellowOakDicom.Network;
 using FellowOakDicom.Network.Client;
 using Rdmp.Core.ReusableLibraryCode.Progress;
@@ -92,8 +90,8 @@ public class DicomRequestSender : IDicomRequestSender
     #region SendRequest
     private void SendRequest(DicomRequest dicomRequest, CancellationToken token)
     {
-        var client = DicomClientFactory.Create(_dicomConfiguration.RemoteAetUri.Host,
-            _dicomConfiguration.RemoteAetUri.Port, false, _dicomConfiguration.LocalAetTitle,
+        var client = DicomClientFactory.Create(_dicomConfiguration.RemoteAetHost,
+            _dicomConfiguration.RemoteAetPort, false, _dicomConfiguration.LocalAetTitle,
             _dicomConfiguration.RemoteAetTitle);
         SendRequest(dicomRequest, client,token);
     }
@@ -128,7 +126,7 @@ public class DicomRequestSender : IDicomRequestSender
     {
         _listener.OnNotify(this, new(
             verbose ? ProgressEventType.Information : ProgressEventType.Trace,
-            $"Sending request to {_dicomConfiguration.RemoteAetTitle} at {_dicomConfiguration.RemoteAetUri.Host}:{_dicomConfiguration.RemoteAetUri.Port}"));
+            $"Sending request to {_dicomConfiguration.RemoteAetTitle} at {_dicomConfiguration.RemoteAetHost}:{_dicomConfiguration.RemoteAetHost}"));
         bool completed;
         try
         {

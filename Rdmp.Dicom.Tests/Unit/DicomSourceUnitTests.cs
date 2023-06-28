@@ -5,8 +5,6 @@ using System.Linq;
 using System.Xml;
 using DicomTypeTranslation.Elevation.Exceptions;
 using NUnit.Framework;
-using Rdmp.Core.DataFlowPipeline;
-using Rdmp.Core.DataFlowPipeline.Requirements;
 using Rdmp.Core.DataLoad.Engine.Job;
 using Rdmp.Dicom.PipelineComponents.DicomSources;
 using Rdmp.Dicom.PipelineComponents.DicomSources.Worklists;
@@ -58,8 +56,8 @@ public class DicomSourceUnitTests
 
         var f = Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestData/IM-0001-0013.dcm");
 
-        source.PreInitialize(new FlatFileToLoadDicomFileWorklist(new(new(f))), new ThrowImmediatelyDataLoadEventListener());
-        var result = source.GetChunk(new ThrowImmediatelyDataLoadEventListener(), new());
+        source.PreInitialize(new FlatFileToLoadDicomFileWorklist(new(new(f))), ThrowImmediatelyDataLoadEventListener.Quiet);
+        var result = source.GetChunk(ThrowImmediatelyDataLoadEventListener.Quiet, new());
 
         Assert.AreEqual("IM00010013",result.TableName);
         Assert.Greater(result.Columns.Count,0);
@@ -81,7 +79,7 @@ public class DicomSourceUnitTests
         var fileCount = Directory.GetFiles(dir,"*.dcm").Length;
 
         var source = new DicomFileCollectionSource {FilenameField = "RelativeFileArchiveURI"};
-        source.PreInitialize(new FlatFileToLoadDicomFileWorklist(new(new(zip))), new ThrowImmediatelyDataLoadEventListener());
+        source.PreInitialize(new FlatFileToLoadDicomFileWorklist(new(new(zip))), ThrowImmediatelyDataLoadEventListener.Quiet);
         var toMemory = new ToMemoryDataLoadEventListener(true);
         var result = source.GetChunk(toMemory, new());
 
@@ -101,7 +99,7 @@ public class DicomSourceUnitTests
         File.WriteAllText(controlFile.FullName,file1.FullName + Environment.NewLine + file2.FullName);
 
         var source = new DicomFileCollectionSource {FilenameField = "RelativeFileArchiveURI"};
-        source.PreInitialize(new FlatFileToLoadDicomFileWorklist(new(controlFile)), new ThrowImmediatelyDataLoadEventListener());
+        source.PreInitialize(new FlatFileToLoadDicomFileWorklist(new(controlFile)), ThrowImmediatelyDataLoadEventListener.Quiet);
             
         var toMemory = new ToMemoryDataLoadEventListener(true);
         var result = source.GetChunk(toMemory, new());

@@ -114,11 +114,7 @@ public class TagColumnAdder: ICheckable
 
     public static string GetDataTypeForTag(string keyword,ITypeTranslater tt)
     {
-        var tag = DicomDictionary.Default.FirstOrDefault(t => t.Keyword == keyword);
-
-        if(tag == null)
-            throw new NotSupportedException($"Keyword '{keyword}' is not a valid Dicom Tag.");
-            
+        var tag = DicomDictionary.Default.FirstOrDefault(t => t.Keyword == keyword) ?? throw new NotSupportedException($"Keyword '{keyword}' is not a valid Dicom Tag.");
         var type = DicomTypeTranslater.GetNaturalTypeForVr(tag.ValueRepresentations, tag.ValueMultiplicity);
         return tt.GetSQLDBTypeForCSharpType(type);
     }
