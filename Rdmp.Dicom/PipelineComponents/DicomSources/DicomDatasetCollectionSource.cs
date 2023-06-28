@@ -40,20 +40,32 @@ public class DicomDatasetCollectionSource : DicomSource, IPipelineRequirement<ID
         var sw = Stopwatch.StartNew();
         var currentBatch = BatchSize;
         var dt = GetDataTable();
-
-        while (currentBatch > 0 && _datasetListWorklist.GetNextDatasetToProcess(out var filename,out var otherValuesToStoreInRow) is { } ds)
+        dt.BeginLoadData();
+        var returned = false;
+        try
         {
-            ProcessDataset(filename, ds, dt, listener, otherValuesToStoreInRow);
-            currentBatch--;
-        }
+            while (currentBatch > 0 && _datasetListWorklist.GetNextDatasetToProcess(out var filename,out var otherValuesToStoreInRow) is { } ds)
+            {
+                ProcessDataset(filename, ds, dt, listener, otherValuesToStoreInRow);
+                currentBatch--;
+            }
             
-        sw.Stop();
-        listener.OnNotify(this, new(ProgressEventType.Information,
-            $"GetChunk cumulative total time is {sw.ElapsedMilliseconds}ms"));
+            sw.Stop();
+            listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information,
+                $"GetChunk cumulative total time is {sw.ElapsedMilliseconds}ms"));
 
-        if (dt.Rows.Count > 0)
-            return dt;
-        dt.Dispose();
+            dt.EndLoadData();
+            if (dt.Rows.Count > 0)
+            {
+                returned = true;
+                return dt;
+            }
+        }
+        finally
+        {
+            if (!returned)
+                dt.Dispose();
+        }
         return null;
     }
 
