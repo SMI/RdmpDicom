@@ -3,7 +3,7 @@
     <PackageId>HIC.Rdmp.Dicom</PackageId>
     <RootNamespace>Rdmp.Dicom</RootNamespace>
     <AssemblyName>Rdmp.Dicom</AssemblyName>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
   <ItemGroup>
