@@ -316,8 +316,7 @@ public class ExecuteCommandCreateNewImagingDatasetSuite : BasicCommandExecution
 
         var arg = args.Single(a => a.Name.Equals(property));
 
-        var mef = ((ICatalogueRepository) arg.Repository).MEF;
-        if (mef.GetType(value.GetType().FullName) == null)
+        if (MEF.GetType(value.GetType().FullName) == null)
             throw new ArgumentException($"No type found for { value.GetType().FullName }");
 
         //if this fails, look to see if GetType returned null (indicates that your Type is not loaded by MEF).  Look at mef.DescribeBadAssembliesIfAny() to investigate this issue
