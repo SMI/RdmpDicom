@@ -278,7 +278,7 @@ public class ExecuteCommandCreateNewImagingDatasetSuite : BasicCommandExecution
 
         ////////////////////////////////////////////////////////////////////////////////////////////////
             
-        var checker = new CheckEntireDataLoadProcess(NewLoadMetadata, new(NewLoadMetadata), new(), _catalogueRepository.MEF);
+        var checker = new CheckEntireDataLoadProcess(NewLoadMetadata, new(NewLoadMetadata), new());
         checker.Check(new AcceptAllCheckNotifier());
     }
 

@@ -9,6 +9,7 @@ using Rdmp.Dicom.Cache.Pipeline.Dicom;
 using Rdmp.Dicom.PACS;
 using Rdmp.Core.Curation.Data;
 using Rdmp.Core.Caching.Pipeline.Sources;
+using Rdmp.Core.MapsDirectlyToDatabaseTable;
 using Rdmp.Core.QueryBuilding;
 
 namespace Rdmp.Dicom.Cache.Pipeline;
@@ -237,15 +238,15 @@ public abstract class SMICacheSource : CacheSource<SMIDataChunk>
     {
         Whitelist = new();
 
-        var db = DataAccessPortal.GetInstance().ExpectDatabase(PatientIdWhitelistColumnInfo.TableInfo, DataAccessContext.DataLoad);
+        var db = DataAccessPortal.ExpectDatabase(PatientIdWhitelistColumnInfo.TableInfo, DataAccessContext.DataLoad);
         var server = db.Server;
 
         var qb = new QueryBuilder("distinct", null);
-        qb.AddColumn(new ColumnInfoToIColumn(new(), PatientIdWhitelistColumnInfo));
+        qb.AddColumn(new ColumnInfoToIColumn(new MemoryRepository(), PatientIdWhitelistColumnInfo));
 
         var sql = qb.SQL;
 
-        listener.OnNotify(this, new(ProgressEventType.Information,
+        listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information,
             $"Downloading Whitelist with SQL:{sql}"));
 
         using (var con = server.GetConnection())
