@@ -99,12 +99,12 @@ public class TagColumnAdder: ICheckable
 
     private DiscoveredDatabase GetDatabase()
     {
-        return DataAccessPortal.GetInstance().ExpectDatabase(_tableInfo, DataAccessContext.InternalDataProcessing);
+        return DataAccessPortal.ExpectDatabase(_tableInfo, DataAccessContext.InternalDataProcessing);
     }
 
     public static string[] GetAvailableTags()
     {
-        return DicomDictionary.Default.Select(t => t.Keyword).ToArray();
+        return DicomDictionary.Default.Select(static t => t.Keyword).ToArray();
     }
 
     public static DicomDictionaryEntry GetTag(string keyword)

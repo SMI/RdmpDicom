@@ -69,7 +69,7 @@ someAE	XA\SR	Fluoroscopy upper limb Lt	0102030405	TEXT	1.2.3.4.70	20200416
 
         source.SearchPattern = "anonResult.xml";
 
-        Assert.DoesNotThrow(() => source.Check(new ThrowImmediatelyCheckNotifier()));
+        Assert.DoesNotThrow(() => source.Check(ThrowImmediatelyCheckNotifier.Quiet));
 
         source.PreInitialize(new(new(inventory)), ThrowImmediatelyDataLoadEventListener.Quiet);
 
