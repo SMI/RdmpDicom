@@ -29,7 +29,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: HicServices/RDMP
-          ref: develop
+          ref: hotfix/loggingid
           path: RDMP
 
       - name: Initialize CodeQL
