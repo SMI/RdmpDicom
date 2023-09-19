@@ -12,12 +12,12 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout RdmpDicom source
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Checkout RDMP source
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: HicServices/RDMP
-          ref: feature/rc4
+          ref: hotfix/loggingid
           path: RDMP
       - uses: actions/setup-dotnet@v3
         with:
