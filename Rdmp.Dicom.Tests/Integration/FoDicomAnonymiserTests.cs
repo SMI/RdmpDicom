@@ -1,6 +1,5 @@
 ﻿using FellowOakDicom;
 using Rdmp.Core.MapsDirectlyToDatabaseTable.Versioning;
-using Moq;
 using NUnit.Framework;
 using Rdmp.Core.Curation.Data;
 using Rdmp.Core.Curation.Data.Spontaneous;
@@ -14,11 +13,25 @@ using Rdmp.Core.ReusableLibraryCode.Checks;
 using Rdmp.Core.ReusableLibraryCode.Progress;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.IO;
 using System.Linq;
+using FAnsi.Discovery;
+using FAnsi.Discovery.QuerySyntax;
+using Rdmp.Core.DataExport.DataExtraction;
+using Rdmp.Core.DataExport.DataExtraction.UserPicks;
+using Rdmp.Core.DataExport.DataRelease.Audit;
+using Rdmp.Core.Logging.PastEvents;
+using Rdmp.Core.MapsDirectlyToDatabaseTable;
+using Rdmp.Core.MapsDirectlyToDatabaseTable.Revertable;
+using Rdmp.Core.Providers;
+using Rdmp.Core.QueryBuilding.Parameters;
+using Rdmp.Core.Repositories;
+using Rdmp.Core.ReusableLibraryCode;
 using Tests.Common;
 using DatabaseType = FAnsi.DatabaseType;
+using IContainer = Rdmp.Core.Curation.Data.IContainer;
 
 namespace Rdmp.Dicom.Tests.Integration;
 
@@ -510,25 +523,439 @@ public class FoDicomAnonymiserTests:DatabaseTests
     }
     private IExtractDatasetCommand MockExtractionCommand()
     {
-        //Setup Mocks
-        var project = Mock.Of<IProject>(p=>p.ProjectNumber == 100);
-
-        //mock project number
-        var config = Mock.Of<IExtractionConfiguration>(c=>c.Project == project);
-            
-        //mock the prochi/release id columnvar cohort = MockRepository.GenerateMock<IExtractableCohort>();
-        var queryBuilder = Mock.Of<ISqlQueryBuilder>(q=>
-            q.SelectColumns == new List<QueryTimeColumn> { new(new SpontaneouslyInventedColumn(new(), "Pat","[db]..[tb].[Pat]"){IsExtractionIdentifier = true}) });
-                       
-            
-        //mock the extraction directory
-        var cmd = Mock.Of<IExtractDatasetCommand>(c=>
-            c.GetExtractionDirectory() == new DirectoryInfo(TestContext.CurrentContext.WorkDirectory) &&
-            c.Configuration == config && 
-            c.QueryBuilder == queryBuilder
-        );
-
-        return cmd;
+        return new DummyExtractDatasetCommand(TestContext.CurrentContext.WorkDirectory,100);
     }
 
+}
+
+internal class DummySqlQueryBuilder : ISqlQueryBuilder
+{
+    /// <inheritdoc />
+    public string SQL { get; }
+
+    /// <inheritdoc />
+    public bool SQLOutOfDate { get; set; }
+
+    /// <inheritdoc />
+    public string LimitationSQL { get; }
+
+    /// <inheritdoc />
+    public List<QueryTimeColumn> SelectColumns { get; init; }
+
+    /// <inheritdoc />
+    public List<ITableInfo> TablesUsedInQuery { get; }
+
+    /// <inheritdoc />
+    public IQuerySyntaxHelper QuerySyntaxHelper { get; }
+
+    /// <inheritdoc />
+    public List<IFilter> Filters { get; }
+
+    /// <inheritdoc />
+    public List<JoinInfo> JoinsUsedInQuery { get; }
+
+    /// <inheritdoc />
+    public IContainer RootFilterContainer { get; set; }
+
+    /// <inheritdoc />
+    public bool CheckSyntax { get; set; }
+
+    /// <inheritdoc />
+    public ITableInfo PrimaryExtractionTable { get; }
+
+    /// <inheritdoc />
+    public ParameterManager ParameterManager { get; }
+
+    /// <inheritdoc />
+    public void AddColumnRange(IColumn[] columnsToAdd)
+    {
+    }
+
+    /// <inheritdoc />
+    public void AddColumn(IColumn col)
+    {
+    }
+
+    /// <inheritdoc />
+    public void RegenerateSQL()
+    {
+    }
+
+    /// <inheritdoc />
+    public IEnumerable<Lookup> GetDistinctRequiredLookups()
+    {
+        yield break;
+    }
+
+    /// <inheritdoc />
+    public List<CustomLine> CustomLines { get; }
+
+    /// <inheritdoc />
+    public CustomLine AddCustomLine(string text, QueryComponent positionToInsert) => null;
+
+    /// <inheritdoc />
+    public CustomLine TopXCustomLine { get; set; }
+}
+internal class DummyExtractionConfiguration : IExtractionConfiguration
+{
+    /// <inheritdoc />
+    public void DeleteInDatabase()
+    {
+    }
+
+    /// <inheritdoc />
+    public event PropertyChangedEventHandler PropertyChanged;
+
+    /// <inheritdoc />
+    public int ID { get; set; }
+
+    /// <inheritdoc />
+    public IRepository Repository { get; set; }
+
+    /// <inheritdoc />
+    public void SetReadOnly()
+    {
+    }
+
+    /// <inheritdoc />
+    public void SaveToDatabase()
+    {
+    }
+
+    /// <inheritdoc />
+    public void RevertToDatabaseState()
+    {
+    }
+
+    /// <inheritdoc />
+    public RevertableObjectReport HasLocalChanges() => null;
+
+    /// <inheritdoc />
+    public bool Exists() => false;
+
+    /// <inheritdoc />
+    public string Name { get; set; }
+
+    /// <inheritdoc />
+    public IHasDependencies[] GetObjectsThisDependsOn()
+    {
+        return new IHasDependencies[] { };
+    }
+
+    /// <inheritdoc />
+    public IHasDependencies[] GetObjectsDependingOnThis()
+    {
+        return new IHasDependencies[] { };
+    }
+
+    /// <inheritdoc />
+    public bool ShouldBeReadOnly(out string reason)
+    {
+        reason = null;
+        return false;
+    }
+
+    /// <inheritdoc />
+    public DiscoveredServer GetDistinctLoggingDatabase() => null;
+
+    /// <inheritdoc />
+    public DiscoveredServer GetDistinctLoggingDatabase(out IExternalDatabaseServer serverChosen)
+    {
+        serverChosen = null;
+        return null;
+    }
+
+    /// <inheritdoc />
+    public string GetDistinctLoggingTask() => null;
+
+    /// <inheritdoc />
+    public IEnumerable<ArchivalDataLoadInfo> FilterRuns(IEnumerable<ArchivalDataLoadInfo> runs)
+    {
+        yield break;
+    }
+
+    /// <inheritdoc />
+    public IDataExportRepository DataExportRepository { get; }
+
+    /// <inheritdoc />
+    public DateTime? dtCreated { get; set; }
+
+    /// <inheritdoc />
+    public int? Cohort_ID { get; set; }
+
+    /// <inheritdoc />
+    public string RequestTicket { get; set; }
+
+    /// <inheritdoc />
+    public string ReleaseTicket { get; set; }
+
+    /// <inheritdoc />
+    public int Project_ID { get; }
+
+    /// <inheritdoc />
+    public IProject Project { get; init; }
+
+    /// <inheritdoc />
+    public string Username { get; }
+
+    /// <inheritdoc />
+    public string Separator { get; set; }
+
+    /// <inheritdoc />
+    public string Description { get; set; }
+
+    /// <inheritdoc />
+    public bool IsReleased { get; set; }
+
+    /// <inheritdoc />
+    public int? ClonedFrom_ID { get; set; }
+
+    /// <inheritdoc />
+    public IExtractableCohort Cohort { get; }
+
+    /// <inheritdoc />
+    public int? DefaultPipeline_ID { get; set; }
+
+    /// <inheritdoc />
+    public int? CohortIdentificationConfiguration_ID { get; set; }
+
+    /// <inheritdoc />
+    public int? CohortRefreshPipeline_ID { get; set; }
+
+    /// <inheritdoc />
+    public IExtractableCohort GetExtractableCohort() => null;
+
+    /// <inheritdoc />
+    public IProject GetProject() => null;
+
+    /// <inheritdoc />
+    public ISqlParameter[] GlobalExtractionFilterParameters { get; }
+
+    /// <inheritdoc />
+    public IReleaseLog[] ReleaseLog { get; }
+
+    /// <inheritdoc />
+    public IEnumerable<ICumulativeExtractionResults> CumulativeExtractionResults { get; }
+
+    /// <inheritdoc />
+    public IEnumerable<ISupplementalExtractionResults> SupplementalExtractionResults { get; }
+
+    /// <inheritdoc />
+    public ExtractableColumn[] GetAllExtractableColumnsFor(IExtractableDataSet dataset)
+    {
+        return new ExtractableColumn[] { };
+    }
+
+    /// <inheritdoc />
+    public IContainer GetFilterContainerFor(IExtractableDataSet dataset) => null;
+
+    /// <inheritdoc />
+    public IExtractableDataSet[] GetAllExtractableDataSets()
+    {
+        return new IExtractableDataSet[] { };
+    }
+
+    /// <inheritdoc />
+    public ISelectedDataSets[] SelectedDataSets { get; }
+
+    /// <inheritdoc />
+    public void RemoveDatasetFromConfiguration(IExtractableDataSet extractableDataSet)
+    {
+    }
+
+    /// <inheritdoc />
+    public void Unfreeze()
+    {
+    }
+
+    /// <inheritdoc />
+    public IMapsDirectlyToDatabaseTable[] GetGlobals()
+    {
+        return new IMapsDirectlyToDatabaseTable[] { };
+    }
+
+    /// <inheritdoc />
+    public bool IsExtractable(out string reason)
+    {
+        reason = null;
+        return false;
+    }
+}
+internal class DummyProject : IProject
+{
+    /// <inheritdoc />
+    public IHasDependencies[] GetObjectsThisDependsOn()
+    {
+        return new IHasDependencies[] { };
+    }
+
+    /// <inheritdoc />
+    public IHasDependencies[] GetObjectsDependingOnThis()
+    {
+        return new IHasDependencies[] { };
+    }
+
+    /// <inheritdoc />
+    public void DeleteInDatabase()
+    {
+    }
+
+    /// <inheritdoc />
+    public event PropertyChangedEventHandler PropertyChanged;
+
+    /// <inheritdoc />
+    public int ID { get; set; }
+
+    /// <inheritdoc />
+    public IRepository Repository { get; set; }
+
+    /// <inheritdoc />
+    public void SetReadOnly()
+    {
+    }
+
+    /// <inheritdoc />
+    public void SaveToDatabase()
+    {
+    }
+
+    /// <inheritdoc />
+    public void RevertToDatabaseState()
+    {
+    }
+
+    /// <inheritdoc />
+    public RevertableObjectReport HasLocalChanges() => null;
+
+    /// <inheritdoc />
+    public bool Exists() => false;
+
+    /// <inheritdoc />
+    public string Name { get; set; }
+
+    /// <inheritdoc />
+    public string Folder { get; set; }
+
+    /// <inheritdoc />
+    public string MasterTicket { get; set; }
+
+    /// <inheritdoc />
+    public string ExtractionDirectory { get; set; }
+
+    /// <inheritdoc />
+    public int? ProjectNumber { get; set; }
+
+    /// <inheritdoc />
+    public IExtractionConfiguration[] ExtractionConfigurations { get; }
+
+    /// <inheritdoc />
+    public IProjectCohortIdentificationConfigurationAssociation[] ProjectCohortIdentificationConfigurationAssociations
+    {
+        get;
+    }
+
+    /// <inheritdoc />
+    public IDataExportRepository DataExportRepository { get; }
+
+    /// <inheritdoc />
+    public ICatalogue[] GetAllProjectCatalogues()
+    {
+        return new ICatalogue[] { };
+    }
+
+    /// <inheritdoc />
+    public ExtractionInformation[] GetAllProjectCatalogueColumns(ExtractionCategory any)
+    {
+        return new ExtractionInformation[] { };
+    }
+
+    /// <inheritdoc />
+    public ExtractionInformation[] GetAllProjectCatalogueColumns(ICoreChildProvider childProvider, ExtractionCategory any)
+    {
+        return new ExtractionInformation[] { };
+    }
+}
+internal class DummyExtractDatasetCommand : IExtractDatasetCommand
+{
+    private readonly DirectoryInfo _dir;
+
+    public DummyExtractDatasetCommand(string dir, int i)
+    {
+        _dir = new DirectoryInfo(dir);
+        Configuration = new DummyExtractionConfiguration()
+        {
+            Project = new DummyProject {ProjectNumber = i}
+        };
+        QueryBuilder = new DummySqlQueryBuilder()
+        {
+            SelectColumns = new List<QueryTimeColumn>
+            {
+                new(new SpontaneouslyInventedColumn(new(), "Pat", "[db]..[tb].[Pat]") { IsExtractionIdentifier = true })
+            }
+        };
+    }
+
+    /// <inheritdoc />
+    public DirectoryInfo GetExtractionDirectory() => _dir;
+
+    /// <inheritdoc />
+    public IExtractionConfiguration Configuration { get; }
+
+    /// <inheritdoc />
+    public string DescribeExtractionImplementation() => null;
+
+    /// <inheritdoc />
+    public ExtractCommandState State { get; }
+
+    /// <inheritdoc />
+    public void ElevateState(ExtractCommandState newState)
+    {
+    }
+
+    /// <inheritdoc />
+    public bool IsBatchResume { get; set; }
+
+    /// <inheritdoc />
+    public ISelectedDataSets SelectedDataSets { get; }
+
+    /// <inheritdoc />
+    public IExtractableCohort ExtractableCohort { get; set; }
+
+    /// <inheritdoc />
+    public ICatalogue Catalogue { get; }
+
+    /// <inheritdoc />
+    public IExtractionDirectory Directory { get; set; }
+
+    /// <inheritdoc />
+    public IExtractableDatasetBundle DatasetBundle { get; }
+
+    /// <inheritdoc />
+    public List<IColumn> ColumnsToExtract { get; set; }
+
+    /// <inheritdoc />
+    public IProject Project { get; }
+
+    /// <inheritdoc />
+    public void GenerateQueryBuilder()
+    {
+    }
+
+    /// <inheritdoc />
+    public ISqlQueryBuilder QueryBuilder { get; set; }
+
+    /// <inheritdoc />
+    public ICumulativeExtractionResults CumulativeExtractionResults { get; }
+
+    /// <inheritdoc />
+    public int TopX { get; set; }
+
+    /// <inheritdoc />
+    public DateTime? BatchStart { get; set; }
+
+    /// <inheritdoc />
+    public DateTime? BatchEnd { get; set; }
+
+    /// <inheritdoc />
+    public DiscoveredServer GetDistinctLiveDatabaseServer() => null;
 }
