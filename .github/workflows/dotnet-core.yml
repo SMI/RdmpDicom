@@ -29,7 +29,7 @@ jobs:
           for /f tokens^=1^,2^ delims^=^" %%i in (SharedAssemblyInfo.cs) do @if "%%i"=="[assembly: AssemblyVersion(" echo version=%%j>> %GITHUB_OUTPUT%
           perl -ne "print """rdmpversion=""".$1."""\n""" if /version>(.+)</i"  RDMP\directory.build.props >>%GITHUB_OUTPUT%
       - name: Install MS SQL 2019
-        uses: crazy-max/ghaction-chocolatey@v2
+        uses: crazy-max/ghaction-chocolatey@v3
         with:
           args: install -ry sqllocaldb wget
       - name: Build
