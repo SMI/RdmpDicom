@@ -17,7 +17,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: HicServices/RDMP
-          ref: feature/rc4
+          ref: develop
           path: RDMP
       - uses: actions/setup-dotnet@v3
         with:
