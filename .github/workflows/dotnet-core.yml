@@ -59,6 +59,14 @@ jobs:
               </metadata>
           </package>
           EOP
+          rm -f p/windows/windows.dll
+          rm -f p/windows/ja-JP/Terminal.Gui.resources.dll
+          rm -f p/windows/fr-FR/Terminal.Gui.resources.dll
+          rm -f p/windows/pt-PT/Terminal.Gui.resources.dll
+          rm -f p/main/main.dll
+          rm -f p/main/ja-JP/Terminal.Gui.resources.dll
+          rm -f p/main/fr-FR/Terminal.Gui.resources.dll
+          rm -f p/main/pt-PT/Terminal.Gui.resources.dll
           7z a -tzip Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg plugin.nuspec p
           dotnet pack Rdmp.Dicom/Rdmp.Dicom.csproj -c Release -p:Version=${{ steps.version.outputs.version }} --include-source --include-symbols -o .
           cat > testcmd.yaml <<-EOC
