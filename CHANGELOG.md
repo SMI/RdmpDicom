@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.0.1]
+ - Documentation Update
+ - Update to target RDMP version 8.1.0
 ## [7.0.0] 2023-02-08
 
 - Replace SharpCompress 0.32.2 with LibArchive.net 0.1.3 due to LZMA bugs
