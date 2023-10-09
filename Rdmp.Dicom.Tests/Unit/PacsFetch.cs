@@ -8,6 +8,7 @@ using FellowOakDicom.Log;
 using FellowOakDicom.Memory;
 using FellowOakDicom.Network;
 using FellowOakDicom.Network.Client;
+using Microsoft.Extensions.Logging;
 using NUnit.Framework;
 
 namespace Rdmp.Dicom.Tests.Unit;
@@ -17,9 +18,9 @@ internal class PacsFetch
     class QRService : DicomService, IDicomServiceProvider, IDicomCFindProvider, IDicomCEchoProvider,
         IDicomCMoveProvider
     {
-        private static readonly DicomServiceDependencies Deps = new(new ConsoleLogManager(),
+        private static readonly DicomServiceDependencies Dependencies = new(LoggerFactory.Create(builder=>builder.AddConsole()),
             new DesktopNetworkManager(), new DefaultTranscoderManager(), new ArrayPoolMemoryProvider());
-        public QRService(INetworkStream stream, Encoding fallbackEncoding, Logger log) : base(stream, fallbackEncoding, log,Deps)
+        public QRService(INetworkStream stream, Encoding fallbackEncoding,Microsoft.Extensions.Logging.ILogger log) : base(stream, fallbackEncoding, log,Dependencies)
         {
         }
 
