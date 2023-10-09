@@ -41,7 +41,7 @@
     <ProjectReference Include="..\RDMP\Tests.Common\Tests.Common.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="HIC.BadMedicine.Dicom" Version="0.0.16-rc1" />
+    <PackageReference Include="HIC.BadMedicine.Dicom" Version="0.0.16" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.7.2" />
     <PackageReference Include="NUnit" Version="3.13.3" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
