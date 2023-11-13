@@ -5,6 +5,7 @@ using YamlDotNet.Serialization;
 using Newtonsoft.Json.Linq;
 using System.Text.RegularExpressions;
 using System.Web;
+using System.Text.Json.Nodes;
 
 namespace Rdmp.Dicom.ExternalApis
 {
@@ -288,22 +289,28 @@ namespace Rdmp.Dicom.ExternalApis
             termsArray.Add(termsObj);
 
             //Set the filter
-            dynamic filterObj = new JObject();
+            var filterObj = new JObject();
             if (UseStartDate)
-                filterObj.start_date = StartDate.ToString(StartEndDateFormat);
+                filterObj.Add("start_date", StartDate.ToString(StartEndDateFormat));
+                //filterObj.start_date = StartDate.ToString(StartEndDateFormat);
             if (UseEndDate)
-                filterObj.end_date = EndDate.ToString(StartEndDateFormat);
+                filterObj.Add("end_date", EndDate.ToString(StartEndDateFormat));
+            //filterObj.end_date = EndDate.ToString(StartEndDateFormat);
             if (Modalities.Count > 0)
-                filterObj.modalities = new JArray(Modalities);
+                filterObj.Add("modalities", new JArray(Modalities));
+            //filterObj.modalities = new JArray(Modalities);
 
             //Create API JSON
-            dynamic apiCallJson = new JObject();
-            apiCallJson.terms = termsArray;
-            apiCallJson.filter = filterObj;
+            var apiCallJson = new JObject();
+            apiCallJson.Add("terms", termsArray);
+            apiCallJson.Add("filter", filterObj);
+            //apiCallJson.terms = termsArray;
+            //apiCallJson.filter = filterObj;
             /*if (ReturnFields.Count > 0)
                 apiCallJson.returnFields = new JArray(ReturnFields);*/
             if (!string.IsNullOrWhiteSpace(ReturnField))
-                apiCallJson.returnFields = new JArray(ReturnField);
+                apiCallJson.Add("returnFields", new JArray(ReturnField));
+                //apiCallJson.returnFields = new JArray(ReturnField);
 
             return apiCallJson;
         }
