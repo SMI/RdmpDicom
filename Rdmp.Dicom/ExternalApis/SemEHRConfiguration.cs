@@ -263,19 +263,25 @@ namespace Rdmp.Dicom.ExternalApis
         public JObject GetQueryJson()
         {           
             //Set the terms
-            dynamic termsObj = new JObject();
+            var termsObj = new JObject();
             if (!string.IsNullOrWhiteSpace(Query))
-                termsObj.q = HttpUtility.UrlEncode(Query);
-            if(QDepth > -1)
-                termsObj.qdepth = QDepth;
+                termsObj.Add("q", HttpUtility.UrlEncode(Query));
+                //termsObj.q = HttpUtility.UrlEncode(Query);
+            if (QDepth > -1)
+                termsObj.Add("qDepth", QDepth);
+                //termsObj.qdepth = QDepth;
             if(!string.IsNullOrWhiteSpace(QStop))
-                termsObj.qstop = QStop; 
+                termsObj.Add("qStop", QStop);
+                //termsObj.qstop = QStop; 
             if (!string.IsNullOrWhiteSpace(Negation))
-                termsObj.negation = Negation;
+                termsObj.Add("negation", Negation);
+                //termsObj.negation = Negation;
             if (!string.IsNullOrWhiteSpace(Experiencer))
-                termsObj.experiencer = Experiencer;
+                termsObj.Add("experiencer", Experiencer);
+                //termsObj.experiencer = Experiencer;
             if (Temporality.Count > 0)
-                termsObj.temporality = new JArray(Temporality);
+                termsObj.Add("temporality", new JArray(Temporality));
+                //termsObj.temporality = new JArray(Temporality);
 
             //Add terms to terms array
             JArray termsArray = new();
