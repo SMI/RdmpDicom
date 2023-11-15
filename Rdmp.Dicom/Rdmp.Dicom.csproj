@@ -1,8 +1,9 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <PackageId>HIC.Rdmp.Dicom</PackageId>
     <RootNamespace>Rdmp.Dicom</RootNamespace>
     <AssemblyName>Rdmp.Dicom</AssemblyName>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
   <ItemGroup>
@@ -25,9 +26,13 @@
     <EmbeddedResource Include="db\up\005_EnsureUIDMapUnique.sql" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="HIC.DicomTypeTranslation" Version="4.0.1" />
-    <PackageReference Include="HIC.RDMP.Plugin" Version="8.0.5" />
-    <PackageReference Include="SharpCompress" Version="0.32.2" />
-    <PackageReference Include="Terminal.Gui" Version="1.8.2" />
+    <PackageReference Include="HIC.DicomTypeTranslation" Version="4.0.3" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\RDMP\Rdmp.Core\Rdmp.Core.csproj" />
   </ItemGroup>
 </Project>

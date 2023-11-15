@@ -1,7 +1,6 @@
-namespace Rdmp.Dicom.Extraction
+namespace Rdmp.Dicom.Extraction;
+
+public interface IMappingRepository
 {
-    public interface IMappingRepository
-    {
-        string GetOrAllocateMapping(string value, int projectNumber, UIDType uidType);
-    }
+    string GetOrAllocateMapping(string value, int projectNumber, UIDType uidType);
 }

@@ -8,6 +8,7 @@ using FellowOakDicom.Log;
 using FellowOakDicom.Memory;
 using FellowOakDicom.Network;
 using FellowOakDicom.Network.Client;
+using Microsoft.Extensions.Logging;
 using NUnit.Framework;
 
 namespace Rdmp.Dicom.Tests.Unit;
@@ -17,9 +18,9 @@ internal class PacsFetch
     class QRService : DicomService, IDicomServiceProvider, IDicomCFindProvider, IDicomCEchoProvider,
         IDicomCMoveProvider
     {
-        private static readonly DicomServiceDependencies Deps = new(new ConsoleLogManager(),
+        private static readonly DicomServiceDependencies Dependencies = new(LoggerFactory.Create(builder=>builder.AddConsole()),
             new DesktopNetworkManager(), new DefaultTranscoderManager(), new ArrayPoolMemoryProvider());
-        public QRService(INetworkStream stream, Encoding fallbackEncoding, Logger log) : base(stream, fallbackEncoding, log,Deps)
+        public QRService(INetworkStream stream, Encoding fallbackEncoding,Microsoft.Extensions.Logging.ILogger log) : base(stream, fallbackEncoding, log,Dependencies)
         {
         }
 
@@ -114,7 +115,7 @@ internal class PacsFetch
             new Item("patientId","studyUid","seriesUid","sopInstanceUid1"),
             new Item("patientId","studyUid","seriesUid","sopInstanceUid2")
         };
-        var hbo=new HierarchyBasedOrder(new DateTime(2020,1,1),new DateTime(2020,12,31),PlacementMode.PlaceThenFill,OrderLevel.Study,new ThrowImmediatelyDataLoadEventListener());
+        var hbo=new HierarchyBasedOrder(new DateTime(2020,1,1),new DateTime(2020,12,31),PlacementMode.PlaceThenFill,OrderLevel.Study,ThrowImmediatelyDataLoadEventListener.Quiet);
         hbo.Place(target[0]);
         hbo.Place(target[1]);
 
