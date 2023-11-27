@@ -40,18 +40,18 @@ internal class ExecuteCommandAddTagTests : DatabaseTests
 
         // use it to create a table
         var tbl = db.ExpectTable(template.TableName);
-        IAtomicCommand cmd = new ExecuteCommandCreateNewImagingDataset(RepositoryLocator,tbl , template);
-        Assert.IsFalse(cmd.IsImpossible);
+        IAtomicCommand cmd = new ExecuteCommandCreateNewImagingDataset(RepositoryLocator, tbl, template);
+        Assert.That(cmd.IsImpossible, Is.False);
         cmd.Execute();
 
-        Assert.IsTrue(tbl.Exists());
+        Assert.That(tbl.Exists());
 
         // import RDMP reference to the table
-        var importer = new TableInfoImporter(CatalogueRepository,tbl);
-        importer.DoImport(out var ti,out var cols);
-            
-        var forward = new ForwardEngineerCatalogue(ti,cols);
-        forward.ExecuteForwardEngineering(out var catalogue,out _,out _);
+        var importer = new TableInfoImporter(CatalogueRepository, tbl);
+        importer.DoImport(out var ti, out var cols);
+
+        var forward = new ForwardEngineerCatalogue(ti, cols);
+        forward.ExecuteForwardEngineering(out var catalogue, out _, out _);
 
         // Create an archive table and backup trigger like we would have if this were the target of a data load
         var triggerImplementerFactory = new TriggerImplementerFactory(type);
@@ -60,36 +60,39 @@ internal class ExecuteCommandAddTagTests : DatabaseTests
 
         var archive = tbl.Database.ExpectTable($"{tbl.GetRuntimeName()}_Archive");
 
-        Assert.IsTrue(archive.Exists());
+        Assert.That(archive.Exists());
 
-        var activator = new ConsoleInputManager(RepositoryLocator,ThrowImmediatelyCheckNotifier.Quiet)
+        var activator = new ConsoleInputManager(RepositoryLocator, ThrowImmediatelyCheckNotifier.Quiet)
         {
             DisallowInput = true
         };
 
         // Test the actual commands
-        cmd = new ExecuteCommandAddTag(activator,catalogue,"ffffff","int");
-        Assert.IsFalse(cmd.IsImpossible,cmd.ReasonCommandImpossible);
+        cmd = new ExecuteCommandAddTag(activator, catalogue, "ffffff", "int");
+        Assert.That(cmd.IsImpossible, Is.False, cmd.ReasonCommandImpossible);
         cmd.Execute();
 
-        cmd = new ExecuteCommandAddTag(activator,catalogue,"EchoTime",null);
-        Assert.IsFalse(cmd.IsImpossible,cmd.ReasonCommandImpossible);
+        cmd = new ExecuteCommandAddTag(activator, catalogue, "EchoTime", null);
+        Assert.That(cmd.IsImpossible, Is.False, cmd.ReasonCommandImpossible);
         cmd.Execute();
 
         // attempting to add something that is already there is not a problem and just gets skipped
-        Assert.DoesNotThrow(()=>new ExecuteCommandAddTag(activator,catalogue,"StudyDate",null).Execute());
-            
-        cmd = new ExecuteCommandAddTag(activator,catalogue,"SeriesDate",null);
-        Assert.IsFalse(cmd.IsImpossible,cmd.ReasonCommandImpossible);
+        Assert.DoesNotThrow(() => new ExecuteCommandAddTag(activator, catalogue, "StudyDate", null).Execute());
+
+        cmd = new ExecuteCommandAddTag(activator, catalogue, "SeriesDate", null);
+        Assert.That(cmd.IsImpossible, Is.False, cmd.ReasonCommandImpossible);
         cmd.Execute();
 
-        Assert.AreEqual("int",tbl.DiscoverColumn("ffffff").DataType.SQLType);
-        Assert.AreEqual("decimal(38,19)",tbl.DiscoverColumn("EchoTime").DataType.SQLType);
-        Assert.AreEqual(typeof(DateTime),tbl.DiscoverColumn("SeriesDate").DataType.GetCSharpDataType());
+        Assert.Multiple(() =>
+        {
+            Assert.That(tbl.DiscoverColumn("ffffff").DataType.SQLType, Is.EqualTo("int"));
+            Assert.That(tbl.DiscoverColumn("EchoTime").DataType.SQLType, Is.EqualTo("decimal(38,19)"));
+            Assert.That(tbl.DiscoverColumn("SeriesDate").DataType.GetCSharpDataType(), Is.EqualTo(typeof(DateTime)));
 
-        Assert.AreEqual("int",archive.DiscoverColumn("ffffff").DataType.SQLType);
-        Assert.AreEqual("decimal(38,19)",archive.DiscoverColumn("EchoTime").DataType.SQLType);
-        Assert.AreEqual(typeof(DateTime),archive.DiscoverColumn("SeriesDate").DataType.GetCSharpDataType());
+            Assert.That(archive.DiscoverColumn("ffffff").DataType.SQLType, Is.EqualTo("int"));
+            Assert.That(archive.DiscoverColumn("EchoTime").DataType.SQLType, Is.EqualTo("decimal(38,19)"));
+            Assert.That(archive.DiscoverColumn("SeriesDate").DataType.GetCSharpDataType(), Is.EqualTo(typeof(DateTime)));
+        });
 
     }
 }

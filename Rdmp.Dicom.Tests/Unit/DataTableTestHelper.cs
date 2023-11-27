@@ -25,7 +25,7 @@ class DataTableTestHelper
 
         for (var i = 0; i < columnNames.Length; i++)
         {
-            DataColumn column = new() {DataType = data[0, i].GetType(), ColumnName = columnNames[i]};
+            DataColumn column = new() { DataType = data[0, i].GetType(), ColumnName = columnNames[i] };
             result.Columns.Add(column);
         }
 

@@ -9,19 +9,19 @@ using NUnit.Framework;
 namespace Rdmp.Dicom.Tests;
 
 /// <summary>
-/// Tests to confirm that the dependencies in csproj files (NuGet packages) match those in the .nuspec files and that packages.md 
+/// Tests to confirm that the dependencies in csproj files (NuGet packages) match those in the .nuspec files and that packages.md
 /// lists the correct versions (in documentation)
 /// </summary>
 public class PackageListIsCorrectTests
 {
-    private static readonly EnumerationOptions EnumerationOptions = new() { RecurseSubdirectories = true,MatchCasing = MatchCasing.CaseInsensitive,IgnoreInaccessible = true};
+    private static readonly EnumerationOptions EnumerationOptions = new() { RecurseSubdirectories = true, MatchCasing = MatchCasing.CaseInsensitive, IgnoreInaccessible = true };
 
     //<PackageReference Include="NUnit3TestAdapter" Version="3.13.0" />
-    private static readonly Regex RPackageRef = new(@"<PackageReference\s+Include=""(.*)""\s+Version=""([^""]*)""", RegexOptions.IgnoreCase|RegexOptions.Compiled|RegexOptions.CultureInvariant);
+    private static readonly Regex RPackageRef = new(@"<PackageReference\s+Include=""(.*)""\s+Version=""([^""]*)""", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
     // | Org.SomePackage |
     //
-    private static readonly Regex RMarkdownEntry = new(@"^\|\s*\[?([^ |\]]+)(\]\([^)]+\))?\s*\|", RegexOptions.IgnoreCase|RegexOptions.Compiled|RegexOptions.CultureInvariant);
+    private static readonly Regex RMarkdownEntry = new(@"^\|\s*\[?([^ |\]]+)(\]\([^)]+\))?\s*\|", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
 
     /// <summary>
@@ -29,17 +29,17 @@ public class PackageListIsCorrectTests
     /// </summary>
     /// <param name="rootPath"></param>
     [TestCase]
-    public void TestPackagesDocumentCorrect(string rootPath=null)
+    public void TestPackagesDocumentCorrect(string rootPath = null)
     {
-        var root= FindRoot(rootPath);
+        var root = FindRoot(rootPath);
         var undocumented = new StringBuilder();
 
         // Extract the named packages from PACKAGES.md
         var packagesMarkdown = GetPackagesMarkdown(root).SelectMany(File.ReadAllLines)
             .Select(line => RMarkdownEntry.Match(line))
-            .Where(m=>m.Success)
+            .Where(m => m.Success)
             .Select(m => m.Groups[1].Value)
-            .Except(new[]{"Package", "-------" })
+            .Except(new[] { "Package", "-------" })
             .ToHashSet(StringComparer.InvariantCultureIgnoreCase);
 
         // Extract the named packages from csproj files
@@ -51,9 +51,12 @@ public class PackageListIsCorrectTests
         undocumented.AppendJoin(Environment.NewLine, undocumentedPackages);
 
         var unusedPackages = packagesMarkdown.Except(usedPackages).ToArray();
-        Assert.IsEmpty(unusedPackages,
-            $"The following packages are listed in PACKAGES.md but are not used in any csproj file: {string.Join(", ", unusedPackages)}");
-        Assert.IsEmpty(undocumented.ToString());
+        Assert.Multiple(() =>
+        {
+            Assert.That(unusedPackages, Is.Empty,
+                    $"The following packages are listed in PACKAGES.md but are not used in any csproj file: {string.Join(", ", unusedPackages)}");
+            Assert.That(undocumented.ToString(), Is.Empty);
+        });
     }
 
     /// <summary>
@@ -79,7 +82,7 @@ public class PackageListIsCorrectTests
         var root = new DirectoryInfo(TestContext.CurrentContext.TestDirectory);
         while (!root.EnumerateFiles("*.sln", SearchOption.TopDirectoryOnly).Any() && root.Parent != null)
             root = root.Parent;
-        Assert.IsNotNull(root.Parent, "Could not find root of repository");
+        Assert.That(root.Parent, Is.Not.Null, "Could not find root of repository");
         return root;
     }
 
@@ -101,7 +104,7 @@ public class PackageListIsCorrectTests
     private static string[] GetPackagesMarkdown(DirectoryInfo root)
     {
         var path = root.EnumerateFiles("packages.md", EnumerationOptions).Select(f => f.FullName).ToArray();
-        Assert.False(path.Length==0, "Could not find packages.md");
+        Assert.That(path, Is.Not.Empty, "Could not find packages.md");
         return path;
     }
 

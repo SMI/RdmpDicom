@@ -91,7 +91,7 @@ public partial class SemEHRUI : Form
         _configuration.Temporality = new();
         foreach (KeyValuePair<string, string> item in cblTemporality.CheckedItems)
         {
-            _configuration.Temporality.Add(item.Value.ToString());                
+            _configuration.Temporality.Add(item.Value.ToString());
         }
 
         _configuration.Negation = "";

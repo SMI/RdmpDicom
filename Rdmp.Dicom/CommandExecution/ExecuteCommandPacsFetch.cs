@@ -20,9 +20,9 @@ class ExecuteCommandPacsFetch : BasicCommandExecution, ICacheFetchRequestProvide
 
     public ExecuteCommandPacsFetch(IBasicActivateItems activator,string start, string end, string remoteAeHost, ushort remotePort,string remoteAeTitle, string localAeHost, ushort localPort, string localAeTitle, string outDir, int maxRetries):base(activator)
     {
-        var startDate = DateTime.Parse(start);   
-        var endDate =  DateTime.Parse(end);   
-                        
+        var startDate = DateTime.Parse(start);
+        var endDate =  DateTime.Parse(end);
+
         // Make something that kinda looks like a valid DLE load
         var memory = new MemoryCatalogueRepository();
         var lmd = new LoadMetadata(memory);

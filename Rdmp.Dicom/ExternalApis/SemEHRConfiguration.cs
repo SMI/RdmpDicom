@@ -69,7 +69,7 @@ public class SemEHRConfiguration
     /// The passphrase required to connect to the API
     /// </summary>
     public string Passphrase { get; set; } = "";
-        
+
     /// <summary>
     /// The HTTP Basic Authentication Username/Password to use when connecting to the SemEHR Api
     /// </summary>
@@ -144,14 +144,14 @@ public class SemEHRConfiguration
 
     //API Return Fields
     /// <summary>
-    /// The list of fields that should be returned - "SOPInstanceUID", "SeriesInstanceUID", "StudyInstanceUID" 
+    /// The list of fields that should be returned - "SOPInstanceUID", "SeriesInstanceUID", "StudyInstanceUID"
     /// </summary>
     //Currently only supporting one return feild which is all we need from an RDMP point of view
     //public List<string> ReturnFields { get; set; } = new List<string>();
 
     //API Return Field
     /// <summary>
-    /// The field that should be returned - "SOPInstanceUID", "SeriesInstanceUID", "StudyInstanceUID" 
+    /// The field that should be returned - "SOPInstanceUID", "SeriesInstanceUID", "StudyInstanceUID"
     /// </summary>
     public string ReturnField { get; set; } = "";
 
@@ -263,7 +263,7 @@ public class SemEHRConfiguration
     }
 
     public JsonObject GetQueryJson()
-    {           
+    {
         //Set the terms
         dynamic termsObj = new JsonObject();
         if (!string.IsNullOrWhiteSpace(Query))
@@ -271,7 +271,7 @@ public class SemEHRConfiguration
         if(QDepth > -1)
             termsObj.qdepth = QDepth;
         if(!string.IsNullOrWhiteSpace(QStop))
-            termsObj.qstop = QStop; 
+            termsObj.qstop = QStop;
         if (!string.IsNullOrWhiteSpace(Negation))
             termsObj.negation = Negation;
         if (!string.IsNullOrWhiteSpace(Experiencer))
@@ -309,7 +309,7 @@ public class SemEHRConfiguration
     public string GetQueryJsonAsString()
     {
         return Regex.Replace(GetQueryJson().ToString(), @"\s+", "");
-            
+
     }
 
     public string GetUrlWithQuerystring()

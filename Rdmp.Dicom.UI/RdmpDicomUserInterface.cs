@@ -75,7 +75,7 @@ public class RdmpDicomUserInterface : PluginUserInterface, IRefreshBusSubscriber
 
     public void RefreshBus_RefreshObject(object sender, RefreshObjectEventArgs e)
     {
-            
+
     }
 
     public override bool CustomActivate(IMapsDirectlyToDatabaseTable o)

@@ -83,7 +83,7 @@ public class AmbiguousFilePath
 
         if (!IsZipReference(path))
             return Path.Combine(root,path);
-            
+
         var bits = path.Split('!');
         return $"{Path.Combine(root, bits[0])}!{bits[1]}";
     }
@@ -185,8 +185,8 @@ public class AmbiguousFilePath
         var extension = Path.GetExtension(fullPath);
 
 
-        return 
-            string.IsNullOrWhiteSpace(extension) || 
+        return
+            string.IsNullOrWhiteSpace(extension) ||
 
             // The following is a valid dicom file name but looks like it has an extension .5323
             // 123.3221.23123.5325

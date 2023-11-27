@@ -28,10 +28,10 @@ class CFindSourceTests : UnitTests
         // file name is miday on 2001 1st January
         var f = Path.Combine(dir.FullName, @"out/Data/Cache/ALL/20010101120000.csv");
         FileAssert.Exists(f);
-            
+
         var result = File.ReadAllLines(f);
 
         // should be at least 1 image in the public test server
-        Assert.GreaterOrEqual(result.Length,1);
+        Assert.That(result, Is.Not.Empty);
     }
 }

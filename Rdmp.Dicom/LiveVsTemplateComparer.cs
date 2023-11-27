@@ -34,7 +34,7 @@ public class LiveVsTemplateComparer
                c.TableName.Equals(liveTableNameWithoutPrefix,StringComparison.CurrentCultureIgnoreCase)) ?? throw new($"Could not find a Template called '{liveTableName}' or '{liveTableNameWithoutPrefix}'.  Templates in file were {string.Join(",",templateCollection.Tables.Select(t=>t.TableName))}");
 
         //script the template
-        var creator = new ImagingTableCreation(discoveredTable.Database.Server.GetQuerySyntaxHelper());            
+        var creator = new ImagingTableCreation(discoveredTable.Database.Server.GetQuerySyntaxHelper());
         TemplateSql = creator.GetCreateTableSql(discoveredTable.Database,liveTableName,template, discoveredTable.Schema);
 
         TemplateSql  = TailorTemplateSql(TemplateSql );
@@ -43,7 +43,7 @@ public class LiveVsTemplateComparer
     {
         //condense all multiple spaces to single spaces
         templateSql = Regex.Replace(templateSql,"  +"," ");
-            
+
         return templateSql;
     }
 
@@ -51,10 +51,10 @@ public class LiveVsTemplateComparer
     {
         // get rid of collation
         liveSql = Regex.Replace(liveSql,"\\bCOLLATE \\w+","");
-            
+
         // condense all multiple spaces to single spaces
         liveSql = Regex.Replace(liveSql,"  +"," ");
-            
+
         return liveSql;
     }
 }

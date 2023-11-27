@@ -7,7 +7,7 @@ using Tests.Common;
 
 namespace Rdmp.Dicom.Tests.Integration;
 
-public class ImagingTableCreationTests:DatabaseTests
+public class ImagingTableCreationTests : DatabaseTests
 {
 
     [TestCase(DatabaseType.MySql)]
@@ -32,25 +32,31 @@ public class ImagingTableCreationTests:DatabaseTests
             }
         };
         var tbl = db.ExpectTable(template.TableName);
-        var cmd = new ExecuteCommandCreateNewImagingDataset(RepositoryLocator,tbl , template);
-        Assert.IsFalse(cmd.IsImpossible);
+        var cmd = new ExecuteCommandCreateNewImagingDataset(RepositoryLocator, tbl, template);
+        Assert.That(cmd.IsImpossible, Is.False);
         cmd.Execute();
 
-        Assert.IsTrue(tbl.Exists());
+        Assert.That(tbl.Exists());
 
         var cols = tbl.DiscoverColumns();
-        Assert.AreEqual(2,cols.Length);
+        Assert.That(cols, Has.Length.EqualTo(2));
 
         var rfa = cols.Single(c => c.GetRuntimeName().Equals("RelativeFileArchiveURI"));
 
-        Assert.IsTrue(rfa.IsPrimaryKey);
-        Assert.IsFalse(rfa.AllowNulls); //because PK!
+        Assert.Multiple(() =>
+        {
+            Assert.That(rfa.IsPrimaryKey);
+            Assert.That(rfa.AllowNulls, Is.False); //because PK!
+        });
 
 
         var sid = cols.Single(c => c.GetRuntimeName().Equals("SeriesInstanceUID"));
 
-        Assert.IsFalse(sid.IsPrimaryKey);
-        Assert.IsTrue(sid.AllowNulls); 
+        Assert.Multiple(() =>
+        {
+            Assert.That(sid.IsPrimaryKey, Is.False);
+            Assert.That(sid.AllowNulls);
+        });
 
 
 

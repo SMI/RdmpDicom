@@ -91,7 +91,7 @@ public partial class TagElevationXmlUI : Form,ICustomUI<DicomSource.TagElevation
             RunChecks();
         }
         else
-            queryEditor.Text = ExampleElevationFile; 
+            queryEditor.Text = ExampleElevationFile;
     }
 
     private void Btn_Click(object sender, EventArgs e)

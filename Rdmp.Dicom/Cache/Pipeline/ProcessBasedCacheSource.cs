@@ -30,34 +30,34 @@ Example:. './GetImages.exe ""%s"" ""%e%""'")]
 
     public override void Abort(IDataLoadEventListener listener)
     {
-            
+
     }
 
     public override void Check(ICheckNotifier notifier)
     {
-            
+
     }
 
     public override void Dispose(IDataLoadEventListener listener, Exception pipelineFailureExceptionIfAny)
     {
-            
+
     }
 
     public override SMIDataChunk DoGetChunk(ICacheFetchRequest request, IDataLoadEventListener listener, GracefulCancellationToken cancellationToken)
-    {                     
+    {
         listener.OnNotify(this,new(ProgressEventType.Information,$"ProcessBasedCacheSource version is {typeof(ProcessBasedCacheSource).Assembly.GetName().Version}.  Assembly is {typeof(ProcessBasedCacheSource).Assembly} " ));
-            
+
         // Where we are putting the files
         var cacheDir = new LoadDirectory(Request.CacheProgress.LoadProgress.LoadMetadata.LocationOfFlatFiles).Cache;
         var cacheLayout = new SMICacheLayout(cacheDir, new("ALL"));
-            
+
         Chunk = new(Request)
         {
             FetchDate = Request.Start,
             Modality = "ALL",
             Layout = cacheLayout
         };
-            
+
         var workingDirectory = cacheLayout.GetLoadCacheDirectory(listener);
 
         listener.OnNotify(this,new(ProgressEventType.Information,
@@ -69,7 +69,7 @@ Example:. './GetImages.exe ""%s"" ""%e%""'")]
         listener.OnNotify(this,new(ProgressEventType.Information, $"Args template is:{Args}"));
         listener.OnNotify(this,new(ProgressEventType.Information,
             $"Datetime format is:{TimeFormat}"));
-            
+
 
         var args = Args
             .Replace("%s",request.Start.ToString(TimeFormat))
@@ -85,7 +85,7 @@ Example:. './GetImages.exe ""%s"" ""%e%""'")]
             p.StartInfo.UseShellExecute = false;
             p.StartInfo.RedirectStandardOutput = true;
             p.OutputDataReceived += (sender, a) => listener.OnNotify(this,new(ProgressEventType.Information,a.Data));
-            
+
             p.Start();
             p.BeginOutputReadLine();
 
@@ -97,7 +97,7 @@ Example:. './GetImages.exe ""%s"" ""%e%""'")]
             if(p.ExitCode != 0 && ThrowOnNonZeroExitCode)
                 throw new($"Process exited with code {p.ExitCode}");
         }
-            
+
         return Chunk;
     }
 

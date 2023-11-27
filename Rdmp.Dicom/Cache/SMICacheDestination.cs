@@ -15,7 +15,7 @@ public class SMICacheDestination : CacheFilesystemDestination
     public string Modality { get; set; }
 
     [DemandsInitialization("The file extension to look for in fetched data", Mandatory = true, DefaultValue = "*.dcm")]
-    public string Extension { get; set; } 
+    public string Extension { get; set; }
 
     public SMIDataChunk ProcessPipelineData(SMIDataChunk toProcess, IDataLoadEventListener listener, GracefulCancellationToken cancellationToken)
     {
@@ -41,7 +41,7 @@ public class SMICacheDestination : CacheFilesystemDestination
         //save cache fill progress to the database
         if(!DEBUG_DoNotUpdateCacheProgress)
             toProcess.Request.SaveCacheFillProgress(toProcess.Request.End);
-             
+
 
         return toProcess;
     }
