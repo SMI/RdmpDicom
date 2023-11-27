@@ -103,7 +103,7 @@ public class FoDicomAnonymiser: IPluginDataFlowComponent<DataTable>,IPipelineReq
         if (MetadataOnly)
         {
             var matching = GetMetadataOnlyColumnsToProcess(toProcess);
-                
+
             if (!matching.Any())
             {
                 // this should have already returned above via IgnoreDataset, bad times if you end up here.
@@ -112,7 +112,7 @@ public class FoDicomAnonymiser: IPluginDataFlowComponent<DataTable>,IPipelineReq
 
             var dictionary = matching.ToDictionary(k => k,
                 c => UIDMapping.SupportedTags.First(k => k.Key.DictionaryEntry.Keyword.Equals(c.ColumnName)));
-                
+
             var releaseIdentifierColumn = GetReleaseIdentifierColumn().GetRuntimeName();
 
             foreach (DataRow row in toProcess.Rows)
@@ -236,7 +236,7 @@ public class FoDicomAnonymiser: IPluginDataFlowComponent<DataTable>,IPipelineReq
 
 
     /// <summary>
-    /// Setup class ready to start anonymising.  Pass in 
+    /// Setup class ready to start anonymising.  Pass in
     /// </summary>
     /// <param name="projectNumber"></param>
     /// <param name="destinationDirectory">Destination directory to pass to <see cref="IPutDicomFilesInExtractionDirectories"/>
@@ -333,7 +333,7 @@ public class FoDicomAnonymiser: IPluginDataFlowComponent<DataTable>,IPipelineReq
             //change value in dataset
             ds.AddOrUpdate(key, releaseValue);
 
-                
+
             //and change value in DataTable
             if (rowIfAny != null && rowIfAny.Table.Columns.Contains(key.DictionaryEntry.Keyword))
                 rowIfAny[key.DictionaryEntry.Keyword] = releaseValue;
@@ -348,7 +348,7 @@ public class FoDicomAnonymiser: IPluginDataFlowComponent<DataTable>,IPipelineReq
         }
 
         var newPath = putter.WriteOutDataset(_destinationDirectory, releaseColumnValue, ds);
-    
+
         if(rowIfAny != null)
             rowIfAny[RelativeArchiveColumnName] = newPath;
 
@@ -387,12 +387,12 @@ public class FoDicomAnonymiser: IPluginDataFlowComponent<DataTable>,IPipelineReq
 
     public void Dispose(IDataLoadEventListener listener, Exception pipelineFailureExceptionIfAny)
     {
-            
+
     }
 
     public void Abort(IDataLoadEventListener listener)
     {
-            
+
     }
 
     public void PreInitialize(IExtractCommand value, IDataLoadEventListener listener)
@@ -412,7 +412,7 @@ public class FoDicomAnonymiser: IPluginDataFlowComponent<DataTable>,IPipelineReq
         {
             notifier.OnCheckPerformed(new($"Error processing {nameof(DeleteTags)}",CheckResult.Fail, ex));
         }
-            
+
 
         lock(CreateServersOneAtATime)
         {

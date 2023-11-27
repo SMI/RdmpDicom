@@ -23,7 +23,7 @@ public class ExecuteCommandAddTag : BasicCommandExecution
     /// <param name="catalogue">The Catalogue you want to add the tag to.  Must have a single table under it.</param>
     /// <param name="column">The name of a dicom tag</param>
     /// <param name="dataType">Optional.  Pass null to lookup the dicom tags datatype automatically (recommended).  Pass a value to use an explicit SQL DBMS datatype instead.</param>
-    public ExecuteCommandAddTag(BasicActivateItems activator, ICatalogue catalogue,string column,string dataType) 
+    public ExecuteCommandAddTag(BasicActivateItems activator, ICatalogue catalogue,string column,string dataType)
         : this(activator,new[] { catalogue },column,dataType)
     {
 
@@ -37,16 +37,16 @@ public class ExecuteCommandAddTag : BasicCommandExecution
     /// <param name="column">The name of a dicom tag</param>
     /// <param name="dataType">Optional.  Pass null to lookup the dicom tags datatype automatically (recommended).  Pass a value to use an explicit SQL DBMS datatype instead.</param>
     [UseWithObjectConstructor]
-    public ExecuteCommandAddTag(BasicActivateItems activator,ICatalogue[] catalogues, 
+    public ExecuteCommandAddTag(BasicActivateItems activator,ICatalogue[] catalogues,
         [DemandsInitialization("Name of the new column you want created.")]
-        string column, 
+        string column,
         [DemandsInitialization("Optional when column is the name of a Dicom Tag e.g. StudyInstanceUID")]
         string dataType):base(activator)
     {
         foreach(var c in catalogues)
         {
             _adders.Add(BuildTagAdder(c,column, dataType));
-                
+
             // once we can't process any Catalogue we should stop investigating
             if (IsImpossible)
                 break;
@@ -71,7 +71,7 @@ public class ExecuteCommandAddTag : BasicCommandExecution
 
         var syntax = tables[0].GetQuerySyntaxHelper();
 
-        //if user hasn't listed a specific datatype, guess it from the column 
+        //if user hasn't listed a specific datatype, guess it from the column
         if (string.IsNullOrWhiteSpace(dataType))
         {
             var available = TagColumnAdder.GetAvailableTags();

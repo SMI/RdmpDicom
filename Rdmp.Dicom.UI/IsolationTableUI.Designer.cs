@@ -30,103 +30,105 @@ namespace Rdmp.Dicom.UI
         /// </summary>
         private void InitializeComponent()
         {
-            this.flpTables = new System.Windows.Forms.FlowLayoutPanel();
-            this.label1 = new System.Windows.Forms.Label();
-            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
-            this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
-            this.tbTop = new System.Windows.Forms.ToolStripTextBox();
-            this.toolStripLabel2 = new System.Windows.Forms.ToolStripLabel();
-            this.tbTimeout = new System.Windows.Forms.ToolStripTextBox();
-            this.dataGridView1 = new System.Windows.Forms.DataGridView();
-            this.toolStrip1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
-            this.SuspendLayout();
+            flpTables = new System.Windows.Forms.FlowLayoutPanel();
+            label1 = new System.Windows.Forms.Label();
+            toolStrip1 = new System.Windows.Forms.ToolStrip();
+            toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
+            tbTop = new System.Windows.Forms.ToolStripTextBox();
+            toolStripLabel2 = new System.Windows.Forms.ToolStripLabel();
+            tbTimeout = new System.Windows.Forms.ToolStripTextBox();
+            dataGridView1 = new System.Windows.Forms.DataGridView();
+            toolStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
+            SuspendLayout();
             // 
             // flpTables
             // 
-            this.flpTables.Dock = System.Windows.Forms.DockStyle.Top;
-            this.flpTables.Location = new System.Drawing.Point(0, 38);
-            this.flpTables.Name = "flpTables";
-            this.flpTables.Size = new System.Drawing.Size(974, 30);
-            this.flpTables.TabIndex = 0;
+            flpTables.Dock = System.Windows.Forms.DockStyle.Top;
+            flpTables.Location = new System.Drawing.Point(0, 71);
+            flpTables.Margin = new System.Windows.Forms.Padding(6, 7, 6, 7);
+            flpTables.Name = "flpTables";
+            flpTables.Size = new System.Drawing.Size(2110, 74);
+            flpTables.TabIndex = 0;
             // 
             // label1
             // 
-            this.label1.AutoSize = true;
-            this.label1.Dock = System.Windows.Forms.DockStyle.Top;
-            this.label1.Location = new System.Drawing.Point(0, 0);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(84, 13);
-            this.label1.TabIndex = 1;
-            this.label1.Text = "Isolation Tables:";
+            label1.AutoSize = true;
+            label1.Dock = System.Windows.Forms.DockStyle.Top;
+            label1.Location = new System.Drawing.Point(0, 0);
+            label1.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            label1.Name = "label1";
+            label1.Size = new System.Drawing.Size(181, 32);
+            label1.TabIndex = 1;
+            label1.Text = "Isolation Tables:";
             // 
             // toolStrip1
             // 
-            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripLabel1,
-            this.tbTop,
-            this.toolStripLabel2,
-            this.tbTimeout});
-            this.toolStrip1.Location = new System.Drawing.Point(0, 13);
-            this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(974, 25);
-            this.toolStrip1.TabIndex = 4;
-            this.toolStrip1.Text = "toolStrip1";
+            toolStrip1.ImageScalingSize = new System.Drawing.Size(32, 32);
+            toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { toolStripLabel1, tbTop, toolStripLabel2, tbTimeout });
+            toolStrip1.Location = new System.Drawing.Point(0, 32);
+            toolStrip1.Name = "toolStrip1";
+            toolStrip1.Padding = new System.Windows.Forms.Padding(0, 0, 4, 0);
+            toolStrip1.Size = new System.Drawing.Size(2110, 39);
+            toolStrip1.TabIndex = 4;
+            toolStrip1.Text = "toolStrip1";
             // 
             // toolStripLabel1
             // 
-            this.toolStripLabel1.Name = "toolStripLabel1";
-            this.toolStripLabel1.Size = new System.Drawing.Size(31, 22);
-            this.toolStripLabel1.Text = "Top:";
+            toolStripLabel1.Name = "toolStripLabel1";
+            toolStripLabel1.Size = new System.Drawing.Size(58, 33);
+            toolStripLabel1.Text = "Top:";
             // 
             // tbTop
             // 
-            this.tbTop.Name = "tbTop";
-            this.tbTop.Size = new System.Drawing.Size(100, 25);
-            this.tbTop.Click += new System.EventHandler(this.tbTop_Click);
+            tbTop.Name = "tbTop";
+            tbTop.Size = new System.Drawing.Size(212, 39);
+            tbTop.Click += tbTop_Click;
             // 
             // toolStripLabel2
             // 
-            this.toolStripLabel2.Name = "toolStripLabel2";
-            this.toolStripLabel2.Size = new System.Drawing.Size(55, 22);
-            this.toolStripLabel2.Text = "Timeout:";
+            toolStripLabel2.Name = "toolStripLabel2";
+            toolStripLabel2.Size = new System.Drawing.Size(108, 33);
+            toolStripLabel2.Text = "Timeout:";
             // 
             // tbTimeout
             // 
-            this.tbTimeout.Name = "tbTimeout";
-            this.tbTimeout.Size = new System.Drawing.Size(100, 25);
-            this.tbTimeout.Click += new System.EventHandler(this.tbTimeout_Click);
+            tbTimeout.Name = "tbTimeout";
+            tbTimeout.Size = new System.Drawing.Size(212, 39);
+            tbTimeout.Click += tbTimeout_Click;
             // 
             // dataGridView1
             // 
-            this.dataGridView1.AllowUserToAddRows = false;
-            this.dataGridView1.AllowUserToDeleteRows = false;
-            this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dataGridView1.Location = new System.Drawing.Point(0, 68);
-            this.dataGridView1.Name = "dataGridView1";
-            this.dataGridView1.ReadOnly = true;
-            this.dataGridView1.Size = new System.Drawing.Size(974, 604);
-            this.dataGridView1.TabIndex = 5;
+            dataGridView1.AllowUserToAddRows = false;
+            dataGridView1.AllowUserToDeleteRows = false;
+            dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridView1.Dock = System.Windows.Forms.DockStyle.Fill;
+            dataGridView1.Location = new System.Drawing.Point(0, 145);
+            dataGridView1.Margin = new System.Windows.Forms.Padding(6, 7, 6, 7);
+            dataGridView1.Name = "dataGridView1";
+            dataGridView1.ReadOnly = true;
+            dataGridView1.RowHeadersWidth = 82;
+            dataGridView1.Size = new System.Drawing.Size(2110, 1509);
+            dataGridView1.TabIndex = 5;
             // 
             // IsolationTableUI
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(974, 672);
-            this.Controls.Add(this.dataGridView1);
-            this.Controls.Add(this.flpTables);
-            this.Controls.Add(this.toolStrip1);
-            this.Controls.Add(this.label1);
-            this.Name = "IsolationTableUI";
-            this.Text = "Isolation Table Reviewer";
-            this.Load += new System.EventHandler(this.IsolationTableUI_Load);
-            this.toolStrip1.ResumeLayout(false);
-            this.toolStrip1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
-            this.ResumeLayout(false);
-            this.PerformLayout();
-
+            AutoScaleDimensions = new System.Drawing.SizeF(13F, 32F);
+            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            ClientSize = new System.Drawing.Size(2110, 1654);
+            Controls.Add(dataGridView1);
+            Controls.Add(flpTables);
+            Controls.Add(toolStrip1);
+            Controls.Add(label1);
+            Margin = new System.Windows.Forms.Padding(6, 7, 6, 7);
+            Name = "IsolationTableUI";
+            Text = "Isolation Table Reviewer";
+            Load += IsolationTableUI_Load;
+            toolStrip1.ResumeLayout(false);
+            toolStrip1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)dataGridView1).EndInit();
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion

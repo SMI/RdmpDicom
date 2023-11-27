@@ -25,7 +25,7 @@ public class UIDMapping
     {
         if (SupportedTags.TryGetValue(tag, out var supportedTag))
             UIDType = supportedTag;
-        else 
+        else
             throw new InvalidOperationException(
                 $"UIDMapping does not handle this tag type: {tag.DictionaryEntry.Keyword}");
     }

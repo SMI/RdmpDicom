@@ -12,9 +12,9 @@ namespace Rdmp.Dicom.Tests.Integration;
 class ExecuteCommandCreateNewImagingDatasetSuiteTests : DatabaseTests
 {
 
-  #region Template
+    #region Template
 
-  const string TemplateYaml = @"
+    const string TemplateYaml = @"
 #Last Modified: 2020-04-07
 Tables:
 - TableName: StudyTable
@@ -140,38 +140,41 @@ Tables:
   - ColumnName: ScanOptions
     AllowNulls: true
 ";
-  #endregion
+    #endregion
 
-  [TestCase(DatabaseType.MicrosoftSQLServer)]
-  [TestCase(DatabaseType.MySql)]
-  public void TestSuiteCreation(DatabaseType dbType)
-  {
-    var db = GetCleanedServer(dbType);
+    [TestCase(DatabaseType.MicrosoftSQLServer)]
+    [TestCase(DatabaseType.MySql)]
+    public void TestSuiteCreation(DatabaseType dbType)
+    {
+        var db = GetCleanedServer(dbType);
 
-    var template = Path.Combine(TestContext.CurrentContext.WorkDirectory,"CT.it");
-    File.WriteAllText(template,TemplateYaml);
+        var template = Path.Combine(TestContext.CurrentContext.WorkDirectory, "CT.it");
+        File.WriteAllText(template, TemplateYaml);
 
-    var cmd = new ExecuteCommandCreateNewImagingDatasetSuite(RepositoryLocator,db,
-      new(TestContext.CurrentContext.WorkDirectory),
-      typeof(DicomFileCollectionSource),
-      "CT_",
-      new(template),
-      persistentRaw: false,
-      createLoad: true);
+        var cmd = new ExecuteCommandCreateNewImagingDatasetSuite(RepositoryLocator, db,
+          new(TestContext.CurrentContext.WorkDirectory),
+          typeof(DicomFileCollectionSource),
+          "CT_",
+          new(template),
+          persistentRaw: false,
+          createLoad: true);
 
-    Assert.IsFalse(cmd.IsImpossible);
+        Assert.That(cmd.IsImpossible, Is.False);
 
-    cmd.Execute();
+        cmd.Execute();
 
-    Assert.IsNotNull(cmd.NewLoadMetadata);
-            
-    var pipelineCreated = RepositoryLocator.CatalogueRepository.GetAllObjects<Pipeline>().OrderByDescending(p=>p.ID).First();
-            
-    Assert.AreEqual(typeof(DicomFileCollectionSource),pipelineCreated.Source.GetClassAsSystemType());
-            
-    var argFieldMap = pipelineCreated.Source.GetAllArguments().Single(a=>a.Name.Equals(nameof(DicomSource.UseAllTableInfoInLoadAsFieldMap)));
-            
-    Assert.IsNotNull(argFieldMap);
-    Assert.AreEqual(argFieldMap.GetValueAsSystemType(),cmd.NewLoadMetadata);
-  }
+        Assert.That(cmd.NewLoadMetadata, Is.Not.Null);
+
+        var pipelineCreated = RepositoryLocator.CatalogueRepository.GetAllObjects<Pipeline>().OrderByDescending(p => p.ID).First();
+
+        Assert.That(pipelineCreated.Source.GetClassAsSystemType(), Is.EqualTo(typeof(DicomFileCollectionSource)));
+
+        var argFieldMap = pipelineCreated.Source.GetAllArguments().Single(a => a.Name.Equals(nameof(DicomSource.UseAllTableInfoInLoadAsFieldMap)));
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(argFieldMap, Is.Not.Null);
+            Assert.That(cmd.NewLoadMetadata, Is.EqualTo(argFieldMap.GetValueAsSystemType()));
+        });
+    }
 }

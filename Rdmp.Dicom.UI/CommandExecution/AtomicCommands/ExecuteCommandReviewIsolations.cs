@@ -13,7 +13,7 @@ class ExecuteCommandReviewIsolations: BasicUICommandExecution
     {
         _reviewer = new(processTask);
 
-        if (_reviewer.Error != null) 
+        if (_reviewer.Error != null)
             SetImpossible(_reviewer.Error);
 
     }

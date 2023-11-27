@@ -16,16 +16,16 @@ public class FlatFileToLoadDicomFileWorklist : IDicomFileWorklist
     public FlatFileToLoadDicomFileWorklist(FlatFileToLoad file)
     {
         _file = file;
-            
+
         if(file.File is not { Extension: ".txt" })
             return;
-                
+
         //input is a textual list of files/zips
         _lines = File.ReadAllLines(file.File.FullName).Where(l => !string.IsNullOrWhiteSpace(l)).ToArray();
         _linesCurrent = 0;
 
     }
-        
+
     public bool GetNextFileOrDirectoryToProcess(out DirectoryInfo directory, out AmbiguousFilePath file)
     {
         file = null;
@@ -33,7 +33,7 @@ public class FlatFileToLoadDicomFileWorklist : IDicomFileWorklist
 
         if (_dataExhausted)
             return false;
-            
+
         //input is a single dicom file/zip
         if(_lines == null)
         {
@@ -54,7 +54,7 @@ public class FlatFileToLoadDicomFileWorklist : IDicomFileWorklist
                 file = new(new FileInfo(line.Trim()).FullName);
                 return true;
             }
-                    
+
             if (Directory.Exists(line.Trim()))
             {
                 _linesCurrent++;

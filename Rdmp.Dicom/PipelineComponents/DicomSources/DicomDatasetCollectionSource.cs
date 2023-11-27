@@ -28,7 +28,7 @@ public class DicomDatasetCollectionSource : DicomSource, IPipelineRequirement<ID
         base.MarkCorrupt(ds);
         _datasetListWorklist.MarkCorrupt(ds);
     }
-        
+
     public override DataTable GetChunk(IDataLoadEventListener listener, GracefulCancellationToken cancellationToken)
     {
         if(_datasetListWorklist == null)
@@ -49,7 +49,7 @@ public class DicomDatasetCollectionSource : DicomSource, IPipelineRequirement<ID
                 ProcessDataset(filename, ds, dt, listener, otherValuesToStoreInRow);
                 currentBatch--;
             }
-            
+
             sw.Stop();
             listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information,
                 $"GetChunk cumulative total time is {sw.ElapsedMilliseconds}ms"));

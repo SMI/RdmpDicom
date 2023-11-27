@@ -71,7 +71,7 @@ public class SemEHRApiCaller : PluginCohortCompiler
             if (semEHRResponse.success)
             {
                 SubmitIdentifierList(config.ReturnField,
-                    semEHRResponse.results.Count == 0 ? new string[] { } : semEHRResponse.results.ToArray(), ac,
+                    semEHRResponse.results.Count == 0 ? Array.Empty<string>() : semEHRResponse.results.ToArray(), ac,
                     cache);
 
                 /*If we can cope with the return field with multiple types this will handle that
@@ -100,7 +100,7 @@ public class SemEHRApiCaller : PluginCohortCompiler
                 //If we failed, get the failing error message
                 throw new($"The SemEHR API has failed: {semEHRResponse.message}");
             }
-               
+
         }
         else
         {

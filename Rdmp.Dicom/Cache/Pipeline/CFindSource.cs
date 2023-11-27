@@ -48,7 +48,7 @@ public class CFindSource : SMICacheSource
         //temp dir
         var cacheDir = new LoadDirectory(Request.CacheProgress.LoadProgress.LoadMetadata.LocationOfFlatFiles).Cache;
         var cacheLayout = new SMICacheLayout(cacheDir, new(Modality));
-            
+
         Chunk = new(Request)
         {
             FetchDate = dateFrom,
@@ -129,7 +129,7 @@ public class CFindSource : SMICacheSource
         }
         else
         {
-            writer.WriteField(DicomTypeTranslater.Flatten(val));                
+            writer.WriteField(DicomTypeTranslater.Flatten(val));
         }
     }
 }

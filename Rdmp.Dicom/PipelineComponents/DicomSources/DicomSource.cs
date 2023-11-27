@@ -55,7 +55,7 @@ public abstract class DicomSource : IPluginDataFlowSource<DataTable>
         //if it has a trailing slash (but isn't just '/') then trim the end
         if(value != null)
             return value.Length != 1 ? value.TrimEnd('\\', '/') : value;
-            
+
         return null;
     }
 
@@ -93,7 +93,7 @@ public abstract class DicomSource : IPluginDataFlowSource<DataTable>
     {
         if (FieldMapTableIfAny != null && TagWhitelist != null)
             notifier.OnCheckPerformed(new("Cannot specify both a FieldMapTableIfAny and a TagWhitelist", CheckResult.Fail));
-                        
+
         try
         {
             LoadElevationRequestsFile();
@@ -147,7 +147,7 @@ public abstract class DicomSource : IPluginDataFlowSource<DataTable>
                     value = DicomTypeTranslater.Flatten(DicomTypeTranslaterReader.GetCSharpValue(ds, item));
                     break;
                 case InvalidDataHandling.MarkCorrupt:
-                        
+
                     try
                     {
                         //try to enforce types
@@ -156,10 +156,10 @@ public abstract class DicomSource : IPluginDataFlowSource<DataTable>
                     catch (Exception ex)
                     {
                         //something went wrong pulling out the value
-                            
+
                         //mark it as corrupt
                         MarkCorrupt(ds);
-                            
+
                         //but make sure to warn people listening
                         listener.OnNotify(this, new(ProgressEventType.Warning,
                             $"Could not GetCSharpValue for DicomItem {item.Tag}({entry.Keyword}) for {GetProblemFileDescription(filename, otherValuesToStoreInRow)}", ex));
@@ -302,14 +302,14 @@ public abstract class DicomSource : IPluginDataFlowSource<DataTable>
     public bool ShouldSkip(DataTable dt, DicomTag tag)
     {
 
-        //if there is a whitelist 
+        //if there is a whitelist
         if (TagWhitelist != null)
             if (!TagWhitelist.IsMatch(tag.DictionaryEntry.Keyword)) //and the current header isn't matched by it
                 return true;
 
         //if there is a blacklist
         if (TagBlacklist != null)
-            if (TagBlacklist.IsMatch(tag.DictionaryEntry.Keyword)) //and the current header matches the blacklist 
+            if (TagBlacklist.IsMatch(tag.DictionaryEntry.Keyword)) //and the current header matches the blacklist
                 return true; //skip it
 
         //if there is an explict mapping to follow
@@ -398,7 +398,7 @@ public abstract class DicomSource : IPluginDataFlowSource<DataTable>
 
         //if tag elevation is specified in a file
         return TagElevationConfigurationFile != null ? new TagElevationRequestCollection(File.ReadAllText(TagElevationConfigurationFile.FullName)) : null;
-            
+
         //there is no tag elevation
     }
 

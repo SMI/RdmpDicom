@@ -13,7 +13,7 @@ public partial class TagColumnAdderUI : Form
     {
         _tableInfo = tableInfo;
         InitializeComponent();
-            
+
         cbxTag.AutoCompleteSource = AutoCompleteSource.ListItems;
         cbxTag.DataSource = TagColumnAdder.GetAvailableTags();
     }

@@ -35,7 +35,7 @@ using IContainer = Rdmp.Core.Curation.Data.IContainer;
 
 namespace Rdmp.Dicom.Tests.Integration;
 
-public class FoDicomAnonymiserTests:DatabaseTests
+public class FoDicomAnonymiserTests : DatabaseTests
 {
     [OneTimeSetUp]
     public void Init()
@@ -49,7 +49,7 @@ public class FoDicomAnonymiserTests:DatabaseTests
         TidyUpImages();
     }
 
-    private void TidyUpImages()
+    private static void TidyUpImages()
     {
         var imagesDir = new DirectoryInfo(Path.Combine(TestContext.CurrentContext.WorkDirectory, "Images"));
         if (imagesDir.Exists)
@@ -59,24 +59,24 @@ public class FoDicomAnonymiserTests:DatabaseTests
     // The following commented tests will fail due to underlying system limits on paths
     // there is no reliable method to get maximum path length (apparently?)
     //        [TestCase(typeof(PutInUidStudySeriesFolders))]
-    [TestCase(typeof(PutInUidSeriesFolders),true)]
-    [TestCase(typeof(PutInUidSeriesFolders),false)]
-    [TestCase(typeof(PutInReleaseIdentifierSubfolders),true)]
-    [TestCase(typeof(PutInReleaseIdentifierSubfolders),false)]
-    [TestCase(typeof(PutInRoot),true)]
-    [TestCase(typeof(PutInRoot),true)]
-    public void TestAnonymisingDataset(Type putterType,bool keepDates)
+    [TestCase(typeof(PutInUidSeriesFolders), true)]
+    [TestCase(typeof(PutInUidSeriesFolders), false)]
+    [TestCase(typeof(PutInReleaseIdentifierSubfolders), true)]
+    [TestCase(typeof(PutInReleaseIdentifierSubfolders), false)]
+    [TestCase(typeof(PutInRoot), true)]
+    [TestCase(typeof(PutInRoot), true)]
+    public void TestAnonymisingDataset(Type putterType, bool keepDates)
     {
         var uidMapDb = GetCleanedServer(DatabaseType.MicrosoftSQLServer, "TESTUIDMapp");
 
         MasterDatabaseScriptExecutor e = new(uidMapDb);
         var patcher = new SMIDatabasePatcher();
-        e.CreateAndPatchDatabase(patcher,new AcceptAllCheckNotifier());
+        e.CreateAndPatchDatabase(patcher, new AcceptAllCheckNotifier());
 
         var eds = new ExternalDatabaseServer(CatalogueRepository, "eds", patcher);
         eds.SetProperties(uidMapDb);
-            
-        Dictionary<DicomTag,string> thingThatShouldDisappear = new()
+
+        Dictionary<DicomTag, string> thingThatShouldDisappear = new()
         {
             //Things we would want to disappear
             {DicomTag.PatientName,"Moscow"},
@@ -87,12 +87,12 @@ public class FoDicomAnonymiserTests:DatabaseTests
             {DicomTag.StudyDate,"20020101"}
         };
 
-        Dictionary<DicomTag,string> thingsThatShouldRemain = new()
+        Dictionary<DicomTag, string> thingsThatShouldRemain = new()
         {
             //Things we would want to remain
             //{DicomTag.SmokingStatus,"YES"},
         };
-            
+
         var dicom = new DicomDataset
         {
             {DicomTag.SOPInstanceUID, "123.4.4"},
@@ -103,11 +103,11 @@ public class FoDicomAnonymiserTests:DatabaseTests
 
         foreach (var (key, value) in thingThatShouldDisappear)
             dicom.AddOrUpdate(key, value);
-            
+
         foreach (var (key, value) in thingsThatShouldRemain)
             dicom.AddOrUpdate(key, value);
 
-        dicom.AddOrUpdate(DicomTag.StudyDate, new DateTime(2002 , 01 , 01));
+        dicom.AddOrUpdate(DicomTag.StudyDate, new DateTime(2002, 01, 01));
 
         var fi = new FileInfo(Path.Combine(TestContext.CurrentContext.WorkDirectory, "madness.dcm"));
 
@@ -129,7 +129,7 @@ public class FoDicomAnonymiserTests:DatabaseTests
         IExtractCommand cmd = MockExtractionCommand();
 
         //give the mock to anonymiser
-        anonymiser.PreInitialize(cmd,ThrowImmediatelyDataLoadEventListener.Quiet);
+        anonymiser.PreInitialize(cmd, ThrowImmediatelyDataLoadEventListener.Quiet);
 
         anonymiser.PutterType = putterType;
         anonymiser.ArchiveRootIfAny = TestContext.CurrentContext.WorkDirectory;
@@ -138,24 +138,27 @@ public class FoDicomAnonymiserTests:DatabaseTests
         anonymiser.RetainDates = keepDates;
         anonymiser.DeleteTags = "AlgorithmName";
 
-        using var anoDt = anonymiser.ProcessPipelineData(dt,ThrowImmediatelyDataLoadEventListener.Quiet,new());
+        using var anoDt = anonymiser.ProcessPipelineData(dt, ThrowImmediatelyDataLoadEventListener.Quiet, new());
 
-        Assert.AreEqual(1,anoDt.Rows.Count);
-            
+        Assert.That(anoDt.Rows, Has.Count.EqualTo(1));
+
         //Data table should contain new UIDs
-        Assert.AreNotEqual("123.4.4", anoDt.Rows[0]["SOPInstanceUID"]);
-        Assert.AreEqual(56, anoDt.Rows[0]["SOPInstanceUID"].ToString().Length);
+        Assert.That(anoDt.Rows[0]["SOPInstanceUID"], Is.Not.EqualTo("123.4.4"));
+        Assert.Multiple(() =>
+        {
+            Assert.That(anoDt.Rows[0]["SOPInstanceUID"].ToString(), Has.Length.EqualTo(56));
 
-        Assert.AreNotEqual("123.4.6", anoDt.Rows[0]["StudyInstanceUID"]);
-        Assert.AreEqual(56, anoDt.Rows[0]["StudyInstanceUID"].ToString().Length);
+            Assert.That(anoDt.Rows[0]["StudyInstanceUID"], Is.Not.EqualTo("123.4.6"));
+        });
+        Assert.That(anoDt.Rows[0]["StudyInstanceUID"].ToString(), Has.Length.EqualTo(56));
 
         FileInfo expectedFile = null;
-        if(putterType == typeof(PutInRoot))
-            expectedFile = new(Path.Combine(TestContext.CurrentContext.WorkDirectory,"Images",
+        if (putterType == typeof(PutInRoot))
+            expectedFile = new(Path.Combine(TestContext.CurrentContext.WorkDirectory, "Images",
                 $"{anoDt.Rows[0]["SOPInstanceUID"]}.dcm"));
 
         if (putterType == typeof(PutInReleaseIdentifierSubfolders))
-            expectedFile = new(Path.Combine(TestContext.CurrentContext.WorkDirectory, "Images","Hank",
+            expectedFile = new(Path.Combine(TestContext.CurrentContext.WorkDirectory, "Images", "Hank",
                 $"{anoDt.Rows[0]["SOPInstanceUID"]}.dcm"));
 
         if (putterType == typeof(PutInUidSeriesFolders))
@@ -166,46 +169,52 @@ public class FoDicomAnonymiserTests:DatabaseTests
             expectedFile = new(Path.Combine(TestContext.CurrentContext.WorkDirectory, "Images", "Hank", anoDt.Rows[0]["StudyInstanceUID"].ToString(), anoDt.Rows[0]["SeriesInstanceUID"].ToString(),
                 $"{anoDt.Rows[0]["SOPInstanceUID"]}.dcm"));
 
-        Assert.IsTrue(expectedFile?.Exists);
+        Assert.That(expectedFile?.Exists, Is.EqualTo(true));
         var anoDicom = DicomFile.Open(expectedFile.FullName);
-            
-        Assert.AreEqual("Hank",anoDicom.Dataset.GetValue<string>(DicomTag.PatientID,0));
 
-        Assert.AreEqual(anoDt.Rows[0]["SOPInstanceUID"], anoDicom.Dataset.GetValue<string>(DicomTag.SOPInstanceUID, 0));
-        Assert.AreEqual(56, anoDicom.Dataset.GetValue<string>(DicomTag.SeriesInstanceUID, 0).Length);
+        Assert.Multiple(() =>
+        {
+            Assert.That(anoDicom.Dataset.GetValue<string>(DicomTag.PatientID, 0), Is.EqualTo("Hank"));
 
-        Assert.AreEqual(anoDt.Rows[0]["StudyInstanceUID"], anoDicom.Dataset.GetValue<string>(DicomTag.StudyInstanceUID, 0));
+            Assert.That(anoDicom.Dataset.GetValue<string>(DicomTag.SOPInstanceUID, 0), Is.EqualTo(anoDt.Rows[0]["SOPInstanceUID"]));
+            Assert.That(anoDicom.Dataset.GetValue<string>(DicomTag.SeriesInstanceUID, 0), Has.Length.EqualTo(56));
+
+            Assert.That(anoDicom.Dataset.GetValue<string>(DicomTag.StudyInstanceUID, 0), Is.EqualTo(anoDt.Rows[0]["StudyInstanceUID"]));
+        });
 
 
         foreach (var (key, _) in thingThatShouldDisappear)
         {
             //if it chopped out the entire tag
-            if(!anoDicom.Dataset.Contains(key))
+            if (!anoDicom.Dataset.Contains(key))
                 continue;
-                
+
             if (anoDicom.Dataset.GetValueCount(key) == 0)
                 continue;
-                
+
             var value = anoDicom.Dataset.GetSingleValue<string>(key);
             switch (value)
             {
                 //allowed values
-                case "ANONYMOUS":continue;
+                case "ANONYMOUS": continue;
 
                 //anonymous date
-                case "00010101":  Assert.IsFalse(keepDates);
+                case "00010101":
+                    Assert.That(keepDates, Is.False);
                     continue;
-                case "20020101":    Assert.IsTrue(keepDates);
+                case "20020101":
+                    Assert.That(keepDates);
                     continue;
 
 
-                default: Assert.Fail($"Unexpected value for {key}:{value}");
+                default:
+                    Assert.Fail($"Unexpected value for {key}:{value}");
                     break;
             }
         }
 
         foreach (var (key, value) in thingsThatShouldRemain)
-            Assert.AreEqual(value, anoDicom.Dataset.GetValue<string>(key, 0));
+            Assert.That(anoDicom.Dataset.GetValue<string>(key, 0), Is.EqualTo(value));
     }
 
     [TestCase()]
@@ -284,27 +293,33 @@ public class FoDicomAnonymiserTests:DatabaseTests
 
         using var anoDt = anonymiser.ProcessPipelineData(dt, ThrowImmediatelyDataLoadEventListener.Quiet, new());
 
-        Assert.AreEqual(1, anoDt.Rows.Count);
+        Assert.That(anoDt.Rows, Has.Count.EqualTo(1));
 
         //Data table should contain new UIDs
-        Assert.AreNotEqual("123.4.4", anoDt.Rows[0]["SOPInstanceUID"]);
-        Assert.AreEqual(56, anoDt.Rows[0]["SOPInstanceUID"].ToString()?.Length);
+        Assert.That(anoDt.Rows[0]["SOPInstanceUID"], Is.Not.EqualTo("123.4.4"));
+        Assert.Multiple(() =>
+        {
+            Assert.That(anoDt.Rows[0]["SOPInstanceUID"].ToString()?.Length, Is.EqualTo(56));
 
-        Assert.AreNotEqual("123.4.6", anoDt.Rows[0]["StudyInstanceUID"]);
-        Assert.AreEqual(56, anoDt.Rows[0]["StudyInstanceUID"].ToString()?.Length);
-            
+            Assert.That(anoDt.Rows[0]["StudyInstanceUID"], Is.Not.EqualTo("123.4.6"));
+        });
+        Assert.That(anoDt.Rows[0]["StudyInstanceUID"].ToString()?.Length, Is.EqualTo(56));
+
         var expectedFile = new FileInfo(Path.Combine(TestContext.CurrentContext.WorkDirectory, "Images",
             $"{anoDt.Rows[0]["SOPInstanceUID"]}.dcm"));
 
-        Assert.IsTrue(expectedFile.Exists);
+        Assert.That(expectedFile.Exists);
         var anoDicom = DicomFile.Open(expectedFile.FullName);
 
-        Assert.AreEqual("Hank", anoDicom.Dataset.GetValue<string>(DicomTag.PatientID, 0));
+        Assert.Multiple(() =>
+        {
+            Assert.That(anoDicom.Dataset.GetValue<string>(DicomTag.PatientID, 0), Is.EqualTo("Hank"));
 
-        Assert.AreEqual(anoDt.Rows[0]["SOPInstanceUID"], anoDicom.Dataset.GetValue<string>(DicomTag.SOPInstanceUID, 0));
-        Assert.AreEqual(56, anoDicom.Dataset.GetValue<string>(DicomTag.SeriesInstanceUID, 0).Length);
+            Assert.That(anoDicom.Dataset.GetValue<string>(DicomTag.SOPInstanceUID, 0), Is.EqualTo(anoDt.Rows[0]["SOPInstanceUID"]));
+            Assert.That(anoDicom.Dataset.GetValue<string>(DicomTag.SeriesInstanceUID, 0), Has.Length.EqualTo(56));
 
-        Assert.AreEqual(anoDt.Rows[0]["StudyInstanceUID"], anoDicom.Dataset.GetValue<string>(DicomTag.StudyInstanceUID, 0));
+            Assert.That(anoDicom.Dataset.GetValue<string>(DicomTag.StudyInstanceUID, 0), Is.EqualTo(anoDt.Rows[0]["StudyInstanceUID"]));
+        });
 
 
         foreach (var (key, _) in thingThatShouldDisappear)
@@ -329,7 +344,7 @@ public class FoDicomAnonymiserTests:DatabaseTests
         }
 
         foreach (var (key, value) in thingsThatShouldRemain)
-            Assert.AreEqual(value, anoDicom.Dataset.GetValue<string>(key, 0),$"Expected tag {key} to remain");
+            Assert.That(anoDicom.Dataset.GetValue<string>(key, 0), Is.EqualTo(value), $"Expected tag {key} to remain");
     }
 
     // The following commented tests will fail due to underlying system limits on paths
@@ -343,7 +358,7 @@ public class FoDicomAnonymiserTests:DatabaseTests
         var outputDirectory = new DirectoryInfo(Path.Combine(TestContext.CurrentContext.WorkDirectory, "Images"));
         const string releaseIdentifier = "Hank";
         var putter = (IPutDicomFilesInExtractionDirectories)ObjectConstructor.Construct(putterType);
-            
+
         var dicomDataset = new DicomDataset
         {
             {DicomTag.SOPInstanceUID, "123.4.4"},
@@ -371,23 +386,23 @@ public class FoDicomAnonymiserTests:DatabaseTests
 
         if (putterType == typeof(PutInUidStudySeriesFolders))
             expectedFile = new(Path.Combine(outputDirectory.FullName, releaseIdentifier,
-                dicomDataset.GetValue<string>(DicomTag.StudyInstanceUID, 0), 
+                dicomDataset.GetValue<string>(DicomTag.StudyInstanceUID, 0),
                 dicomDataset.GetValue<string>(DicomTag.SeriesInstanceUID, 0),
                 $"{dicomDataset.GetValue<string>(DicomTag.SOPInstanceUID, 0)}.dcm"));
-            
 
-        Assert.IsTrue(expectedFile?.Exists);
+
+        Assert.That(expectedFile?.Exists, Is.EqualTo(true));
 
     }
 
-        
+
     [Test]
     public void TestUIDTableExists()
     {
         var db = GetCleanedServer(DatabaseType.MicrosoftSQLServer);
 
         // set it to an empty database
-        var eds = new ExternalDatabaseServer(CatalogueRepository,"UID server",null);
+        var eds = new ExternalDatabaseServer(CatalogueRepository, "UID server", null);
         eds.SetProperties(db);
 
         var anon = new FoDicomAnonymiser
@@ -395,9 +410,9 @@ public class FoDicomAnonymiserTests:DatabaseTests
             UIDMappingServer = eds
         };
 
-        var ex = Assert.Throws<Exception>(()=>anon.Check(ThrowImmediatelyCheckNotifier.QuietPicky));
+        var ex = Assert.Throws<Exception>(() => anon.Check(ThrowImmediatelyCheckNotifier.QuietPicky));
 
-        StringAssert.AreEqualIgnoringCase("UIDMappingServer is not set up yet", ex?.Message);
+        Assert.That(ex?.Message, Is.EqualTo("UIDMappingServer is not set up yet").IgnoreCase);
 
         anon.Check(new AcceptAllCheckNotifier());
 
@@ -490,20 +505,23 @@ public class FoDicomAnonymiserTests:DatabaseTests
 
             using var anoDt = anonymiser.ProcessPipelineData(dt, ThrowImmediatelyDataLoadEventListener.Quiet, new());
 
-            Assert.AreEqual(1, anoDt.Rows.Count);
+            Assert.That(anoDt.Rows, Has.Count.EqualTo(1));
 
             //Data table should contain new UIDs
-            Assert.AreNotEqual("123.4.4", anoDt.Rows[0]["SOPInstanceUID"]);
-            Assert.AreEqual(56, anoDt.Rows[0]["SOPInstanceUID"].ToString()?.Length);
+            Assert.That(anoDt.Rows[0]["SOPInstanceUID"], Is.Not.EqualTo("123.4.4"));
+            Assert.Multiple(() =>
+            {
+                Assert.That(anoDt.Rows[0]["SOPInstanceUID"].ToString()?.Length, Is.EqualTo(56));
 
-            Assert.AreNotEqual("123.4.6", anoDt.Rows[0]["StudyInstanceUID"]);
-            Assert.AreEqual(56, anoDt.Rows[0]["StudyInstanceUID"].ToString()?.Length);
+                Assert.That(anoDt.Rows[0]["StudyInstanceUID"], Is.Not.EqualTo("123.4.6"));
+            });
+            Assert.That(anoDt.Rows[0]["StudyInstanceUID"].ToString()?.Length, Is.EqualTo(56));
 
             // second time
-            if(dtFirstTime != null)
+            if (dtFirstTime != null)
             {
                 // rows should be the same whether or not we are doing Metadata only extraction
-                foreach(DataRow row in dtFirstTime.Rows)
+                foreach (DataRow row in dtFirstTime.Rows)
                 {
                     AssertContains(dt, row.ItemArray);
                 }
@@ -513,17 +531,17 @@ public class FoDicomAnonymiserTests:DatabaseTests
         }
     }
 
-    private void AssertContains(DataTable dt, params object[] rowValues)
+    private static void AssertContains(DataTable dt, params object[] rowValues)
     {
-        Assert.IsTrue(dt.Rows.Cast<DataRow>().Any(r =>
+        Assert.That(dt.Rows.Cast<DataRow>().Any(r =>
                 rowValues.All(v => r.ItemArray.Contains(v))), "Did not find expected row " + string.Join(",", rowValues)
             + Environment.NewLine + "Rows seen were:" +
             string.Join(Environment.NewLine,
                 dt.Rows.Cast<DataRow>().Select(r => string.Join(",", r.ItemArray))));
     }
-    private IExtractDatasetCommand MockExtractionCommand()
+    private static IExtractDatasetCommand MockExtractionCommand()
     {
-        return new DummyExtractDatasetCommand(TestContext.CurrentContext.WorkDirectory,100);
+        return new DummyExtractDatasetCommand(TestContext.CurrentContext.WorkDirectory, 100);
     }
 
 }
@@ -639,13 +657,13 @@ internal class DummyExtractionConfiguration : IExtractionConfiguration
     /// <inheritdoc />
     public IHasDependencies[] GetObjectsThisDependsOn()
     {
-        return new IHasDependencies[] { };
+        return Array.Empty<IHasDependencies>();
     }
 
     /// <inheritdoc />
     public IHasDependencies[] GetObjectsDependingOnThis()
     {
-        return new IHasDependencies[] { };
+        return Array.Empty<IHasDependencies>();
     }
 
     /// <inheritdoc />
@@ -743,7 +761,7 @@ internal class DummyExtractionConfiguration : IExtractionConfiguration
     /// <inheritdoc />
     public ExtractableColumn[] GetAllExtractableColumnsFor(IExtractableDataSet dataset)
     {
-        return new ExtractableColumn[] { };
+        return Array.Empty<ExtractableColumn>();
     }
 
     /// <inheritdoc />
@@ -752,7 +770,7 @@ internal class DummyExtractionConfiguration : IExtractionConfiguration
     /// <inheritdoc />
     public IExtractableDataSet[] GetAllExtractableDataSets()
     {
-        return new IExtractableDataSet[] { };
+        return Array.Empty<IExtractableDataSet>();
     }
 
     /// <inheritdoc />
@@ -771,7 +789,7 @@ internal class DummyExtractionConfiguration : IExtractionConfiguration
     /// <inheritdoc />
     public IMapsDirectlyToDatabaseTable[] GetGlobals()
     {
-        return new IMapsDirectlyToDatabaseTable[] { };
+        return Array.Empty<IMapsDirectlyToDatabaseTable>();
     }
 
     /// <inheritdoc />
@@ -786,13 +804,13 @@ internal class DummyProject : IProject
     /// <inheritdoc />
     public IHasDependencies[] GetObjectsThisDependsOn()
     {
-        return new IHasDependencies[] { };
+        return Array.Empty<IHasDependencies>();
     }
 
     /// <inheritdoc />
     public IHasDependencies[] GetObjectsDependingOnThis()
     {
-        return new IHasDependencies[] { };
+        return Array.Empty<IHasDependencies>();
     }
 
     /// <inheritdoc />
@@ -860,19 +878,19 @@ internal class DummyProject : IProject
     /// <inheritdoc />
     public ICatalogue[] GetAllProjectCatalogues()
     {
-        return new ICatalogue[] { };
+        return Array.Empty<ICatalogue>();
     }
 
     /// <inheritdoc />
     public ExtractionInformation[] GetAllProjectCatalogueColumns(ExtractionCategory any)
     {
-        return new ExtractionInformation[] { };
+        return Array.Empty<ExtractionInformation>();
     }
 
     /// <inheritdoc />
     public ExtractionInformation[] GetAllProjectCatalogueColumns(ICoreChildProvider childProvider, ExtractionCategory any)
     {
-        return new ExtractionInformation[] { };
+        return Array.Empty<ExtractionInformation>();
     }
 }
 internal class DummyExtractDatasetCommand : IExtractDatasetCommand
@@ -884,7 +902,7 @@ internal class DummyExtractDatasetCommand : IExtractDatasetCommand
         _dir = new DirectoryInfo(dir);
         Configuration = new DummyExtractionConfiguration()
         {
-            Project = new DummyProject {ProjectNumber = i}
+            Project = new DummyProject { ProjectNumber = i }
         };
         QueryBuilder = new DummySqlQueryBuilder()
         {

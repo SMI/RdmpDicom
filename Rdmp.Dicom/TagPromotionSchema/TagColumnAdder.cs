@@ -50,7 +50,7 @@ public class TagColumnAdder: ICheckable
             Check(_notifierForExecute);
 
         var db = GetDatabase();
-            
+
         using (var con = db.Server.GetConnection())
         {
             con.Open();

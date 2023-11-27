@@ -38,14 +38,15 @@ public partial class IsolationTableUI : Form
     {
         dataGridView1.DataSource = _currentDataTable = _reviewer.GetDifferences(kvp, out _currentDiffs);
     }
-        
+
     private void DataGridView1OnCellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
     {
         var diff = _currentDiffs?.FirstOrDefault(d => d.RowIndex == e.RowIndex);
 
         if (diff == null || diff.IsMaster || _currentDataTable == null) return;
+
         var colName = _currentDataTable.Columns[e.ColumnIndex].ColumnName;
-                
+
         if(diff.ConflictingColumns.Contains(colName))
             e.CellStyle.BackColor = Color.LightCyan;
     }
@@ -66,7 +67,7 @@ public partial class IsolationTableUI : Form
 
     private void tbTop_Click(object sender, EventArgs e)
     {
-            
+
         tbTop.ForeColor = Color.Black;
 
         try

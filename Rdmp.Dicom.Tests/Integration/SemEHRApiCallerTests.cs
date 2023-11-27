@@ -17,8 +17,7 @@ namespace Rdmp.Dicom.Tests.Integration;
 
 public class SemEHRApiCallerTests : DatabaseTests
 {
-
-    public CachedAggregateConfigurationResultsManager SetupCache(DatabaseType dbType, out DiscoveredDatabase cacheDb)
+    private CachedAggregateConfigurationResultsManager SetupCache(DatabaseType dbType, out DiscoveredDatabase cacheDb)
     {
         cacheDb = GetCleanedServer(dbType);
         var creator = new MasterDatabaseScriptExecutor(cacheDb);
@@ -29,7 +28,7 @@ public class SemEHRApiCallerTests : DatabaseTests
         var eds = new ExternalDatabaseServer(CatalogueRepository, "cache", patcher);
         eds.SetProperties(cacheDb);
 
-        return new(eds);
+        return new CachedAggregateConfigurationResultsManager(eds);
     }
 
 
@@ -43,9 +42,9 @@ public class SemEHRApiCallerTests : DatabaseTests
         var cata = new Catalogue(CatalogueRepository, $"{PluginCohortCompiler.ApiPrefix}cata");
         var cic = new CohortIdentificationConfiguration(CatalogueRepository, "my cic");
         cic.CreateRootContainerIfNotExists();
-            
+
         var ac = new AggregateConfiguration(CatalogueRepository, cata, "blah");
-        cic.RootCohortAggregateContainer.AddChild(ac,0);
+        cic.RootCohortAggregateContainer.AddChild(ac, 0);
 
         var semEHRConfiguration = new SemEHRConfiguration()
         {
@@ -58,9 +57,9 @@ public class SemEHRApiCallerTests : DatabaseTests
 
         var resultTable = cacheMgr.GetLatestResultsTableUnsafe(ac, AggregateOperation.IndexedExtractionIdentifierList);
 
-        Assert.IsNotNull(resultTable);
+        Assert.That(resultTable, Is.Not.Null);
 
         var tbl = cacheDb.ExpectTable(resultTable.GetRuntimeName());
-        Assert.AreEqual(75, tbl.GetDataTable().Rows.Count);
+        Assert.That(tbl.GetDataTable().Rows, Has.Count.EqualTo(75));
     }
 }

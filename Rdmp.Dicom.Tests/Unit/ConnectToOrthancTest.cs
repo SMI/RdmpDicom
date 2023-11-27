@@ -16,15 +16,16 @@ internal class PublicPacsTest
         var success = false;
         var client = DicomClientFactory.Create(host, port, false, LocalAetTitle, RemoteAetTitle);
         client.AddRequestAsync(new DicomCEchoRequest
+        {
+            OnResponseReceived = (req, res) =>
             {
-                OnResponseReceived = (req,res) => {
-                    success = true;
-                }
+                success = true;
             }
+        }
         ).Wait();
         client.SendAsync().Wait();
-        Assert.True(success,$"No echo response from PACS on {host}:{port}");
+        Assert.That(success, $"No echo response from PACS on {host}:{port}");
     }
 
-        
+
 }

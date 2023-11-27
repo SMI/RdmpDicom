@@ -45,9 +45,9 @@ class IsolationReviewTests : DatabaseTests
         // 'pk' 3 differs on col B
         dt.Rows.Add(3, 1, 1);
         dt.Rows.Add(3, 2, 1);
-            
-            
-        db.CreateTable("mytbl_Isolation",dt);
+
+
+        db.CreateTable("mytbl_Isolation", dt);
 
         var lmd = new LoadMetadata(CatalogueRepository, "ExampleLoad");
         var pt = new ProcessTask(CatalogueRepository, lmd, LoadStage.AdjustRaw)
@@ -57,38 +57,41 @@ class IsolationReviewTests : DatabaseTests
         };
         pt.SaveToDatabase();
 
-        //make an isolation db that is the 
-        var eds = new ExternalDatabaseServer(CatalogueRepository,"Isolation db",null);
+        //make an isolation db that is the
+        var eds = new ExternalDatabaseServer(CatalogueRepository, "Isolation db", null);
         eds.SetProperties(db);
 
         var args = pt.CreateArgumentsForClassIfNotExists(typeof(PrimaryKeyCollisionIsolationMutilation));
 
         var ti = new TableInfo(CatalogueRepository, "mytbl");
-        var ci = new ColumnInfo(CatalogueRepository, "A", "varchar(1)", ti) {IsPrimaryKey = true};
+        var ci = new ColumnInfo(CatalogueRepository, "A", "varchar(1)", ti) { IsPrimaryKey = true };
         ci.SaveToDatabase();
 
         SetArg(args, "IsolationDatabase", eds);
-        SetArg(args, "TablesToIsolate", new []{ti});
-            
+        SetArg(args, "TablesToIsolate", new[] { ti });
+
         var reviewer = new IsolationReview(pt);
 
         //no error since it is configured correctly
-        Assert.IsNull(reviewer.Error);
+        Assert.That(reviewer.Error, Is.Null);
 
         //tables should exist
         var isolationTables = reviewer.GetIsolationTables();
-        Assert.IsTrue(isolationTables.Single().Value.Exists());
+        Assert.That(isolationTables.Single().Value.Exists());
 
-            
-        var diffDataTable = reviewer.GetDifferences(isolationTables.Single(),out var diffs);
-            
-        Assert.AreEqual(6,diffDataTable.Rows.Count);
-        Assert.AreEqual(6,diffs.Count);
+
+        var diffDataTable = reviewer.GetDifferences(isolationTables.Single(), out var diffs);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(diffDataTable.Rows, Has.Count.EqualTo(6));
+            Assert.That(diffs, Has.Count.EqualTo(6));
+        });
     }
 
-    private void SetArg(IArgument[] args, string argName, object value)
+    private static void SetArg(IArgument[] args, string argName, object value)
     {
-        var arg = args.Single(a=>a.Name.Equals(argName));
+        var arg = args.Single(a => a.Name.Equals(argName));
         arg.SetValue(value);
         arg.SaveToDatabase();
     }
