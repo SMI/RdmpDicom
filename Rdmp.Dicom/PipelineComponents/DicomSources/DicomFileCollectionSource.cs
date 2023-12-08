@@ -26,7 +26,7 @@ public class DicomFileCollectionSource : DicomSource, IPipelineRequirement<IDico
 {
     [DemandsInitialization("Number of threads to use to process files",defaultValue:1,mandatory:true)]
     public int ThreadCount { get; set; }
-        
+
     [DemandsInitialization("The number of failed zip/dcm files to skip before throwing an Exception instead of just warnings", defaultValue: 100, mandatory: true)]
     public int ErrorThreshold { get; set; }
 
@@ -41,7 +41,7 @@ public class DicomFileCollectionSource : DicomSource, IPipelineRequirement<IDico
     private int _totalErrors = 0;
 
     private IDicomFileWorklist _fileWorklist;
-        
+
     //start recording performance
     Stopwatch _stopwatch = new();
 
@@ -60,7 +60,7 @@ public class DicomFileCollectionSource : DicomSource, IPipelineRequirement<IDico
         }
 
         _stopwatch.Start();
-            
+
         var dt = GetDataTable();
 
         try
@@ -112,7 +112,7 @@ public class DicomFileCollectionSource : DicomSource, IPipelineRequirement<IDico
     {
         var skippedEntries = 0;
         var corruptedEntries = 0;
-            
+
         try
         {
             using var archive=new LibArchiveReader(zipFileName);
@@ -147,7 +147,7 @@ public class DicomFileCollectionSource : DicomSource, IPipelineRequirement<IDico
             listener.OnNotify(this,new(ProgressEventType.Warning,
                 $"Error processing zip file '{zipFileName}'", e));
         }
-                
+
         if(skippedEntries>0)
             listener.OnNotify(this,new(ProgressEventType.Warning,
                 $"Skipped '{skippedEntries}' in zip archive '{zipFileName}' because they did not have .dcm extensions"));
@@ -156,7 +156,7 @@ public class DicomFileCollectionSource : DicomSource, IPipelineRequirement<IDico
     }
 
     private void RecordError(string filenameOrZipEntry, Exception exception)
-    {                    
+    {
         _totalErrors ++;
         _listener.OnNotify(this, new(ProgressEventType.Warning,
             $"{filenameOrZipEntry} could not be processed", exception));
@@ -168,27 +168,27 @@ public class DicomFileCollectionSource : DicomSource, IPipelineRequirement<IDico
 
     List<Task>  tasks = new();
     readonly object oTasksLock = new();
-        
-        
+
+
     private void ProcessDirectoryAsync(DataTable dt,DirectoryInfo directoryInfo, IDataLoadEventListener listener)
     {
         bool tooManyRunningTasks;
-            
+
         lock (oTasksLock)
             tooManyRunningTasks = tasks.Count(t => !t.IsCompleted) >= ThreadCount;
 
         //if the maximum number of tasks are already executing
         if(tooManyRunningTasks)
             Task.WaitAll(tasks.ToArray());
-            
+
         lock (oTasksLock)
             tasks = tasks.Where(t=>!t.IsCompleted).ToList();
-            
+
         //start asynchronous processing of this directory
         var newT = Task.Run(() => ProcessDirectory(dt, directoryInfo, listener));
         tasks.Add(newT);
-            
-        //but then continue to process the subdirectories 
+
+        //but then continue to process the subdirectories
         DirectoryInfo[] directories;
         try
         {
@@ -257,7 +257,7 @@ public class DicomFileCollectionSource : DicomSource, IPipelineRequirement<IDico
 
             var ds = file.Dataset;
             ProcessDataset(filename,ds,dt,listener);
-                
+
         }
     }
 
@@ -271,12 +271,12 @@ public class DicomFileCollectionSource : DicomSource, IPipelineRequirement<IDico
         }
 
         _fileWorklist = value as IDicomFileWorklist;
-            
+
         if(_fileWorklist == null)
             listener.OnNotify(this,new(ProgressEventType.Warning,
                 $"Expected IDicomWorklist to be of Type IDicomProcessListProvider (but it was {value.GetType().Name}).  This component will be skipped"));
     }
-        
+
     public override DataTable TryGetPreview()
     {
         try

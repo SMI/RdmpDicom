@@ -36,9 +36,9 @@ public class PersistentRawTableCreator : IDisposeAfterDataLoad
             var discardedColumns = tableInfo.PreLoadDiscardedColumns.Where(c => c.Destination == DiscardedColumnDestination.Dilute).ToArray();
 
             var clone = new TableInfoCloneOperation(job.Configuration,(TableInfo)tableInfo,LoadBubble.Raw,job);
-                
+
             clone.CloneTable(liveTable.Database, rawDb, tableInfo.Discover(DataAccessContext.DataLoad), rawTableName, true,true, true, discardedColumns);
-                
+
             var existingColumns = tableInfo.ColumnInfos.Select(c => c.GetRuntimeName(LoadStage.AdjustRaw)).ToArray();
 
             foreach (var preLoadDiscardedColumn in tableInfo.PreLoadDiscardedColumns)
@@ -54,7 +54,7 @@ public class PersistentRawTableCreator : IDisposeAfterDataLoad
                 //add all the preload discarded columns because they could be routed to ANO store or sent to oblivion
                 AddColumnToTable(rawTable, preLoadDiscardedColumn.RuntimeColumnName, preLoadDiscardedColumn.SqlDataType, job);
             }
-                
+
             _rawTables.Add(rawTable);
 
         }

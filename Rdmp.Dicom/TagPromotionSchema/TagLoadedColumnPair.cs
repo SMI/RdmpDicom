@@ -7,7 +7,7 @@ namespace Rdmp.Dicom.TagPromotionSchema;
 public class TagLoadedColumnPair
 {
     public static DatabaseTypeRequest LoadedColumnDataType =  new(typeof (string), 50);
-        
+
     public enum States
     {
         None,

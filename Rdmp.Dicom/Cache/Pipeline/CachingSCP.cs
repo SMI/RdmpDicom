@@ -45,7 +45,7 @@ public class CachingSCP : DicomService, IDicomServiceProvider, IDicomCStoreProvi
         DicomTransferSyntax.MPEG4AVCH264HighProfileLevel42For2DVideo,
         DicomTransferSyntax.MPEG4AVCH264HighProfileLevel42For3DVideo,
         DicomTransferSyntax.MPEG4AVCH264StereoHighProfileLevel42,
-			
+
         // Uncompressed
         DicomTransferSyntax.ExplicitVRLittleEndian,
         DicomTransferSyntax.ExplicitVRBigEndian,
@@ -100,7 +100,7 @@ public class CachingSCP : DicomService, IDicomServiceProvider, IDicomCStoreProvi
         if (e != null) msg += e.Message + e.StackTrace;
         Logger.Info(msg, e);
         Listener.OnNotify(this,new(Verbose ? ProgressEventType.Information : ProgressEventType.Trace,
-            $"ConnectionClosed: {msg}")); 
+            $"ConnectionClosed: {msg}"));
     }
     #endregion
 

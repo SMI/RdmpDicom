@@ -47,7 +47,7 @@ public partial class SemEHRConsoleUI {
 
         tbDateFormat.Text = _configuration.StartEndDateFormat;
         tbQuery.Text = _configuration.Query;
-                        
+
         cbUseStartDate.Checked = _configuration.UseStartDate;
         dptStartDate.Date = _configuration.StartDate;
         cbUseEndDate.Checked = _configuration.UseEndDate;

@@ -43,7 +43,7 @@ public partial class CreateNewImagingDatasetUI : Form
 
         return true;
     }
-                
+
     private void btnCreateSuiteWithTemplate_Click(object sender, EventArgs e)
     {
         string filename;

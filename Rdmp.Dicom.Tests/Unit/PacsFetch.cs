@@ -18,9 +18,9 @@ internal class PacsFetch
     class QRService : DicomService, IDicomServiceProvider, IDicomCFindProvider, IDicomCEchoProvider,
         IDicomCMoveProvider
     {
-        private static readonly DicomServiceDependencies Dependencies = new(LoggerFactory.Create(builder=>builder.AddConsole()),
+        private static readonly DicomServiceDependencies Dependencies = new(LoggerFactory.Create(builder => builder.AddConsole()),
             new DesktopNetworkManager(), new DefaultTranscoderManager(), new ArrayPoolMemoryProvider());
-        public QRService(INetworkStream stream, Encoding fallbackEncoding,Microsoft.Extensions.Logging.ILogger log) : base(stream, fallbackEncoding, log,Dependencies)
+        public QRService(INetworkStream stream, Encoding fallbackEncoding, Microsoft.Extensions.Logging.ILogger log) : base(stream, fallbackEncoding, log, Dependencies)
         {
         }
 
@@ -56,13 +56,14 @@ internal class PacsFetch
             foreach (var pc in association.PresentationContexts)
             {
                 if (pc.AbstractSyntax == DicomUID.Verification
-                    || pc.AbstractSyntax==DicomUID.PatientRootQueryRetrieveInformationModelFind
-                    || pc.AbstractSyntax==DicomUID.PatientRootQueryRetrieveInformationModelMove
-                    || pc.AbstractSyntax==DicomUID.StudyRootQueryRetrieveInformationModelFind
-                    || pc.AbstractSyntax==DicomUID.StudyRootQueryRetrieveInformationModelMove)
+                    || pc.AbstractSyntax == DicomUID.PatientRootQueryRetrieveInformationModelFind
+                    || pc.AbstractSyntax == DicomUID.PatientRootQueryRetrieveInformationModelMove
+                    || pc.AbstractSyntax == DicomUID.StudyRootQueryRetrieveInformationModelFind
+                    || pc.AbstractSyntax == DicomUID.StudyRootQueryRetrieveInformationModelMove)
                 {
                     pc.AcceptTransferSyntaxes(DicomTransferSyntax.ExplicitVRLittleEndian);
-                } else if (pc.AbstractSyntax.StorageCategory != DicomStorageCategory.None)
+                }
+                else if (pc.AbstractSyntax.StorageCategory != DicomStorageCategory.None)
                 {
                     pc.AcceptTransferSyntaxes();
                 }
@@ -93,18 +94,19 @@ internal class PacsFetch
     [Test]
     public void EchoTest()
     {
-        var success=false;
+        var success = false;
         var client = DicomClientFactory.Create("127.0.0.1", 11112, false, "me", "otherme");
         client.NegotiateAsyncOps();
         client.AddRequestAsync(new DicomCEchoRequest
+        {
+            OnResponseReceived = (req, res) =>
             {
-                OnResponseReceived = (req, res) => {
-                    success = true;
-                }
+                success = true;
             }
+        }
         ).Wait();
         client.SendAsync().Wait();
-        Assert.True(success, "No echo response from own PACS");
+        Assert.That(success, "No echo response from own PACS");
     }
     /*
     [Test]

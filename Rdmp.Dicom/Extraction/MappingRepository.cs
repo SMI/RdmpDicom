@@ -177,7 +177,7 @@ public class MappingRepository : IMappingRepository
     }
 
     static readonly Random r = new();
-        
+
     private string GetKindaUid()
     {
         StringBuilder sb = new();

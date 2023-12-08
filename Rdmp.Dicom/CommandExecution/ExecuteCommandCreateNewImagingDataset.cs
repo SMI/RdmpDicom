@@ -14,9 +14,9 @@ public class ExecuteCommandCreateNewImagingDataset:BasicCommandExecution
     private readonly ImageTableTemplate _tableTemplate;
     private readonly IRDMPPlatformRepositoryServiceLocator _repositoryLocator;
     private readonly DiscoveredTable _expectedTable;
-        
+
     public ICatalogue NewCatalogueCreated { get; private set; }
-        
+
     public ExecuteCommandCreateNewImagingDataset(IRDMPPlatformRepositoryServiceLocator repositoryLocator, DiscoveredTable expectedTable, ImageTableTemplate tableTemplate)
     {
         _repositoryLocator = repositoryLocator;
@@ -50,7 +50,7 @@ public class ExecuteCommandCreateNewImagingDataset:BasicCommandExecution
             seriesEi.IsExtractionIdentifier = true;
             seriesEi.SaveToDatabase();
         }
-            
+
         //make it extractable
         new ExtractableDataSet(_repositoryLocator.DataExportRepository, cata);
 

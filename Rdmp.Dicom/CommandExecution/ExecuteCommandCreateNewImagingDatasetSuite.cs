@@ -27,7 +27,7 @@ namespace Rdmp.Dicom.CommandExecution;
 
 public class ExecuteCommandCreateNewImagingDatasetSuite : BasicCommandExecution
 {
-        
+
     private readonly DiscoveredDatabase _databaseToCreateInto;
     private readonly DirectoryInfo _projectDirectory;
     private readonly IExternalDatabaseServer _loggingServer;
@@ -36,22 +36,22 @@ public class ExecuteCommandCreateNewImagingDatasetSuite : BasicCommandExecution
 
     public List<ICatalogue> NewCataloguesCreated { get; }
     public LoadMetadata NewLoadMetadata { get; private set; }
-        
+
     /// <summary>
-    /// The component of the data load that will handle reading the Dicom files / json and converting it into DataTables (only populated after Execute has been called).  
+    /// The component of the data load that will handle reading the Dicom files / json and converting it into DataTables (only populated after Execute has been called).
     /// Note that this is a PipelineComponent meaning it is the template which gets stamped out into a hydrated instance at runtime.  The DicomSourcePipelineComponent.Path Should
     /// contain the DicomSourceType.Name and when the DLE is run the DicomSourceType is the Type that will be created from the template
     /// </summary>
     public PipelineComponent DicomSourcePipelineComponent { get; private set; }
 
     /// <summary>
-    /// The DicomSource component Type to use for the Loadmetadata pipeline responsible for loading the dicom metadata into the Catalogues (e.g. DicomDatasetCollectionSource 
+    /// The DicomSource component Type to use for the Loadmetadata pipeline responsible for loading the dicom metadata into the Catalogues (e.g. DicomDatasetCollectionSource
     /// for Json or DicomFileCollectionSource for files)
     /// </summary>
     public Type DicomSourceType { get; set; }
 
     public bool CreateCoalescer { get; set; }
-        
+
     /// <summary>
     /// Optional text to put at the beginning of the Catalogues / Pipeline etc
     /// </summary>
@@ -84,7 +84,7 @@ public class ExecuteCommandCreateNewImagingDatasetSuite : BasicCommandExecution
 
         if(_loggingServer == null)
             SetImpossible("No default logging server has been configured in your Catalogue database");
-            
+
         CreateLoad = true;
     }
 
@@ -146,7 +146,7 @@ public class ExecuteCommandCreateNewImagingDatasetSuite : BasicCommandExecution
             foreach (var table in Template.Tables)
             {
                 var tblName = GetNameWithPrefix(table.TableName);
-                    
+
                 var tbl = _databaseToCreateInto.ExpectTable(tblName);
 
                 var cmd = new ExecuteCommandCreateNewImagingDataset(_repositoryLocator, tbl, table);
@@ -202,10 +202,10 @@ public class ExecuteCommandCreateNewImagingDatasetSuite : BasicCommandExecution
             arg.SetValue(NewLoadMetadata);
             arg.SaveToDatabase();
         }
-            
+
         pipe.SourcePipelineComponent_ID = DicomSourcePipelineComponent.ID;
         pipe.SaveToDatabase();
-            
+
 
         //Create the load process task that uses the pipe to load RAW tables with data from the dicom files
         var pt = new ProcessTask(_catalogueRepository, NewLoadMetadata, LoadStage.Mounting)
@@ -223,10 +223,10 @@ public class ExecuteCommandCreateNewImagingDatasetSuite : BasicCommandExecution
 
         var args = PersistentRaw? pt.CreateArgumentsForClassIfNotExists<AutoRoutingAttacherWithPersistentRaw>() : pt.CreateArgumentsForClassIfNotExists<AutoRoutingAttacher>();
         SetArgument(args, "LoadPipeline", pipe);
-            
+
         /////////////////////////////////////// Distinct tables on load /////////////////////////
 
-            
+
         var distincter = new ProcessTask(_catalogueRepository,NewLoadMetadata,LoadStage.AdjustRaw);
         var distincterArgs = distincter.CreateArgumentsForClassIfNotExists<Distincter>();
 
@@ -254,7 +254,7 @@ public class ExecuteCommandCreateNewImagingDatasetSuite : BasicCommandExecution
 
             foreach (var tbl in tablesCreated.Where(tbl => !tbl.DiscoverColumns().Any(c=>c.GetRuntimeName().Equals("SOPInstanceUID",StringComparison.CurrentCultureIgnoreCase))))
                 regexPattern.Append($"({tbl.GetRuntimeName()})|");
-                
+
 
             var coalArgs = coalescer.CreateArgumentsForClassIfNotExists<Coalescer>();
             SetArgument(coalArgs, "TableRegexPattern", regexPattern.ToString().TrimEnd('|'));
@@ -277,7 +277,7 @@ public class ExecuteCommandCreateNewImagingDatasetSuite : BasicCommandExecution
         SetArgument(args, "ConditionsToTerminateUnder", PrematureLoadEndCondition.NoRecordsInAnyTablesInDatabase);
 
         ////////////////////////////////////////////////////////////////////////////////////////////////
-            
+
         var checker = new CheckEntireDataLoadProcess(NewLoadMetadata, new(NewLoadMetadata), new());
         checker.Check(new AcceptAllCheckNotifier());
     }

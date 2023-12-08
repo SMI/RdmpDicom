@@ -15,7 +15,7 @@ public class IsolationReview
     public string Error { get; }
     public TableInfo[] TablesToIsolate { get; set; }
     public ExternalDatabaseServer IsolationDatabase { get; set; }
-        
+
     public int Top { get; set; }
     public int Timeout { get; set; } = 300;
 
@@ -23,7 +23,7 @@ public class IsolationReview
     {
         if(processTask == null)
             throw new ArgumentNullException(nameof(processTask));
-        
+
         if (!processTask.IsPluginType() || processTask.ProcessTaskType != ProcessTaskType.MutilateDataTable ||
             processTask.Path != typeof(PrimaryKeyCollisionIsolationMutilation).FullName)
         {
@@ -46,7 +46,7 @@ public class IsolationReview
                 return;
             }
         }
-            
+
         if (TablesToIsolate == null || TablesToIsolate.Length == 0)
         {
             Error = "No tables configured on Isolation task";
@@ -62,7 +62,7 @@ public class IsolationReview
         var db = IsolationDatabase.Discover(DataAccessContext.InternalDataProcessing);
 
         return TablesToIsolate.ToDictionary(
-            tableInfo => tableInfo, 
+            tableInfo => tableInfo,
             tableInfo => db.ExpectTable(PrimaryKeyCollisionIsolationMutilation.GetIsolationTableName(tableInfo))
         );
     }
@@ -75,19 +75,19 @@ public class IsolationReview
             throw new($"Table '{tbl.GetFullyQualifiedName()}' did not exist");
 
         var pks = ti.ColumnInfos.Where(c => c.IsPrimaryKey).ToArray();
-            
+
         if(pks.Length != 1)
             throw new($"TableInfo {ti} for which isolation table exists has {pks.Length} IsPrimaryKey columns");
-            
+
         var isolationCols = tbl.DiscoverColumns();
 
         var isolationPks = isolationCols.Where(c => c.GetRuntimeName().Equals(pks[0].GetRuntimeName())).ToArray();
-            
+
         if(isolationPks.Length != 1)
             throw new($"Found {isolationPks.Length != 1} columns called {pks[0].GetRuntimeName()} in isolation table {tbl.GetFullyQualifiedName()}");
 
         var isolationPk = isolationPks[0];
-            
+
         var sortOn = isolationPk.GetRuntimeName();
 
         using var con = tbl.Database.Server.GetConnection();
@@ -99,7 +99,7 @@ public class IsolationReview
         if (Top > 0)
         {
             var syntaxHelper = tbl.Database.Server.GetQuerySyntaxHelper();
-            var topxSql = 
+            var topxSql =
                 syntaxHelper.HowDoWeAchieveTopX(Top);
 
             sql = topxSql.Location switch
@@ -118,7 +118,7 @@ public class IsolationReview
         }
 
         DataTable dt = new();
-                
+
         using (var cmd = tbl.Database.Server.GetCommand(sql, con))
         {
             cmd.CommandTimeout = Timeout;
@@ -127,7 +127,7 @@ public class IsolationReview
         }
 
         differences = new();
-                
+
         //if there's only 1 row in the table then there are no differences!
         if (dt.Rows.Count < 2)
         {
@@ -137,7 +137,7 @@ public class IsolationReview
 
         //clone the schema and import only rows where there are 2+ entries for the same 'pk' value
         var differencesDt = dt.Clone();
-                
+
         //for each PK value the first time we encounter it it is the 'master' row version from which all other rows are compared
         var masterRow = dt.Rows[0];
         var haveImportedMasterRow = false;
@@ -199,9 +199,9 @@ public class IsolationReview
 public class IsolationDifference
 {
     public string Pk { get; set; }
-        
+
     public int RowIndex { get; set; }
-        
+
     public bool IsMaster { get; set; }
 
     public List<string> ConflictingColumns { get; set; } = new();

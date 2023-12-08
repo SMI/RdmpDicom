@@ -138,7 +138,7 @@ public class ExecuteCommandBuildExtractionView : BasicCommandExecution
     }
 
     /// <summary>
-    /// Identify study table based on its name 
+    /// Identify study table based on its name
     /// </summary>
     /// <param name="fromTables"></param>
     /// <returns></returns>
@@ -157,7 +157,7 @@ public class ExecuteCommandBuildExtractionView : BasicCommandExecution
 
         primaryTable.IsPrimaryExtractionTable = true;
         primaryTable.SaveToDatabase();
-                    
+
         foreach(var series in SeriesLevelTables)
         {
             SetupSubTableWithJoinsOf("StudyInstanceUID", primaryTable, series,joinManager);

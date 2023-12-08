@@ -34,7 +34,7 @@ class SMICacheTextFileGenerator:CachedFileRetriever
         if (!jobs.Any())
             return ExitCodeType.OperationNotRequired;
 
-            
+
         StringBuilder sb = new();
 
         foreach (var file in jobs.Values)

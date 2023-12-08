@@ -22,7 +22,7 @@ using Rdmp.Core.Curation.Checks;
 namespace Rdmp.Dicom.Attachers.Routing;
 
 /// <summary>
-/// Routes tags from DICOM files to relational database tables in RAW as part of a DLE configuration. 
+/// Routes tags from DICOM files to relational database tables in RAW as part of a DLE configuration.
 /// <para><see cref="AutoRoutingAttacherPipelineUseCase"/></para>
 /// </summary>
 public class AutoRoutingAttacher:Attacher,IPluginAttacher, IDemandToUseAPipeline, IDataFlowDestination<DataTable>
@@ -30,7 +30,7 @@ public class AutoRoutingAttacher:Attacher,IPluginAttacher, IDemandToUseAPipeline
     public IDataLoadJob Job;
     private Dictionary<string, HashSet<DataTable>> _columnNameToTargetTablesDictionary;
     private Dictionary<string, Tuple<SqlBulkInsertDestination,ITableLoadInfo>> _uploaders;
-        
+
     [DemandsInitialization(@"Optional, when specified this regex must match ALL table names in the load.  
 The pattern must contain a single Group e.g. '^(.*)_.*$' would match CT_Image and CT_Study with the group matching 'CT'.  
 This Grouping will be used to extract the Modality code when deciding which table(s) to put a given record into")]
@@ -41,7 +41,7 @@ This Grouping will be used to extract the Modality code when deciding which tabl
 
     [DemandsInitialization("This attacher expects multiple flat files that will be loaded this pattern should match them (file pattern not regex e.g. *.csv)")]
     public string ListPattern { get; set; }
-        
+
     readonly Dictionary<string, bool> _columnNamesRoutedSuccesfully = new(StringComparer.CurrentCultureIgnoreCase);
 
     readonly Stopwatch _sw = new();
@@ -49,7 +49,7 @@ This Grouping will be used to extract the Modality code when deciding which tabl
 
     protected AutoRoutingAttacher(bool requestsExternalDatabaseCreation) : base(requestsExternalDatabaseCreation) //Derived classes can change mind about RAW creation
     {
-            
+
     }
 
     public AutoRoutingAttacher() : base(true)//Create RAW for us
@@ -59,7 +59,7 @@ This Grouping will be used to extract the Modality code when deciding which tabl
     public override ExitCodeType Attach(IDataLoadJob job,GracefulCancellationToken token)
     {
         Job = job;
-            
+
         //if we have an explicit payload to run instead (this is how you inject explicit files/archives/directories to be loaded without touching the disk
         if (job.Payload != null)
         {
@@ -92,7 +92,7 @@ This Grouping will be used to extract the Modality code when deciding which tabl
             job.OnNotify(this,new(ProgressEventType.Warning,
                 $"Ignored input columns:{unmatchedColumns}"));
         }
-            
+
 
         return ExitCodeType.Success;
     }
@@ -144,9 +144,9 @@ This Grouping will be used to extract the Modality code when deciding which tabl
         if(LoadPipeline != null)
         {
             new PipelineChecker(LoadPipeline).Check(notifier);
-                
+
             //don't check this since we are our own Fixed source for the engine so we just end up in a loop! but do instantiate it incase there are construction/context errors
-                
+
             PipelineChecker c = new(LoadPipeline);
             c.Check(notifier);
         }
@@ -176,7 +176,7 @@ This Grouping will be used to extract the Modality code when deciding which tabl
         RefreshUploadDictionary();
 
         CreateTableUploaders();
-            
+
         CreateModalityMap();
 
         AddRows(toProcess);
@@ -221,7 +221,7 @@ This Grouping will be used to extract the Modality code when deciding which tabl
                 throw new($"ModalityMatchingRegex failed to match against DataTable {dt.TableName}");
 
             var modality = m.Groups[1].Value;
-            
+
             _modalityMap.TryAdd(dt, modality);
         }
     }
@@ -306,7 +306,7 @@ This Grouping will be used to extract the Modality code when deciding which tabl
 
     public void Dispose(IDataLoadEventListener listener, Exception pipelineFailureExceptionIfAny)
     {
-            
+
     }
 
     private void DisposeUploaders(Exception exception)
@@ -316,17 +316,17 @@ This Grouping will be used to extract the Modality code when deciding which tabl
             item1.Dispose(ThrowImmediatelyDataLoadEventListener.Quiet, exception);
             item2.CloseAndArchive();
         }
-            
+
         foreach (var dt in _columnNameToTargetTablesDictionary.SelectMany(v => v.Value).Distinct())
             dt.Dispose();
-            
+
         _columnNameToTargetTablesDictionary = null;
         _uploaders = null;
     }
 
     public void Abort(IDataLoadEventListener listener)
     {
-            
+
     }
     #endregion
 }

@@ -28,13 +28,13 @@ public class PrimaryKeyCollisionIsolationMutilation:IPluginMutilateDataTables
 {
     [DemandsInitialization("All tables which participate in record isolation e.g. Study,Series, Image.  These tables must have valid JoinInfos configured and one must be marked TableInfo.IsPrimaryExtractionTable",Mandatory=true)]
     public TableInfo[] TablesToIsolate { get; set; }
-        
+
     [DemandsInitialization("Database in which to put _Isolation tables.",Mandatory=true)]
     public ExternalDatabaseServer IsolationDatabase { get; set; }
 
     [DemandsInitialization("Timeout for each individual sql command, measured in seconds",Mandatory=true, DefaultValue = 30)]
     public int TimeoutInSeconds {get;set;}
-        
+
     private List<JoinInfo> _joins;
     private DiscoveredDatabase _raw;
     private IQuerySyntaxHelper _syntaxHelper;
@@ -52,7 +52,7 @@ public class PrimaryKeyCollisionIsolationMutilation:IPluginMutilateDataTables
         //if there is only one or no tables that's fine (mandatory will check for null itself)
         if (TablesToIsolate == null)
             throw new("No tables have been selected");
-             
+
         //make sure there is only one primary key per table and that it's a string
         foreach (var t in TablesToIsolate)
         {
@@ -64,7 +64,7 @@ public class PrimaryKeyCollisionIsolationMutilation:IPluginMutilateDataTables
         if (TablesToIsolate.Length >1 && TablesToIsolate.Count(t => t.IsPrimaryExtractionTable) != 1)
         {
             var primaryTables = TablesToIsolate.Where(t => t.IsPrimaryExtractionTable).ToArray();
-                
+
             notifier.OnCheckPerformed(
                 new(
                     $"There are {TablesToIsolate.Length} tables to operate on but {primaryTables.Length} are marked IsPrimaryExtractionTable ({string.Join(",",primaryTables.Select(t=>t.Name))}).  This should be set on a single top level table only e.g. Study",
@@ -137,7 +137,7 @@ public class PrimaryKeyCollisionIsolationMutilation:IPluginMutilateDataTables
         //create a RAW table schema called TableName_Isolation
         var cloner = new TableInfoCloneOperation(new(toCreate.Database.Server),tableInfo,LoadBubble.Live,_job ?? (IDataLoadEventListener)ThrowImmediatelyDataLoadEventListener.Quiet);
         cloner.CloneTable(from.Database, toCreate.Database, from, toCreate.GetRuntimeName(), true, true, true, tableInfo.PreLoadDiscardedColumns);
-            
+
         if(!toCreate.Exists())
             throw new($"Table '{toCreate}' did not exist after issuing create command");
 
@@ -160,7 +160,7 @@ public class PrimaryKeyCollisionIsolationMutilation:IPluginMutilateDataTables
         _qb.PrimaryExtractionTable = _primaryTable;
 
         _qb.RegenerateSQL();
-            
+
         _joins = _qb.JoinsUsedInQuery ?? new List<JoinInfo>();
 
         _fromSql = SqlQueryBuilderHelper.GetFROMSQL(_qb);
@@ -186,7 +186,7 @@ public class PrimaryKeyCollisionIsolationMutilation:IPluginMutilateDataTables
                 break;
 
             next = jnext.ForeignKey.TableInfo;
-                
+
             if(overflow-- ==0)
                 throw new("Joins resulted in a loop overflow");
         }
@@ -221,7 +221,7 @@ public class PrimaryKeyCollisionIsolationMutilation:IPluginMutilateDataTables
         _job = job;
 
         BuildJoinOrder(false);
-            
+
         foreach (var tableInfo in TablesToIsolate)
         {
             var pkCol = tableInfo.ColumnInfos.Single(c => c.IsPrimaryKey);
@@ -323,7 +323,7 @@ public class PrimaryKeyCollisionIsolationMutilation:IPluginMutilateDataTables
             }
 
         }
-            
+
 
         return toReturn.ToArray();
     }
@@ -335,7 +335,7 @@ public class PrimaryKeyCollisionIsolationMutilation:IPluginMutilateDataTables
         var pkColumnName = GetRAWColumnNameFullyQualified(pk);
 
         var deleteFromTableName = GetRAWTableNameFullyQualified(tableInfo);
-            
+
         //fetch all the data (LEFT/RIGHT joins can introduce null records so add not null to WHERE for the table being migrated to avoid full null rows)
         var sqlSelect =
             $"Select distinct {deleteFromTableName}.* {_fromSql} WHERE {deleteOnColumnName} = @val AND {pkColumnName} is not null";
@@ -352,9 +352,9 @@ public class PrimaryKeyCollisionIsolationMutilation:IPluginMutilateDataTables
             using var da = _raw.Server.GetDataAdapter(cmdSelect);
             da.Fill(dt);
         }
-                
+
         dt.Columns.Add(SpecialFieldNames.DataLoadRunID, typeof(int));
-                
+
         foreach (DataRow row in dt.Rows)
             row[SpecialFieldNames.DataLoadRunID] = _dataLoadInfoId;
 
@@ -386,7 +386,7 @@ public class PrimaryKeyCollisionIsolationMutilation:IPluginMutilateDataTables
         foreach (var d in deleteValues)
         {
             p2.Value = d;
-                    
+
             //then delete it
             var affectedRows = cmdDelete.ExecuteNonQuery();
 
@@ -407,7 +407,7 @@ public class PrimaryKeyCollisionIsolationMutilation:IPluginMutilateDataTables
         var sb = new StringBuilder();
 
         // 1 join per pair of tables
-                
+
         if(_joins.Count != TablesToIsolate.Length -1)
             throw new($"Unexpected join count, expected {TablesToIsolate.Length -1} but found {_joins.Count}");
 
@@ -429,9 +429,9 @@ public class PrimaryKeyCollisionIsolationMutilation:IPluginMutilateDataTables
             sb.Append(syntax.EnsureWrapped(j.PrimaryKey.TableInfo.GetRuntimeName(LoadBubble.Raw,_namer)));
             sb.Append('.');
             sb.Append(syntax.EnsureWrapped(j.PrimaryKey.GetRuntimeName(LoadStage.AdjustRaw)));
-                    
+
             sb.Append('=');
-                    
+
             sb.Append(syntax.EnsureWrapped(j.ForeignKey.TableInfo.GetRuntimeName(LoadBubble.Raw,_namer)));
             sb.Append('.');
             sb.Append(syntax.EnsureWrapped(j.ForeignKey.GetRuntimeName(LoadStage.AdjustRaw)));

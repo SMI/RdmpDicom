@@ -9,16 +9,16 @@ internal class ExecuteCommandCreateNewImagingDatasetSuiteUnitTests
     [Test]
     public void TestMakeUniqueName()
     {
-        Assert.AreEqual("ff",
-            ExecuteCommandCreateNewImagingDatasetSuite.MakeUniqueName(Array.Empty<string>(), "ff")
-        );
+        Assert.Multiple(() =>
+        {
+            Assert.That(ExecuteCommandCreateNewImagingDatasetSuite.MakeUniqueName(Array.Empty<string>(), "ff")
+        , Is.EqualTo("ff"));
 
-        Assert.AreEqual("ff2",
-            ExecuteCommandCreateNewImagingDatasetSuite.MakeUniqueName(new[] {"ff" }, "ff")
-        );
-        Assert.AreEqual("ff4",
-            ExecuteCommandCreateNewImagingDatasetSuite.MakeUniqueName(new[] { "ff","ff2","ff3" }, "ff")
-        );
+            Assert.That(ExecuteCommandCreateNewImagingDatasetSuite.MakeUniqueName(new[] { "ff" }, "ff")
+    , Is.EqualTo("ff2"));
+            Assert.That(ExecuteCommandCreateNewImagingDatasetSuite.MakeUniqueName(new[] { "ff", "ff2", "ff3" }, "ff")
+    , Is.EqualTo("ff4"));
+        });
     }
 
 }

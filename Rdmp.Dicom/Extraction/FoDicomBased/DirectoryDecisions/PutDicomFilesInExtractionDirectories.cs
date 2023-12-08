@@ -30,11 +30,11 @@ public abstract class PutDicomFilesInExtractionDirectories : IPutDicomFilesInExt
     protected string SaveDicomData(DirectoryInfo outputDirectory,DicomDataset dicomDataset)
     {
         var path = Path.Combine(outputDirectory.FullName, dicomDataset.GetValue<string>(DicomTag.SOPInstanceUID, 0));
-            
+
         if(!path.EndsWith(".dcm"))
         {
             path += ".dcm";
-        }            
+        }
 
         var outPath = new FileInfo(path);
         new DicomFile(dicomDataset).Save(outPath.FullName);
@@ -47,7 +47,7 @@ public abstract class PutDicomFilesInExtractionDirectories : IPutDicomFilesInExt
             return null;
 
         var path = Path.Combine(outputDirectory.FullName, sopUid);
-            
+
         if (!path.EndsWith(".dcm"))
         {
             path += ".dcm";

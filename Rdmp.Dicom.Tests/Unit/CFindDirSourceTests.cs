@@ -34,22 +34,24 @@ someAE	DX\SR	XR Elbow Lt	0102030405	TEXT	1.2.3.4.60	20200416
 someAE	XA\SR	Fluoroscopy upper limb Lt	0102030405	TEXT	1.2.3.4.70	20200416
 */
 
-        Assert.AreEqual(3, dt.Rows.Count);
+        Assert.That(dt.Rows, Has.Count.EqualTo(3));
 
+        Assert.Multiple(() =>
+        {
+            Assert.That(dt.Rows[0]["StudyDescription"], Is.EqualTo("XR Facial bones"));
+            Assert.That(dt.Rows[1]["StudyDescription"], Is.EqualTo("XR Elbow Lt"));
+            Assert.That(dt.Rows[2]["StudyDescription"], Is.EqualTo("Fluoroscopy upper limb Lt"));
 
-        Assert.AreEqual("XR Facial bones", dt.Rows[0]["StudyDescription"]);
-        Assert.AreEqual("XR Elbow Lt", dt.Rows[1]["StudyDescription"]);
-        Assert.AreEqual("Fluoroscopy upper limb Lt", dt.Rows[2]["StudyDescription"]);
+            Assert.That(dt.Rows[0]["StudyInstanceUID"], Is.EqualTo("1.2.3.4.50"));
+            Assert.That(dt.Rows[1]["StudyInstanceUID"], Is.EqualTo("1.2.3.4.60"));
+            Assert.That(dt.Rows[2]["StudyInstanceUID"], Is.EqualTo("1.2.3.4.70"));
 
-        Assert.AreEqual("1.2.3.4.50", dt.Rows[0]["StudyInstanceUID"]);
-        Assert.AreEqual("1.2.3.4.60", dt.Rows[1]["StudyInstanceUID"]);
-        Assert.AreEqual("1.2.3.4.70", dt.Rows[2]["StudyInstanceUID"]);
+            Assert.That(dt.Rows[0]["RetrieveAETitle"], Is.EqualTo("someAE"));
+            Assert.That(dt.Rows[1]["RetrieveAETitle"], Is.EqualTo("someAE"));
+            Assert.That(dt.Rows[2]["RetrieveAETitle"], Is.EqualTo("someAE"));
+        });
 
-        Assert.AreEqual("someAE", dt.Rows[0]["RetrieveAETitle"]);
-        Assert.AreEqual("someAE", dt.Rows[1]["RetrieveAETitle"]);
-        Assert.AreEqual("someAE", dt.Rows[2]["RetrieveAETitle"]);
-
-        Assert.IsNotNull(dt.TableName);
+        Assert.That(dt.TableName, Is.Not.Null);
     }
 
 
@@ -75,6 +77,6 @@ someAE	XA\SR	Fluoroscopy upper limb Lt	0102030405	TEXT	1.2.3.4.70	20200416
 
         var dt = source.GetChunk(ThrowImmediatelyDataLoadEventListener.Quiet, new());
 
-        Assert.AreEqual(3, dt.Rows.Count);
+        Assert.That(dt.Rows, Has.Count.EqualTo(3));
     }
 }

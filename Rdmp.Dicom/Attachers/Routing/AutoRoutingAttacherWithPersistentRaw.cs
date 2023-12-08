@@ -8,7 +8,7 @@ class AutoRoutingAttacherWithPersistentRaw : AutoRoutingAttacher
 {
     public AutoRoutingAttacherWithPersistentRaw():base(false)
     {
-            
+
     }
     public override ExitCodeType Attach(IDataLoadJob job, GracefulCancellationToken token)
     {

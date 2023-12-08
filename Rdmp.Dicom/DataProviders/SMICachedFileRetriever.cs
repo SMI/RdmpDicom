@@ -15,7 +15,7 @@ public class SMICachedFileRetriever : CachedFileRetriever
 {
     public override void Initialize(ILoadDirectory hicProjectDirectory, DiscoveredDatabase dbInfo)
     {
-            
+
     }
     public override ExitCodeType Fetch(IDataLoadJob dataLoadJob, GracefulCancellationToken cancellationToken)
     {

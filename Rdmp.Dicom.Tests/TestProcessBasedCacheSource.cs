@@ -55,8 +55,10 @@ class TestProcessBasedCacheSource : UnitTests
         var fork = new ForkDataLoadEventListener(toMem, ThrowImmediatelyDataLoadEventListener.Quiet);
         source.GetChunk(fork, new());
 
-        Assert.Contains($"Hey Thomas go get 24/12/01 and store in {Path.Combine(loadDir.Cache.FullName, "ALL")}",
-            toMem.GetAllMessagesByProgressEventType()[ProgressEventType.Information].Select(v => v.Message).ToArray());
+        Assert.That(
+            toMem.GetAllMessagesByProgressEventType()[ProgressEventType.Information].Select(static v => v.Message)
+                .ToArray(),
+            Does.Contain($"Hey Thomas go get 24/12/01 and store in {Path.Combine(loadDir.Cache.FullName, "ALL")}"));
     }
 
     private static bool IsLinux => Environment.OSVersion.Platform != PlatformID.Win32NT;

@@ -17,7 +17,7 @@ class PressureGaugeTests
             ThresholdBeatsPerMinute = 4
         };
         g.Tick(new DateTime(2001, 01, 01, 01, 01, 01), ThrowImmediatelyDataLoadEventListener.Quiet, () => someFact = true);
-        Assert.IsFalse(someFact);
+        Assert.That(someFact, Is.False);
     }
     [Test]
     public void TestGauge_NotReached_OverTime()
@@ -31,11 +31,11 @@ class PressureGaugeTests
 
         // events are 1 minute appart so does not trigger
         g.Tick(new(2001, 01, 01, 01, 01, 01), ThrowImmediatelyDataLoadEventListener.Quiet, () => someFact = true);
-        Assert.IsFalse(someFact);
+        Assert.That(someFact, Is.False);
         g.Tick(new(2001, 01, 01, 01, 02, 01), ThrowImmediatelyDataLoadEventListener.Quiet, () => someFact = true);
-        Assert.IsFalse(someFact);
+        Assert.That(someFact, Is.False);
         g.Tick(new(2001, 01, 01, 01, 03, 01), ThrowImmediatelyDataLoadEventListener.Quiet, () => someFact = true);
-        Assert.IsFalse(someFact);
+        Assert.That(someFact, Is.False);
     }
     [Test]
     public void TestGauge_Reached()
@@ -47,15 +47,15 @@ class PressureGaugeTests
             ThresholdBeatsPerMinute = 4
         };
         g.Tick(new DateTime(2001, 01, 01, 01, 01, 01), ThrowImmediatelyDataLoadEventListener.Quiet, () => someFact = true);
-        Assert.IsFalse(someFact);
+        Assert.That(someFact, Is.False);
         g.Tick(new(2001, 01, 01, 01, 01, 01), ThrowImmediatelyDataLoadEventListener.Quiet, () => someFact = true);
-        Assert.IsFalse(someFact);
+        Assert.That(someFact, Is.False);
         g.Tick(new(2001, 01, 01, 01, 01, 01), ThrowImmediatelyDataLoadEventListener.Quiet, () => someFact = true);
-        Assert.IsFalse(someFact);
+        Assert.That(someFact, Is.False);
         g.Tick(new(2001, 01, 01, 01, 01, 01), ThrowImmediatelyDataLoadEventListener.Quiet, () => someFact = true);
-        Assert.IsFalse(someFact);
+        Assert.That(someFact, Is.False);
         g.Tick(new(2001, 01, 01, 01, 01, 01), ThrowImmediatelyDataLoadEventListener.Quiet, () => someFact = true);
-        Assert.IsTrue(someFact);
+        Assert.That(someFact);
     }
 
     [Test]
@@ -68,9 +68,9 @@ class PressureGaugeTests
             ThresholdBeatsPerMinute = 1
         };
         g.Tick(new DateTime(2001, 01, 01, 01, 01, 01), ThrowImmediatelyDataLoadEventListener.Quiet, () => someFact = true);
-        Assert.IsFalse(someFact);
+        Assert.That(someFact, Is.False);
         g.Tick(new(2001, 01, 01, 01, 01, 30), ThrowImmediatelyDataLoadEventListener.Quiet, () => someFact = true);
-        Assert.IsTrue(someFact);
+        Assert.That(someFact);
     }
     [Test]
     public void TestGauge_Reached_OverTime_Boundary()
@@ -82,8 +82,8 @@ class PressureGaugeTests
             ThresholdBeatsPerMinute = 1
         };
         g.Tick(new DateTime(2001, 01, 01, 01, 01, 30), ThrowImmediatelyDataLoadEventListener.Quiet, () => someFact = true);
-        Assert.IsFalse(someFact);
+        Assert.That(someFact, Is.False);
         g.Tick(new(2001, 01, 01, 01, 02, 29), ThrowImmediatelyDataLoadEventListener.Quiet, () => someFact = true);
-        Assert.IsTrue(someFact);
+        Assert.That(someFact);
     }
 }

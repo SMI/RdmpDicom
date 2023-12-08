@@ -29,14 +29,14 @@ public class CFindDirSource : IPluginDataFlowSource<DataTable>, IPipelineRequire
 
     [DemandsInitialization("Comma seperated list of dicom tags to read from the CFind results", Mandatory = true, DefaultValue = DefaultHeaders)]
     public string HeadersToRead { get; set; } = DefaultHeaders;
-        
+
     int filesRead = 0;
 
     Stopwatch timer;
 
     public void Abort(IDataLoadEventListener listener)
     {
-            
+
     }
 
     public void Check(ICheckNotifier notifier)
@@ -50,9 +50,9 @@ public class CFindDirSource : IPluginDataFlowSource<DataTable>, IPipelineRequire
 
     public void Dispose(IDataLoadEventListener listener, Exception pipelineFailureExceptionIfAny)
     {
-            
+
     }
-        
+
     bool firstTime = true;
 
     public DataTable GetChunk(IDataLoadEventListener listener, GracefulCancellationToken cancellationToken)
@@ -93,7 +93,7 @@ public class CFindDirSource : IPluginDataFlowSource<DataTable>, IPipelineRequire
         {
             dt.TableName = QuerySyntaxHelper.MakeHeaderNameSensible(_file.File.Name);
         }
-                
+
 
         foreach (var h in HeadersToRead.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
         {
@@ -138,7 +138,7 @@ public class CFindDirSource : IPluginDataFlowSource<DataTable>, IPipelineRequire
     private void XmlToRows(string file, DataTable dt)
     {
         using var fileStream = File.Open(file, FileMode.Open);
-        //Load the file and create a navigator object. 
+        //Load the file and create a navigator object.
         var xDoc = new XmlDocument();
         xDoc.Load(fileStream);
 

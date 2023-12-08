@@ -11,7 +11,7 @@ public class ExecuteCommandCreateNewImagingDataset : BasicUICommandExecution
 {
     public ExecuteCommandCreateNewImagingDataset(IActivateItems activator) : base(activator)
     {
-            
+
     }
 
     public override string GetCommandName()

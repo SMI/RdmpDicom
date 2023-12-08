@@ -14,14 +14,14 @@ public class SMICacheLayout : CacheLayout
 {
     public SMICacheLayout(DirectoryInfo cacheDirectory, SMICachePathResolver resolver): base(cacheDirectory, "yyyyMMddHH", CacheArchiveType.Zip, CacheFileGranularity.Hour, resolver)
     {
-            
+
     }
-        
+
     public void CreateArchive(DateTime archiveDate,IDataLoadEventListener listener, string extension)
     {
         var downloadDirectory = GetLoadCacheDirectory(listener);
         var dataFiles = downloadDirectory.EnumerateFiles(extension).ToArray();
-            
+
         if (!dataFiles.Any())
             return;
 
