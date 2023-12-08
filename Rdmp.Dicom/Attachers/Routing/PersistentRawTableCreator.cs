@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Rdmp.Core.ReusableLibraryCode.DataAccess;
 using FAnsi.Discovery;
@@ -48,7 +49,7 @@ public class PersistentRawTableCreator : IDisposeAfterDataLoad
                     continue;
 
                 if (existingColumns.Any(e => e.Equals(preLoadDiscardedColumn.GetRuntimeName(LoadStage.AdjustRaw))))
-                    throw new(
+                    throw new Exception(
                         $"There is a column called {preLoadDiscardedColumn.GetRuntimeName(LoadStage.AdjustRaw)} as both a PreLoadDiscardedColumn and in the TableInfo (live table), you should either drop the column from the live table or remove it as a PreLoadDiscarded column");
 
                 //add all the preload discarded columns because they could be routed to ANO store or sent to oblivion
@@ -62,7 +63,7 @@ public class PersistentRawTableCreator : IDisposeAfterDataLoad
 
     private void AddColumnToTable(DiscoveredTable table, string desiredColumnName, string desiredColumnType, IDataLoadEventListener listener)
     {
-        listener.OnNotify(this, new(ProgressEventType.Information,
+        listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information,
             $"Adding column '{desiredColumnName}' with datatype '{desiredColumnType}' to table '{table.GetFullyQualifiedName()}'"));
         table.AddColumn(desiredColumnName, desiredColumnType, true, 500);
     }

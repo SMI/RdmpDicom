@@ -7,6 +7,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using Rdmp.Core.Startup;
+using NUnit.Framework.Legacy;
 
 namespace Rdmp.Dicom.Tests.Unit;
 

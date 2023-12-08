@@ -1,3 +1,4 @@
+using System;
 using Rdmp.Core.Caching.Layouts;
 using Rdmp.Core.Caching.Pipeline.Destinations;
 using Rdmp.Core.Caching.Requests;
@@ -20,14 +21,14 @@ public class SMICacheDestination : CacheFilesystemDestination
     public SMIDataChunk ProcessPipelineData(SMIDataChunk toProcess, IDataLoadEventListener listener, GracefulCancellationToken cancellationToken)
     {
         if(!Modality.Equals(toProcess.Modality))
-            throw new(
+            throw new Exception(
                 $"Modality '{Modality}' of destination component did not match ICacheChunk toProcess Modality which was '{toProcess.Modality}'");
 
 
         // next archive the files and remove the temporary dicom files
         // todo: skip this and stream directly into an archive
         var archiveDate = toProcess.Request.Start;
-        listener.OnNotify(this, new(ProgressEventType.Information,
+        listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information,
             $"Creating archive: {toProcess.Layout.GetArchiveFileInfoForDate(archiveDate, listener).FullName}"));
         toProcess.Layout.CreateArchive(archiveDate,listener, Extension);
 
@@ -53,7 +54,7 @@ public class SMICacheDestination : CacheFilesystemDestination
 
     public override ICacheLayout CreateCacheLayout()
     {
-        return new SMICacheLayout(CacheDirectory, new(Modality));
+        return new SMICacheLayout(CacheDirectory, new SMICachePathResolver(Modality));
     }
 
     public override void Abort(IDataLoadEventListener listener)

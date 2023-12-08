@@ -19,7 +19,7 @@ public class DicomDatasetCollectionSource : DicomSource, IPipelineRequirement<ID
         _datasetListWorklist = value as IDicomDatasetWorklist;
 
         if (_datasetListWorklist == null)
-            listener.OnNotify(this, new(ProgressEventType.Warning,
+            listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning,
                 $"Expected IDicomWorklist to be of Type IDicomDatasetWorklist (but it was {value.GetType().Name}). Component will be skipped."));
     }
 
@@ -33,7 +33,7 @@ public class DicomDatasetCollectionSource : DicomSource, IPipelineRequirement<ID
     {
         if(_datasetListWorklist == null)
         {
-            listener.OnNotify(this, new(ProgressEventType.Warning, "Skipping component because _datasetListWorklist is null"));
+            listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning, "Skipping component because _datasetListWorklist is null"));
             return null;
         }
 

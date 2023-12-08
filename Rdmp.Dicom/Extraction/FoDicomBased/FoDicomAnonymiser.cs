@@ -24,7 +24,7 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased;
 /// Goes directly to the referenced file locations (which cannot be in zip files) and runs DicomAnonymizer on the files that are referenced
 /// in  <see cref="RelativeArchiveColumnName"/>.
 /// </summary>
-public class FoDicomAnonymiser: IPluginDataFlowComponent<DataTable>,IPipelineRequirement<IExtractCommand>
+public partial class FoDicomAnonymiser: IPluginDataFlowComponent<DataTable>,IPipelineRequirement<IExtractCommand>
 {
     private IExtractDatasetCommand _extractCommand;
 
@@ -82,7 +82,7 @@ public class FoDicomAnonymiser: IPluginDataFlowComponent<DataTable>,IPipelineReq
         //Things we ignore, Lookups, SupportingSql etc
         if (_extractCommand == null)
         {
-            listener.OnNotify(this, new(ProgressEventType.Information, "Ignoring non dataset command "));
+            listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information, "Ignoring non dataset command "));
             return toProcess;
         }
 
@@ -141,7 +141,7 @@ public class FoDicomAnonymiser: IPluginDataFlowComponent<DataTable>,IPipelineReq
         foreach (var dicomFile in new AmbiguousFilePath(ArchiveRootIfAny,dicomFiles).GetDataset())
         {
             if (_errors > 0 && _errors > ErrorThreshold)
-                throw new($"Number of errors reported ({_errors}) reached the threshold ({ErrorThreshold})");
+                throw new Exception($"Number of errors reported ({_errors}) reached the threshold ({ErrorThreshold})");
             cancellationToken.ThrowIfAbortRequested();
             ProcessFile(dicomFile.Item2,listener, releaseIDs[dicomFile.Item1],_putter,fileRows[dicomFile.Item1]);
         }
@@ -169,7 +169,7 @@ public class FoDicomAnonymiser: IPluginDataFlowComponent<DataTable>,IPipelineReq
         {
             if(GetMetadataOnlyColumnsToProcess(toProcess).Length == 0)
             {
-                listener.OnNotify(this, new(ProgressEventType.Information, "Ignoring non imaging dataset, it had no UID columns"));
+                listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information, "Ignoring non imaging dataset, it had no UID columns"));
                 return true;
             }
 
@@ -180,7 +180,7 @@ public class FoDicomAnonymiser: IPluginDataFlowComponent<DataTable>,IPipelineReq
         //if it isn't a dicom dataset don't process it
         if (!toProcess.Columns.Contains(RelativeArchiveColumnName))
         {
-            listener.OnNotify(this, new(ProgressEventType.Warning,
+            listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning,
                 $"Dataset {_extractCommand.DatasetBundle.DataSet} did not contain field '{RelativeArchiveColumnName}' so we will not attempt to extract images"));
             return true;
         }
@@ -261,7 +261,7 @@ public class FoDicomAnonymiser: IPluginDataFlowComponent<DataTable>,IPipelineReq
     /// <param name="listener">Where to report errors/progress to</param>
     /// <param name="releaseColumnValue">The substitution to enter in for PatientID</param>
     /// <param name="putter">Determines where the anonymous image is written to</param>
-    /// <param name="rowIfAny">If a <see cref="System.Data.DataTable"/> is kicking around, pass the row and it's UID fields will be updated.  Otherwise pass null.</param>
+    /// <param name="rowIfAny">If a <see cref="DataTable"/> is kicking around, pass the row and it's UID fields will be updated.  Otherwise pass null.</param>
     public void ProcessFile(DicomFile dicomFile,  IDataLoadEventListener listener, string releaseColumnValue,
         IPutDicomFilesInExtractionDirectories putter,
         DataRow rowIfAny)
@@ -357,7 +357,7 @@ public class FoDicomAnonymiser: IPluginDataFlowComponent<DataTable>,IPipelineReq
         listener.OnProgress(this, new ProgressEventArgs("Writing ANO images", new ProgressMeasurement(_anonymisedImagesCount, ProgressType.Records), _sw.Elapsed));
     }
 
-    private static readonly Regex patientLevelRegex = new("0010,.*",RegexOptions.Compiled|RegexOptions.CultureInvariant);
+    private static readonly Regex patientLevelRegex = PatientLevelRegex();
     private static void RemovePatientNameEtc(SecurityProfile profile)
     {
         // we still want to remove PatientName, PatientAddress etc see these:
@@ -378,7 +378,7 @@ public class FoDicomAnonymiser: IPluginDataFlowComponent<DataTable>,IPipelineReq
             }
             catch (Exception)
             {
-                throw new($"Could not find a tag called '{s}' when resolving {nameof(DeleteTags)} property.  All names must exactly match DicomTags");
+                throw new Exception($"Could not find a tag called '{s}' when resolving {nameof(DeleteTags)} property.  All names must exactly match DicomTags");
             }
         }
 
@@ -410,7 +410,7 @@ public class FoDicomAnonymiser: IPluginDataFlowComponent<DataTable>,IPipelineReq
         }
         catch (Exception ex)
         {
-            notifier.OnCheckPerformed(new($"Error processing {nameof(DeleteTags)}",CheckResult.Fail, ex));
+            notifier.OnCheckPerformed(new CheckEventArgs($"Error processing {nameof(DeleteTags)}",CheckResult.Fail, ex));
         }
 
 
@@ -418,7 +418,7 @@ public class FoDicomAnonymiser: IPluginDataFlowComponent<DataTable>,IPipelineReq
         {
             if (UIDMappingServer == null)
             {
-                throw new($"{nameof(UIDMappingServer)} not set, set it existing UID mapping server or to an empty database to create a new one");
+                throw new Exception($"{nameof(UIDMappingServer)} not set, set it existing UID mapping server or to an empty database to create a new one");
             }
 
             var patcher = new SMIDatabasePatcher();
@@ -455,4 +455,7 @@ public class FoDicomAnonymiser: IPluginDataFlowComponent<DataTable>,IPipelineReq
             UIDMappingServer.SaveToDatabase();
         }
     }
+
+    [GeneratedRegex("0010,.*", RegexOptions.CultureInvariant)]
+    private static partial Regex PatientLevelRegex();
 }

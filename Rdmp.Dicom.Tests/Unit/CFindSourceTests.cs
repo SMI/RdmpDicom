@@ -3,6 +3,7 @@ using Rdmp.Core.CommandLine.Interactive;
 using Rdmp.Dicom.CommandExecution;
 using Rdmp.Core.ReusableLibraryCode.Checks;
 using System.IO;
+using NUnit.Framework.Legacy;
 using Tests.Common;
 
 namespace Rdmp.Dicom.Tests.Unit;

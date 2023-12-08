@@ -39,7 +39,7 @@ public class DicomRequestSender : IDicomRequestSender
     public void Check()
     {
         var echoRequest = new DicomCEchoRequest();
-        SendRequest(echoRequest, new(false));
+        SendRequest(echoRequest, new CancellationToken(false));
     }
     #endregion
 
@@ -72,7 +72,7 @@ public class DicomRequestSender : IDicomRequestSender
         // value in mills
         var delay =  _dicomConfiguration.RequestCooldownInMilliseconds;
         if (delay <= 0) return;
-        _listener.OnNotify(this, new(
+        _listener.OnNotify(this, new NotifyEventArgs(
             verbose ? ProgressEventType.Information : ProgressEventType.Trace,
             $"Requests sleeping for {delay / 1000}seconds"));
         Task.Delay(delay, cancellationToken).Wait(cancellationToken);
@@ -124,7 +124,7 @@ public class DicomRequestSender : IDicomRequestSender
     #region SendRequest
     public void SendRequest(IDicomClient client,CancellationToken token)
     {
-        _listener.OnNotify(this, new(
+        _listener.OnNotify(this, new NotifyEventArgs(
             verbose ? ProgressEventType.Information : ProgressEventType.Trace,
             $"Sending request to {_dicomConfiguration.RemoteAetTitle} at {_dicomConfiguration.RemoteAetHost}:{_dicomConfiguration.RemoteAetHost}"));
         bool completed;
@@ -136,7 +136,7 @@ public class DicomRequestSender : IDicomRequestSender
         catch (Exception ex)
         {
             OnRequestException?.Invoke(ex);
-            throw new($"Error when attempting to send DICOM request: {ex.Message}", ex);
+            throw new Exception($"Error when attempting to send DICOM request: {ex.Message}", ex);
         }
 
         if(completed)

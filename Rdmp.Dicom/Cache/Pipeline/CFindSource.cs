@@ -31,8 +31,8 @@ public class CFindSource : SMICacheSource
 
     public override SMIDataChunk DoGetChunk(ICacheFetchRequest cacheRequest, IDataLoadEventListener listener,GracefulCancellationToken cancellationToken)
     {
-        listener.OnNotify(this,new(ProgressEventType.Information,$"CFindSource version is {typeof(CFindSource).Assembly.GetName().Version}.  Assembly is {typeof(PACSSource).Assembly} " ));
-        listener.OnNotify(this,new(ProgressEventType.Information,$"Fo-Dicom version is {typeof(DicomClient).Assembly.GetName().Version}.  Assembly is {typeof(DicomClient).Assembly} " ));
+        listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,$"CFindSource version is {typeof(CFindSource).Assembly.GetName().Version}.  Assembly is {typeof(PACSSource).Assembly} " ));
+        listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,$"Fo-Dicom version is {typeof(DicomClient).Assembly.GetName().Version}.  Assembly is {typeof(DicomClient).Assembly} " ));
 
         var dicomConfiguration = GetConfiguration();
         var requestSender = new DicomRequestSender(dicomConfiguration, listener,true);
@@ -47,9 +47,9 @@ public class CFindSource : SMICacheSource
 
         //temp dir
         var cacheDir = new LoadDirectory(Request.CacheProgress.LoadProgress.LoadMetadata.LocationOfFlatFiles).Cache;
-        var cacheLayout = new SMICacheLayout(cacheDir, new(Modality));
+        var cacheLayout = new SMICacheLayout(cacheDir, new SMICachePathResolver(Modality));
 
-        Chunk = new(Request)
+        Chunk = new SMIDataChunk(Request)
         {
             FetchDate = dateFrom,
             Modality = Modality,
@@ -74,7 +74,7 @@ public class CFindSource : SMICacheSource
         #region Query
 
         listener.OnNotify(this,
-            new(ProgressEventType.Information,
+            new NotifyEventArgs(ProgressEventType.Information,
                 $"Requesting Studies from {dateFrom} to {dateTo}"));
         var responses = 0;
 
@@ -88,7 +88,7 @@ public class CFindSource : SMICacheSource
         };
         requestSender.ThrottleRequest(request,client, cancellationToken.AbortToken);
         listener.OnNotify(this,
-            new(ProgressEventType.Debug,
+            new NotifyEventArgs(ProgressEventType.Debug,
                 $"Total filtered studies for {dateFrom} to {dateTo} is {responses}"));
         #endregion
 
