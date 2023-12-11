@@ -37,6 +37,6 @@ public sealed class AutoRoutingAttacherPipelineUseCase:PipelineUseCase
 
     public static AutoRoutingAttacherPipelineUseCase GetDesignTimeUseCase(AutoRoutingAttacher attacher)
     {
-        return new(attacher);
+        return new AutoRoutingAttacherPipelineUseCase(attacher);
     }
 }

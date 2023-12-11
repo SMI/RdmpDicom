@@ -54,8 +54,8 @@ public class PACSSource : SMICacheSource
     {
         gauge.ThresholdBeatsPerMinute = MaximumAllowableAssociationEventsPerMinute;
 
-        listener.OnNotify(this, new(ProgressEventType.Information, $"PACSSource version is {typeof(PACSSource).Assembly.GetName().Version}.  Assembly is {typeof(PACSSource).Assembly} "));
-        listener.OnNotify(this, new(ProgressEventType.Information, $"Fo-Dicom version is {typeof(DicomClient).Assembly.GetName().Version}.  Assembly is {typeof(DicomClient).Assembly} "));
+        listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information, $"PACSSource version is {typeof(PACSSource).Assembly.GetName().Version}.  Assembly is {typeof(PACSSource).Assembly} "));
+        listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information, $"Fo-Dicom version is {typeof(DicomClient).Assembly.GetName().Version}.  Assembly is {typeof(DicomClient).Assembly} "));
 
         var dicomConfiguration = GetConfiguration();
         var requestSender = new DicomRequestSender(dicomConfiguration, listener, Verbose);
@@ -70,9 +70,9 @@ public class PACSSource : SMICacheSource
 
         //temp dir
         var cacheDir = new LoadDirectory(Request.CacheProgress.LoadProgress.LoadMetadata.LocationOfFlatFiles).Cache;
-        var cacheLayout = new SMICacheLayout(cacheDir, new(Modality));
+        var cacheLayout = new SMICacheLayout(cacheDir, new SMICachePathResolver(Modality));
 
-        Chunk = new(Request)
+        Chunk = new SMIDataChunk(Request)
         {
             FetchDate = dateFrom,
             Modality = Modality,
@@ -85,7 +85,7 @@ public class PACSSource : SMICacheSource
         {
             SaveSopInstance(storeRequest, cacheLayout, listener);
             listener.OnNotify(this,
-                new(ProgressEventType.Debug,
+                new NotifyEventArgs(ProgressEventType.Debug,
                     $"Stored sopInstance{storeRequest.SOPInstanceUID.UID}"));
         };
 
@@ -96,16 +96,16 @@ public class PACSSource : SMICacheSource
             dicomConfiguration.RemoteAetTitle);
         client.AssociationAccepted += (s, e) => {
             gauge.Tick(listener, () => Process.GetCurrentProcess().Kill());
-            listener.OnNotify(this, new(ProgressEventType.Trace, "AssociationAccepted"));
+            listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Trace, "AssociationAccepted"));
         };
         client.AssociationReleased += (s, e) => {
             gauge.Tick(listener, () => Process.GetCurrentProcess().Kill());
-            listener.OnNotify(this, new(ProgressEventType.Trace, $"AssociationReleased"));
+            listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Trace, $"AssociationReleased"));
         };
         client.AssociationRejected += (s, e) =>
         {
             gauge.Tick(listener, () => Process.GetCurrentProcess().Kill());
-            listener.OnNotify(this, new(ProgressEventType.Trace, $"AssociationRejected"));
+            listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Trace, $"AssociationRejected"));
         };
 
         if (AssociationLingerTimeoutInMs is > 0)
@@ -126,19 +126,19 @@ public class PACSSource : SMICacheSource
             #region Query
 
             listener.OnNotify(this,
-                new(ProgressEventType.Information,
+                new NotifyEventArgs(ProgressEventType.Information,
                     $"Requesting Studies from {dateFrom} to {dateTo}"));
 
             var request = CreateStudyRequestByDateRangeForModality(dateFrom, dateTo, Modality);
             request.OnResponseReceived += (req, response) =>
             {
                 if (Filter(Whitelist, response))
-                    studiesToOrder.Add(new(response.Dataset.GetSingleValue<string>(DicomTag.StudyInstanceUID)));
+                    studiesToOrder.Add(new StudyToFetch(response.Dataset.GetSingleValue<string>(DicomTag.StudyInstanceUID)));
 
             };
             requestSender.ThrottleRequest(request, client, cancellationToken.AbortToken);
             listener.OnNotify(this,
-                new(ProgressEventType.Debug,
+                new NotifyEventArgs(ProgressEventType.Debug,
                     $"Total filtered studies for {dateFrom} to {dateTo}is {studiesToOrder.Count}"));
             #endregion
 
@@ -157,7 +157,7 @@ public class PACSSource : SMICacheSource
                 if (dicomConfiguration.TransferCooldownInMilliseconds != 0)
                 {
                     listener.OnNotify(this,
-                        new(Verbose ? ProgressEventType.Information : ProgressEventType.Trace,
+                        new NotifyEventArgs(Verbose ? ProgressEventType.Information : ProgressEventType.Trace,
                             $"Transfers sleeping for {dicomConfiguration.TransferCooldownInMilliseconds / 1000}seconds"));
                     Task.Delay(dicomConfiguration.TransferCooldownInMilliseconds, cancellationToken.AbortToken).Wait(cancellationToken.AbortToken);
                 }
@@ -171,7 +171,7 @@ public class PACSSource : SMICacheSource
                 cMoveRequest.OnResponseReceived += (requ, response) =>
                 {
                     listener.OnNotify(this,
-                        new(ProgressEventType.Debug,
+                        new NotifyEventArgs(ProgressEventType.Debug,
                             $"Got {response.Status.State} response for {requ}.  Items remaining {response.Remaining}"));
 
                     switch (response.Status.State)
@@ -205,7 +205,7 @@ public class PACSSource : SMICacheSource
                 //send the command to the server
 
                 //tell user what we are sending
-                listener.OnNotify(this, new(
+                listener.OnNotify(this, new NotifyEventArgs(
                     Verbose ? ProgressEventType.Information : ProgressEventType.Trace,
                     CMoveRequestToString(cMoveRequest, current.RetryCount + 1)));
 
@@ -230,13 +230,13 @@ public class PACSSource : SMICacheSource
                 // Study has finished being fetched (or timed out)
 
                 if (hasTransferTimedOut)
-                    listener.OnNotify(this, new(ProgressEventType.Information,
+                    listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information,
                         $"Abandoning fetch of study {current.StudyUid}"));
 
                 switch (consecutiveFailures)
                 {
                     case > 5:
-                        throw new("Too many consecutive failures, giving up");
+                        throw new Exception("Too many consecutive failures, giving up");
                     // 1 failure = study not available, 2 failures = system is having a bad day?
                     case <= 1:
                         continue;
@@ -244,7 +244,7 @@ public class PACSSource : SMICacheSource
 
                 //wait 4 minutes then 6 minutes then 8 minutes, eventually server will start responding again?
                 var sleepFor = consecutiveFailures * 2 * 60_000;
-                listener.OnNotify(this, new(ProgressEventType.Warning, $"Sleeping for {sleepFor}ms due to {consecutiveFailures} consecutive failures"));
+                listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning, $"Sleeping for {sleepFor}ms due to {consecutiveFailures} consecutive failures"));
 
                 Task.Delay(sleepFor, cancellationToken.AbortToken)
                     .Wait(cancellationToken.AbortToken);

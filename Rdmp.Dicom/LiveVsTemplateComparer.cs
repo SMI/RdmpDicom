@@ -11,7 +11,7 @@ namespace Rdmp.Dicom;
 /// <summary>
 /// Compares differences between an imaging template and a live data table on a server (what columns have been renamed, resized etc).
 /// </summary>
-public class LiveVsTemplateComparer
+public partial class LiveVsTemplateComparer
 {
     public string TemplateSql {get;}
     public string LiveSql  {get;}
@@ -31,7 +31,7 @@ public class LiveVsTemplateComparer
 
         var template = templateCollection.Tables.FirstOrDefault(
             c=>c.TableName.Equals(liveTableName,StringComparison.CurrentCultureIgnoreCase) ||
-               c.TableName.Equals(liveTableNameWithoutPrefix,StringComparison.CurrentCultureIgnoreCase)) ?? throw new($"Could not find a Template called '{liveTableName}' or '{liveTableNameWithoutPrefix}'.  Templates in file were {string.Join(",",templateCollection.Tables.Select(t=>t.TableName))}");
+               c.TableName.Equals(liveTableNameWithoutPrefix,StringComparison.CurrentCultureIgnoreCase)) ?? throw new Exception($"Could not find a Template called '{liveTableName}' or '{liveTableNameWithoutPrefix}'.  Templates in file were {string.Join(",",templateCollection.Tables.Select(t=>t.TableName))}");
 
         //script the template
         var creator = new ImagingTableCreation(discoveredTable.Database.Server.GetQuerySyntaxHelper());
@@ -42,7 +42,7 @@ public class LiveVsTemplateComparer
     private string TailorTemplateSql(string templateSql)
     {
         //condense all multiple spaces to single spaces
-        templateSql = Regex.Replace(templateSql,"  +"," ");
+        templateSql = MultipleSpaceRegex().Replace(templateSql," ");
 
         return templateSql;
     }
@@ -50,11 +50,16 @@ public class LiveVsTemplateComparer
     private string TailorLiveSql(string liveSql, DatabaseType databaseType)
     {
         // get rid of collation
-        liveSql = Regex.Replace(liveSql,"\\bCOLLATE \\w+","");
+        liveSql = CollateRegex().Replace(liveSql, "");
 
         // condense all multiple spaces to single spaces
-        liveSql = Regex.Replace(liveSql,"  +"," ");
+        liveSql = MultipleSpaceRegex().Replace(liveSql, " ");
 
         return liveSql;
     }
+
+    [GeneratedRegex("\\bCOLLATE \\w+",RegexOptions.CultureInvariant)]
+    private static partial Regex CollateRegex();
+    [GeneratedRegex("  +",RegexOptions.CultureInvariant)]
+    private static partial Regex MultipleSpaceRegex();
 }

@@ -53,7 +53,7 @@ public class SemEHRApiCallerTests : DatabaseTests
             ValidateServerCert = false
         };
 
-        caller.Run(ac, cacheMgr, CancellationToken.None, semEHRConfiguration);
+        caller.Run(ac, cacheMgr, semEHRConfiguration, CancellationToken.None);
 
         var resultTable = cacheMgr.GetLatestResultsTableUnsafe(ac, AggregateOperation.IndexedExtractionIdentifierList);
 

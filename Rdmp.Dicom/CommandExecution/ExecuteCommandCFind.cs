@@ -10,6 +10,7 @@ using Rdmp.Dicom.Cache.Pipeline;
 using Rdmp.Core.ReusableLibraryCode.Progress;
 using System;
 using System.IO;
+using Rdmp.Core.DataFlowPipeline;
 
 namespace Rdmp.Dicom.CommandExecution;
 
@@ -47,7 +48,7 @@ class ExecuteCommandCFind : BasicCommandExecution, ICacheFetchRequestProvider
         };
         //<- rly? its not gonna pass without an http!?
 
-        _request = new(BasicActivator.RepositoryLocator.CatalogueRepository, startDate)
+        _request = new BackfillCacheFetchRequest(BasicActivator.RepositoryLocator.CatalogueRepository, startDate)
         {
             ChunkPeriod = endDate.Subtract(startDate),
             CacheProgress = cp
@@ -64,7 +65,7 @@ class ExecuteCommandCFind : BasicCommandExecution, ICacheFetchRequestProvider
     {
         base.Execute();
 
-        _source.GetChunk(ThrowImmediatelyDataLoadEventListener.Quiet, new());
+        _source.GetChunk(ThrowImmediatelyDataLoadEventListener.Quiet, new GracefulCancellationToken());
 
     }
     public ICacheFetchRequest Current => _request;

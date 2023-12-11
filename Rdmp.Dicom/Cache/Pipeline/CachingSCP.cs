@@ -60,8 +60,8 @@ public class CachingSCP : DicomService, IDicomServiceProvider, IDicomCStoreProvi
     private string CalledAE = string.Empty;
     private string CallingAE = string.Empty;
 
-    private static DicomServiceDependencies Deps = new(new ConsoleLogManager(),new DesktopNetworkManager(),new DefaultTranscoderManager(),new ArrayPoolMemoryProvider());
-    public CachingSCP(INetworkStream stream, Encoding encoding, Logger logger): base(stream, encoding, logger, Deps)
+    private static readonly DicomServiceDependencies Dependencies = new(new ConsoleLogManager(),new DesktopNetworkManager(),new DefaultTranscoderManager(),new ArrayPoolMemoryProvider());
+    public CachingSCP(INetworkStream stream, Encoding encoding, Logger logger): base(stream, encoding, logger, Dependencies)
     {
         Options.LogDimseDatasets = false;
         Options.LogDataPDUs = false;
@@ -89,7 +89,7 @@ public class CachingSCP : DicomService, IDicomServiceProvider, IDicomCStoreProvi
     {
         var msg = $"Received abort from {source}for {reason}";
         Logger.Warn(msg, source, reason);
-        Listener.OnNotify(this,new(ProgressEventType.Warning, $"Aborted: {msg}"));
+        Listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Warning, $"Aborted: {msg}"));
     }
     #endregion
 
@@ -99,7 +99,7 @@ public class CachingSCP : DicomService, IDicomServiceProvider, IDicomCStoreProvi
         var msg = "Connection closed";
         if (e != null) msg += e.Message + e.StackTrace;
         Logger.Info(msg, e);
-        Listener.OnNotify(this,new(Verbose ? ProgressEventType.Information : ProgressEventType.Trace,
+        Listener.OnNotify(this,new NotifyEventArgs(Verbose ? ProgressEventType.Information : ProgressEventType.Trace,
             $"ConnectionClosed: {msg}"));
     }
     #endregion
@@ -107,21 +107,21 @@ public class CachingSCP : DicomService, IDicomServiceProvider, IDicomCStoreProvi
     #region OnCStoreRequest
     public Task<DicomCStoreResponse> OnCStoreRequestAsync(DicomCStoreRequest request)
     {
-        Listener.OnNotify(this, new(Verbose ? ProgressEventType.Information : ProgressEventType.Trace,
+        Listener.OnNotify(this, new NotifyEventArgs(Verbose ? ProgressEventType.Information : ProgressEventType.Trace,
             $"Received CStore Request: {request.SOPInstanceUID}"));
         DicomCStoreResponse response;
         try
         {
-            response = new(request, DicomStatus.Success);
+            response = new DicomCStoreResponse(request, DicomStatus.Success);
             OnEndProcessingCStoreRequest(request, response);
         }
         catch (Exception e)
         {
-            Listener.OnNotify(this, new(ProgressEventType.Error,
+            Listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Error,
                 $"Failed CStore: {request.SOPInstanceUID}", e));
-            response = new(request, DicomStatus.ProcessingFailure);
+            response = new DicomCStoreResponse(request, DicomStatus.ProcessingFailure);
         }
-        Listener.OnNotify(this, new(Verbose ? ProgressEventType.Information : ProgressEventType.Trace,
+        Listener.OnNotify(this, new NotifyEventArgs(Verbose ? ProgressEventType.Information : ProgressEventType.Trace,
             $"Sending CStore Response: {response.Status} from AET: {CalledAE} to AET:{CallingAE}"));
         return Task.FromResult(response);
     }
@@ -133,7 +133,7 @@ public class CachingSCP : DicomService, IDicomServiceProvider, IDicomCStoreProvi
         var msg = "CStore request exception";
         if (e != null) msg += e.Message + e.StackTrace;
         Logger.Info(msg, e);
-        await Task.Run(()=>Listener.OnNotify(this, new(ProgressEventType.Error, "CStoreRequest failed", e)));
+        await Task.Run(()=>Listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Error, "CStoreRequest failed", e)));
     }
     #endregion
 
@@ -149,7 +149,7 @@ public class CachingSCP : DicomService, IDicomServiceProvider, IDicomCStoreProvi
     {
         // Client hasn't been configured correctly
         if (string.IsNullOrWhiteSpace(LocalAet))
-            throw new("LocalAet cannot be null");
+            throw new Exception("LocalAet cannot be null");
 
 
         if (!string.Equals(association.CalledAE, LocalAet, StringComparison.CurrentCultureIgnoreCase))
@@ -167,9 +167,9 @@ public class CachingSCP : DicomService, IDicomServiceProvider, IDicomCStoreProvi
         }
         CalledAE = association.CalledAE;
         CallingAE = association.CallingAE;
-        Listener.OnNotify(this, new(ProgressEventType.Trace,
+        Listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Trace,
             $"Max Async OPs invocable = {association.MaxAsyncOpsInvoked}performable = {association.MaxAsyncOpsPerformed}"));
-        Listener.OnNotify(this, new(ProgressEventType.Trace,
+        Listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Trace,
             $"Accepted Association Request from {CallingAE} to {CalledAE}"));
     }
     #endregion
@@ -177,7 +177,7 @@ public class CachingSCP : DicomService, IDicomServiceProvider, IDicomCStoreProvi
     #region OnReceiveAssociationReleaseRequest
     public void OnReceiveAssociationReleaseRequest()
     {
-        Listener.OnNotify(this, new(ProgressEventType.Trace,
+        Listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Trace,
             $"Released Association from {CallingAE} to {CalledAE}"));
     }
     #endregion

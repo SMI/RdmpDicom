@@ -72,19 +72,19 @@ public class IsolationReview
         var (ti, tbl) = isolationTable;
 
         if(!tbl.Exists())
-            throw new($"Table '{tbl.GetFullyQualifiedName()}' did not exist");
+            throw new Exception($"Table '{tbl.GetFullyQualifiedName()}' did not exist");
 
         var pks = ti.ColumnInfos.Where(c => c.IsPrimaryKey).ToArray();
 
         if(pks.Length != 1)
-            throw new($"TableInfo {ti} for which isolation table exists has {pks.Length} IsPrimaryKey columns");
+            throw new Exception($"TableInfo {ti} for which isolation table exists has {pks.Length} IsPrimaryKey columns");
 
         var isolationCols = tbl.DiscoverColumns();
 
         var isolationPks = isolationCols.Where(c => c.GetRuntimeName().Equals(pks[0].GetRuntimeName())).ToArray();
 
         if(isolationPks.Length != 1)
-            throw new($"Found {isolationPks.Length != 1} columns called {pks[0].GetRuntimeName()} in isolation table {tbl.GetFullyQualifiedName()}");
+            throw new Exception($"Found {isolationPks.Length != 1} columns called {pks[0].GetRuntimeName()} in isolation table {tbl.GetFullyQualifiedName()}");
 
         var isolationPk = isolationPks[0];
 
@@ -126,7 +126,7 @@ public class IsolationReview
             da.Fill(dt);
         }
 
-        differences = new();
+        differences = new List<IsolationDifference>();
 
         //if there's only 1 row in the table then there are no differences!
         if (dt.Rows.Count < 2)
@@ -152,7 +152,7 @@ public class IsolationReview
                 {
                     differencesDt.ImportRow(masterRow);
                     haveImportedMasterRow = true;
-                    differences.Add(new(differencesDt.Rows.Count - 1, masterRow[sortOn].ToString(), true));
+                    differences.Add(new IsolationDifference(differencesDt.Rows.Count - 1, masterRow[sortOn].ToString(), true));
                     differencesDtIdx++;
                 }
 

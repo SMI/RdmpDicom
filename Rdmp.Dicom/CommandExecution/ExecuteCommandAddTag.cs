@@ -10,7 +10,7 @@ using System.Linq;
 namespace Rdmp.Dicom.CommandExecution;
 
 /// <summary>
-/// Adds a new column to a <see cref="Catalogue"/> based on either a dicom tag (with infered datatype) or an explict name/datatype combination
+/// Adds a new column to a <see cref="Catalogue"/> based on either a dicom tag (with inferred datatype) or an explict name/datatype combination
 /// </summary>
 public class ExecuteCommandAddTag : BasicCommandExecution
 {
@@ -97,7 +97,7 @@ public class ExecuteCommandAddTag : BasicCommandExecution
             }
             catch (Exception e)
             {
-                throw new("No dataType was specified and column name could not be resolved to a DicomTag", e);
+                throw new Exception("No dataType was specified and column name could not be resolved to a DicomTag", e);
             }
 
         }
