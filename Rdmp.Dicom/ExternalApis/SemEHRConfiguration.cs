@@ -160,7 +160,7 @@ public class SemEHRConfiguration
     {
         LoadFrom(aggregate, out var main, out var over);
 
-        if(main != null && over != null)
+        if (main != null && over != null)
         {
             return main.OverrideWith(over);
         }
@@ -267,17 +267,17 @@ public class SemEHRConfiguration
         //Set the terms
         dynamic termsObj = new JsonObject();
         if (!string.IsNullOrWhiteSpace(Query))
-            termsObj.q = HttpUtility.UrlEncode(Query);
-        if(QDepth > -1)
-            termsObj.qdepth = QDepth;
-        if(!string.IsNullOrWhiteSpace(QStop))
-            termsObj.qstop = QStop;
+            termsObj.Add("q",HttpUtility.UrlEncode(Query));
+        if (QDepth > -1)
+            termsObj.Add("qdepth",QDepth);
+        if (!string.IsNullOrWhiteSpace(QStop))
+            termsObj.Add("qstop",QStop);
         if (!string.IsNullOrWhiteSpace(Negation))
-            termsObj.negation = Negation;
+            termsObj.Add("negation",Negation);
         if (!string.IsNullOrWhiteSpace(Experiencer))
-            termsObj.experiencer = Experiencer;
+            termsObj.Add("experiencer",Experiencer);
         if (Temporality.Count > 0)
-            termsObj.temporality = new JsonArray(Temporality.Select(s=>JsonValue.Create(s) as JsonNode).ToArray());
+            termsObj.Add("temporality", new JsonArray(Temporality.Select(s => JsonValue.Create(s) as JsonNode).ToArray()));
 
         //Add terms to terms array
         JsonArray termsArray = new()
@@ -288,20 +288,20 @@ public class SemEHRConfiguration
         //Set the filter
         dynamic filterObj = new JsonObject();
         if (UseStartDate)
-            filterObj.start_date = StartDate.ToString(StartEndDateFormat);
+            filterObj.Add("start_date",StartDate.ToString(StartEndDateFormat));
         if (UseEndDate)
-            filterObj.end_date = EndDate.ToString(StartEndDateFormat);
+            filterObj.Add("end_date", EndDate.ToString(StartEndDateFormat));
         if (Modalities.Count > 0)
-            filterObj.modalities = new JsonArray(Modalities.Select(s => JsonValue.Create(s) as JsonNode).ToArray());
+            filterObj.Add("modalities", new JsonArray(Modalities.Select(s => JsonValue.Create(s) as JsonNode).ToArray()));
 
         //Create API JSON
         dynamic apiCallJson = new JsonObject();
-        apiCallJson.terms = termsArray;
-        apiCallJson.filter = filterObj;
+        apiCallJson.Add("terms", termsArray);
+        apiCallJson.Add("filter", filterObj);
         /*if (ReturnFields.Count > 0)
             apiCallJson.returnFields = new JArray(ReturnFields);*/
         if (!string.IsNullOrWhiteSpace(ReturnField))
-            apiCallJson.returnFields = new JsonArray(ReturnField);
+            apiCallJson.Add("returnFields", new JsonArray(ReturnField));
 
         return apiCallJson;
     }

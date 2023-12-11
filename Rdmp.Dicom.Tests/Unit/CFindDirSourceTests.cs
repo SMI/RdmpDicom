@@ -4,6 +4,7 @@ using NUnit.Framework.Legacy;
 using Rdmp.Dicom.PipelineComponents.CFind;
 using Rdmp.Core.ReusableLibraryCode.Checks;
 using Rdmp.Core.ReusableLibraryCode.Progress;
+using NUnit.Framework.Legacy;
 
 namespace Rdmp.Dicom.Tests.Unit;
 public class CFindDirSourceTests
