@@ -92,7 +92,7 @@ public abstract class DicomSource : IPluginDataFlowSource<DataTable>
     public void Check(ICheckNotifier notifier)
     {
         if (FieldMapTableIfAny != null && TagWhitelist != null)
-            notifier.OnCheckPerformed(new("Cannot specify both a FieldMapTableIfAny and a TagWhitelist", CheckResult.Fail));
+            notifier.OnCheckPerformed(new CheckEventArgs("Cannot specify both a FieldMapTableIfAny and a TagWhitelist", CheckResult.Fail));
 
         try
         {
@@ -100,12 +100,12 @@ public abstract class DicomSource : IPluginDataFlowSource<DataTable>
         }
         catch (Exception e)
         {
-            notifier.OnCheckPerformed(new("Could not deserialize TagElevationConfigurationFile", CheckResult.Fail, e));
+            notifier.OnCheckPerformed(new CheckEventArgs("Could not deserialize TagElevationConfigurationFile", CheckResult.Fail, e));
         }
 
         if (string.IsNullOrWhiteSpace(ArchiveRoot)) return;
         if (!Path.IsPathRooted(ArchiveRoot))
-            notifier.OnCheckPerformed(new("ArchiveRoot is not rooted, it must be an absolute path e.g. c:\\temp\\MyImages\\", CheckResult.Fail));
+            notifier.OnCheckPerformed(new CheckEventArgs("ArchiveRoot is not rooted, it must be an absolute path e.g. c:\\temp\\MyImages\\", CheckResult.Fail));
 
     }
 
@@ -161,7 +161,7 @@ public abstract class DicomSource : IPluginDataFlowSource<DataTable>
                         MarkCorrupt(ds);
 
                         //but make sure to warn people listening
-                        listener.OnNotify(this, new(ProgressEventType.Warning,
+                        listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning,
                             $"Could not GetCSharpValue for DicomItem {item.Tag}({entry.Keyword}) for {GetProblemFileDescription(filename, otherValuesToStoreInRow)}", ex));
 
                         //do not add the row to the table
@@ -179,7 +179,7 @@ public abstract class DicomSource : IPluginDataFlowSource<DataTable>
                     {
 
                         //but make sure to warn people listening
-                        listener.OnNotify(this, new(ProgressEventType.Warning,
+                        listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning,
                             $"Could not GetCSharpValue for DicomItem {item.Tag}({entry.Keyword}) for {GetProblemFileDescription(filename, otherValuesToStoreInRow)}", ex));
 
                         if (InvalidDataHandlingStrategy == InvalidDataHandling.MarkCorrupt)
@@ -227,7 +227,7 @@ public abstract class DicomSource : IPluginDataFlowSource<DataTable>
             }
             catch (Exception e)
             {
-                listener.OnNotify(this, new(ProgressEventType.Warning,
+                listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning,
                     $"Error getting Tag '{header}' item.ValueRepresentation is ({item.ValueRepresentation}) {GetProblemFileDescription(filename, otherValuesToStoreInRow)}", e));
             }
 
@@ -256,7 +256,7 @@ public abstract class DicomSource : IPluginDataFlowSource<DataTable>
                                 if (e is TagNavigationException)
                                     throw;
 
-                                listener.OnNotify(this, new(ProgressEventType.Warning,
+                                listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning,
                                     $"Error getting Tag for ElevationRequest '{request.ColumnName}' for {GetProblemFileDescription(filename, otherValuesToStoreInRow)}", e));
                                 value = DBNull.Value;
                             }
@@ -270,7 +270,7 @@ public abstract class DicomSource : IPluginDataFlowSource<DataTable>
                 }
                 catch (TagNavigationException e)
                 {
-                    listener.OnNotify(this, new(ProgressEventType.Warning,
+                    listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning,
                         $"Rule for column {request.ColumnName} failed to resolve GetValue for {GetProblemFileDescription(filename, otherValuesToStoreInRow)}", e));
                 }
             }
@@ -322,19 +322,20 @@ public abstract class DicomSource : IPluginDataFlowSource<DataTable>
     {
         lock (_oDictLock)
         {
-            if (!_maxTagLengths.ContainsKey(tag))
+            if (!_maxTagLengths.TryGetValue(tag, out var maxLength))
             {
                 var type = DicomTypeTranslater.GetNaturalTypeForVr(
                     tag.DictionaryEntry.ValueRepresentations, tag.DictionaryEntry.ValueMultiplicity);
-                _maxTagLengths.Add(tag, type.Width ?? -1);
+                maxLength = type.Width ?? -1;
+                _maxTagLengths.Add(tag, maxLength);
             }
 
-            //we don't think it's a string or the string is a fine length
-            if (_maxTagLengths[tag] <= 0 || value.Length <= _maxTagLengths[tag])
+            //we don't think it's a string or the string length is OK
+            if (maxLength <= 0 || value.Length <= maxLength)
                 return true;
 
-            listener.OnNotify(this, new(ProgressEventType.Warning,
-                $"Found value '{value}' that was too long for it's VR ({tag}).  Max length was {_maxTagLengths[tag]} supplied value was length {value.Length}"));
+            listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning,
+                $"Found value '{value}' that was too long for its VR ({tag}).  Max length was {maxLength} supplied value was length {value.Length}"));
         }
 
         return false;
@@ -394,7 +395,7 @@ public abstract class DicomSource : IPluginDataFlowSource<DataTable>
     {
         //if tag elevation is specified in raw XML
         if(TagElevationConfigurationXml != null && !string.IsNullOrWhiteSpace(TagElevationConfigurationXml.xml))
-            return new(TagElevationConfigurationXml.xml);
+            return new TagElevationRequestCollection(TagElevationConfigurationXml.xml);
 
         //if tag elevation is specified in a file
         return TagElevationConfigurationFile != null ? new TagElevationRequestCollection(File.ReadAllText(TagElevationConfigurationFile.FullName)) : null;

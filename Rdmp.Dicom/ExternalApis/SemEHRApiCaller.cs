@@ -17,9 +17,10 @@ public class SemEHRApiCaller : PluginCohortCompiler
 {
     public const string SemEHRApiPrefix = $"{ApiPrefix}SemEHR";
 
-    public override void Run(AggregateConfiguration ac, CachedAggregateConfigurationResultsManager cache, CancellationToken token)
+    public override void Run(AggregateConfiguration ac, CachedAggregateConfigurationResultsManager cache,
+        CancellationToken token)
     {
-        Run(ac, cache, token, SemEHRConfiguration.LoadFrom(ac));
+        Run(ac, cache, SemEHRConfiguration.LoadFrom(ac), token);
     }
 
     private static string GetAuthString(IRepository repo, SemEHRConfiguration config)
@@ -32,7 +33,8 @@ public class SemEHRApiCaller : PluginCohortCompiler
         return Convert.ToBase64String(Encoding.UTF8.GetBytes($"{credentials.Username}:{credentials.GetDecryptedPassword()}"));
     }
 
-    internal void Run(AggregateConfiguration ac, CachedAggregateConfigurationResultsManager cache, CancellationToken token, SemEHRConfiguration config)
+    internal void Run(AggregateConfiguration ac, CachedAggregateConfigurationResultsManager cache,
+        SemEHRConfiguration config, CancellationToken token)
     {
         using var httpClientHandler = new HttpClientHandler();
 
@@ -98,13 +100,13 @@ public class SemEHRApiCaller : PluginCohortCompiler
             else
             {
                 //If we failed, get the failing error message
-                throw new($"The SemEHR API has failed: {semEHRResponse.message}");
+                throw new Exception($"The SemEHR API has failed: {semEHRResponse.message}");
             }
 
         }
         else
         {
-            throw new(
+            throw new Exception(
                 $"The API response returned a HTTP Status Code: ({(int)response.StatusCode}) {response.StatusCode}");
         }
         #endregion

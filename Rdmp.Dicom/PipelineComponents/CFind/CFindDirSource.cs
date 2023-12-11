@@ -58,7 +58,7 @@ public class CFindDirSource : IPluginDataFlowSource<DataTable>, IPipelineRequire
     public DataTable GetChunk(IDataLoadEventListener listener, GracefulCancellationToken cancellationToken)
     {
         if (_file == null)
-            throw new("File has not been set");
+            throw new Exception("File has not been set");
         if (!_file.File.Exists)
             throw new FileNotFoundException($"File did not exist:'{_file.File.FullName}'");
 
@@ -105,7 +105,7 @@ public class CFindDirSource : IPluginDataFlowSource<DataTable>, IPipelineRequire
 
     private void ProcessDir(string dir, DataTable dt, IDataLoadEventListener listener)
     {
-        listener.OnNotify(this, new(ProgressEventType.Information, $"Starting '{dir}'"));
+        listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information, $"Starting '{dir}'"));
 
         if (File.Exists(dir))
         {
@@ -116,13 +116,13 @@ public class CFindDirSource : IPluginDataFlowSource<DataTable>, IPipelineRequire
 
         if (!Directory.Exists(dir))
         {
-            listener.OnNotify(this, new(ProgressEventType.Error, $"'{dir}' was not a Directory or File"));
+            listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Error, $"'{dir}' was not a Directory or File"));
             return;
         }
 
         var matches = Directory.GetFiles(dir, SearchPattern, SearchOption.AllDirectories);
 
-        listener.OnNotify(this, new(ProgressEventType.Information, $"Found {matches.Length} CFind files in {dir}"));
+        listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information, $"Found {matches.Length} CFind files in {dir}"));
 
         foreach(var file in matches)
         {
@@ -130,7 +130,7 @@ public class CFindDirSource : IPluginDataFlowSource<DataTable>, IPipelineRequire
 
             if (filesRead++ % 10000 == 0)
             {
-                listener.OnProgress(this, new("Reading files", new(filesRead, ProgressType.Records, matches.Length), timer?.Elapsed ?? TimeSpan.Zero));
+                listener.OnProgress(this, new ProgressEventArgs("Reading files", new ProgressMeasurement(filesRead, ProgressType.Records, matches.Length), timer?.Elapsed ?? TimeSpan.Zero));
             }
         }
     }
@@ -168,6 +168,6 @@ public class CFindDirSource : IPluginDataFlowSource<DataTable>, IPipelineRequire
 
     public DataTable TryGetPreview()
     {
-        return GetChunk(ThrowImmediatelyDataLoadEventListener.Quiet, new());
+        return GetChunk(ThrowImmediatelyDataLoadEventListener.Quiet, new GracefulCancellationToken());
     }
 }

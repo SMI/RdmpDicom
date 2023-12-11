@@ -55,7 +55,7 @@ public class DicomFileCollectionSource : DicomSource, IPipelineRequirement<IDico
 
         if (_fileWorklist == null)
         {
-            listener.OnNotify(this, new(ProgressEventType.Warning, "Skipping component because _fileWorklist is null"));
+            listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning, "Skipping component because _fileWorklist is null"));
             return null;
         }
 
@@ -70,7 +70,7 @@ public class DicomFileCollectionSource : DicomSource, IPipelineRequirement<IDico
 
             // Exactly one of file/directory must be null:
             if (file!=null == (directory!=null))
-                throw new("Expected IDicomProcessListProvider to return either a DirectoryInfo or a FileInfo not both/neither");
+                throw new Exception("Expected IDicomProcessListProvider to return either a DirectoryInfo or a FileInfo not both/neither");
 
             if (file != null)
             {
@@ -105,7 +105,7 @@ public class DicomFileCollectionSource : DicomSource, IPipelineRequirement<IDico
 
     private void UpdateProgressListeners()
     {
-        _listener.OnProgress(this, new("Processing Files", new(_filesProcessedSoFar, ProgressType.Records), _stopwatch.Elapsed));
+        _listener.OnProgress(this, new ProgressEventArgs("Processing Files", new ProgressMeasurement(_filesProcessedSoFar, ProgressType.Records), _stopwatch.Elapsed));
     }
 
     private void ProcessZipArchive(DataTable dt, string zipFileName, IDataLoadEventListener listener)
@@ -144,12 +144,12 @@ public class DicomFileCollectionSource : DicomSource, IPipelineRequirement<IDico
         }
         catch (InvalidDataException e)
         {
-            listener.OnNotify(this,new(ProgressEventType.Warning,
+            listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Warning,
                 $"Error processing zip file '{zipFileName}'", e));
         }
 
         if(skippedEntries>0)
-            listener.OnNotify(this,new(ProgressEventType.Warning,
+            listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Warning,
                 $"Skipped '{skippedEntries}' in zip archive '{zipFileName}' because they did not have .dcm extensions"));
 
         UpdateProgressListeners();
@@ -158,11 +158,11 @@ public class DicomFileCollectionSource : DicomSource, IPipelineRequirement<IDico
     private void RecordError(string filenameOrZipEntry, Exception exception)
     {
         _totalErrors ++;
-        _listener.OnNotify(this, new(ProgressEventType.Warning,
+        _listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning,
             $"{filenameOrZipEntry} could not be processed", exception));
 
         if (_totalErrors > ErrorThreshold)
-            throw new("Maximum number of errors reached (ErrorThreshold)", exception);
+            throw new Exception("Maximum number of errors reached (ErrorThreshold)", exception);
     }
 
 
@@ -207,7 +207,7 @@ public class DicomFileCollectionSource : DicomSource, IPipelineRequirement<IDico
 
     private void ProcessDirectory(DataTable dt, DirectoryInfo directoryInfo,IDataLoadEventListener listener)
     {
-        listener.OnNotify(this, new(ProgressEventType.Information,
+        listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information,
             $"Started Directory '{directoryInfo.FullName}' on Thread {Environment.CurrentManagedThreadId}"));
 
         //process all dcm files and archives in current directory
@@ -250,7 +250,7 @@ public class DicomFileCollectionSource : DicomSource, IPipelineRequirement<IDico
             if(file == null)
             {
 
-                listener.OnNotify(this, new(ProgressEventType.Warning,
+                listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning,
                     $"Skipping file '{filename}' because DicomFile.Open returned null"));
                 return;
             }
@@ -266,14 +266,14 @@ public class DicomFileCollectionSource : DicomSource, IPipelineRequirement<IDico
         if (value == null)
         {
             listener.OnNotify(this,
-                new(ProgressEventType.Warning, "Could not check IDicomProcessListProvider because it was null (only valid at Design Time)"));
+                new NotifyEventArgs(ProgressEventType.Warning, "Could not check IDicomProcessListProvider because it was null (only valid at Design Time)"));
             return;
         }
 
         _fileWorklist = value as IDicomFileWorklist;
 
         if(_fileWorklist == null)
-            listener.OnNotify(this,new(ProgressEventType.Warning,
+            listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Warning,
                 $"Expected IDicomWorklist to be of Type IDicomProcessListProvider (but it was {value.GetType().Name}).  This component will be skipped"));
     }
 
@@ -282,11 +282,11 @@ public class DicomFileCollectionSource : DicomSource, IPipelineRequirement<IDico
         try
         {
             //todo timeout 10s
-            return GetChunk(ThrowImmediatelyDataLoadEventListener.Quiet, new());
+            return GetChunk(ThrowImmediatelyDataLoadEventListener.Quiet, new GracefulCancellationToken());
         }
         finally
         {
-            _stopwatch = new();
+            _stopwatch = new Stopwatch();
         }
     }
 

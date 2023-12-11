@@ -1,3 +1,4 @@
+using System;
 using Rdmp.Core.DataFlowPipeline.Requirements;
 using System.IO;
 using System.Linq;
@@ -39,7 +40,7 @@ public class FlatFileToLoadDicomFileWorklist : IDicomFileWorklist
         {
             _dataExhausted = true;
 
-            file = new(_file.File.FullName);
+            file = new AmbiguousFilePath(_file.File.FullName);
             return true;
         }
 
@@ -51,22 +52,22 @@ public class FlatFileToLoadDicomFileWorklist : IDicomFileWorklist
             if (File.Exists(line.Trim()))
             {
                 _linesCurrent++;
-                file = new(new FileInfo(line.Trim()).FullName);
+                file = new AmbiguousFilePath(new FileInfo(line.Trim()).FullName);
                 return true;
             }
 
             if (Directory.Exists(line.Trim()))
             {
                 _linesCurrent++;
-                directory = new(line);
+                directory = new DirectoryInfo(line);
                 return true;
             }
 
             if (!AmbiguousFilePath.IsZipReference(line))
-                throw new(
+                throw new Exception(
                     $"Text file '{_file.File.Name}' contained a line that was neither a File or a Directory:'{line}'");
             _linesCurrent++;
-            file = new(line);
+            file = new AmbiguousFilePath(line);
             return true;
         }
 

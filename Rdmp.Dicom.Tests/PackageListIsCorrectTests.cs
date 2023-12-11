@@ -12,16 +12,16 @@ namespace Rdmp.Dicom.Tests;
 /// Tests to confirm that the dependencies in csproj files (NuGet packages) match those in the .nuspec files and that packages.md
 /// lists the correct versions (in documentation)
 /// </summary>
-public class PackageListIsCorrectTests
+internal sealed partial class PackageListIsCorrectTests
 {
     private static readonly EnumerationOptions EnumerationOptions = new() { RecurseSubdirectories = true, MatchCasing = MatchCasing.CaseInsensitive, IgnoreInaccessible = true };
 
     //<PackageReference Include="NUnit3TestAdapter" Version="3.13.0" />
-    private static readonly Regex RPackageRef = new(@"<PackageReference\s+Include=""(.*)""\s+Version=""([^""]*)""", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant);
+    private static readonly Regex RPackageRef = PackageRefRegex();
 
     // | Org.SomePackage |
     //
-    private static readonly Regex RMarkdownEntry = new(@"^\|\s*\[?([^ |\]]+)(\]\([^)]+\))?\s*\|", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant);
+    private static readonly Regex RMarkdownEntry = MarkdownEntryRegex();
 
 
     /// <summary>
@@ -44,7 +44,7 @@ public class PackageListIsCorrectTests
 
         // Extract the named packages from csproj files
         var usedPackages = GetCsprojFiles(root).Select(File.ReadAllText).SelectMany(s => RPackageRef.Matches(s))
-            .Select(m => m.Groups[1].Value).ToHashSet(StringComparer.InvariantCultureIgnoreCase);
+            .Select(static m => m.Groups[1].Value).ToHashSet(StringComparer.InvariantCultureIgnoreCase);
 
         // Then subtract those listed in PACKAGES.md (should be empty)
         var undocumentedPackages = usedPackages.Except(packagesMarkdown).Select(BuildRecommendedMarkdownLine);
@@ -108,4 +108,8 @@ public class PackageListIsCorrectTests
         return path;
     }
 
+    [GeneratedRegex("<PackageReference\\s+Include=\"(.*)\"\\s+Version=\"([^\"]*)\"", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]
+    private static partial Regex PackageRefRegex();
+    [GeneratedRegex("^\\|\\s*\\[?([^ |\\]]+)(\\]\\([^)]+\\))?\\s*\\|", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]
+    private static partial Regex MarkdownEntryRegex();
 }

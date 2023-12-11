@@ -46,7 +46,7 @@ public class SMICacheLayout : CacheLayout
     {
         // Ensure there are no files in the root directory
         if (RootDirectory.EnumerateFiles("*", SearchOption.TopDirectoryOnly).Any())
-            throw new("The imaging cache directory should not contain any files at its root.");
+            throw new Exception("The imaging cache directory should not contain any files at its root.");
 
         // Ensure all directories are named after valid dates by filtering on those that don't parse exactly
         // todo: reinstate correct version after an actual layout is decided on!
@@ -83,7 +83,7 @@ public class SMICacheLayout : CacheLayout
         var allFiles = GetLoadCacheDirectory(listener).EnumerateFiles($"*.{ArchiveType}", SearchOption.AllDirectories);
         var dateTimes = allFiles.Select(ConvertFilenameToDateTime).ToList();
         dateTimes.Sort((a, b) => a.CompareTo(b));
-        return new(dateTimes);
+        return new Queue<DateTime>(dateTimes);
     }
 
     private DateTime ConvertFilenameToDateTime(FileInfo fileInfo)

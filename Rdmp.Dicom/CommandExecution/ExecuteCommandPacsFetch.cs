@@ -10,6 +10,7 @@ using Rdmp.Dicom.Cache.Pipeline;
 using Rdmp.Core.ReusableLibraryCode.Progress;
 using System;
 using System.IO;
+using Rdmp.Core.DataFlowPipeline;
 
 namespace Rdmp.Dicom.CommandExecution;
 
@@ -36,7 +37,7 @@ class ExecuteCommandPacsFetch : BasicCommandExecution, ICacheFetchRequestProvide
         var cp = new CacheProgress(memory,lp);
 
         //Create the source component only and a valid request range to fetch
-        _source = new()
+        _source = new PACSSource
         {
             RemoteAEHost = remoteAeHost,
             RemoteAEPort = remotePort,
@@ -50,7 +51,7 @@ class ExecuteCommandPacsFetch : BasicCommandExecution, ICacheFetchRequestProvide
         };
         //<- rly? its not gonna pass without an http!?
 
-        _request = new(BasicActivator.RepositoryLocator.CatalogueRepository, startDate)
+        _request = new BackfillCacheFetchRequest(BasicActivator.RepositoryLocator.CatalogueRepository, startDate)
         {
             ChunkPeriod = endDate.Subtract(startDate), CacheProgress = cp
         };
@@ -66,7 +67,7 @@ class ExecuteCommandPacsFetch : BasicCommandExecution, ICacheFetchRequestProvide
     {
         base.Execute();
 
-        _source.GetChunk(ThrowImmediatelyDataLoadEventListener.Quiet,new());
+        _source.GetChunk(ThrowImmediatelyDataLoadEventListener.Quiet,new GracefulCancellationToken());
 
     }
     public ICacheFetchRequest Current => _request;
