@@ -92,7 +92,7 @@ jobs:
           echo "Running plugin test script"
           dotnet run --project RDMP\\Tools\\rdmp\\rdmp.csproj -c Release -- -f testcmd.yaml --dir yaml 
       - name: Store created nupkg files
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           path: ./*.nupkg
           retention-days: 1
