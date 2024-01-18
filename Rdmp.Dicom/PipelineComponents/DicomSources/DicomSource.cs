@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Text.RegularExpressions;
 using Rdmp.Core.Curation.Data;
 using Rdmp.Core.DataFlowPipeline;
@@ -129,6 +130,25 @@ public abstract class DicomSource : IPluginDataFlowSource<DataTable>
 
         foreach (var item in ds)
         {
+            // First special-case Sequences such as ICD11 diagnostic codes:
+            if (item is DicomSequence seq && item.Tag == DicomTag.ConceptNameCodeSequence)
+            {
+                var code = seq.Items[0];
+                var scheme = code.GetSingleValueOrDefault(DicomTag.CodingSchemeDesignator, "");
+                if (scheme.Equals("I11", StringComparison.Ordinal) || scheme.Equals("ICD11", StringComparison.Ordinal))
+                {
+                    // Capture ICD11 code and meaning
+                    rowValues.Add("ICD11code", code.GetSingleValueOrDefault(DicomTag.CodeValue, "missing"));
+                    rowValues.Add("ICD11meaning", code.GetSingleValueOrDefault(DicomTag.CodeMeaning, "missing"));
+                }
+                else
+                {
+                    // TODO: Handle other code pairs
+                }
+
+                continue;
+            }
+
             //get the tag name (human readable)
             var entry = item.Tag.DictionaryEntry;
 
