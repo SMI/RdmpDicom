@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Fix issue with PutDicomFilesInExtractionDirectories option in FoDicom Pipeline Component
+
 ## [7.0.1]
  - Documentation Update
  - Update to target RDMP version 8.1.0
