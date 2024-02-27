@@ -107,7 +107,16 @@ public partial class AmbiguousFilePath
                     throw new AmbiguousFilePathResolutionException(
                         $"Path provided '{entry.Key}' was not to either an entry in a zip file or to a dicom file");
                 _fullPaths.Remove(entry.Key);
-                yield return new ValueTuple<string,DicomFile>(entry.Value,DicomFile.Open(entry.Key));
+                if (File.Exists(entry.Key))
+                {
+                    yield return new ValueTuple<string, DicomFile>(entry.Value, DicomFile.Open(entry.Key));
+                }
+                else
+                {
+                    listener?.OnNotify(this,
+                     new NotifyEventArgs(ProgressEventType.Warning,
+                         $"Unable to find file {entry.Key}. You may wish to validate this"));
+                }
                 continue;
             }
 
