@@ -115,7 +115,7 @@ public partial class AmbiguousFilePath
                 {
                     listener?.OnNotify(this,
                      new NotifyEventArgs(ProgressEventType.Warning,
-                         $"Unable to find file {entry.Key}. You may wish to validate this"));
+                         $"Unable to find file '{entry.Key}'."));
                 }
                 continue;
             }
