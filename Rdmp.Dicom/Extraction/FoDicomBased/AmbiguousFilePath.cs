@@ -116,7 +116,7 @@ public partial class AmbiguousFilePath
                 {
                     listener?.OnNotify(this,
                         new NotifyEventArgs(ProgressEventType.Warning,
-                            $"Unable to find file '{entry.Key}'.", e));
+                            $"Unable to read DICOM file '{entry.Key}'.", e));
                 }
 
                 if (f is not null)
