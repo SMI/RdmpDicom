@@ -108,7 +108,7 @@ internal sealed partial class PackageListIsCorrectTests
         return path;
     }
 
-    [GeneratedRegex("<PackageReference\\s+Include=\"(.*)\"\\s+Version=\"([^\"]*)\"", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]
+    [GeneratedRegex("<PackageReference\\s+Include=\"(.*)\"(\\s+Version=\"[^\"]*\")?", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]
     private static partial Regex PackageRefRegex();
     [GeneratedRegex("^\\|\\s*\\[?([^ |\\]]+)(\\]\\([^)]+\\))?\\s*\\|", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]
     private static partial Regex MarkdownEntryRegex();
