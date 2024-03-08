@@ -16,6 +16,7 @@ using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using Rdmp.Core.QueryBuilding;
+using System.Threading.Tasks;
 
 namespace Rdmp.Dicom.Extraction.FoDicomBased
 {
@@ -23,27 +24,27 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
     /// Goes directly to the referenced file locations (which cannot be in zip files) and runs DicomAnonymizer on the files that are referenced
     /// in  <see cref="RelativeArchiveColumnName"/>.
     /// </summary>
-    public class FoDicomAnonymiser: IPluginDataFlowComponent<DataTable>,IPipelineRequirement<IExtractCommand>
+    public class FoDicomAnonymiser : IPluginDataFlowComponent<DataTable>, IPipelineRequirement<IExtractCommand>
     {
         private IExtractDatasetCommand _extractCommand;
 
         [DemandsInitialization("If the path filename contains relative file uris to images then this is the root directory")]
         public string ArchiveRootIfAny { get; set; }
 
-        [DemandsInitialization("The column name in the extracted dataset which contains the location of the dicom files",Mandatory = true)]
+        [DemandsInitialization("The column name in the extracted dataset which contains the location of the dicom files", Mandatory = true)]
         public string RelativeArchiveColumnName { get; set; }
 
-        [DemandsInitialization("The mapping database for UID fields", Mandatory=true)]
+        [DemandsInitialization("The mapping database for UID fields", Mandatory = true)]
         public ExternalDatabaseServer UIDMappingServer { get; set; }
 
-        [DemandsInitialization("Determines how dicom files are written to the project ouput directory",TypeOf = typeof(IPutDicomFilesInExtractionDirectories),Mandatory=true)]
+        [DemandsInitialization("Determines how dicom files are written to the project ouput directory", TypeOf = typeof(IPutDicomFilesInExtractionDirectories), Mandatory = true)]
         public Type PutterType { get; set; }
 
         [DemandsInitialization("Retain Full Dates in dicom tags during anonymisation")]
         public bool RetainDates { get; set; }
 
-        [DemandsInitialization("The number of errors (e.g. failed to find/anonymise file) to allow before abandoning the extraction",DefaultValue = 100)]
-        public int ErrorThreshold {get; set; }
+        [DemandsInitialization("The number of errors (e.g. failed to find/anonymise file) to allow before abandoning the extraction", DefaultValue = 100)]
+        public int ErrorThreshold { get; set; }
 
         [DemandsInitialization("Comma separated list of top level tags that you want deleted from the dicom dataset of files being extracted.  This field exists to cover any anonymisation gaps e.g. ditching ReferencedImageSequence")]
         public string DeleteTags { get; set; }
@@ -76,7 +77,7 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
 
         private bool initialized;
 
-        public DataTable ProcessPipelineData(DataTable toProcess, IDataLoadEventListener listener,GracefulCancellationToken cancellationToken)
+        public DataTable ProcessPipelineData(DataTable toProcess, IDataLoadEventListener listener, GracefulCancellationToken cancellationToken)
         {
             //Things we ignore, Lookups, SupportingSql etc
             if (_extractCommand == null)
@@ -85,7 +86,7 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
                 return toProcess;
             }
 
-            if(IgnoreDataset(toProcess,listener))
+            if (IgnoreDataset(toProcess, listener))
             {
                 return toProcess;
             }
@@ -102,7 +103,7 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
             if (MetadataOnly)
             {
                 var matching = GetMetadataOnlyColumnsToProcess(toProcess);
-                
+
                 if (!matching.Any())
                 {
                     // this should have already returned above via IgnoreDataset, bad times if you end up here.
@@ -111,7 +112,7 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
 
                 Dictionary<DataColumn, KeyValuePair<DicomTag, UIDType>> dictionary = matching.ToDictionary(k => k,
                         c => UIDMapping.SupportedTags.First(k => k.Key.DictionaryEntry.Keyword.Equals(c.ColumnName)));
-                
+
                 var releaseIdentifierColumn = GetReleaseIdentifierColumn().GetRuntimeName();
 
                 foreach (DataRow row in toProcess.Rows)
@@ -126,8 +127,10 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
             var releaseColumn = GetReleaseIdentifierColumn();
 
             _sw.Start();
-            
-            foreach (DataRow row in toProcess.Rows)
+
+            //foreach (DataRow row in toProcess.Rows)
+            Parallel.ForEach(toProcess.AsEnumerable(), row =>
+
             {
                 if (_errors > 0 && _errors > ErrorThreshold)
                     throw new($"Number of errors reported ({_errors}) reached the threshold ({ErrorThreshold})");
@@ -139,8 +142,8 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
                 //get the new patient ID
                 var releasePatientId = row[releaseColumn.GetRuntimeName()].ToString();
 
-                ProcessFile(path,listener,pool, releasePatientId,_putter,row);
-            }
+                ProcessFile(path, listener, pool, releasePatientId, _putter, row);
+            });
 
             _sw.Stop();
 
@@ -154,16 +157,16 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
 
         private DataColumn[] GetMetadataOnlyColumnsToProcess(DataTable toProcess)
         {
-             return toProcess.Columns.Cast<DataColumn>().Where(
-                   c => UIDMapping.SupportedTags.Any(k => k.Key.DictionaryEntry.Keyword.Equals(c.ColumnName)))
-                   .ToArray();
+            return toProcess.Columns.Cast<DataColumn>().Where(
+                  c => UIDMapping.SupportedTags.Any(k => k.Key.DictionaryEntry.Keyword.Equals(c.ColumnName)))
+                  .ToArray();
         }
 
         private bool IgnoreDataset(DataTable toProcess, IDataLoadEventListener listener)
         {
-            if(MetadataOnly)
+            if (MetadataOnly)
             {
-                if(GetMetadataOnlyColumnsToProcess(toProcess).Length == 0)
+                if (GetMetadataOnlyColumnsToProcess(toProcess).Length == 0)
                 {
                     listener.OnNotify(this, new(ProgressEventType.Information, "Ignoring non imaging dataset, it had no UID columns"));
                     return true;
@@ -219,10 +222,10 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
             // if we have RelativeArchiveUri then we had better make sure that matches too
             if (row.Table.Columns.Contains(RelativeArchiveColumnName))
             {
-                var outPath = _putter.PredictOutputPath(_destinationDirectory, releaseIdentifier,studyUid,seriesUid, sopUid);
+                var outPath = _putter.PredictOutputPath(_destinationDirectory, releaseIdentifier, studyUid, seriesUid, sopUid);
 
                 // if we are able to calculate the 'would be' output path from the metadata alone
-                if(!string.IsNullOrWhiteSpace(outPath))
+                if (!string.IsNullOrWhiteSpace(outPath))
                 {
                     // then update the row
                     row[RelativeArchiveColumnName] = outPath;
@@ -259,7 +262,7 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
         /// <param name="releaseColumnValue">The substitution to enter in for PatientID</param>
         /// <param name="putter">Determines where the anonymous image is written to</param>
         /// <param name="rowIfAny">If a <see cref="System.Data.DataTable"/> is kicking around, pass the row and it's UID fields will be updated.  Otherwise pass null.</param>
-        public void ProcessFile(AmbiguousFilePath path,  IDataLoadEventListener listener, 
+        public void ProcessFile(AmbiguousFilePath path, IDataLoadEventListener listener,
             ZipPool pool, string releaseColumnValue,
             IPutDicomFilesInExtractionDirectories putter,
             DataRow rowIfAny)
@@ -345,7 +348,7 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
                 //change value in dataset
                 ds.AddOrUpdate(key, releaseValue);
 
-                
+
                 //and change value in DataTable
                 if (rowIfAny != null && rowIfAny.Table.Columns.Contains(key.DictionaryEntry.Keyword))
                     rowIfAny[key.DictionaryEntry.Keyword] = releaseValue;
@@ -360,8 +363,8 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
             }
 
             var newPath = putter.WriteOutDataset(_destinationDirectory, releaseColumnValue, ds);
-    
-            if(rowIfAny != null)
+
+            if (rowIfAny != null)
                 rowIfAny[RelativeArchiveColumnName] = newPath;
 
             _anonymisedImagesCount++;
@@ -381,7 +384,7 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
             List<DicomTag> toReturn = new();
             var alsoDelete = DeleteTags?.Split(",", StringSplitOptions.RemoveEmptyEntries) ?? Array.Empty<string>();
 
-            foreach(var s in alsoDelete)
+            foreach (var s in alsoDelete)
             {
                 try
                 {
@@ -398,12 +401,12 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
 
         public void Dispose(IDataLoadEventListener listener, Exception pipelineFailureExceptionIfAny)
         {
-            
+
         }
 
         public void Abort(IDataLoadEventListener listener)
         {
-            
+
         }
 
         public void PreInitialize(IExtractCommand value, IDataLoadEventListener listener)
@@ -421,11 +424,11 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
             }
             catch (Exception ex)
             {
-                notifier.OnCheckPerformed(new($"Error processing {nameof(DeleteTags)}",CheckResult.Fail, ex));
+                notifier.OnCheckPerformed(new($"Error processing {nameof(DeleteTags)}", CheckResult.Fail, ex));
             }
-            
 
-            lock(CreateServersOneAtATime)
+
+            lock (CreateServersOneAtATime)
             {
                 if (UIDMappingServer == null)
                 {
