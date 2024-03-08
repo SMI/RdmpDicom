@@ -16,6 +16,7 @@ using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using Rdmp.Core.QueryBuilding;
+using System.Threading.Tasks;
 
 namespace Rdmp.Dicom.Extraction.FoDicomBased
 {
@@ -149,8 +150,43 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased
 
         private IColumn GetReleaseIdentifierColumn()
         {
+<<<<<<< Updated upstream
             return _extractCommand.QueryBuilder.SelectColumns.Select(c => c.IColumn).Single(c => c.IsExtractionIdentifier);
         }
+||||||| Stash base
+            var file = (string)processRow[RelativeArchiveColumnName];
+            fileRows.Add(file,processRow);
+            dicomFiles.Add((file,file));
+            releaseIDs.Add(file, processRow[releaseColumn.GetRuntimeName()].ToString());
+        }
+        foreach (var dicomFile in new AmbiguousFilePath(ArchiveRootIfAny,dicomFiles).GetDataset())
+        {
+            if (_errors > 0 && _errors > ErrorThreshold)
+                throw new Exception($"Number of errors reported ({_errors}) reached the threshold ({ErrorThreshold})");
+            cancellationToken.ThrowIfAbortRequested();
+            ProcessFile(dicomFile.Item2,listener, releaseIDs[dicomFile.Item1],_putter,fileRows[dicomFile.Item1]);
+        }
+=======
+            var file = (string)processRow[RelativeArchiveColumnName];
+            fileRows.Add(file,processRow);
+            dicomFiles.Add((file,file));
+            releaseIDs.Add(file, processRow[releaseColumn.GetRuntimeName()].ToString());
+        }
+        Parallel.ForEach(new AmbiguousFilePath(ArchiveRootIfAny, dicomFiles).GetDataset(), dicomFile =>
+        {
+            if (_errors > 0 && _errors > ErrorThreshold)
+                throw new Exception($"Number of errors reported ({_errors}) reached the threshold ({ErrorThreshold})");
+            cancellationToken.ThrowIfAbortRequested();
+            ProcessFile(dicomFile.Item2, listener, releaseIDs[dicomFile.Item1], _putter, fileRows[dicomFile.Item1]);
+        });
+        //foreach (var dicomFile in new AmbiguousFilePath(ArchiveRootIfAny,dicomFiles).GetDataset())
+        //{
+        //    if (_errors > 0 && _errors > ErrorThreshold)
+        //        throw new Exception($"Number of errors reported ({_errors}) reached the threshold ({ErrorThreshold})");
+        //    cancellationToken.ThrowIfAbortRequested();
+        //    ProcessFile(dicomFile.Item2,listener, releaseIDs[dicomFile.Item1],_putter,fileRows[dicomFile.Item1]);
+        //}
+>>>>>>> Stashed changes
 
         private DataColumn[] GetMetadataOnlyColumnsToProcess(DataTable toProcess)
         {
