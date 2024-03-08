@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Rdmp.Core.QueryBuilding;
+using System.Threading.Tasks;
 
 namespace Rdmp.Dicom.Extraction.FoDicomBased;
 
@@ -138,7 +139,7 @@ public partial class FoDicomAnonymiser : IPluginDataFlowComponent<DataTable>, IP
             dicomFiles.Add((file, file));
             releaseIDs.Add(file, processRow[releaseColumn.GetRuntimeName()].ToString());
         }
-        Parallel.ForEach(AmbiguousFilePath(ArchiveRootIfAny, dicomFiles).GetDataset(), dicomFiles =>
+        Parallel.ForEach(new AmbiguousFilePath(ArchiveRootIfAny, dicomFiles).GetDataset(), dicomFile =>
         {
             if (_errors > 0 && _errors > ErrorThreshold)
                 throw new Exception($"Number of errors reported ({_errors}) reached the threshold ({ErrorThreshold})");

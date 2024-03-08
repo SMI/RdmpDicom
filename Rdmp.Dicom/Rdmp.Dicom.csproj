@@ -3,6 +3,7 @@
 		<PackageId>HIC.Rdmp.Dicom</PackageId>
 		<RootNamespace>Rdmp.Dicom</RootNamespace>
 		<AssemblyName>Rdmp.Dicom</AssemblyName>
+		<TargetFramework>net8.0</TargetFramework>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 		<NuGetAudit>false</NuGetAudit>
 	</PropertyGroup>
