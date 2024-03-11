@@ -355,7 +355,11 @@ public partial class FoDicomAnonymiser : IPluginDataFlowComponent<DataTable>, IP
 
         _anonymisedImagesCount++;
 
-        listener.OnProgress(this, new ProgressEventArgs("Writing ANO images", new ProgressMeasurement(_anonymisedImagesCount, ProgressType.Records), _sw.Elapsed));
+        try
+        {
+            listener.OnProgress(this, new ProgressEventArgs("Writing ANO images", new ProgressMeasurement(_anonymisedImagesCount, ProgressType.Records), _sw.Elapsed));
+        }
+        catch (Exception) { }
     }
 
     private static readonly Regex patientLevelRegex = PatientLevelRegex();
