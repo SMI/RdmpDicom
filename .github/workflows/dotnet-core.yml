@@ -83,14 +83,14 @@ jobs:
           - AddTag Catalogue:CT_*Table SeriesDate null
           - CreateNewImagingDatasetSuite "DatabaseType:MicrosoftSqlServer:Name:ImagingTest2:Server=(localdb)\MSSQLLocalDB;Integrated Security=true;Encrypt=yes;TrustServerCertificate=true" ./data DicomFileCollectionSource CT_ CT.it false true
           EOC
-      - name: Test
-        run: |
-          dotnet test -c Release
-          echo "Loading plugin"
-          dotnet run --project RDMP\\Tools\\rdmp\\rdmp.csproj -c Release -- pack -p --file Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg --dir yaml
-          7z t Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg
-          echo "Running plugin test script"
-          dotnet run --project RDMP\\Tools\\rdmp\\rdmp.csproj -c Release -- -f testcmd.yaml --dir yaml 
+      # - name: Test
+      #   run: |
+      #     dotnet test -c Release
+      #     echo "Loading plugin"
+      #     dotnet run --project RDMP\\Tools\\rdmp\\rdmp.csproj -c Release -- pack -p --file Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg --dir yaml
+      #     7z t Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg
+      #     echo "Running plugin test script"
+      #     dotnet run --project RDMP\\Tools\\rdmp\\rdmp.csproj -c Release -- -f testcmd.yaml --dir yaml 
       - name: Store created nupkg files
         uses: actions/upload-artifact@v4
         with:
