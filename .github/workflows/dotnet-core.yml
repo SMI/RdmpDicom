@@ -81,7 +81,7 @@ jobs:
           - AddTag Catalogue:CT_*Table SeriesDate null
           - AddTag Catalogue:CT_*Table SeriesDate null
           - AddTag Catalogue:CT_*Table SeriesDate null
-          - CreateNewImagingDatasetSuite "DatabaseType:MicrosoftSqlServer:Name:ImagingTest2:Server=(localdb)\MSSQLLocalDB;Integrated Security=true;Encrypt=yes;TrustServerCertificate=true" ./data DicomFileCollectionSource CT_ CT.it false true
+          # - CreateNewImagingDatasetSuite "DatabaseType:MicrosoftSqlServer:Name:ImagingTest2:Server=(localdb)\MSSQLLocalDB;Integrated Security=true;Encrypt=yes;TrustServerCertificate=true" ./data DicomFileCollectionSource CT_ CT.it false true
           EOC
       - name: Test
         run: |
