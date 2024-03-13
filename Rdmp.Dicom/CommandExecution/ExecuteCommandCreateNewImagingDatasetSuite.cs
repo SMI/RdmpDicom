@@ -114,7 +114,6 @@ public class ExecuteCommandCreateNewImagingDatasetSuite : BasicCommandExecution
 
     public override void Execute()
     {
-        if (1 == 1) return;
         var logging = LogManager.GetCurrentClassLogger();
 
         if (DicomSourceType == null)
@@ -128,7 +127,7 @@ public class ExecuteCommandCreateNewImagingDatasetSuite : BasicCommandExecution
         List<DiscoveredTable> tablesCreated = new();
 
         // create the database if it does not exist
-        if(!_databaseToCreateInto.Server.Exists() || !_databaseToCreateInto.Exists())
+        if(!_databaseToCreateInto.Server.Exists())// || !_databaseToCreateInto.Exists())
         {
             var create = _databaseToCreateInto.GetRuntimeName();
             logging.Info($"Creating '{create}'");
