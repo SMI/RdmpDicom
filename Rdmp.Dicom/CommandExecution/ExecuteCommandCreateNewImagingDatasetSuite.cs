@@ -84,7 +84,7 @@ public class ExecuteCommandCreateNewImagingDatasetSuite : BasicCommandExecution
 
         _loggingServer = _catalogueRepository.GetDefaultFor(PermissableDefaults.LiveLoggingServer_ID);
 
-        if(_loggingServer == null)
+        if (_loggingServer == null)
             SetImpossible("No default logging server has been configured in your Catalogue database");
 
         CreateLoad = true;
@@ -103,7 +103,7 @@ public class ExecuteCommandCreateNewImagingDatasetSuite : BasicCommandExecution
         FileInfo templateFile,
         bool persistentRaw,
         bool createLoad
-    ):this(repositoryLocator, databaseToCreateInto, projectDirectory)
+    ) : this(repositoryLocator, databaseToCreateInto, projectDirectory)
     {
         DicomSourceType = dicomSourceType ?? typeof(DicomFileCollectionSource);
         TablePrefix = tablePrefix;
@@ -127,7 +127,8 @@ public class ExecuteCommandCreateNewImagingDatasetSuite : BasicCommandExecution
         List<DiscoveredTable> tablesCreated = new();
 
         // create the database if it does not exist
-        if(!_databaseToCreateInto.Server.Exists())// || !_databaseToCreateInto.Exists())
+        //if (!_databaseToCreateInto.Server.Exists() || !_databaseToCreateInto.Exists())
+        if (!_databaseToCreateInto.Exists())
         {
             var create = _databaseToCreateInto.GetRuntimeName();
             logging.Info($"Creating '{create}'");
@@ -136,14 +137,14 @@ public class ExecuteCommandCreateNewImagingDatasetSuite : BasicCommandExecution
             logging.Info($"Database Created, now waiting");
             Thread.Sleep(5000);
 
-            if(!_databaseToCreateInto.Exists())
+            if (!_databaseToCreateInto.Exists())
             {
                 throw new Exception($"Created database '{create}' but then it was still reported to not exist");
             }
         }
 
         //Create with template?
-        if(Template != null)
+        if (Template != null)
         {
             foreach (var table in Template.Tables)
             {
@@ -163,7 +164,7 @@ public class ExecuteCommandCreateNewImagingDatasetSuite : BasicCommandExecution
             throw new Exception("No Template provided");
 
         //that's us done if we aren't creating a load
-        if(!CreateLoad)
+        if (!CreateLoad)
             return;
 
         var loadName = GetNameWithPrefixInBracketsIfAny("SMI Image Loading");
@@ -182,7 +183,7 @@ public class ExecuteCommandCreateNewImagingDatasetSuite : BasicCommandExecution
         //create the logging task
         new Core.Logging.LogManager(_loggingServer).CreateNewLoggingTaskIfNotExists(loadName);
 
-        var projDir = LoadDirectory.CreateDirectoryStructure(_projectDirectory, "ImageLoading",true);
+        var projDir = LoadDirectory.CreateDirectoryStructure(_projectDirectory, "ImageLoading", true);
         NewLoadMetadata.LocationOfFlatFiles = projDir.RootPath.FullName;
         NewLoadMetadata.SaveToDatabase();
 
@@ -191,15 +192,15 @@ public class ExecuteCommandCreateNewImagingDatasetSuite : BasicCommandExecution
 
         //Create a pipeline for reading from Dicom files and writing to any destination component (which must be fixed)
         var name = GetNameWithPrefixInBracketsIfAny("Image Loading Pipe");
-        name = MakeUniqueName(_catalogueRepository.GetAllObjects<Pipeline>().Select(p=>p.Name).ToArray(),name);
+        name = MakeUniqueName(_catalogueRepository.GetAllObjects<Pipeline>().Select(p => p.Name).ToArray(), name);
 
         var pipe = new Pipeline(_catalogueRepository, name);
         DicomSourcePipelineComponent = new PipelineComponent(_catalogueRepository, pipe, DicomSourceType, 0, DicomSourceType.Name);
         DicomSourcePipelineComponent.CreateArgumentsForClassIfNotExists(DicomSourceType);
 
         // Set the argument for only populating tags who appear in the end tables of the load (no need for source to read all the tags only those we are actually loading)
-        var arg = DicomSourcePipelineComponent.GetAllArguments().FirstOrDefault(a=>a.Name.Equals(nameof(DicomSource.UseAllTableInfoInLoadAsFieldMap)));
-        if(arg != null)
+        var arg = DicomSourcePipelineComponent.GetAllArguments().FirstOrDefault(a => a.Name.Equals(nameof(DicomSource.UseAllTableInfoInLoadAsFieldMap)));
+        if (arg != null)
         {
             arg.SetValue(NewLoadMetadata);
             arg.SaveToDatabase();
@@ -223,13 +224,13 @@ public class ExecuteCommandCreateNewImagingDatasetSuite : BasicCommandExecution
 
         pt.SaveToDatabase();
 
-        var args = PersistentRaw? pt.CreateArgumentsForClassIfNotExists<AutoRoutingAttacherWithPersistentRaw>() : pt.CreateArgumentsForClassIfNotExists<AutoRoutingAttacher>();
+        var args = PersistentRaw ? pt.CreateArgumentsForClassIfNotExists<AutoRoutingAttacherWithPersistentRaw>() : pt.CreateArgumentsForClassIfNotExists<AutoRoutingAttacher>();
         SetArgument(args, "LoadPipeline", pipe);
 
         /////////////////////////////////////// Distinct tables on load /////////////////////////
 
 
-        var distincter = new ProcessTask(_catalogueRepository,NewLoadMetadata,LoadStage.AdjustRaw);
+        var distincter = new ProcessTask(_catalogueRepository, NewLoadMetadata, LoadStage.AdjustRaw);
         var distincterArgs = distincter.CreateArgumentsForClassIfNotExists<Distincter>();
 
         distincter.Name = "Distincter";
@@ -241,7 +242,7 @@ public class ExecuteCommandCreateNewImagingDatasetSuite : BasicCommandExecution
 
         /////////////////////////////////////////////////////////////////////////////////////
 
-        if(CreateCoalescer)
+        if (CreateCoalescer)
         {
             var coalescer = new ProcessTask(_catalogueRepository, NewLoadMetadata, LoadStage.AdjustRaw)
             {
@@ -254,7 +255,7 @@ public class ExecuteCommandCreateNewImagingDatasetSuite : BasicCommandExecution
 
             StringBuilder regexPattern = new();
 
-            foreach (var tbl in tablesCreated.Where(tbl => !tbl.DiscoverColumns().Any(c=>c.GetRuntimeName().Equals("SOPInstanceUID",StringComparison.CurrentCultureIgnoreCase))))
+            foreach (var tbl in tablesCreated.Where(tbl => !tbl.DiscoverColumns().Any(c => c.GetRuntimeName().Equals("SOPInstanceUID", StringComparison.CurrentCultureIgnoreCase))))
                 regexPattern.Append($"({tbl.GetRuntimeName()})|");
 
 
@@ -292,7 +293,7 @@ public class ExecuteCommandCreateNewImagingDatasetSuite : BasicCommandExecution
 
         // otherwise give it a suffix
         var suffix = 2;
-        while (existingUsedNames.Any(p => p.Equals(candidate + suffix,StringComparison.CurrentCultureIgnoreCase)))
+        while (existingUsedNames.Any(p => p.Equals(candidate + suffix, StringComparison.CurrentCultureIgnoreCase)))
         {
             suffix++;
         }
@@ -319,7 +320,7 @@ public class ExecuteCommandCreateNewImagingDatasetSuite : BasicCommandExecution
         var arg = args.Single(a => a.Name.Equals(property));
 
         if (MEF.GetType(value.GetType().FullName) == null)
-            throw new ArgumentException($"No type found for { value.GetType().FullName }");
+            throw new ArgumentException($"No type found for {value.GetType().FullName}");
 
         //if this fails, look to see if GetType returned null (indicates that your Type is not loaded by MEF).  Look at mef.DescribeBadAssembliesIfAny() to investigate this issue
         arg.SetValue(value);
