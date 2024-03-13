@@ -127,8 +127,7 @@ public class ExecuteCommandCreateNewImagingDatasetSuite : BasicCommandExecution
         List<DiscoveredTable> tablesCreated = new();
 
         // create the database if it does not exist
-        //if (!_databaseToCreateInto.Server.Exists() || !_databaseToCreateInto.Exists())
-        if (!_databaseToCreateInto.Exists())
+        if (!_databaseToCreateInto.Exists() || !_databaseToCreateInto.Server.Exists())
         {
             var create = _databaseToCreateInto.GetRuntimeName();
             logging.Info($"Creating '{create}'");
