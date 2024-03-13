@@ -103,10 +103,19 @@ public abstract class DicomSource : IPluginDataFlowSource<DataTable>
             notifier.OnCheckPerformed(new CheckEventArgs("Could not deserialize TagElevationConfigurationFile", CheckResult.Fail, e));
         }
 
-        if (string.IsNullOrWhiteSpace(ArchiveRoot)) return;
-        if (!Path.IsPathRooted(ArchiveRoot))
+        // Fail if a non-absolute ArchiveRoot is set:
+        if (!string.IsNullOrWhiteSpace(ArchiveRoot) && !Path.IsPathFullyQualified(ArchiveRoot))
             notifier.OnCheckPerformed(new CheckEventArgs("ArchiveRoot is not rooted, it must be an absolute path e.g. c:\\temp\\MyImages\\", CheckResult.Fail));
+    }
 
+    private IEnumerable<string> SquashTree(DicomDataset ds, DicomTag t)
+    {
+        if (ds.TryGetSingleValue(t, out string value)) yield return value;
+
+        foreach (var datum in ds)
+            if (datum is DicomSequence seq)
+                foreach (var d in seq.SelectMany(i => SquashTree(i, t)))
+                    yield return d;
     }
 
     /// <summary>
@@ -127,8 +136,29 @@ public abstract class DicomSource : IPluginDataFlowSource<DataTable>
 
         var rowValues = new Dictionary<string, object>();
 
+        // First collect all CodeMeaning and CodeValue values as strings:
+        var meanings = string.Join('\n', SquashTree(ds, DicomTag.CodeMeaning));
+        if (!string.IsNullOrWhiteSpace(meanings)) rowValues.Add("CodeMeanings", meanings);
+        var values = string.Join('\n', SquashTree(ds, DicomTag.CodeValue));
+        if (!string.IsNullOrWhiteSpace(values)) rowValues.Add("CodeValues", values);
+
         foreach (var item in ds)
         {
+            // First special-case Sequences such as ICD11 diagnostic codes:
+            if (item is DicomSequence seq && item.Tag == DicomTag.ConceptNameCodeSequence)
+            {
+                var code = seq.Items[0];
+                var scheme = code.GetSingleValueOrDefault(DicomTag.CodingSchemeDesignator, "");
+                if (scheme.Equals("I11", StringComparison.Ordinal) || scheme.Equals("ICD11", StringComparison.Ordinal))
+                {
+                    // Capture ICD11 code and meaning
+                    rowValues.Add("ICD11code", code.GetSingleValueOrDefault(DicomTag.CodeValue, "missing"));
+                    rowValues.Add("ICD11meaning", code.GetSingleValueOrDefault(DicomTag.CodeMeaning, "missing"));
+                }
+
+                continue;
+            }
+
             //get the tag name (human readable)
             var entry = item.Tag.DictionaryEntry;
 
