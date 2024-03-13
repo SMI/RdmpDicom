@@ -114,6 +114,7 @@ public class ExecuteCommandCreateNewImagingDatasetSuite : BasicCommandExecution
 
     public override void Execute()
     {
+        if (1 == 1) return;
         var logging = LogManager.GetCurrentClassLogger();
 
         if (DicomSourceType == null)
