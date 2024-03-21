@@ -14,6 +14,7 @@ using Rdmp.Core.Curation;
 using System.Collections.Concurrent;
 using FellowOakDicom.Log;
 using FellowOakDicom.Network.Client;
+using Microsoft.Extensions.Logging;
 
 namespace Rdmp.Dicom.Cache.Pipeline;
 
@@ -90,7 +91,7 @@ public class PACSSource : SMICacheSource
         };
 
         //helps with tidying up resources if we abort or through an exception and neatly avoids ->  Access to disposed closure
-        using var server = new DicomServer<CachingSCP>(new DicomServerDependencies(new DesktopNetworkManager(),new ConsoleLogManager()));
+        using var server = new DicomServer<CachingSCP>(new DicomServerDependencies(new DesktopNetworkManager(), new LoggerFactory()));
         var client = DicomClientFactory.Create(dicomConfiguration.RemoteAetHost,
             dicomConfiguration.RemoteAetPort, false, dicomConfiguration.LocalAetTitle,
             dicomConfiguration.RemoteAetTitle);
