@@ -2,7 +2,7 @@
   <PropertyGroup>
     <RootNamespace>Rdmp.Dicom.Tests</RootNamespace>
     <AssemblyName>Rdmp.Dicom.Tests</AssemblyName>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
   <ItemGroup>
