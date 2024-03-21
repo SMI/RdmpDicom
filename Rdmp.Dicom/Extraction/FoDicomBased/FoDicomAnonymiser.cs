@@ -138,7 +138,7 @@ public partial class FoDicomAnonymiser: IPluginDataFlowComponent<DataTable>,IPip
             dicomFiles.Add((file,file));
             releaseIDs.Add(file, processRow[releaseColumn.GetRuntimeName()].ToString());
         }
-        foreach (var dicomFile in new AmbiguousFilePath(ArchiveRootIfAny,dicomFiles).GetDataset(5))
+        foreach (var dicomFile in new AmbiguousFilePath(ArchiveRootIfAny,dicomFiles).GetDataset(5,100,listener))
         {
             if (_errors > 0 && _errors > ErrorThreshold)
                 throw new Exception($"Number of errors reported ({_errors}) reached the threshold ({ErrorThreshold})");
