@@ -36,7 +36,7 @@ cd ../..
 nuget pack ./Rdmp.Dicom.nuspec -Properties Configuration=Release -IncludeReferencedProjects -Symbols -Version 0.0.1
 ```
 
-This will produce a nupkg file (e.g. Rdmp.Dicom.0.0.1.nupkg) which can be consumed by both the RDMP client and dot net core RDMP CLI.
+This will produce a nupkg file (e.g. Rdmp.Dicom.0.0.1.rdmp) which can be consumed by both the RDMP client and dot net core RDMP CLI.
 
 # Debugging
 Since it is annoying to have to upload a new version of the plugin to test changes you can instead publish directly to the RDMP bin directory.
