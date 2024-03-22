@@ -165,7 +165,9 @@ public partial class AmbiguousFilePath
             catch (Exception ex)
             {
                 if (attempt >= retryCount)
-                    throw;
+                {
+                  throw;
+                }
                 listener?.OnNotify(this,
                     new NotifyEventArgs(ProgressEventType.Warning,
                         $"Sleeping for {retryDelay}ms because of encountering Exception : {ex.Message} handling {bits[0]}", ex));

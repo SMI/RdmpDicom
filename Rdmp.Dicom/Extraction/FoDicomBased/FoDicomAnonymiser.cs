@@ -24,27 +24,27 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased;
 /// Goes directly to the referenced file locations (which cannot be in zip files) and runs DicomAnonymizer on the files that are referenced
 /// in  <see cref="RelativeArchiveColumnName"/>.
 /// </summary>
-public partial class FoDicomAnonymiser: IPluginDataFlowComponent<DataTable>,IPipelineRequirement<IExtractCommand>
+public partial class FoDicomAnonymiser : IPluginDataFlowComponent<DataTable>, IPipelineRequirement<IExtractCommand>
 {
     private IExtractDatasetCommand _extractCommand;
 
     [DemandsInitialization("If the path filename contains relative file uris to images then this is the root directory")]
     public string ArchiveRootIfAny { get; set; }
 
-    [DemandsInitialization("The column name in the extracted dataset which contains the location of the dicom files",Mandatory = true)]
+    [DemandsInitialization("The column name in the extracted dataset which contains the location of the dicom files", Mandatory = true)]
     public string RelativeArchiveColumnName { get; set; }
 
-    [DemandsInitialization("The mapping database for UID fields", Mandatory=true)]
+    [DemandsInitialization("The mapping database for UID fields", Mandatory = true)]
     public ExternalDatabaseServer UIDMappingServer { get; set; }
 
-    [DemandsInitialization("Determines how dicom files are written to the project output directory",TypeOf = typeof(IPutDicomFilesInExtractionDirectories),Mandatory=true)]
+    [DemandsInitialization("Determines how dicom files are written to the project output directory", TypeOf = typeof(IPutDicomFilesInExtractionDirectories), Mandatory = true)]
     public Type PutterType { get; set; }
 
     [DemandsInitialization("Retain Full Dates in dicom tags during anonymisation")]
     public bool RetainDates { get; set; }
 
-    [DemandsInitialization("The number of errors (e.g. failed to find/anonymise file) to allow before abandoning the extraction",DefaultValue = 100)]
-    public int ErrorThreshold {get; set; }
+    [DemandsInitialization("The number of errors (e.g. failed to find/anonymise file) to allow before abandoning the extraction", DefaultValue = 100)]
+    public int ErrorThreshold { get; set; }
 
     [DemandsInitialization("Comma separated list of top level tags that you want deleted from the dicom dataset of files being extracted.  This field exists to cover any anonymisation gaps e.g. ditching ReferencedImageSequence")]
     public string DeleteTags { get; set; }
@@ -60,6 +60,14 @@ public partial class FoDicomAnonymiser: IPluginDataFlowComponent<DataTable>,IPip
 
     [DemandsInitialization("Set to true to skip opening/anonymising files and just process the metadata already in the database.", DefaultValue = false)]
     public bool MetadataOnly { get; set; }
+
+    [DemandsInitialization("How many tries to allow for fetching the file. This setting may be useful on network drives or oversubscribed resources", DefaultValue = 0)]
+
+    public int FileFetchRetryLimit { get; set; }
+
+    [DemandsInitialization("How long to wait between file fetch retries in milliseconds.", DefaultValue = 100)]
+
+    public int FileFetchRetryTimeout { get; set; }
 
     private IPutDicomFilesInExtractionDirectories _putter;
 
@@ -77,7 +85,7 @@ public partial class FoDicomAnonymiser: IPluginDataFlowComponent<DataTable>,IPip
 
     private bool initialized;
 
-    public DataTable ProcessPipelineData(DataTable toProcess, IDataLoadEventListener listener,GracefulCancellationToken cancellationToken)
+    public DataTable ProcessPipelineData(DataTable toProcess, IDataLoadEventListener listener, GracefulCancellationToken cancellationToken)
     {
         //Things we ignore, Lookups, SupportingSql etc
         if (_extractCommand == null)
@@ -86,7 +94,7 @@ public partial class FoDicomAnonymiser: IPluginDataFlowComponent<DataTable>,IPip
             return toProcess;
         }
 
-        if(IgnoreDataset(toProcess,listener))
+        if (IgnoreDataset(toProcess, listener))
         {
             return toProcess;
         }
@@ -134,16 +142,16 @@ public partial class FoDicomAnonymiser: IPluginDataFlowComponent<DataTable>,IPip
         foreach (DataRow processRow in toProcess.Rows)
         {
             var file = (string)processRow[RelativeArchiveColumnName];
-            fileRows.Add(file,processRow);
-            dicomFiles.Add((file,file));
+            fileRows.Add(file, processRow);
+            dicomFiles.Add((file, file));
             releaseIDs.Add(file, processRow[releaseColumn.GetRuntimeName()].ToString());
         }
-        foreach (var dicomFile in new AmbiguousFilePath(ArchiveRootIfAny,dicomFiles).GetDataset())
+        foreach (var dicomFile in new AmbiguousFilePath(ArchiveRootIfAny, dicomFiles).GetDataset(FileFetchRetryLimit, FileFetchRetryTimeout, listener))
         {
             if (_errors > 0 && _errors > ErrorThreshold)
                 throw new Exception($"Number of errors reported ({_errors}) reached the threshold ({ErrorThreshold})");
             cancellationToken.ThrowIfAbortRequested();
-            ProcessFile(dicomFile.Item2,listener, releaseIDs[dicomFile.Item1],_putter,fileRows[dicomFile.Item1]);
+            ProcessFile(dicomFile.Item2, listener, releaseIDs[dicomFile.Item1], _putter, fileRows[dicomFile.Item1]);
         }
 
         _sw.Stop();
@@ -165,9 +173,9 @@ public partial class FoDicomAnonymiser: IPluginDataFlowComponent<DataTable>,IPip
 
     private bool IgnoreDataset(DataTable toProcess, IDataLoadEventListener listener)
     {
-        if(MetadataOnly)
+        if (MetadataOnly)
         {
-            if(GetMetadataOnlyColumnsToProcess(toProcess).Length == 0)
+            if (GetMetadataOnlyColumnsToProcess(toProcess).Length == 0)
             {
                 listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information, "Ignoring non imaging dataset, it had no UID columns"));
                 return true;
@@ -223,10 +231,10 @@ public partial class FoDicomAnonymiser: IPluginDataFlowComponent<DataTable>,IPip
         // if we have RelativeArchiveUri then we had better make sure that matches too
         if (row.Table.Columns.Contains(RelativeArchiveColumnName))
         {
-            var outPath = _putter.PredictOutputPath(_destinationDirectory, releaseIdentifier,studyUid,seriesUid, sopUid);
+            var outPath = _putter.PredictOutputPath(_destinationDirectory, releaseIdentifier, studyUid, seriesUid, sopUid);
 
             // if we are able to calculate the 'would be' output path from the metadata alone
-            if(!string.IsNullOrWhiteSpace(outPath))
+            if (!string.IsNullOrWhiteSpace(outPath))
             {
                 // then update the row
                 row[RelativeArchiveColumnName] = outPath;
@@ -262,7 +270,7 @@ public partial class FoDicomAnonymiser: IPluginDataFlowComponent<DataTable>,IPip
     /// <param name="releaseColumnValue">The substitution to enter in for PatientID</param>
     /// <param name="putter">Determines where the anonymous image is written to</param>
     /// <param name="rowIfAny">If a <see cref="DataTable"/> is kicking around, pass the row and it's UID fields will be updated.  Otherwise pass null.</param>
-    public void ProcessFile(DicomFile dicomFile,  IDataLoadEventListener listener, string releaseColumnValue,
+    public void ProcessFile(DicomFile dicomFile, IDataLoadEventListener listener, string releaseColumnValue,
         IPutDicomFilesInExtractionDirectories putter,
         DataRow rowIfAny)
     {
@@ -349,7 +357,7 @@ public partial class FoDicomAnonymiser: IPluginDataFlowComponent<DataTable>,IPip
 
         var newPath = putter.WriteOutDataset(_destinationDirectory, releaseColumnValue, ds);
 
-        if(rowIfAny != null)
+        if (rowIfAny != null)
             rowIfAny[RelativeArchiveColumnName] = newPath;
 
         _anonymisedImagesCount++;
@@ -370,7 +378,7 @@ public partial class FoDicomAnonymiser: IPluginDataFlowComponent<DataTable>,IPip
         List<DicomTag> toReturn = new();
         var alsoDelete = DeleteTags?.Split(",", StringSplitOptions.RemoveEmptyEntries) ?? Array.Empty<string>();
 
-        foreach(var s in alsoDelete)
+        foreach (var s in alsoDelete)
         {
             try
             {
@@ -410,11 +418,11 @@ public partial class FoDicomAnonymiser: IPluginDataFlowComponent<DataTable>,IPip
         }
         catch (Exception ex)
         {
-            notifier.OnCheckPerformed(new CheckEventArgs($"Error processing {nameof(DeleteTags)}",CheckResult.Fail, ex));
+            notifier.OnCheckPerformed(new CheckEventArgs($"Error processing {nameof(DeleteTags)}", CheckResult.Fail, ex));
         }
 
 
-        lock(CreateServersOneAtATime)
+        lock (CreateServersOneAtATime)
         {
             if (UIDMappingServer == null)
             {
