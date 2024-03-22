@@ -166,8 +166,6 @@ public partial class AmbiguousFilePath
             {
                 if (attempt >= retryCount)
                 {
-                    listener?.OnNotify(this,
-                  new NotifyEventArgs(ProgressEventType.Warning, $"Hit max retries {retryCount}"));
                   throw;
                 }
                 listener?.OnNotify(this,
