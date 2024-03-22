@@ -65,7 +65,7 @@ public partial class FoDicomAnonymiser : IPluginDataFlowComponent<DataTable>, IP
 
     public int FileFetchRetryLimit { get; set; }
 
-    [DemandsInitialization("How long to wait between file fetch retries.", DefaultValue = 100)]
+    [DemandsInitialization("How long to wait between file fetch retries in milliseconds.", DefaultValue = 100)]
 
     public int FileFetchRetryTimeout { get; set; }
 
