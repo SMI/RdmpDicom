@@ -110,5 +110,5 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ github.ref }}
           file_glob: true
-          file: 'Rdmp.Dicom.${{ steps.version.outputs.version }}.rdmp'
+          file: 'Rdmp.Dicom.${{ steps.version.outputs.version }}.*'
     
