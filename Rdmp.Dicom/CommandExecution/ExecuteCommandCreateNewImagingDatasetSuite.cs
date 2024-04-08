@@ -173,7 +173,7 @@ public class ExecuteCommandCreateNewImagingDatasetSuite : BasicCommandExecution
         //tell all the catalogues that they are part of this load and where to log under the same task
         foreach (var c in NewCataloguesCreated)
         {
-            c.LoadMetadata_ID = NewLoadMetadata.ID;
+            NewLoadMetadata.LinkToCatalogue(c);
             c.LoggingDataTask = loadName;
             c.LiveLoggingServer_ID = _loggingServer.ID;
             c.SaveToDatabase();
