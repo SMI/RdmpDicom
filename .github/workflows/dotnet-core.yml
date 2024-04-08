@@ -86,44 +86,19 @@ jobs:
       - name: Test
         run: |
           dotnet test -c Release
-      - name: Build
-        run: |
-          cd Plugin/windows
-          dotnet publish --runtime win-x64 -c Release --self-contained false -nologo
-          cd ../main
-          dotnet publish --runtime win-x64 -c Release --self-contained false -nologo
-          dotnet publish --runtime linux-x64 -c Release --self-contained false -nologo
-          cd ../..
-          nuget pack ./Rdmp.Dicom.nuspec -Properties Configuration=Release -IncludeReferencedProjects -Symbols -Version ${{ steps.version.outputs.version }}
-          nuget pack ./Rdmp.Dicom.Library.nuspec -Properties Configuration=Release -IncludeReferencedProjects -Symbols -Version ${{ steps.version.outputs.version }}
-          
-          cp Databases.Integration.yaml .\rdmpcli\Databases.yaml
-          cmd /c rdmpcli\rdmp.exe pack --file Rdmp.Dicom.${{ steps.version.outputs.version }}.rdmp
-           cmd /c rdmpcli\rdmp.exe pack --file Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg
-          cmd /c rdmpcli\rdmp.exe cmd listsupportedcommands
-          cmd /c rdmpcli\rdmp.exe cmd describe CreateNewImagingDatasetSuite
-      - name: Get Imaging Template
-        run: |
-          Invoke-WebRequest -Uri https://raw.githubusercontent.com/HicServices/DicomTypeTranslation/main/Templates/CT.it -OutFile D:\a\RdmpDicom\CT.it
-      - name: Integration Tests
-        run: |
-          cmd /c rdmpcli\rdmp.exe cmd NewObject ConnectionStringKeyword MicrosoftSqlServer TrustServerCertificate yes
-          cmd /c rdmpcli\rdmp.exe cmd NewObject ConnectionStringKeyword MicrosoftSqlServer Encrypt yes
-          cmd /c rdmpcli\rdmp.exe cmd CreateNewImagingDatasetSuite "DatabaseType:MicrosoftSqlServer:Name:ImagingTest:Server=(localdb)\MSSQLLocalDB;Integrated Security=true;Encrypt=yes;TrustServerCertificate=true" ./data DicomFileCollectionSource CT_ ../CT.it false true
-          cmd /c rdmpcli\rdmp.exe cmd AddTag Catalogue:CT_ImageTable StudyDate null
-          cmd /c rdmpcli\rdmp.exe cmd AddTag Catalogue:CT_*Table SeriesDate null
-          cmd /c rdmpcli\rdmp.exe cmd AddTag Catalogue:CT_*Table SeriesDate null
-          cmd /c rdmpcli\rdmp.exe cmd AddTag Catalogue:CT_*Table SeriesDate null          
-          cmd /c rdmpcli\rdmp.exe cmd CreateNewImagingDatasetSuite "DatabaseType:MicrosoftSqlServer:Name:ImagingTest2:Server=(localdb)\MSSQLLocalDB;Integrated Security=true;Encrypt=yes;TrustServerCertificate=true" ./data DicomFileCollectionSource CT_ ../CT.it false true
-      - name: Nuget push
-        if: contains(github.ref,'refs/tags/')
-        run: nuget push HIC.Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg -Source https://api.nuget.org/v3/index.json -ApiKey ${{ secrets.NUGET_KEY }} -SkipDuplicate
-      - name: Store created rdmp files
-        uses: actions/upload-artifact@v3
+          echo "Loading plugin"
+          dotnet run --project RDMP\\Tools\\rdmp\\rdmp.csproj -c Release -- pack -p --file Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg --dir yaml
+          7z t Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg
+            dotnet run --project RDMP\\Tools\\rdmp\\rdmp.csproj -c Release -- pack -p --file Rdmp.Dicom.${{ steps.version.outputs.version }}.rdmp --dir yaml
+          7z t Rdmp.Dicom.${{ steps.version.outputs.version }}.rdmp
+          echo "Running plugin test script"
+          dotnet run --project RDMP\\Tools\\rdmp\\rdmp.csproj -c Release -- -f testcmd.yaml --dir yaml 
+      - name: Store created nupkg files
+        uses: actions/upload-artifact@v4
         with:
           path: |
-              ./*.rdmp
               ./*.nupkg
+              ./*.rdmp
           retention-days: 1
       - name: Nuget push
         if: contains(github.ref,'refs/tags/')
@@ -134,4 +109,6 @@ jobs:
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ github.ref }}
-          file: 'Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg'
+          file_glob: true
+          file: 'Rdmp.Dicom.${{ steps.version.outputs.version }}.rdmp'
+    
