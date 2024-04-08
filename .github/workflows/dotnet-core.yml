@@ -48,6 +48,7 @@ jobs:
           
           cp Databases.Integration.yaml .\rdmpcli\Databases.yaml
           cmd /c rdmpcli\rdmp.exe pack --file Rdmp.Dicom.${{ steps.version.outputs.version }}.rdmp
+           cmd /c rdmpcli\rdmp.exe pack --file Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg
           cmd /c rdmpcli\rdmp.exe cmd listsupportedcommands
           cmd /c rdmpcli\rdmp.exe cmd describe CreateNewImagingDatasetSuite
       - name: Get Imaging Template
@@ -65,11 +66,13 @@ jobs:
           cmd /c rdmpcli\rdmp.exe cmd CreateNewImagingDatasetSuite "DatabaseType:MicrosoftSqlServer:Name:ImagingTest2:Server=(localdb)\MSSQLLocalDB;Integrated Security=true;Encrypt=yes;TrustServerCertificate=true" ./data DicomFileCollectionSource CT_ ../CT.it false true
       - name: Nuget push
         if: contains(github.ref,'refs/tags/')
-        run: nuget push HIC.Rdmp.Dicom.${{ steps.version.outputs.version }}.rdmp -Source https://api.nuget.org/v3/index.json -ApiKey ${{ secrets.NUGET_KEY }} -SkipDuplicate
+        run: nuget push HIC.Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg -Source https://api.nuget.org/v3/index.json -ApiKey ${{ secrets.NUGET_KEY }} -SkipDuplicate
       - name: Store created rdmp files
         uses: actions/upload-artifact@v3
         with:
-          path: ./*.rdmp
+          path: |
+              ./*.rdmp
+              ./*.nupkg
           retention-days: 1
       - name: Upload release binaries
         if: contains(github.ref,'refs/tags/')
@@ -77,4 +80,5 @@ jobs:
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ github.ref }}
-          file: 'Rdmp.Dicom.${{ steps.version.outputs.version }}.rdmp'
+          file_glob: true
+          file: 'Rdmp.Dicom.${{ steps.version.outputs.version }}.*'
