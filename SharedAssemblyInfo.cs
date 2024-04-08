@@ -1,9 +1,13 @@
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
+#if WINDOWS
+[assembly: System.Runtime.Versioning.SupportedOSPlatformAttribute("windows")]
+#endif
+
 [assembly: AssemblyCompany("Health Informatics Centre, University of Dundee")]
 [assembly: AssemblyProduct("RDMP Dicom Plugin")]
-[assembly: AssemblyCopyright("Copyright (c) 2018 - 2020")]
+[assembly: AssemblyCopyright("Copyright (c) 2018 - 2024")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

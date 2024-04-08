@@ -1,6 +1,5 @@
-﻿namespace Rdmp.Dicom.PipelineComponents.CFind
+﻿namespace Rdmp.Dicom.PipelineComponents.CFind;
+
+public class List
 {
-    public class List
-    {
-    }
 }

@@ -20,7 +20,7 @@ You can create image tables (and an accompanying data load configuration) with t
 
 ![Create Imaging Table](./Images/CreateImagingTables.png)
 
-You can find some [sample templates](https://github.com/HicServices/DicomTypeTranslation/tree/develop/Templates) in the DicomTypeTranslation repository].
+You can find some [sample templates](https://github.com/SMI/DicomTypeTranslation/tree/develop/Templates) in the DicomTypeTranslation repository].
 
 All tables should have a unique primary key e.g. SOPInstanceUID.  Identical duplication is automatically handled when migrating from RAW to STAGING (prior to MERGE with LIVE) so you can use high level fields as primary keys (e.g. StudyInstanceUID) provided all values in all images are the same for that value (e.g. PatientID, PatientBirthDate etc - these are unlikely to change during a study!).
 

@@ -2,27 +2,26 @@ using Rdmp.Core.DataFlowPipeline;
 using Rdmp.Core.DataLoad;
 using Rdmp.Core.DataLoad.Engine.Job;
 
-namespace Rdmp.Dicom.Attachers.Routing
+namespace Rdmp.Dicom.Attachers.Routing;
+
+class AutoRoutingAttacherWithPersistentRaw : AutoRoutingAttacher
 {
-    class AutoRoutingAttacherWithPersistentRaw : AutoRoutingAttacher
+    public AutoRoutingAttacherWithPersistentRaw():base(false)
     {
-        public AutoRoutingAttacherWithPersistentRaw():base(false)
-        {
-            
-        }
-        public override ExitCodeType Attach(IDataLoadJob job, GracefulCancellationToken token)
-        {
-            //Create RAW if it doesn't exist
-            if (!_dbInfo.Exists())
-                _dbInfo.Create();
 
-            var tableCreator = new PersistentRawTableCreator();
+    }
+    public override ExitCodeType Attach(IDataLoadJob job, GracefulCancellationToken token)
+    {
+        //Create RAW if it doesn't exist
+        if (!_dbInfo.Exists())
+            _dbInfo.Create();
 
-            tableCreator.CreateRAWTablesInDatabase(_dbInfo, job);
+        var tableCreator = new PersistentRawTableCreator();
 
-            job.PushForDisposal(tableCreator);
+        tableCreator.CreateRAWTablesInDatabase(_dbInfo, job);
 
-            return base.Attach(job,token);
-        }
+        job.PushForDisposal(tableCreator);
+
+        return base.Attach(job,token);
     }
 }
