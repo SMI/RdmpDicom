@@ -101,9 +101,9 @@ jobs:
               ./*.nupkg
               ./*.rdmp
           retention-days: 1
-      # - name: Nuget push
-      #   if: contains(github.ref,'refs/tags/')
-      #   run: dotnet nuget push HIC.Rdmp.Dicom.*.nupkg -k ${{ secrets.NUGET_KEY }} --skip-duplicate --source https://api.nuget.org/v3/index.json
+      - name: Nuget push
+        if: contains(github.ref,'refs/tags/')
+        run: dotnet nuget push HIC.Rdmp.Dicom.*.nupkg -k ${{ secrets.NUGET_KEY }} --skip-duplicate --source https://api.nuget.org/v3/index.json
       - name: Upload release binaries
         if: contains(github.ref,'refs/tags/')
         uses: svenstaro/upload-release-action@v2
