@@ -622,6 +622,13 @@ internal class DummyExtractionConfiguration : IExtractionConfiguration
     }
 
     /// <inheritdoc />
+    public event PropertyChangedEventHandler PropertyChanged
+    {
+        add { }
+        remove { }
+    }
+
+    /// <inheritdoc />
     public int ID { get; set; }
 
     /// <inheritdoc />
@@ -808,6 +815,13 @@ internal class DummyProject : IProject
     public IHasDependencies[] GetObjectsDependingOnThis()
     {
         return Array.Empty<IHasDependencies>();
+    }
+
+    /// <inheritdoc />
+    public event PropertyChangedEventHandler PropertyChanged
+    {
+        add { }
+        remove { }
     }
 
     /// <inheritdoc />
