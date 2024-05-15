@@ -622,7 +622,11 @@ internal class DummyExtractionConfiguration : IExtractionConfiguration
     }
 
     /// <inheritdoc />
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler PropertyChanged
+    {
+        add { }
+        remove { }
+    }
 
     /// <inheritdoc />
     public int ID { get; set; }
@@ -814,12 +818,16 @@ internal class DummyProject : IProject
     }
 
     /// <inheritdoc />
-    public void DeleteInDatabase()
+    public event PropertyChangedEventHandler PropertyChanged
     {
+        add { }
+        remove { }
     }
 
     /// <inheritdoc />
-    public event PropertyChangedEventHandler PropertyChanged;
+    public void DeleteInDatabase()
+    {
+    }
 
     /// <inheritdoc />
     public int ID { get; set; }
