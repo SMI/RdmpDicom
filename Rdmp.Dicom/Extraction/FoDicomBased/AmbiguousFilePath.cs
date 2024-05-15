@@ -35,24 +35,22 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased;
 /// </summary>
 public partial class AmbiguousFilePath
 {
-
     private readonly SortedDictionary<string, string> _fullPaths;
     private static readonly Regex RegexDigitsAndDotsOnly = DigitsAndDotsOnlyRegex();
 
 
-
-    public AmbiguousFilePath(string fullPath) : this(null,fullPath)
+    public AmbiguousFilePath(string fullPath) : this(null, fullPath)
     {
     }
 
-    public AmbiguousFilePath(string root, IEnumerable<(string,string)> paths)
+    public AmbiguousFilePath(string root, IEnumerable<(string, string)> paths)
     {
         //if root is provided but is not absolute
-        if(!string.IsNullOrWhiteSpace(root) && !IsAbsolute(root))
+        if (!string.IsNullOrWhiteSpace(root) && !IsAbsolute(root))
             throw new ArgumentException($"Specified root path '{root}' was not IsAbsolute", nameof(root));
 
         _fullPaths = new SortedDictionary<string, string>();
-        paths.Select(p => (Combine(root, p.Item1),p.Item2)).Each(p=>_fullPaths.Add(p.Item1,p.Item2));
+        paths.Select(p => (Combine(root, p.Item1), p.Item2)).Each(p => _fullPaths.Add(p.Item1, p.Item2));
     }
 
     public AmbiguousFilePath(string fullPath, string fileName)
@@ -65,7 +63,7 @@ public partial class AmbiguousFilePath
             {
                 _fullPaths = new SortedDictionary<string, string>();
                 using var zip = new LibArchiveReader(absPath);
-                zip.Entries().Each(e => _fullPaths.Add($"{absPath}!{e.Name}",$"{fileName}!{e.Name}"));
+                zip.Entries().Each(e => _fullPaths.Add($"{absPath}!{e.Name}", $"{fileName}!{e.Name}"));
                 return;
             }
         }
@@ -73,6 +71,7 @@ public partial class AmbiguousFilePath
         {
             // Not a zip so ignore, treat as single file
         }
+
         _fullPaths = new SortedDictionary<string, string> { { absPath, fileName } };
     }
 
@@ -82,7 +81,7 @@ public partial class AmbiguousFilePath
             return path;
 
         if (!IsZipReference(path))
-            return Path.Combine(root,path);
+            return Path.Combine(root, path);
 
         var bits = path.Split('!');
         return $"{Path.Combine(root, bits[0])}!{bits[1]}";
@@ -96,7 +95,7 @@ public partial class AmbiguousFilePath
     /// <param name="retryDelay">Number of milliseconds to wait after encountering an Exception reading before trying</param>
     /// <param name="listener"></param>
     /// <returns></returns>
-    public IEnumerable<ValueTuple<string,DicomFile>> GetDataset(int retryCount = 0, int retryDelay=100, IDataLoadEventListener listener = null)
+    public IEnumerable<ValueTuple<string, DicomFile>> GetDataset(int retryCount = 0, int retryDelay = 100, IDataLoadEventListener listener = null)
     {
         while (!_fullPaths.IsNullOrEmpty())
         {
@@ -106,8 +105,25 @@ public partial class AmbiguousFilePath
                 if (!IsDicomReference(entry.Key))
                     throw new AmbiguousFilePathResolutionException(
                         $"Path provided '{entry.Key}' was not to either an entry in a zip file or to a dicom file");
+
                 _fullPaths.Remove(entry.Key);
-                yield return new ValueTuple<string,DicomFile>(entry.Value,DicomFile.Open(entry.Key));
+                DicomFile f = null;
+                try
+                {
+                    f = DicomFile.Open(entry.Key);
+                }
+                catch (Exception e)
+                {
+                    listener?.OnNotify(this,
+                        new NotifyEventArgs(ProgressEventType.Warning,
+                            $"Unable to read DICOM file '{entry.Key}'.", e));
+                }
+
+                if (f is not null)
+                {
+                    yield return new ValueTuple<string, DicomFile>(entry.Value, f);
+                }
+
                 continue;
             }
 
@@ -115,7 +131,7 @@ public partial class AmbiguousFilePath
             // Can't 'yield return' directly from inside try/catch, so buffer:
             List<(string tag, DicomFile)> resultQueue = new();
             var bits = entry.Key.Split('!');
-            TryAgain:
+        TryAgain:
             try
             {
                 var found = false;
@@ -131,16 +147,16 @@ public partial class AmbiguousFilePath
                         $"{bits[0]}!/{zipEntry.Name.Replace('/','\\')}",
                         $"{bits[0]}!\\{zipEntry.Name.Replace('/','\\')}",
                     };
-                    foreach(var name in tryNames)
-                        if (_fullPaths.TryGetValue(name,out var tag))
+                    foreach (var name in tryNames)
+                        if (_fullPaths.TryGetValue(name, out var tag))
                         {
                             if (name.Equals(entry.Key))
                                 found = true;
                             _fullPaths.Remove(name);
                             using var s = zipEntry.Stream;
                             var f = LoadStream(s);
-                            if (f!=null)
-                                resultQueue.Add((tag,f));
+                            if (f != null)
+                                resultQueue.Add((tag, f));
                         }
                 }
                 if (!found)
@@ -149,7 +165,9 @@ public partial class AmbiguousFilePath
             catch (Exception ex)
             {
                 if (attempt >= retryCount)
-                    throw;
+                {
+                  throw;
+                }
                 listener?.OnNotify(this,
                     new NotifyEventArgs(ProgressEventType.Warning,
                         $"Sleeping for {retryDelay}ms because of encountering Exception : {ex.Message} handling {bits[0]}", ex));
@@ -179,7 +197,7 @@ public partial class AmbiguousFilePath
 
     public static bool IsDicomReference(string fullPath)
     {
-        if(string.IsNullOrWhiteSpace(fullPath))
+        if (string.IsNullOrWhiteSpace(fullPath))
             return false;
 
         var extension = Path.GetExtension(fullPath);

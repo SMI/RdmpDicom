@@ -174,14 +174,14 @@ public abstract class DicomSource : IPluginDataFlowSource<DataTable>
                 case InvalidDataHandling.ThrowException:
 
                     //enforce types and leave any Exceptions uncaught
-                    value = DicomTypeTranslater.Flatten(DicomTypeTranslaterReader.GetCSharpValue(ds, item));
+                    value = DicomTypeTranslater.Flatten(new[] { DicomTypeTranslaterReader.GetCSharpValue(ds, item) });
                     break;
                 case InvalidDataHandling.MarkCorrupt:
 
                     try
                     {
                         //try to enforce types
-                        value = DicomTypeTranslater.Flatten(DicomTypeTranslaterReader.GetCSharpValue(ds, item));
+                        value = DicomTypeTranslater.Flatten(new[] { DicomTypeTranslaterReader.GetCSharpValue(ds, item) });
                     }
                     catch (Exception ex)
                     {
@@ -203,7 +203,7 @@ public abstract class DicomSource : IPluginDataFlowSource<DataTable>
                     //try to enforce types
                     try
                     {
-                        value = DicomTypeTranslater.Flatten(DicomTypeTranslaterReader.GetCSharpValue(ds, item));
+                        value = DicomTypeTranslater.Flatten(new[] { DicomTypeTranslaterReader.GetCSharpValue(ds, item) });
                     }
                     catch (Exception ex)
                     {

@@ -35,7 +35,7 @@ dotnet publish -p:DebugType=embedded -p:GenerateDocumentation=false Plugin/main/
 dotnet run --project RDMP/Tools/rdmp/rdmp.csproj -c Release -- pack -p --file Rdmp.Dicom.0.0.1.nupkg --dir yaml
 ```
 
-This will produce a nupkg file (e.g. Rdmp.Dicom.0.0.1.nupkg) which can be consumed by both the RDMP client and dot net core RDMP CLI.
+This will produce a nupkg file (e.g. Rdmp.Dicom.0.0.1.rdmp) which can be consumed by both the RDMP client and dot net core RDMP CLI.
 
 # Debugging
 Since it is annoying to have to upload a new version of the plugin to test changes you can instead publish directly to the RDMP bin directory.

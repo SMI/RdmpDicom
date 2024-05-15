@@ -1,5 +1,4 @@
 using FellowOakDicom;
-using FellowOakDicom.Log;
 using FellowOakDicom.Network;
 using System;
 using System.Text;
@@ -7,6 +6,9 @@ using System.Threading.Tasks;
 using FellowOakDicom.Imaging.Codec;
 using FellowOakDicom.Memory;
 using Rdmp.Core.ReusableLibraryCode.Progress;
+using Microsoft.Extensions.Logging;
+using FellowOakDicom.Log;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Rdmp.Dicom.Cache.Pipeline;
 
@@ -60,8 +62,8 @@ public class CachingSCP : DicomService, IDicomServiceProvider, IDicomCStoreProvi
     private string CalledAE = string.Empty;
     private string CallingAE = string.Empty;
 
-    private static readonly DicomServiceDependencies Dependencies = new(new ConsoleLogManager(),new DesktopNetworkManager(),new DefaultTranscoderManager(),new ArrayPoolMemoryProvider());
-    public CachingSCP(INetworkStream stream, Encoding encoding, Logger logger): base(stream, encoding, logger, Dependencies)
+    private static readonly DicomServiceDependencies Dependencies =new(new LoggerFactory(),new DesktopNetworkManager(),new DefaultTranscoderManager(),new ArrayPoolMemoryProvider());
+    public CachingSCP(INetworkStream stream, Encoding encoding, ILogger logger): base(stream, encoding, logger, Dependencies)
     {
         Options.LogDimseDatasets = false;
         Options.LogDataPDUs = false;
@@ -88,7 +90,7 @@ public class CachingSCP : DicomService, IDicomServiceProvider, IDicomCStoreProvi
     public void OnReceiveAbort(DicomAbortSource source, DicomAbortReason reason)
     {
         var msg = $"Received abort from {source}for {reason}";
-        Logger.Warn(msg, source, reason);
+        Logger.LogWarning(msg, source, reason);
         Listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Warning, $"Aborted: {msg}"));
     }
     #endregion
@@ -98,7 +100,7 @@ public class CachingSCP : DicomService, IDicomServiceProvider, IDicomCStoreProvi
     {
         var msg = "Connection closed";
         if (e != null) msg += e.Message + e.StackTrace;
-        Logger.Info(msg, e);
+        Logger.LogInformation(msg, e);
         Listener.OnNotify(this,new NotifyEventArgs(Verbose ? ProgressEventType.Information : ProgressEventType.Trace,
             $"ConnectionClosed: {msg}"));
     }
@@ -132,7 +134,7 @@ public class CachingSCP : DicomService, IDicomServiceProvider, IDicomCStoreProvi
     {
         var msg = "CStore request exception";
         if (e != null) msg += e.Message + e.StackTrace;
-        Logger.Info(msg, e);
+        Logger.LogInformation(msg, e);
         await Task.Run(()=>Listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Error, "CStoreRequest failed", e)));
     }
     #endregion

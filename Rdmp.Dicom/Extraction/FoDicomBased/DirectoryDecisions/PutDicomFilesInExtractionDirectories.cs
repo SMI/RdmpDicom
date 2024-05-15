@@ -6,6 +6,10 @@ namespace Rdmp.Dicom.Extraction.FoDicomBased.DirectoryDecisions;
 
 public abstract class PutDicomFilesInExtractionDirectories : IPutDicomFilesInExtractionDirectories
 {
+
+
+    public PutDicomFilesInExtractionDirectories() : base() { }
+
     public string WriteOutDataset(DirectoryInfo outputDirectory, string releaseIdentifier, DicomDataset dicomDataset)
     {
         if(dicomDataset == null)
