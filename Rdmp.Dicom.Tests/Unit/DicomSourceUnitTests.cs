@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Data;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Xml;
 using DicomTypeTranslation.Elevation.Exceptions;
+using FellowOakDicom;
 using NUnit.Framework;
+using Rdmp.Core.DataFlowPipeline;
 using Rdmp.Core.DataLoad.Engine.Job;
 using Rdmp.Dicom.PipelineComponents.DicomSources;
 using Rdmp.Dicom.PipelineComponents.DicomSources.Worklists;
@@ -12,9 +15,8 @@ using Rdmp.Core.ReusableLibraryCode.Progress;
 
 namespace Rdmp.Dicom.Tests.Unit;
 
-public class DicomSourceUnitTests
+public sealed class DicomSourceUnitTests
 {
-
     [Test]
     public void Test_Linux_Root()
     {
@@ -41,7 +43,6 @@ public class DicomSourceUnitTests
     [TestCase(@"C:\bob\", @"C:\fish\bob\fish\1.dcm", @"C:/fish/bob/fish/1.dcm")] //not relative so just return verbatim string (with slash fixes)
     [TestCase(@"C:\bob\", @"./fish.dcm", @"./fish.dcm")]
     [TestCase(@"./bob/", @"./bob/fish.dcm", @"./fish.dcm")] //if the "root" is relative then we can still express this relative to it
-
     public void Test_ApplyArchiveRootToMakeRelativePath(string root, string inputPath, string expectedRelativePath)
     {
         var source = new DicomFileCollectionSource { ArchiveRoot = root };
@@ -49,6 +50,7 @@ public class DicomSourceUnitTests
         var result = source.ApplyArchiveRootToMakeRelativePath(inputPath);
         Assert.That(result, Is.EqualTo(expectedRelativePath));
     }
+
     [Test]
     public void AssembleDataTableFromFile()
     {
@@ -94,10 +96,10 @@ public class DicomSourceUnitTests
             Assert.That(result.Columns, Is.Not.Empty);
         });
     }
+
     [Test]
     public void AssembleDataTableFromFolder()
     {
-
         var file1 = new FileInfo(Path.Combine(TestContext.CurrentContext.TestDirectory, "TestData/FileWithLotsOfTags.dcm"));
         var file2 = new FileInfo(Path.Combine(TestContext.CurrentContext.TestDirectory, "TestData/IM-0001-0013.dcm"));
 
@@ -121,12 +123,11 @@ public class DicomSourceUnitTests
     }
 
 
-
-
     [Test]
     public void Test_ElevationXmlLoading()
     {
         #region xml values
+
         const string validXml1 =
             @"<TagElevationRequestCollection>
   <TagElevationRequest>
@@ -151,6 +152,7 @@ public class DicomSourceUnitTests
     <ElevationPathway>CodeValue->CodeValue</ElevationPathway>
   </TagElevationRequest>
 </TagElevationRequestCollection>";
+
         #endregion
 
         var source = new DicomFileCollectionSource();
@@ -165,11 +167,11 @@ public class DicomSourceUnitTests
         source.TagElevationConfigurationFile = new(file);
 
         var ex = Assert.Throws<XmlException>(() => source.LoadElevationRequestsFile());
-        Assert.That(ex.Message, Does.Contain("Unexpected end of file"));
+        Assert.That(ex?.Message, Does.Contain("Unexpected end of file"));
 
         File.WriteAllText(file, invalidXml);
         var ex2 = Assert.Throws<TagNavigationException>(() => source.LoadElevationRequestsFile());
-        Assert.That(ex2.Message, Does.Contain("Navigation Token CodeValue was not the final token in the pathway"));
+        Assert.That(ex2?.Message, Does.Contain("Navigation Token CodeValue was not the final token in the pathway"));
 
         File.WriteAllText(file, validXml1);
         Assert.That(source.LoadElevationRequestsFile().Requests.Single().ColumnName, Is.EqualTo("CodeValueCol"));
@@ -178,11 +180,11 @@ public class DicomSourceUnitTests
         source.TagElevationConfigurationXml = new() { xml = "<lolz>" };
 
         var ex3 = Assert.Throws<XmlException>(() => source.LoadElevationRequestsFile());
-        Assert.That(ex3.Message, Does.Contain("Unexpected end of file"));
+        Assert.That(ex3?.Message, Does.Contain("Unexpected end of file"));
 
         source.TagElevationConfigurationXml = new() { xml = invalidXml };
         var ex4 = Assert.Throws<TagNavigationException>(() => source.LoadElevationRequestsFile());
-        Assert.That(ex4.Message, Does.Contain("Navigation Token CodeValue was not the final token in the pathway"));
+        Assert.That(ex4?.Message, Does.Contain("Navigation Token CodeValue was not the final token in the pathway"));
 
         source.TagElevationConfigurationXml = new() { xml = validXml2 };
         Assert.That(source.LoadElevationRequestsFile().Requests.Single().ColumnName, Is.EqualTo("CodeValueCol2"));
@@ -195,4 +197,47 @@ public class DicomSourceUnitTests
         source.TagElevationConfigurationXml = new() { xml = "  \r\n  " };
         Assert.That(source.LoadElevationRequestsFile().Requests.Single().ColumnName, Is.EqualTo("CodeValueCol"));
     }
+
+    [Test]
+    public void SR_treeFlatten()
+    {
+        var ds = srTest();
+        var source = new DicomDatasetCollectionSource();
+        source.PreInitialize(new ExplicitListDicomDatasetWorklist([ds], "test.dcm"), ThrowImmediatelyDataLoadEventListener.Quiet);
+        using var dt = source.GetChunk(ThrowImmediatelyDataLoadEventListener.Quiet, new GracefulCancellationToken());
+    }
+
+    private static DicomDataset srTest() =>
+        new([
+            new DicomSequence(DicomTag.AnatomicRegionSequence,new DicomDataset([
+                new DicomShortString(DicomTag.CodeValue, ""),
+                new DicomShortString(DicomTag.CodingSchemeDesignator, ""),
+                new DicomShortString(DicomTag.CodeMeaning, "")
+            ])),
+            new DicomIntegerString(DicomTag.LesionNumber, 1),
+            new DicomCodeString(DicomTag.Laterality, [null]),
+            new DicomSequence(DicomTag.AcquisitionContextSequence, new DicomDataset(
+                new DicomCodeString(DicomTag.ValueType, "CODE"),
+                new DicomSequence(DicomTag.ConceptNameCodeSequence, new DicomDataset(
+                    new DicomShortString(DicomTag.CodingSchemeDesignator, "DCM"),
+                    new DicomLongString(DicomTag.CodeMeaning, "Fitzpatrick Skin Type"),
+                    new DicomUniqueIdentifier(DicomTag.ContextUID, "1.2.840.10008.6.1.1346")
+                )),
+                new DicomSequence(DicomTag.ConceptCodeSequence, new DicomDataset(
+                    new DicomShortString(DicomTag.CodeValue, "C74571"),
+                    new DicomShortString(DicomTag.CodingSchemeDesignator, "LN"),
+                    new DicomLongString(DicomTag.CodeMeaning, "Fitzpatrick Skin Type III")
+                )),
+                new DicomCodeString(DicomTag.ValueType, "CODE"),
+                new DicomSequence(DicomTag.ConceptNameCodeSequence, new DicomDataset(
+                    new DicomShortString(DicomTag.CodeValue, "2F23"),
+                    new DicomShortString(DicomTag.CodingSchemeDesignator, "I11"),
+                    new DicomLongString(DicomTag.CodeMeaning, "Benign dermal fibrous or fibrohistiocytic neoplasms")
+                )),
+                new DicomSequence(DicomTag.ConceptCodeSequence, new DicomDataset(
+                    new DicomShortString(DicomTag.CodeValue, "2F23.0"),
+                    new DicomShortString(DicomTag.CodingSchemeDesignator, "I11"),
+                    new DicomLongString(DicomTag.CodeMeaning, "Dermatofibroma")
+                ))))
+        ]);
 }
