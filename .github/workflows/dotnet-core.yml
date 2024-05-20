@@ -85,6 +85,7 @@ jobs:
           - CreateNewImagingDatasetSuite "DatabaseType:MicrosoftSqlServer:Name:ImagingTest2:Server=(localdb)\MSSQLLocalDB;Integrated Security=true;Encrypt=yes;TrustServerCertificate=true" ./data DicomFileCollectionSource CT_ CT.it false true
           EOC
       - name: Test
+        shell: bash
         run: |
           dotnet test -c Release
           echo "Loading plugin"
