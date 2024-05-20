@@ -202,7 +202,10 @@ public sealed class DicomSourceUnitTests
     public void SR_treeFlatten()
     {
         var ds = srTest();
-        var source = new DicomDatasetCollectionSource();
+        var source = new DicomDatasetCollectionSource
+        {
+            FilenameField = "Filename"
+        };
         source.PreInitialize(new ExplicitListDicomDatasetWorklist([ds], "test.dcm"), ThrowImmediatelyDataLoadEventListener.Quiet);
         using var dt = source.GetChunk(ThrowImmediatelyDataLoadEventListener.Quiet, new GracefulCancellationToken());
     }
