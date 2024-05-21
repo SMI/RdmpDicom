@@ -42,6 +42,7 @@ jobs:
       - name: Package
         shell: bash
         run: |
+          dotnet test -c Release
           wget https://raw.githubusercontent.com/SMI/DicomTypeTranslation/main/Templates/CT.it
           dotnet publish Rdmp.Dicom/Rdmp.Dicom.csproj -o p/main -c Release --self-contained false -nologo
           dotnet publish Rdmp.Dicom.UI/Rdmp.Dicom.UI.csproj -o p/windows -c Release --self-contained false -nologo
@@ -87,7 +88,6 @@ jobs:
       - name: Test
         shell: bash
         run: |
-          dotnet test -c Release
           echo "Loading plugin"
           dotnet run --project RDMP\\Tools\\rdmp\\rdmp.csproj -c Release -- pack -p --file Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg --dir yaml
           7z t Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg
