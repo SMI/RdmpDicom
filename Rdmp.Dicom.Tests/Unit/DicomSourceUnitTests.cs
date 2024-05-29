@@ -208,6 +208,9 @@ public sealed class DicomSourceUnitTests
         };
         source.PreInitialize(new ExplicitListDicomDatasetWorklist([ds], "test.dcm"), ThrowImmediatelyDataLoadEventListener.Quiet);
         using var dt = source.GetChunk(ThrowImmediatelyDataLoadEventListener.Quiet, new GracefulCancellationToken());
+        Assert.That(dt.Rows.Count, Is.EqualTo(1));
+        Assert.That(dt.Rows[0].ItemArray.Any(static i => i?.ToString()?.Contains("Dermatofibroma")==true));
+        Assert.That(dt.Rows[0].ItemArray.Any(static i => i?.ToString()?.Contains("2F23.0")==true));
     }
 
     private static DicomDataset srTest() =>
