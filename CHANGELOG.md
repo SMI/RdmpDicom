@@ -472,4 +472,4 @@ Updated to be compatible with RDMP 4.2
 [1.3.0]: https://github.com/SMI/RdmpDicom/compare/v1.1.0...v1.3.0
 [1.1.0]: https://github.com/SMI/RdmpDicom/compare/v1.0.2...v1.1.0
 [1.0.2]: https://github.com/SMI/RdmpDicom/compare/1581c5ae3a12db1873f4cf1a930215750ad2ae14...v1.0.2
-[Tag Elevation]:https://github.com/SMI/DicomTypeTranslation/tree/develop/DicomTypeTranslation/Elevation
+[Tag Elevation]:https://github.com/SMI/DicomTypeTranslation/tree/main/DicomTypeTranslation/Elevation

@@ -1,6 +1,6 @@
 # NLP Cohort Building
 
-1. [Background](#Background)
+1. [Background](#background)
 1. [Loading Data](#loading-data)
 1. [Starting the REST API](#starting-the-rest-api)
 1. [Adding the API endpoint in RDMP](#adding-the-api-endpoint-in-rdmp)
@@ -18,7 +18,7 @@ A plugin has been created to interface with SR data held in a [SemEHR] instance.
 ## Loading Data
 Before you can use the plugin you must first load your data into a SemEHR instance.
  
-https://github.com/SMI/SmiServices/tree/master/src/applications/SRAnonTool
+https://github.com/SMI/StructuredReports/tree/main/src/applications/SRAnonTool
 
 ## Starting the REST API
 The REST API must be configured and accessible over HTTPS.  Test that you are able
@@ -37,7 +37,7 @@ Alternatively from the command line you can run:
 ```
 
 ## Using the API endpoint in Cohort Builder
-Create a new [CohortIdentificationConfiguration].  Ensure you have [enabled query caching](https://github.com/HicServices/RDMP/blob/develop/Rdmp.Core/CohortCreation/Readme.md#creating-a-cache).  
+Create a new [CohortIdentificationConfiguration].  Ensure you have [enabled query caching](https://github.com/HicServices/RDMP/blob/develop/Rdmp.Core/CohortCreation/CohortCreation.md#creating-a-cache).  
 
 Add your new 'Sem EHR Catalogue' to the root container of the configuration
 

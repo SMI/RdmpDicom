@@ -1,9 +1,9 @@
 # Data Load
 
-1. [Background](#Background)
-3. [Image Tables]
-1. [Implementation](#Implementation)
-1. [Study Series Image Level](#Study-Series-Image-Level)
+1. [Background](#background)
+3. [Image Tables](#image-tables)
+1. [Implementation](#implementation)
+1. [Study Series Image Level](#study-series-image-level)
 
 ## Background
 The Rdmp.Dicom plugin allows you to create and load Dicom [Image Tables].  These tables contain the location (on disk) of the image and relevant metadata (e.g. dicom tags) about each image.
@@ -20,7 +20,7 @@ You can create image tables (and an accompanying data load configuration) with t
 
 ![Create Imaging Table](./Images/CreateImagingTables.png)
 
-You can find some [sample templates](https://github.com/SMI/DicomTypeTranslation/tree/develop/Templates) in the DicomTypeTranslation repository].
+You can find some [sample templates](https://github.com/SMI/DicomTypeTranslation/tree/main/Templates) in the DicomTypeTranslation repository].
 
 All tables should have a unique primary key e.g. SOPInstanceUID.  Identical duplication is automatically handled when migrating from RAW to STAGING (prior to MERGE with LIVE) so you can use high level fields as primary keys (e.g. StudyInstanceUID) provided all values in all images are the same for that value (e.g. PatientID, PatientBirthDate etc - these are unlikely to change during a study!).
 
@@ -50,4 +50,4 @@ Sometimes there are differences in study/series level tags between images when y
 |[PrimaryKeyCollisionIsolationMutilation](./../Rdmp.Dicom/PipelineComponents/PrimaryKeyCollisionIsolationMutilation.md) | If all the above components failed then you can use this one to isolate the colliding records into a store (and drop them from the data load) |
 
 
-[Image Tables]: #Image-Tables
+[Image Tables]: #image-tables
