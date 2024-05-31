@@ -90,7 +90,7 @@ jobs:
           echo "Loading plugin"
           dotnet run --project RDMP\\Tools\\rdmp\\rdmp.csproj -c Release -- pack -p --file Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg --dir yaml
           7z t Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg
-          cp Rdmp.Dicom.${{ steps.version.outputs.version }}.zip Rdmp.Dicom.${{ steps.version.outputs.version }}.rdmp
+          cp Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg Rdmp.Dicom.${{ steps.version.outputs.version }}.rdmp
           echo "Running plugin test script"
           dotnet run --project RDMP\\Tools\\rdmp\\rdmp.csproj -c Release -- -f testcmd.yaml --dir yaml 
       - name: Store created nupkg files
