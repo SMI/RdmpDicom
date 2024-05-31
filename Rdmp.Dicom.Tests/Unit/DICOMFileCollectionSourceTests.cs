@@ -16,6 +16,7 @@ using Rdmp.Core.DataFlowPipeline.Requirements;
 using Rdmp.Core.DataLoad.Engine.Pipeline.Destinations;
 using FAnsi;
 using Rdmp.Dicom.Extraction.FoDicomBased;
+using SynthEHR;
 
 namespace Rdmp.Dicom.Tests.Unit;
 
