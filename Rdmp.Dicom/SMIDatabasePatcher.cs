@@ -2,10 +2,4 @@ using Rdmp.Core.MapsDirectlyToDatabaseTable.Versioning;
 
 namespace Rdmp.Dicom;
 
-public class SMIDatabasePatcher : PluginPatcher
-{
-    public SMIDatabasePatcher():base("db")
-    {
-
-    }
-}
+public sealed class SMIDatabasePatcher() : PluginPatcher("db");
