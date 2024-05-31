@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [7.0.5] 2024-05-31
+
+- Implement CodeMeaning/CodeValue extraction for ICD11 support
+- Bump HIC.DicomTypeTranslation from 4.1.0 to 4.1.1
+
+## [7.0.4] 2024-04-08
+
+- Update RDMP API for new multi-load per catalogue
+
 ## [7.0.3] 2024-03-28
 
 - Add ability to retry file fetch in FoDicomAnaonymiser
@@ -406,8 +415,13 @@ Updated to be compatible with RDMP 4.2
 
 - Initial commit from private repo
 
-[Unreleased]: https://github.com/SMI/RdmpDicom/compare/v7.0.0...develop
-[7.0.0]: https://github.com/SMI/RdmpDicom/compare/v6.0.2...v7.0.0
+[Unreleased]: https://github.com/SMI/RdmpDicom/compare/v7.0.5...develop
+[7.0.5]: https://github.com/SMI/RdmpDicom/compare/v7.0.4...v7.0.5
+[7.0.4]: https://github.com/SMI/RdmpDicom/compare/v7.0.3...v7.0.4
+[7.0.3]: https://github.com/SMI/RdmpDicom/compare/v7.0.2...v7.0.3
+[7.0.2]: https://github.com/SMI/RdmpDicom/compare/v7.0.1...v7.0.2
+[7.0.1]: https://github.com/SMI/RdmpDicom/compare/v7.0.0-rc1...v7.0.1
+[7.0.0]: https://github.com/SMI/RdmpDicom/compare/v6.0.2...v7.0.0-rc1
 [6.0.2]: https://github.com/SMI/RdmpDicom/compare/v6.0.1...v6.0.2
 [6.0.1]: https://github.com/SMI/RdmpDicom/compare/v6.0.0...v6.0.1
 [6.0.0]: https://github.com/SMI/RdmpDicom/compare/v5.0.12...v6.0.0
