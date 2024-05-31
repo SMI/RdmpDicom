@@ -50,7 +50,10 @@ public abstract class DicomSource : IPluginDataFlowSource<DataTable>
         value = value?.TrimStart().TrimEnd(' ', '\t', '\r', '\n');
 
         //Standardize on forward slashes (but don't try to fix \\ e.g. at the start of a UNC path
-        if (!string.IsNullOrEmpty(value)) value = value.StartsWith("\\\\") ? $"\\\\{value[2..].Replace('\\', '/')}" : value.Replace('\\', '/');
+        if (!string.IsNullOrEmpty(value))
+            value = value.StartsWith("\\\\", StringComparison.Ordinal)
+                ? $"\\\\{value[2..].Replace('\\', '/')}"
+                : value.Replace('\\', '/');
 
         //if it has a trailing slash (but isn't just '/') then trim the end
         if(value != null)
@@ -108,14 +111,12 @@ public abstract class DicomSource : IPluginDataFlowSource<DataTable>
             notifier.OnCheckPerformed(new CheckEventArgs("ArchiveRoot is not rooted, it must be an absolute path e.g. c:\\temp\\MyImages\\", CheckResult.Fail));
     }
 
-    private IEnumerable<string> SquashTree(DicomDataset ds, DicomTag t)
+    private static IEnumerable<string> SquashTree(DicomDataset ds, DicomTag t)
     {
         if (ds.TryGetSingleValue(t, out string value)) yield return value;
 
-        foreach (var datum in ds)
-            if (datum is DicomSequence seq)
-                foreach (var d in seq.SelectMany(i => SquashTree(i, t)))
-                    yield return d;
+        foreach (var datum in ds.OfType<DicomSequence>().SelectMany(seq => seq.SelectMany(i => SquashTree(i, t))))
+            yield return datum;
     }
 
     /// <summary>
