@@ -1,4 +1,5 @@
-[![Build status](https://github.com/SMI/RdmpDicom/actions/workflows/dotnet-core.yml/badge.svg)](https://github.com/SMI/RdmpDicom/actions/workflows/dotnet-core.yml) [![Total alerts](https://img.shields.io/lgtm/alerts/g/SMI/RdmpDicom.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/SMI/RdmpDicom/alerts/) [![NuGet Badge](https://buildstats.info/nuget/HIC.RDMP.Dicom)](https://buildstats.info/nuget/HIC.RDMP.Dicom)
+[![Build status](https://github.com/SMI/RdmpDicom/actions/workflows/dotnet-core.yml/badge.svg)](https://github.com/SMI/RdmpDicom/actions/workflows/dotnet-core.yml)
+[![NuGet Badge](https://buildstats.info/nuget/HIC.RDMP.Dicom)](https://buildstats.info/nuget/HIC.RDMP.Dicom)
 
 # RdmpDicom
 Plugin for [RDMP](https://github.com/HicServices/RDMP) that adds support for load, linking (with EHR data in relational databases) and extracting anonymous DICOM images for researchers.
