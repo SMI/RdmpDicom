@@ -1,0 +1,10 @@
+files:
+- ./Documentation/DataExtraction.md
+- ./Documentation/Caching.md
+- ./Documentation/NlpPlugin.md
+- ./Documentation/DataLoad.md
+- ./CHANGELOG.md
+- ./Rdmp.Dicom/PipelineComponents/PrimaryKeyCollisionIsolationMutilation.md
+- ./README.md
+- ./.github/ISSUE_TEMPLATE/bug_report.md
+- ./Packages.md
