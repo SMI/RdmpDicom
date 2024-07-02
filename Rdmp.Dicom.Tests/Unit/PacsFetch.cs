@@ -8,6 +8,7 @@ using FellowOakDicom.Log;
 using FellowOakDicom.Memory;
 using FellowOakDicom.Network;
 using FellowOakDicom.Network.Client;
+using Microsoft.Extensions.Logging;
 using NUnit.Framework;
 
 namespace Rdmp.Dicom.Tests.Unit;
@@ -17,9 +18,9 @@ internal class PacsFetch
     class QRService : DicomService, IDicomServiceProvider, IDicomCFindProvider, IDicomCEchoProvider,
         IDicomCMoveProvider
     {
-        private static readonly DicomServiceDependencies Deps = new(new ConsoleLogManager(),
+        private static readonly DicomServiceDependencies Dependencies = new(LoggerFactory.Create(builder => builder.AddConsole()),
             new DesktopNetworkManager(), new DefaultTranscoderManager(), new ArrayPoolMemoryProvider());
-        public QRService(INetworkStream stream, Encoding fallbackEncoding, Logger log) : base(stream, fallbackEncoding, log,Deps)
+        public QRService(INetworkStream stream, Encoding fallbackEncoding, Microsoft.Extensions.Logging.ILogger log) : base(stream, fallbackEncoding, log, Dependencies)
         {
         }
 
@@ -55,13 +56,14 @@ internal class PacsFetch
             foreach (var pc in association.PresentationContexts)
             {
                 if (pc.AbstractSyntax == DicomUID.Verification
-                    || pc.AbstractSyntax==DicomUID.PatientRootQueryRetrieveInformationModelFind
-                    || pc.AbstractSyntax==DicomUID.PatientRootQueryRetrieveInformationModelMove
-                    || pc.AbstractSyntax==DicomUID.StudyRootQueryRetrieveInformationModelFind
-                    || pc.AbstractSyntax==DicomUID.StudyRootQueryRetrieveInformationModelMove)
+                    || pc.AbstractSyntax == DicomUID.PatientRootQueryRetrieveInformationModelFind
+                    || pc.AbstractSyntax == DicomUID.PatientRootQueryRetrieveInformationModelMove
+                    || pc.AbstractSyntax == DicomUID.StudyRootQueryRetrieveInformationModelFind
+                    || pc.AbstractSyntax == DicomUID.StudyRootQueryRetrieveInformationModelMove)
                 {
                     pc.AcceptTransferSyntaxes(DicomTransferSyntax.ExplicitVRLittleEndian);
-                } else if (pc.AbstractSyntax.StorageCategory != DicomStorageCategory.None)
+                }
+                else if (pc.AbstractSyntax.StorageCategory != DicomStorageCategory.None)
                 {
                     pc.AcceptTransferSyntaxes();
                 }
@@ -92,18 +94,19 @@ internal class PacsFetch
     [Test]
     public void EchoTest()
     {
-        var success=false;
+        var success = false;
         var client = DicomClientFactory.Create("127.0.0.1", 11112, false, "me", "otherme");
         client.NegotiateAsyncOps();
         client.AddRequestAsync(new DicomCEchoRequest
+        {
+            OnResponseReceived = (req, res) =>
             {
-                OnResponseReceived = (req, res) => {
-                    success = true;
-                }
+                success = true;
             }
+        }
         ).Wait();
         client.SendAsync().Wait();
-        Assert.True(success, "No echo response from own PACS");
+        Assert.That(success, "No echo response from own PACS");
     }
     /*
     [Test]
@@ -114,7 +117,7 @@ internal class PacsFetch
             new Item("patientId","studyUid","seriesUid","sopInstanceUid1"),
             new Item("patientId","studyUid","seriesUid","sopInstanceUid2")
         };
-        var hbo=new HierarchyBasedOrder(new DateTime(2020,1,1),new DateTime(2020,12,31),PlacementMode.PlaceThenFill,OrderLevel.Study,new ThrowImmediatelyDataLoadEventListener());
+        var hbo=new HierarchyBasedOrder(new DateTime(2020,1,1),new DateTime(2020,12,31),PlacementMode.PlaceThenFill,OrderLevel.Study,ThrowImmediatelyDataLoadEventListener.Quiet);
         hbo.Place(target[0]);
         hbo.Place(target[1]);
 

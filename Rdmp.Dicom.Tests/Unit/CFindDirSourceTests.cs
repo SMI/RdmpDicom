@@ -1,10 +1,9 @@
 ﻿using System.IO;
 using NUnit.Framework;
-using Rdmp.Core.DataFlowPipeline;
-using Rdmp.Core.DataFlowPipeline.Requirements;
+using NUnit.Framework.Legacy;
 using Rdmp.Dicom.PipelineComponents.CFind;
-using ReusableLibraryCode.Checks;
-using ReusableLibraryCode.Progress;
+using Rdmp.Core.ReusableLibraryCode.Checks;
+using Rdmp.Core.ReusableLibraryCode.Progress;
 
 namespace Rdmp.Dicom.Tests.Unit;
 public class CFindDirSourceTests
@@ -23,11 +22,11 @@ public class CFindDirSourceTests
         File.WriteAllText(inventory, anonxml);
         source.SearchPattern = "anonResult.xml";
 
-        Assert.DoesNotThrow(() => source.Check(new ThrowImmediatelyCheckNotifier()));
+        Assert.DoesNotThrow(() => source.Check(ThrowImmediatelyCheckNotifier.Quiet));
 
-        source.PreInitialize(new(new(inventory)), new ThrowImmediatelyDataLoadEventListener());
+        source.PreInitialize(new(new(inventory)), ThrowImmediatelyDataLoadEventListener.Quiet);
 
-        var dt = source.GetChunk(new ThrowImmediatelyDataLoadEventListener(), new());
+        var dt = source.GetChunk(ThrowImmediatelyDataLoadEventListener.Quiet, new());
 
         /*
      * 
@@ -36,22 +35,24 @@ someAE	DX\SR	XR Elbow Lt	0102030405	TEXT	1.2.3.4.60	20200416
 someAE	XA\SR	Fluoroscopy upper limb Lt	0102030405	TEXT	1.2.3.4.70	20200416
 */
 
-        Assert.AreEqual(3, dt.Rows.Count);
+        Assert.That(dt.Rows, Has.Count.EqualTo(3));
 
+        Assert.Multiple(() =>
+        {
+            Assert.That(dt.Rows[0]["StudyDescription"], Is.EqualTo("XR Facial bones"));
+            Assert.That(dt.Rows[1]["StudyDescription"], Is.EqualTo("XR Elbow Lt"));
+            Assert.That(dt.Rows[2]["StudyDescription"], Is.EqualTo("Fluoroscopy upper limb Lt"));
 
-        Assert.AreEqual("XR Facial bones", dt.Rows[0]["StudyDescription"]);
-        Assert.AreEqual("XR Elbow Lt", dt.Rows[1]["StudyDescription"]);
-        Assert.AreEqual("Fluoroscopy upper limb Lt", dt.Rows[2]["StudyDescription"]);
+            Assert.That(dt.Rows[0]["StudyInstanceUID"], Is.EqualTo("1.2.3.4.50"));
+            Assert.That(dt.Rows[1]["StudyInstanceUID"], Is.EqualTo("1.2.3.4.60"));
+            Assert.That(dt.Rows[2]["StudyInstanceUID"], Is.EqualTo("1.2.3.4.70"));
 
-        Assert.AreEqual("1.2.3.4.50", dt.Rows[0]["StudyInstanceUID"]);
-        Assert.AreEqual("1.2.3.4.60", dt.Rows[1]["StudyInstanceUID"]);
-        Assert.AreEqual("1.2.3.4.70", dt.Rows[2]["StudyInstanceUID"]);
+            Assert.That(dt.Rows[0]["RetrieveAETitle"], Is.EqualTo("someAE"));
+            Assert.That(dt.Rows[1]["RetrieveAETitle"], Is.EqualTo("someAE"));
+            Assert.That(dt.Rows[2]["RetrieveAETitle"], Is.EqualTo("someAE"));
+        });
 
-        Assert.AreEqual("someAE", dt.Rows[0]["RetrieveAETitle"]);
-        Assert.AreEqual("someAE", dt.Rows[1]["RetrieveAETitle"]);
-        Assert.AreEqual("someAE", dt.Rows[2]["RetrieveAETitle"]);
-
-        Assert.IsNotNull(dt.TableName);
+        Assert.That(dt.TableName, Is.Not.Null);
     }
 
 
@@ -71,12 +72,12 @@ someAE	XA\SR	Fluoroscopy upper limb Lt	0102030405	TEXT	1.2.3.4.70	20200416
 
         source.SearchPattern = "anonResult.xml";
 
-        Assert.DoesNotThrow(() => source.Check(new ThrowImmediatelyCheckNotifier()));
+        Assert.DoesNotThrow(() => source.Check(ThrowImmediatelyCheckNotifier.Quiet));
 
-        source.PreInitialize(new(new(inventory)), new ThrowImmediatelyDataLoadEventListener());
+        source.PreInitialize(new(new(inventory)), ThrowImmediatelyDataLoadEventListener.Quiet);
 
-        var dt = source.GetChunk(new ThrowImmediatelyDataLoadEventListener(), new());
+        var dt = source.GetChunk(ThrowImmediatelyDataLoadEventListener.Quiet, new());
 
-        Assert.AreEqual(3, dt.Rows.Count);
+        Assert.That(dt.Rows, Has.Count.EqualTo(3));
     }
 }

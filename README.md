@@ -1,4 +1,5 @@
-[![Build status](https://github.com/HicServices/RdmpDicom/actions/workflows/dotnet-core.yml/badge.svg)](https://github.com/HicServices/RdmpDicom/actions/workflows/dotnet-core.yml) [![Total alerts](https://img.shields.io/lgtm/alerts/g/HicServices/RdmpDicom.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/HicServices/RdmpDicom/alerts/) [![NuGet Badge](https://buildstats.info/nuget/HIC.RDMP.Dicom)](https://buildstats.info/nuget/HIC.RDMP.Dicom)
+[![Build status](https://github.com/SMI/RdmpDicom/actions/workflows/dotnet-core.yml/badge.svg)](https://github.com/SMI/RdmpDicom/actions/workflows/dotnet-core.yml)
+[![NuGet Badge](https://buildstats.info/nuget/HIC.RDMP.Dicom)](https://buildstats.info/nuget/HIC.RDMP.Dicom)
 
 # RdmpDicom
 Plugin for [RDMP](https://github.com/HicServices/RDMP) that adds support for load, linking (with EHR data in relational databases) and extracting anonymous DICOM images for researchers.
@@ -9,7 +10,7 @@ Plugin for [RDMP](https://github.com/HicServices/RDMP) that adds support for loa
 The following demo shows how to deploy and use the RDMP dicom plugin:
 https://youtu.be/j42hmVZKRb4
 
-Releases of the Rdmp.Dicom plugin are hosted in the [Releases section of this Github Repository](https://github.com/HicServices/RdmpDicom/releases).  Once you have downloaded the plugin you can add it to your RDMP instance through the Plugins node in the Tables collection:
+Releases of the Rdmp.Dicom plugin are hosted in the [Releases section of this Github Repository](https://github.com/SMI/RdmpDicom/releases).  Once you have downloaded the plugin you can add it to your RDMP instance through the Plugins node in the Tables collection:
 
 ![Overview](./Documentation/Images/AddPlugin.png)
 
@@ -21,22 +22,21 @@ Once installed the following functionality is available:
 - [NLP Cohort Building Plugin](./Documentation/NlpPlugin.md)
 
 # Building
+Before Building, ensure the version number is correct within the rdmpdicom.nuspec and sharedAssembly.info file
+You will also need 7zip or an equivalent installed.
 
 Building requires MSBuild 15 or later (or Visual Studio 2017 or later).  You will also need to install the [DotNetCore 2.2 SDK](https://dotnet.microsoft.com/download).
 
 You can build Rdmp.Dicom as a plugin for RDMP by running the following (use the Version number in [SharedAssemblyInfo.cs](SharedAssemblyInfo.cs) in place of 0.0.1)
 
 ```bash
-cd Plugin/windows
-dotnet publish --runtime win-x64 -c Release --self-contained false
-cd ../main
-dotnet publish --runtime win-x64 -c Release --self-contained false
-dotnet publish --runtime linux-x64 -c Release --self-contained false
-cd ../..
-nuget pack ./Rdmp.Dicom.nuspec -Properties Configuration=Release -IncludeReferencedProjects -Symbols -Version 0.0.1
+dotnet publish -p:DebugType=embedded -p:GenerateDocumentation=false Plugin/windows/windows.csproj -c Release -o p/windows
+dotnet publish -p:DebugType=embedded -p:GenerateDocumentation=false Plugin/main/main.csproj -c Release -o p/main
+7z a -tzip Rdmp.Dicom.0.0.1.nupkg hicplugin.nuspec p
+dotnet run --project RDMP/Tools/rdmp/rdmp.csproj -c Release -- pack -p --file Rdmp.Dicom.0.0.1.nupkg --dir yaml
 ```
 
-This will produce a nupkg file (e.g. Rdmp.Dicom.0.0.1.nupkg) which can be consumed by both the RDMP client and dot net core RDMP CLI.
+This will produce a nupkg file (e.g. Rdmp.Dicom.0.0.1.rdmp) which can be consumed by both the RDMP client and dot net core RDMP CLI.
 
 # Debugging
 Since it is annoying to have to upload a new version of the plugin to test changes you can instead publish directly to the RDMP bin directory.

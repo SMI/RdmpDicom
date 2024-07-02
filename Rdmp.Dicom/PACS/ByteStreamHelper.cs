@@ -17,11 +17,7 @@ public static class ByteStreamHelper
         long length;
         try
         {
-            length = stream switch
-            {
-                SharpCompress.Compressors.Deflate.DeflateStream ds => (ds.InputBuffer.Length * 2),
-                _ => stream.Length
-            };
+            length = stream.Length;
         }
         catch
         {
@@ -30,7 +26,7 @@ public static class ByteStreamHelper
         }
         using var ms = new MemoryStream((int)length);
         while (true)
-        {;
+        {
             var read = stream.Read(buffer, 0, buffer.Length);
             if (read <= 0)
                 return ms.ToArray();
