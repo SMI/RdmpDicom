@@ -48,7 +48,7 @@ jobs:
           
           cp Databases.Integration.yaml .\rdmpcli\Databases.yaml
           cmd /c rdmpcli\rdmp.exe pack --file Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg
-          cmd /c rdmpcli\rdmp.exe pack --file Rdmp.Dicom.${{ steps.version.outputs.version }}.rdmp
+          cp Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg Rdmp.Dicom.${{ steps.version.outputs.version }}.rdmp
           cmd /c rdmpcli\rdmp.exe cmd listsupportedcommands
           cmd /c rdmpcli\rdmp.exe cmd describe CreateNewImagingDatasetSuite
       - name: Get Imaging Template
