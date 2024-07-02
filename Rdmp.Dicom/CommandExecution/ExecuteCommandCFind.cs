@@ -30,10 +30,10 @@ class ExecuteCommandCFind : BasicCommandExecution, ICacheFetchRequestProvider
 
         var dir = Directory.CreateDirectory(outDir);
         var results = LoadDirectory.CreateDirectoryStructure(dir, "out", true);
-        lmd.LocationOfForLoadingDirectory = Path.Join(results.RootPath.FullName, "Data", "ForLoading");
-        lmd.LocationOfForArchivingDirectory = Path.Join(results.RootPath.FullName, "Data", "ForArchiving");
-        lmd.LocationOfExecutablesDirectory = Path.Join(results.RootPath.FullName, "Executables");
-        lmd.LocationOfCacheDirectory = Path.Join(results.RootPath.FullName, "Cache");
+        lmd.LocationOfForLoadingDirectory = results.ForLoading.FullName;
+        lmd.LocationOfForArchivingDirectory = results.ForArchiving.FullName;
+        lmd.LocationOfExecutablesDirectory = results.ExecutablesPath.FullName;
+        lmd.LocationOfCacheDirectory = results.Cache.FullName;
         lmd.SaveToDatabase();
 
         var lp = new LoadProgress(memory, lmd);
