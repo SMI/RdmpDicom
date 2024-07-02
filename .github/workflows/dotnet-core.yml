@@ -48,6 +48,7 @@ jobs:
           
           cp Databases.Integration.yaml .\rdmpcli\Databases.yaml
           cmd /c rdmpcli\rdmp.exe pack --file Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg
+          cmd /c rdmpcli\rdmp.exe pack --file Rdmp.Dicom.${{ steps.version.outputs.version }}.rdmp
           cmd /c rdmpcli\rdmp.exe cmd listsupportedcommands
           cmd /c rdmpcli\rdmp.exe cmd describe CreateNewImagingDatasetSuite
       - name: Get Imaging Template
@@ -69,12 +70,14 @@ jobs:
       - name: Store created nupkg files
         uses: actions/upload-artifact@v3
         with:
-          path: ./*.nupkg
-          retention-days: 1
+           path: |
+            ./*.rdmp
+            ./*.nupkg
+           retention-days: 1
       - name: Upload release binaries
         if: contains(github.ref,'refs/tags/')
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ github.ref }}
-          file: 'Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg'
+          file: 'Rdmp.Dicom.${{ steps.version.outputs.version }}.*'
