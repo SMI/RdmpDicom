@@ -19,22 +19,25 @@ class ExecuteCommandPacsFetch : BasicCommandExecution, ICacheFetchRequestProvide
     private BackfillCacheFetchRequest _request;
     private PACSSource _source;
 
-    public ExecuteCommandPacsFetch(IBasicActivateItems activator,string start, string end, string remoteAeHost, ushort remotePort,string remoteAeTitle, string localAeHost, ushort localPort, string localAeTitle, string outDir, int maxRetries):base(activator)
+    public ExecuteCommandPacsFetch(IBasicActivateItems activator, string start, string end, string remoteAeHost, ushort remotePort, string remoteAeTitle, string localAeHost, ushort localPort, string localAeTitle, string outDir, int maxRetries) : base(activator)
     {
         var startDate = DateTime.Parse(start);
-        var endDate =  DateTime.Parse(end);
+        var endDate = DateTime.Parse(end);
 
         // Make something that kinda looks like a valid DLE load
         var memory = new MemoryCatalogueRepository();
         var lmd = new LoadMetadata(memory);
 
         var dir = Directory.CreateDirectory(outDir);
-        var results = LoadDirectory.CreateDirectoryStructure(dir,"out",true);
-        lmd.LocationOfFlatFiles = results.RootPath.FullName;
+        var results = LoadDirectory.CreateDirectoryStructure(dir, "out", true);
+        lmd.LocationOfForLoadingDirectory = Path.Join(results.RootPath.FullName, "Data", "ForLoading");
+        lmd.LocationOfForArchivingDirectory = Path.Join(results.RootPath.FullName, "Data", "ForArchiving");
+        lmd.LocationOfExecutablesDirectory = Path.Join(results.RootPath.FullName, "Executables");
+        lmd.LocationOfCacheDirectory = Path.Join(results.RootPath.FullName, "Cache");
         lmd.SaveToDatabase();
 
-        var lp = new LoadProgress(memory,lmd);
-        var cp = new CacheProgress(memory,lp);
+        var lp = new LoadProgress(memory, lmd);
+        var cp = new CacheProgress(memory, lp);
 
         //Create the source component only and a valid request range to fetch
         _source = new PACSSource
@@ -53,7 +56,8 @@ class ExecuteCommandPacsFetch : BasicCommandExecution, ICacheFetchRequestProvide
 
         _request = new BackfillCacheFetchRequest(BasicActivator.RepositoryLocator.CatalogueRepository, startDate)
         {
-            ChunkPeriod = endDate.Subtract(startDate), CacheProgress = cp
+            ChunkPeriod = endDate.Subtract(startDate),
+            CacheProgress = cp
         };
 
         //Initialize it
@@ -67,7 +71,7 @@ class ExecuteCommandPacsFetch : BasicCommandExecution, ICacheFetchRequestProvide
     {
         base.Execute();
 
-        _source.GetChunk(ThrowImmediatelyDataLoadEventListener.Quiet,new GracefulCancellationToken());
+        _source.GetChunk(ThrowImmediatelyDataLoadEventListener.Quiet, new GracefulCancellationToken());
 
     }
     public ICacheFetchRequest Current => _request;

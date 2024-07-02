@@ -44,8 +44,10 @@ class TestProcessBasedCacheSource : UnitTests
         var dir = new DirectoryInfo(TestContext.CurrentContext.WorkDirectory);
         var loadDir = LoadDirectory.CreateDirectoryStructure(dir, "blah", true);
 
-        lmd.LocationOfFlatFiles = loadDir.RootPath.FullName;
-        lmd.SaveToDatabase();
+        lmd.LocationOfForLoadingDirectory = Path.Join(loadDir.RootPath.FullName, "Data", "ForLoading");
+        lmd.LocationOfForArchivingDirectory = Path.Join(loadDir.RootPath.FullName, "Data", "ForArchiving");
+        lmd.LocationOfExecutablesDirectory = Path.Join(loadDir.RootPath.FullName, "Executables");
+        lmd.LocationOfCacheDirectory = Path.Join(loadDir.RootPath.FullName, "Cache"); lmd.SaveToDatabase();
 
         source.PreInitialize(new CacheFetchRequestProvider(cp), ThrowImmediatelyDataLoadEventListener.Quiet);
         source.PreInitialize(cp.CatalogueRepository, ThrowImmediatelyDataLoadEventListener.Quiet);

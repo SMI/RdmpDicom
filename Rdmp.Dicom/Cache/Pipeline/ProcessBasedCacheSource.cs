@@ -48,7 +48,7 @@ Example:. './GetImages.exe ""%s"" ""%e%""'")]
         listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,$"ProcessBasedCacheSource version is {typeof(ProcessBasedCacheSource).Assembly.GetName().Version}.  Assembly is {typeof(ProcessBasedCacheSource).Assembly} " ));
 
         // Where we are putting the files
-        var cacheDir = new LoadDirectory(Request.CacheProgress.LoadProgress.LoadMetadata.LocationOfFlatFiles).Cache;
+        var cacheDir = new System.IO.DirectoryInfo(Request.CacheProgress.LoadProgress.LoadMetadata.LocationOfCacheDirectory);
         var cacheLayout = new SMICacheLayout(cacheDir, new SMICachePathResolver("ALL"));
 
         Chunk = new SMIDataChunk(Request)

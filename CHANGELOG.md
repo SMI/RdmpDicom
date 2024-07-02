@@ -37,7 +37,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bump HIC.DicomTypeTranslation from 4.0.1 to 4.0.2
 - Bump HIC.RDMP.Plugin from 8.0.5 to 8.0.7
 - Bump Terminal.Gui from 1.8.2 to 1.9.0
->>>>>>> 98896b03a427112c6dbe11989e6f8ca2b7b34750
 
 ## [6.0.2] 2022-11-04
 
