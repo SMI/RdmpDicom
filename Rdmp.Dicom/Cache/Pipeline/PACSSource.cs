@@ -70,7 +70,7 @@ public class PACSSource : SMICacheSource
             GetWhitelist(listener);
 
         //temp dir
-        var cacheDir = new LoadDirectory(Request.CacheProgress.LoadProgress.LoadMetadata.LocationOfFlatFiles).Cache;
+        var cacheDir = new DirectoryInfo(Request.CacheProgress.LoadProgress.LoadMetadata.LocationOfCacheDirectory);
         var cacheLayout = new SMICacheLayout(cacheDir, new SMICachePathResolver(Modality));
 
         Chunk = new SMIDataChunk(Request)

@@ -29,13 +29,13 @@ public class CFindSource : SMICacheSource
         DicomTag.ModalitiesInStudy
     };
 
-    public override SMIDataChunk DoGetChunk(ICacheFetchRequest cacheRequest, IDataLoadEventListener listener,GracefulCancellationToken cancellationToken)
+    public override SMIDataChunk DoGetChunk(ICacheFetchRequest cacheRequest, IDataLoadEventListener listener, GracefulCancellationToken cancellationToken)
     {
-        listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,$"CFindSource version is {typeof(CFindSource).Assembly.GetName().Version}.  Assembly is {typeof(PACSSource).Assembly} " ));
-        listener.OnNotify(this,new NotifyEventArgs(ProgressEventType.Information,$"Fo-Dicom version is {typeof(DicomClient).Assembly.GetName().Version}.  Assembly is {typeof(DicomClient).Assembly} " ));
+        listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information, $"CFindSource version is {typeof(CFindSource).Assembly.GetName().Version}.  Assembly is {typeof(PACSSource).Assembly} "));
+        listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information, $"Fo-Dicom version is {typeof(DicomClient).Assembly.GetName().Version}.  Assembly is {typeof(DicomClient).Assembly} "));
 
         var dicomConfiguration = GetConfiguration();
-        var requestSender = new DicomRequestSender(dicomConfiguration, listener,true);
+        var requestSender = new DicomRequestSender(dicomConfiguration, listener, true);
         var dateFrom = Request.Start;
         var dateTo = Request.End;
         CachingSCP.LocalAet = LocalAETitle;
@@ -46,7 +46,7 @@ public class CFindSource : SMICacheSource
             GetWhitelist(listener);
 
         //temp dir
-        var cacheDir = new LoadDirectory(Request.CacheProgress.LoadProgress.LoadMetadata.LocationOfFlatFiles).Cache;
+        var cacheDir = new DirectoryInfo(Request.CacheProgress.LoadProgress.LoadMetadata.LocationOfCacheDirectory);
         var cacheLayout = new SMICacheLayout(cacheDir, new SMICachePathResolver(Modality));
 
         Chunk = new SMIDataChunk(Request)
@@ -62,7 +62,7 @@ public class CFindSource : SMICacheSource
         var filepath = Path.Combine(workingDirectory.FullName, filename);
 
         var sw = new StreamWriter(filepath);
-        using var writer = new CsvWriter(sw,CultureInfo.CurrentCulture);
+        using var writer = new CsvWriter(sw, CultureInfo.CurrentCulture);
 
         WriteHeaders(writer);
 
@@ -83,10 +83,10 @@ public class CFindSource : SMICacheSource
         {
             if (!Filter(Whitelist, response)) return;
             Interlocked.Increment(ref responses);
-            WriteResult(writer,response);
+            WriteResult(writer, response);
 
         };
-        requestSender.ThrottleRequest(request,client, cancellationToken.AbortToken);
+        requestSender.ThrottleRequest(request, client, cancellationToken.AbortToken);
         listener.OnNotify(this,
             new NotifyEventArgs(ProgressEventType.Debug,
                 $"Total filtered studies for {dateFrom} to {dateTo} is {responses}"));
@@ -97,9 +97,9 @@ public class CFindSource : SMICacheSource
 
     private void WriteHeaders(CsvWriter writer)
     {
-        foreach(var t in _tagsToWrite)
+        foreach (var t in _tagsToWrite)
         {
-            var colName = DicomTypeTranslaterReader.GetColumnNameForTag(t,false);
+            var colName = DicomTypeTranslaterReader.GetColumnNameForTag(t, false);
             writer.WriteField(colName);
         }
 
@@ -113,7 +113,7 @@ public class CFindSource : SMICacheSource
 
         foreach (var t in _tagsToWrite)
         {
-            WriteValue(writer, response,t);
+            WriteValue(writer, response, t);
         }
 
         writer.NextRecord();
@@ -123,7 +123,7 @@ public class CFindSource : SMICacheSource
     {
         var val = DicomTypeTranslaterReader.GetCSharpValue(response.Dataset, tag);
 
-        if(val == null)
+        if (val == null)
         {
             writer.WriteField("");
         }

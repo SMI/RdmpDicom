@@ -183,7 +183,10 @@ public class ExecuteCommandCreateNewImagingDatasetSuite : BasicCommandExecution
         new Core.Logging.LogManager(_loggingServer).CreateNewLoggingTaskIfNotExists(loadName);
 
         var projDir = LoadDirectory.CreateDirectoryStructure(_projectDirectory, "ImageLoading", true);
-        NewLoadMetadata.LocationOfFlatFiles = projDir.RootPath.FullName;
+        NewLoadMetadata.LocationOfForLoadingDirectory = projDir.ForLoading.FullName;
+        NewLoadMetadata.LocationOfForArchivingDirectory = projDir.ForArchiving.FullName;
+        NewLoadMetadata.LocationOfExecutablesDirectory = projDir.ExecutablesPath.FullName;
+        NewLoadMetadata.LocationOfCacheDirectory = projDir.Cache.FullName;
         NewLoadMetadata.SaveToDatabase();
 
         /////////////////////////////////////////////Attacher////////////////////////////

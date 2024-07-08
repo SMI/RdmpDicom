@@ -68,8 +68,9 @@ jobs:
           rm -f p/main/ja-JP/Terminal.Gui.resources.dll
           rm -f p/main/fr-FR/Terminal.Gui.resources.dll
           rm -f p/main/pt-PT/Terminal.Gui.resources.dll
-          7z a -tzip Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg plugin.nuspec p
+          7z a -tzip Rdmp.Dicom.${{ steps.version.outputs.version }}.rdmp plugin.nuspec p
           dotnet pack Rdmp.Dicom/Rdmp.Dicom.csproj -c Release -p:Version=${{ steps.version.outputs.version }} -p:SymbolPackageFormat=snupkg --include-source --include-symbols -o .
+          cp Rdmp.Dicom.${{ steps.version.outputs.version }}.rdmp Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg
           cat > testcmd.yaml <<-EOC
           Commands:
           - listsupportedcommands
@@ -88,9 +89,8 @@ jobs:
         shell: bash
         run: |
           echo "Loading plugin"
-          dotnet run --project RDMP\\Tools\\rdmp\\rdmp.csproj -c Release -- pack -p --file Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg --dir yaml
-          7z t Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg
-          cp Rdmp.Dicom.${{ steps.version.outputs.version }}.nupkg Rdmp.Dicom.${{ steps.version.outputs.version }}.rdmp
+          dotnet run --project RDMP\\Tools\\rdmp\\rdmp.csproj -c Release -- pack -p --file Rdmp.Dicom.${{ steps.version.outputs.version }}.rdmp --dir yaml
+          7z t Rdmp.Dicom.${{ steps.version.outputs.version }}.rdmp
           echo "Running plugin test script"
           dotnet run --project RDMP\\Tools\\rdmp\\rdmp.csproj -c Release -- -f testcmd.yaml --dir yaml 
       - name: Store created nupkg files
