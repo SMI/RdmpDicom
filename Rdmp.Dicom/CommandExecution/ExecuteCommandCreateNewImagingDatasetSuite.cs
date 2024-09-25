@@ -283,7 +283,7 @@ public class ExecuteCommandCreateNewImagingDatasetSuite : BasicCommandExecution
 
         ////////////////////////////////////////////////////////////////////////////////////////////////
 
-        var checker = new CheckEntireDataLoadProcess(NewLoadMetadata, new HICDatabaseConfiguration(NewLoadMetadata), new HICLoadConfigurationFlags());
+        var checker = new CheckEntireDataLoadProcess(BasicActivator, NewLoadMetadata, new HICDatabaseConfiguration(NewLoadMetadata), new HICLoadConfigurationFlags());
         checker.Check(new AcceptAllCheckNotifier());
     }
 
