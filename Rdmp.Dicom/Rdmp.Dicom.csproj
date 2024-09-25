@@ -32,7 +32,6 @@
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="fo-dicom" Version="5.1.3" />
-		<PackageReference Include="NLog" Version="5.3.3" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\RDMP\Rdmp.Core\Rdmp.Core.csproj" />

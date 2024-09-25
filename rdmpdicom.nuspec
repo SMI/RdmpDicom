@@ -6,7 +6,7 @@
         <authors>Health Informatics Service, University of Dundee</authors>
         <description>Imaging plugin for Research Data Management Platform </description>
         <dependencies>
-            <dependency id="HIC.RDMP.Plugin" version="8.1.4" />
+            <dependency id="HIC.RDMP.Plugin" version="8.3.0" />
         </dependencies>
     </metadata>
 </package>
