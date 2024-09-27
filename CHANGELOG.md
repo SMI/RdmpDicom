@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [7.1.0] 2024-09-27
+
+- Bump HIC.DicomTypeTranslation from 4.1.2 to 4.1.3
+- Bump HIC.BadMedicine.Dicom from 0.1.0 to 0.1.1
+- Bump NLog from 5.3.2 to 5.3.4
+- Tidy attacher syntax/logic by @jas88 in https://github.com/SMI/RdmpDicom/pull/436
+
 ## [7.0.8] 2024-08-01
 
 - Update to target RDMP v8.2.2
@@ -428,7 +435,11 @@ Updated to be compatible with RDMP 4.2
 
 - Initial commit from private repo
 
-[Unreleased]: https://github.com/SMI/RdmpDicom/compare/v7.0.5...develop
+[Unreleased]: https://github.com/SMI/RdmpDicom/compare/v7.1.0...develop
+[7.1.0]: https://github.com/SMI/RdmpDicom/compare/v7.0.8...v7.1.0
+[7.0.8]: https://github.com/SMI/RdmpDicom/compare/v7.0.7...v7.0.8
+[7.0.7]: https://github.com/SMI/RdmpDicom/compare/v7.0.6...v7.0.7
+[7.0.6]: https://github.com/SMI/RdmpDicom/compare/v7.0.5...v7.0.6
 [7.0.5]: https://github.com/SMI/RdmpDicom/compare/v7.0.4...v7.0.5
 [7.0.4]: https://github.com/SMI/RdmpDicom/compare/v7.0.3...v7.0.4
 [7.0.3]: https://github.com/SMI/RdmpDicom/compare/v7.0.2...v7.0.3
