@@ -12,7 +12,7 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyCulture("")]
 
 // These should be replaced with correct values by the release process
-[assembly: AssemblyVersion("7.1.0")]
-[assembly: AssemblyFileVersion("7.1.0")]
-[assembly: AssemblyInformationalVersion("7.1.0")]
+[assembly: AssemblyVersion("7.1.1")]
+[assembly: AssemblyFileVersion("7.1.1")]
+[assembly: AssemblyInformationalVersion("7.1.1")]
 [assembly: InternalsVisibleTo("Rdmp.Dicom.Tests")]
