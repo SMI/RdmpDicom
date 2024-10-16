@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [7.1.1] 2024-10-16
+
+- Update to target RDMP v8.3.1
+- Bump Microsoft.Extensions.Logging.Console from 8.0.0 to 8.0.1
+- Bump NunitXml.TextLogger tfrom 4..0.254 to 4.1.0
+
 ## [7.1.0] 2024-09-27
 
 - Bump HIC.DicomTypeTranslation from 4.1.2 to 4.1.3
