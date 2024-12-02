@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [7.1.3] Unreleased
+## [7.1.3] 2024-12-02
 
 - Bump RDMP from 8.3.1 to 8.4.0
 - Bump HIC.BadMedicine.Dicom from 0.0.1 to 0.0.2
