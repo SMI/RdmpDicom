@@ -6,6 +6,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.1.3] Unreleased
+
+- Bump RDMP from 8.3.1 to 8.4.0
+- Bump HIC.BadMedicine.Dicom from 0.0.1 to 0.0.2
+- Bump Microsoft.Extensions.Logging.Console from 8.0.1 to 9.0.0
+- Bump Microsoft.NET.Test.Sdk from 17.11.1 to 17.12.0
+- Bump fo-dicom from 5.1.4 to 5.1.5
+
+
 ## [7.1.2] 2024-10-28
 
 - Bump fo-dicom from 5.1.3 to 5.1.4
