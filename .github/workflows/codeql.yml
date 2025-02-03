@@ -29,9 +29,8 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: HicServices/RDMP
-          ref: develop
+          ref: v8.4.2
           path: RDMP
-
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
         with:
