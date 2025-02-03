@@ -26,8 +26,14 @@ jobs:
         id: version
         shell: cmd
         run: |
-          for /f tokens^=1^,2^ delims^=^" %%i in (SharedAssemblyInfo.cs) do @if "%%i"=="[assembly: AssemblyVersion(" echo version=%%j>> %GITHUB_OUTPUT%
-          perl -ne "print """rdmpversion=""".$1."""\n""" if /version>(.+)</i"  RDMP\directory.build.props >>%GITHUB_OUTPUT%
+          perl getversions.pl
+          perl getversions.pl >> %GITHUB_OUTPUT%
+      - name: Fetch RDMP latest tag
+        run: |
+          cd RDMP
+          git fetch --unshallow --tags
+          git checkout v${{steps.version.outputs.rdmpversion}}
+          cd ..
       - name: Install MS SQL 2019
         uses: crazy-max/ghaction-chocolatey@v3
         with:
