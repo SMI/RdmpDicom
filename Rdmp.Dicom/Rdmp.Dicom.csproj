@@ -3,7 +3,7 @@
 		<PackageId>HIC.Rdmp.Dicom</PackageId>
 		<RootNamespace>Rdmp.Dicom</RootNamespace>
 		<AssemblyName>Rdmp.Dicom</AssemblyName>
-		<TargetFramework>net8.0</TargetFramework>
+		<TargetFramework>net$(NETCoreAppMaximumVersion)</TargetFramework>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 	</PropertyGroup>
 	<ItemGroup>
@@ -31,7 +31,7 @@
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="fo-dicom" Version="5.1.5" />
+		<PackageReference Include="fo-dicom" Version="5.2.0" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\RDMP\Rdmp.Core\Rdmp.Core.csproj" />

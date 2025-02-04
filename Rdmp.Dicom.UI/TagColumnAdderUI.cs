@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Windows.Forms;
 using Rdmp.Core.Curation.Data;
 using Rdmp.Dicom.TagPromotionSchema;
@@ -37,7 +38,10 @@ public partial class TagColumnAdderUI : Form
         }
     }
 
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public string ColumnName { get; private set; }
+
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public string ColumnDataType { get; private set; }
 
     private void btnOk_Click(object sender, EventArgs e)
