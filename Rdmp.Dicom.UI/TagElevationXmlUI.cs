@@ -5,6 +5,7 @@ using Rdmp.Dicom.PipelineComponents.DicomSources;
 using Rdmp.Core.ReusableLibraryCode.Checks;
 using ScintillaNET;
 using System;
+using System.ComponentModel;
 using System.Runtime.Versioning;
 using System.Windows.Forms;
 using Rdmp.UI.ScintillaHelper;
@@ -71,7 +72,8 @@ public partial class TagElevationXmlUI : Form,ICustomUI<DicomSource.TagElevation
         }
     }
 
-    public ICatalogueRepository CatalogueRepository { get;set; }
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public ICatalogueRepository CatalogueRepository { get; set; }
 
     public ICustomUIDrivenClass GetFinalStateOfUnderlyingObject()
     {
