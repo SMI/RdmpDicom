@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [7.1.4] - Unreleased
 
 - Add DicomToCSV pipeline component
+- Bump .Net8 to .Net9
+- Bump RDMP from 8.4.2 to 8.4.3
 
 ## [7.1.3] 2024-12-02
 
