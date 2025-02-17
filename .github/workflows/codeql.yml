@@ -11,7 +11,7 @@ on:
 jobs:
   analyze:
     name: Analyze
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     permissions:
       actions: read
       contents: read
@@ -36,7 +36,6 @@ jobs:
         with:
           languages: ${{ matrix.language }}
           queries: +security-and-quality
-
       - name: Autobuild
         run: dotnet build -c Debug
 
