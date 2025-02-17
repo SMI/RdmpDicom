@@ -31,7 +31,7 @@
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="fo-dicom" Version="5.1.5" />
+		<PackageReference Include="fo-dicom" Version="5.2.0" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\RDMP\Rdmp.Core\Rdmp.Core.csproj" />
