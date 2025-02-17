@@ -1,4 +1,5 @@
 ﻿using CsvHelper;
+using CsvHelper.Configuration;
 using FellowOakDicom;
 using Rdmp.Core.Curation.Data;
 using Rdmp.Core.DataExport.DataExtraction.Commands;
@@ -76,24 +77,26 @@ namespace Rdmp.Dicom.Extraction
 
             var dicomFilePaths = new AmbiguousFilePath(ArchiveRootIfAny, dicomFiles).GetDataset(FileFetchRetryLimit, FileFetchRetryTimeout, listener);
             var destinationDirectory = new DirectoryInfo(Path.Combine(_extractCommand.GetExtractionDirectory().FullName));
+            destinationDirectory.Create();
+            var filepath = Path.Combine(destinationDirectory.FullName, "DicomTags.csv");
 
-            foreach (var dcm in dicomFilePaths)
+            using (var sw = new StreamWriter(filepath))
             {
-                try
+                sw.WriteLine("Id,Name,Value");
+                foreach (var dcm in dicomFilePaths)
                 {
-                    destinationDirectory.Create();
-                    var filepath = Path.Combine(destinationDirectory.FullName, "DicomTags.csv");
-
-                    var sw = new StreamWriter(filepath);
-                    using var w = new CsvWriter(sw, System.Globalization.CultureInfo.InvariantCulture);
-                    w.WriteRecords(
-                        DicomFile.Open(dcm.Item1, FileReadOption.ReadAll).Dataset.SelectMany(t => Entry.ProcessTag(dcm.Item1, t))
-                    );
-                }
-                catch (Exception e)
-                {
-                    listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Error, $"Failed to extract tags from DICOM {dcm.Item1}", e));
-                    _errors++;
+                    try
+                    {
+                        foreach (var record in DicomFile.Open(dcm.Item1, FileReadOption.ReadAll).Dataset.SelectMany(t => Entry.ProcessTag(dcm.Item1, t)))
+                        {
+                            sw.WriteLine($"{record.Id},{record.Name},{record.Value}");
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Error, $"Failed to extract tags from DICOM {dcm.Item1}", e));
+                        _errors++;
+                    }
                 }
             }
 
