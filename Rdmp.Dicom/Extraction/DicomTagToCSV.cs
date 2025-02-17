@@ -59,8 +59,6 @@ namespace Rdmp.Dicom.Extraction
                 return toProcess;
             }
 
-            var fileRows = new Dictionary<string, DataRow>();
-            var releaseIDs = new Dictionary<string, string>();
             var dicomFiles = new List<(string, string)>();
 
             foreach (DataRow processRow in toProcess.Rows)
@@ -70,7 +68,6 @@ namespace Rdmp.Dicom.Extraction
                     throw new Exception($"Number of errors reported ({_errors}) reached the threshold ({ErrorThreshold})");
 
                 var file = (string)processRow[RelativeArchiveColumnName];
-                fileRows.Add(file, processRow);
                 dicomFiles.Add((file, file));
             }
 
