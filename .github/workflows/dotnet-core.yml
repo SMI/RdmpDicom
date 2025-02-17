@@ -28,12 +28,6 @@ jobs:
         run: |
           perl getversions.pl
           perl getversions.pl >> %GITHUB_OUTPUT%
-      - name: Fetch RDMP latest tag
-        run: |
-          cd RDMP
-          git fetch --unshallow --tags
-          git checkout v${{steps.version.outputs.rdmpversion}}
-          cd ..
       - name: Install MS SQL 2019
         uses: crazy-max/ghaction-chocolatey@v3
         with:
