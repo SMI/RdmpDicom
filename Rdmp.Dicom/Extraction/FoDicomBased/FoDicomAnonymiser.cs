@@ -330,7 +330,7 @@ public partial class FoDicomAnonymiser : IPluginDataFlowComponent<DataTable>, IP
             //    "0040,0555",
             //    "00F1,0010"
             //};
-            if (_tagsToKeep.Any())
+            if (_tagsToKeep is not null && _tagsToKeep.Any())
             {
                 foreach (var tag in _tagsToKeep)
                 {
