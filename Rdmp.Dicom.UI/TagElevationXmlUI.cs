@@ -8,6 +8,7 @@ using System;
 using System.Runtime.Versioning;
 using System.Windows.Forms;
 using Rdmp.UI.ScintillaHelper;
+using System.ComponentModel;
 
 namespace Rdmp.Dicom.UI;
 
@@ -71,6 +72,7 @@ public partial class TagElevationXmlUI : Form,ICustomUI<DicomSource.TagElevation
         }
     }
 
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public ICatalogueRepository CatalogueRepository { get;set; }
 
     public ICustomUIDrivenClass GetFinalStateOfUnderlyingObject()

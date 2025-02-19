@@ -11,7 +11,7 @@ on:
 jobs:
   analyze:
     name: Analyze
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     permissions:
       actions: read
       contents: read
@@ -31,13 +31,11 @@ jobs:
           repository: HicServices/RDMP
           ref: develop
           path: RDMP
-
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
         with:
           languages: ${{ matrix.language }}
           queries: +security-and-quality
-
       - name: Autobuild
         run: dotnet build -c Debug
 
