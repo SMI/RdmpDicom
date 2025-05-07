@@ -286,7 +286,7 @@ public partial class FoDicomAnonymiser : IPluginDataFlowComponent<DataTable>, IP
             if (CustomSecurityProfile != null)
             {
                 //you can do some pretty dumb stuff with this
-                profile = SecurityProfile.LoadProfile(new StringReader(CustomSecurityProfile), new SecurityProfileOptions());
+                profile = SecurityProfile.LoadProfile(new StringReader(CustomSecurityProfile), SecurityProfileOptions.BasicProfile);
             }
             else
             {
