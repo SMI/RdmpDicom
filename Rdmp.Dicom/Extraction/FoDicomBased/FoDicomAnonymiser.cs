@@ -283,26 +283,26 @@ public partial class FoDicomAnonymiser : IPluginDataFlowComponent<DataTable>, IP
         try
         {
             var skipAnon = SkipAnonymisationOnStructuredReports && dicomFile.Dataset.GetSingleValue<string>(DicomTag.Modality) == "SR";
+            var flags = skipAnon ?
+            //don't anonymise
+            SecurityProfileOptions.RetainSafePrivate |
+            SecurityProfileOptions.RetainDeviceIdent |
+            SecurityProfileOptions.RetainInstitutionIdent |
+            SecurityProfileOptions.RetainUIDs |
+            SecurityProfileOptions.RetainLongFullDates |
+            SecurityProfileOptions.RetainPatientChars :
+            // do anonymise
+            SecurityProfileOptions.BasicProfile |
+            SecurityProfileOptions.CleanStructdCont |
+            SecurityProfileOptions.CleanDesc |
+            SecurityProfileOptions.RetainUIDs;
             if (CustomSecurityProfile != null)
             {
-                //you can do some pretty dumb stuff with this
-                profile = SecurityProfile.LoadProfile(new StringReader(CustomSecurityProfile), SecurityProfileOptions.BasicProfile);
+                profile = SecurityProfile.LoadProfile(new StringReader(CustomSecurityProfile), flags);
             }
             else
             {
-                var flags = skipAnon ?
-              //don't anonymise
-              SecurityProfileOptions.RetainSafePrivate |
-              SecurityProfileOptions.RetainDeviceIdent |
-              SecurityProfileOptions.RetainInstitutionIdent |
-              SecurityProfileOptions.RetainUIDs |
-              SecurityProfileOptions.RetainLongFullDates |
-              SecurityProfileOptions.RetainPatientChars :
-              // do anonymise
-              SecurityProfileOptions.BasicProfile |
-              SecurityProfileOptions.CleanStructdCont |
-              SecurityProfileOptions.CleanDesc |
-              SecurityProfileOptions.RetainUIDs;
+              
                 profile = SecurityProfile.LoadProfile(null, flags);
                 // I know we said skip anonymisation but still remove this stuff cmon
                 if (skipAnon)
