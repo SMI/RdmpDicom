@@ -66,8 +66,12 @@ public partial class FoDicomAnonymiser : IPluginDataFlowComponent<DataTable>, IP
     public int FileFetchRetryLimit { get; set; }
 
     [DemandsInitialization("How long to wait between file fetch retries in milliseconds.", DefaultValue = 100)]
-
     public int FileFetchRetryTimeout { get; set; }
+
+
+    [DemandsInitialization("Custom DICOM security profile. Will override all other configuration.")]
+    public string CustomSecurityProfile { get; set; }
+
 
     private IPutDicomFilesInExtractionDirectories _putter;
 
@@ -275,39 +279,37 @@ public partial class FoDicomAnonymiser : IPluginDataFlowComponent<DataTable>, IP
         DataRow rowIfAny)
     {
         DicomDataset ds;
-
+        SecurityProfile profile;
         try
         {
-            // do not anonymise SRs if this flag is set
             var skipAnon = SkipAnonymisationOnStructuredReports && dicomFile.Dataset.GetSingleValue<string>(DicomTag.Modality) == "SR";
-
-            // See: ftp://medical.nema.org/medical/dicom/2011/11_15pu.pdf
-            var flags = skipAnon ?
-                //don't anonymise
-                SecurityProfileOptions.RetainSafePrivate |
-                SecurityProfileOptions.RetainDeviceIdent |
-                SecurityProfileOptions.RetainInstitutionIdent |
-                SecurityProfileOptions.RetainUIDs |
-                SecurityProfileOptions.RetainLongFullDates |
-                SecurityProfileOptions.RetainPatientChars :
-                // do anonymise
-                SecurityProfileOptions.BasicProfile |
-                SecurityProfileOptions.CleanStructdCont |
-                SecurityProfileOptions.CleanDesc |
-                SecurityProfileOptions.RetainUIDs;
-
-            if (RetainDates && !skipAnon)
-                flags |= SecurityProfileOptions.RetainLongFullDates;
-
-            var profile = SecurityProfile.LoadProfile(null, flags);
-
-
-            // I know we said skip anonymisation but still remove this stuff cmon
-            if (skipAnon)
-                RemovePatientNameEtc(profile);
+            if (CustomSecurityProfile != null)
+            {
+                //you can do some pretty dumb stuff with this
+                profile = SecurityProfile.LoadProfile(new StringReader(CustomSecurityProfile), new SecurityProfileOptions());
+            }
+            else
+            {
+                var flags = skipAnon ?
+              //don't anonymise
+              SecurityProfileOptions.RetainSafePrivate |
+              SecurityProfileOptions.RetainDeviceIdent |
+              SecurityProfileOptions.RetainInstitutionIdent |
+              SecurityProfileOptions.RetainUIDs |
+              SecurityProfileOptions.RetainLongFullDates |
+              SecurityProfileOptions.RetainPatientChars :
+              // do anonymise
+              SecurityProfileOptions.BasicProfile |
+              SecurityProfileOptions.CleanStructdCont |
+              SecurityProfileOptions.CleanDesc |
+              SecurityProfileOptions.RetainUIDs;
+                profile = SecurityProfile.LoadProfile(null, flags);
+                // I know we said skip anonymisation but still remove this stuff cmon
+                if (skipAnon)
+                    RemovePatientNameEtc(profile);
+            }
 
             var anonymiser = new DicomAnonymizer(profile);
-
 
             ds = anonymiser.Anonymize(dicomFile.Dataset);
 
