@@ -1,18 +1,12 @@
 ﻿using FellowOakDicom;
 using FellowOakDicom.Imaging;
 using FellowOakDicom.Imaging.Render;
-using FellowOakDicom.Log;
-using NLog;
-using NPOI.SS.Formula.Functions;
-using Rdmp.Core.Icons.IconProvision;
+using SixLabors.ImageSharp;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Tesseract;
 
 namespace Rdmp.Dicom.Extraction.PixelAnonymisation
@@ -63,44 +57,62 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
         /// <returns></returns>
         public List<Tuple<int, List<DicomRectangle>>> ProcessDicomFile(DicomDataset dicomDataset)
         {
+            new DicomSetupBuilder().RegisterServices(s => s.AddFellowOakDicom().AddImageManager<ImageSharpImageManager>()).Build();
+
             List<Tuple<int, List<DicomRectangle>>> foundRectangles = [];
             using (var engine = new TesseractEngine(_tesseractLocation, _language, EngineMode.Default))
             {
                 var pixelData = DicomPixelData.Create(dicomDataset);
+
                 for (var frameIndex = 0; frameIndex < pixelData.NumberOfFrames; frameIndex++)
                 {
                     var frame = pixelData.GetFrame(frameIndex);
                     bool isSensitive = false;
                     List<DicomRectangle> rectangles = [];
-
-                    using (var img = Pix.LoadFromMemory(frame.Data))
+                    Pix img;
+                    if (frame.Data.Length > 500000)
                     {
-                        using (var page = engine.Process(img))
+                        var frameImg = new DicomImage(dicomDataset, frameIndex);
+                        using (IImage renderedImage = frameImg.RenderImage())
                         {
-                            using (var iter = page.GetIterator())
+                            SixLabors.ImageSharp.Image sharpImg = renderedImage.AsSharpImage();
+                            var path = Path.GetTempFileName() + ".jpeg";
+                            sharpImg.SaveAsJpeg(path);
+                            img = Pix.LoadFromFile(path);
+                            //File.Delete(path);
+                        }
+                    }
+                    else
+                    {
+                        img = Pix.LoadFromMemory(frame.Data);
+                    }
+                    using (var page = engine.Process(img))
+                    {
+                        using (var iter = page.GetIterator())
+                        {
+                            iter.Begin();
+                            do
                             {
-                                iter.Begin();
-                                do
+                                if (iter.TryGetBoundingBox(PageIteratorLevel.Block, out Rect rect))
                                 {
-                                    if (iter.TryGetBoundingBox(PageIteratorLevel.Block, out Rect rect))
+                                    var x = iter.GetConfidence(PageIteratorLevel.Block);
+                                    var y = iter.GetText(PageIteratorLevel.Block);
+                                    if (iter.GetConfidence(PageIteratorLevel.Block) > 40) //bad confidence
                                     {
-                                        if (iter.GetConfidence(PageIteratorLevel.Block) > 40)
+                                        var curText = iter.GetText(PageIteratorLevel.Block);
+                                        if (!IgnoreText(curText))
                                         {
-                                            var curText = iter.GetText(PageIteratorLevel.Block);
-                                            if (!IgnoreText(curText))
+                                            var dicomRectangle = new DicomRectangle()
                                             {
-                                                var dicomRectangle = new DicomRectangle()
-                                                {
-                                                    text = curText,
-                                                    rectangle = rect,
-                                                    confidence = iter.GetConfidence(PageIteratorLevel.Block)
-                                                };
-                                                rectangles.Add(dicomRectangle);
-                                            }
+                                                text = curText,
+                                                rectangle = rect,
+                                                confidence = iter.GetConfidence(PageIteratorLevel.Block)
+                                            };
+                                            rectangles.Add(dicomRectangle);
                                         }
                                     }
-                                } while (iter.Next(PageIteratorLevel.Block));
-                            }
+                                }
+                            } while (iter.Next(PageIteratorLevel.Block));
                         }
                     }
                     if (rectangles.Count > 0)
