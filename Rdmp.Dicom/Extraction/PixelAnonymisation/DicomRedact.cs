@@ -1,7 +1,10 @@
 ﻿using FellowOakDicom;
 using FellowOakDicom.Imaging;
 using FellowOakDicom.Imaging.Reconstruction;
+using FellowOakDicom.Imaging.Render;
+using FellowOakDicom.IO.Buffer;
 using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -21,6 +24,7 @@ public class DicomRedact
     public void Redact(DicomDataset dicomDataset, List<Tuple<int, List<DicomRectangle>>> redactions)
     {
         var pixelData = DicomPixelData.Create(dicomDataset);
+        List<byte[]> newFrames = [];
         for (var frameIndex = 0; frameIndex < pixelData.NumberOfFrames; frameIndex++)
         {
             var frameRedactions = redactions.Where(r => r.Item1 == frameIndex);
@@ -42,6 +46,7 @@ public class DicomRedact
             foreach (var redaction in frameRedactions)
             {
                 var rects = redaction.Item2;
+               
                 foreach (var rectangle in rects)
                 {
                     Graphics g = Graphics.FromImage(bmp);
@@ -54,11 +59,37 @@ public class DicomRedact
                     g.DrawImage(bmpRect, rectangle.rectangle.X1, rectangle.rectangle.Y1, rectangle.rectangle.Width, rectangle.rectangle.Height);
                     g.Dispose();
                 }
-                //pixels[]
             }
             pixels = ImageToByte2(bmp);
-            File.WriteAllBytes("C:\\temp\\output.jpg", pixels);
+            newFrames.Add(pixels);
+            //File.WriteAllBytes("C:\\temp\\output.jpg", pixels);
         }
+        //todo this generates junk dicoms
+        // maybe - https://groups.google.com/g/fo-dicom/c/rTTkSEVncEA
+        //DicomDataset dataset = new DicomDataset();
+        //var dicomfile = new DicomFile(dicomDataset);
+        //dataset = dicomfile.Dataset.Clone();
+
+        //dataset.AddOrUpdate(DicomTag.PhotometricInterpretation, PhotometricInterpretation.Rgb.Value);
+        //dataset.AddOrUpdate(DicomTag.Rows,pixelData.Height);
+        //dataset.AddOrUpdate(DicomTag.Columns, pixelData.Width);
+        //dataset.AddOrUpdate(DicomTag.BitsAllocated,pixelData.BitsAllocated);
+
+        //DicomPixelData _pixelData = DicomPixelData.Create(dataset, true);
+        //_pixelData.BitsStored = pixelData.BitsStored;
+        //_pixelData.SamplesPerPixel = pixelData.SamplesPerPixel;
+        //_pixelData.HighBit = pixelData.HighBit;
+        //_pixelData.PhotometricInterpretation = PhotometricInterpretation.Rgb;
+        //_pixelData.PixelRepresentation = pixelData.PixelRepresentation;
+        //_pixelData.PlanarConfiguration = pixelData.PlanarConfiguration;
+        //_pixelData.Height = pixelData.Height;
+        //_pixelData.Width = pixelData.Width;
+        //MemoryByteBuffer buffer = new MemoryByteBuffer(newFrames[0]);
+        //_pixelData.AddFrame(buffer);
+
+        //dicomfile = new DicomFile(dataset);
+        //dicomfile.Save("C:\\temp\\output.dcm");
+
     }
 
     public static byte[] ImageToByte2(System.Drawing.Image img)

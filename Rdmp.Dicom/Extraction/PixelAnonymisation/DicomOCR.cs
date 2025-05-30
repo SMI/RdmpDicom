@@ -72,11 +72,27 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
                     List<DicomRectangle> rectangles = [];
                     Pix img;
                     var frameImg = new DicomImage(dicomDataset, frameIndex);
+                    double scale = 1.0;
                     using (IImage renderedImage = frameImg.RenderImage())
                     {
                         SixLabors.ImageSharp.Image sharpImg = renderedImage.AsSharpImage();
-                        var path = Path.GetTempFileName() + ".bpm";
-                        sharpImg.SaveAsBmp(path);
+
+                        //this works for some 
+                        //sharpImg.Mutate(x => x.Invert());
+                        //sharpImg.Mutate(x => x.Brightness(10.00001F));
+
+                        //want to do some scaling as ocr works best when the image is atleast 300 dpi
+                        if (sharpImg.Metadata.HorizontalResolution < 300 || sharpImg.Metadata.VerticalResolution < 300)
+                        {
+                            scale = Math.Max(300 / sharpImg.Metadata.HorizontalResolution, 300 / sharpImg.Metadata.VerticalResolution);
+                            sharpImg.Metadata.HorizontalResolution = sharpImg.Metadata.HorizontalResolution * scale;
+                            sharpImg.Metadata.VerticalResolution = sharpImg.Metadata.VerticalResolution * scale;
+                        }
+                        
+                        // there is some real issues wit the preprocessing here
+
+                        var path = Path.GetTempFileName() + ".jpg";
+                        sharpImg.SaveAsJpeg(path);
                         img = Pix.LoadFromFile(path);
                     }
                     using (var page = engine.Process(img))
@@ -88,9 +104,7 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
                             {
                                 if (iter.TryGetBoundingBox(PageIteratorLevel.Block, out Rect rect))
                                 {
-                                    var x = iter.GetConfidence(PageIteratorLevel.Block);
-                                    var y = iter.GetText(PageIteratorLevel.Block);
-                                    if (iter.GetConfidence(PageIteratorLevel.Block) > 40)
+                                    if (iter.GetConfidence(PageIteratorLevel.Block) >= 40)//should be like 40
                                     {
                                         var curText = iter.GetText(PageIteratorLevel.Block);
                                         if (!IgnoreText(curText))
@@ -98,7 +112,7 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
                                             var dicomRectangle = new DicomRectangle()
                                             {
                                                 text = curText,
-                                                rectangle = rect,
+                                                rectangle = new Rect(Convert.ToInt32(rect.X1 / scale), Convert.ToInt32(rect.Y1 / scale), Convert.ToInt32(rect.Width / scale), Convert.ToInt32(rect.Height / scale)),
                                                 confidence = iter.GetConfidence(PageIteratorLevel.Block)
                                             };
                                             rectangles.Add(dicomRectangle);
