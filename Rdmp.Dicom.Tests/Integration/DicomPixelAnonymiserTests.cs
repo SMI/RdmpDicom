@@ -37,10 +37,10 @@ public class DicomPixelAnonymiserTests
         var dt = new DataTable();
         dt.Columns.Add("Pat");
         dt.Columns.Add("dicomFile");
-        //dt.Rows.Add(["1111111111", "C:\\temp\\dicoms\\0002.dcm"]);
+        dt.Rows.Add(["1111111111", "C:\\temp\\dicoms\\002_with_ann.dcm\\dicom-00002.dcm"]);
         //dt.Rows.Add(["1111111111", "C:\\Users\\jfriel001\\Downloads\\I290.dcm"]);
         //dt.Rows.Add(["1111111111", "C:\\Users\\jfriel001\\Downloads\\sb.dcm"]);
-        dt.Rows.Add(["1111111111", "C:\\Users\\jfriel001\\Downloads\\MF_-dicom-00001.dcm"]);
+        //dt.Rows.Add(["1111111111", "C:\\Users\\jfriel001\\Downloads\\MF_-dicom-00001.dcm"]);
 
         anonymiser.ProcessPipelineData(dt,ThrowImmediatelyDataLoadEventListener.Quiet,new());
         Assert.That(1, Is.EqualTo(1));

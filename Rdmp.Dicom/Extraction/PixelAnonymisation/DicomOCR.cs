@@ -2,6 +2,7 @@
 using FellowOakDicom.Imaging;
 using FellowOakDicom.Imaging.Render;
 using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Processing;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -70,21 +71,13 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
                     bool isSensitive = false;
                     List<DicomRectangle> rectangles = [];
                     Pix img;
-                    if (frame.Data.Length > 500000)
+                    var frameImg = new DicomImage(dicomDataset, frameIndex);
+                    using (IImage renderedImage = frameImg.RenderImage())
                     {
-                        var frameImg = new DicomImage(dicomDataset, frameIndex);
-                        using (IImage renderedImage = frameImg.RenderImage())
-                        {
-                            SixLabors.ImageSharp.Image sharpImg = renderedImage.AsSharpImage();
-                            var path = Path.GetTempFileName() + ".jpeg";
-                            sharpImg.SaveAsJpeg(path);
-                            img = Pix.LoadFromFile(path);
-                            //File.Delete(path);
-                        }
-                    }
-                    else
-                    {
-                        img = Pix.LoadFromMemory(frame.Data);
+                        SixLabors.ImageSharp.Image sharpImg = renderedImage.AsSharpImage();
+                        var path = Path.GetTempFileName() + ".bpm";
+                        sharpImg.SaveAsBmp(path);
+                        img = Pix.LoadFromFile(path);
                     }
                     using (var page = engine.Process(img))
                     {
@@ -97,7 +90,7 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
                                 {
                                     var x = iter.GetConfidence(PageIteratorLevel.Block);
                                     var y = iter.GetText(PageIteratorLevel.Block);
-                                    if (iter.GetConfidence(PageIteratorLevel.Block) > 40) //bad confidence
+                                    if (iter.GetConfidence(PageIteratorLevel.Block) > 40)
                                     {
                                         var curText = iter.GetText(PageIteratorLevel.Block);
                                         if (!IgnoreText(curText))

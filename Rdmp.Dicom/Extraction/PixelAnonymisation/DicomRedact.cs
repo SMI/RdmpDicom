@@ -31,24 +31,13 @@ public class DicomRedact
 
 
             System.Drawing.Image bmp;
-            if (frame.Data.Length > 500000)
+            var frameImg = new DicomImage(dicomDataset, frameIndex);
+            using (IImage renderedImage = frameImg.RenderImage())
             {
-                var frameImg = new DicomImage(dicomDataset, frameIndex);
-                using (IImage renderedImage = frameImg.RenderImage())
-                {
-                    SixLabors.ImageSharp.Image sharpImg = renderedImage.AsSharpImage();
-                    var path = Path.GetTempFileName() + ".jpeg";
-                    sharpImg.SaveAsJpeg(path);
-                    bmp = System.Drawing.Image.FromFile(path);
-                }
-            }
-            else
-            {
-                using (var ms = new MemoryStream(pixels))
-                {
-                    bmp = new Bitmap(new Bitmap(ms));
-
-                }
+                SixLabors.ImageSharp.Image sharpImg = renderedImage.AsSharpImage();
+                var path = Path.GetTempFileName() + ".bmp";
+                sharpImg.SaveAsBmp(path);
+                bmp = System.Drawing.Image.FromFile(path);
             }
             foreach (var redaction in frameRedactions)
             {
@@ -59,7 +48,7 @@ public class DicomRedact
                     var bmpRect = new Bitmap(rectangle.rectangle.Width, rectangle.rectangle.Height, PixelFormat.Format24bppRgb);
                     using (Graphics graph = Graphics.FromImage(bmpRect))
                     {
-                        System.Drawing.Rectangle ImageSize = new (0, 0, rectangle.rectangle.Width, rectangle.rectangle.Height);
+                        System.Drawing.Rectangle ImageSize = new(0, 0, rectangle.rectangle.Width, rectangle.rectangle.Height);
                         graph.FillRectangle(Brushes.Red, ImageSize);
                     }
                     g.DrawImage(bmpRect, rectangle.rectangle.X1, rectangle.rectangle.Y1, rectangle.rectangle.Width, rectangle.rectangle.Height);
