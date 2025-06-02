@@ -62,7 +62,7 @@ public class DicomRedact
             }
             pixels = ImageToByte2(bmp);
             newFrames.Add(pixels);
-            //File.WriteAllBytes("C:\\temp\\output.jpg", pixels);
+            File.WriteAllBytes("C:\\temp\\output.jpg", pixels);
         }
         //todo this generates junk dicoms
         // maybe - https://groups.google.com/g/fo-dicom/c/rTTkSEVncEA

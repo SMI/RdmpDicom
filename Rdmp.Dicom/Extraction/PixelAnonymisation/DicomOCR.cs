@@ -3,12 +3,14 @@ using FellowOakDicom.Imaging;
 using FellowOakDicom.Imaging.Render;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
+using SixLabors.ImageSharp.Processing.Processors.Normalization;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using Tesseract;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Rdmp.Dicom.Extraction.PixelAnonymisation
 {
@@ -81,14 +83,26 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
                         //sharpImg.Mutate(x => x.Invert());
                         //sharpImg.Mutate(x => x.Brightness(10.00001F));
 
+                        //sharpImg.Mutate(x => x.Grayscale());
+                        //var processor = new AdaptiveHistogramEqualizationProcessor(65536, true, 2, 8);
+                        //sharpImg.Mutate(c => c.HistogramEqualization(new HistogramEqualizationOptions
+                        //{
+                        //    Method = HistogramEqualizationMethod.AdaptiveTileInterpolation,
+                        //    ClipHistogram = true,
+                        //    ClipLimit=2,
+                        //    NumberOfTiles=8,
+                        //    LuminanceLevels=65536
+                        //}));
+                        //sharpImg.Mutate(x => x.HistogramEqualization(processor));
+                        //sharpImg.Mutate(x => x.Grayscale());
                         //want to do some scaling as ocr works best when the image is atleast 300 dpi
-                        if (sharpImg.Metadata.HorizontalResolution < 300 || sharpImg.Metadata.VerticalResolution < 300)
-                        {
-                            scale = Math.Max(300 / sharpImg.Metadata.HorizontalResolution, 300 / sharpImg.Metadata.VerticalResolution);
-                            sharpImg.Metadata.HorizontalResolution = sharpImg.Metadata.HorizontalResolution * scale;
-                            sharpImg.Metadata.VerticalResolution = sharpImg.Metadata.VerticalResolution * scale;
-                        }
-                        
+                        //if (sharpImg.Metadata.HorizontalResolution < 300 || sharpImg.Metadata.VerticalResolution < 300)
+                        //{
+                        //    scale = Math.Max(300 / sharpImg.Metadata.HorizontalResolution, 300 / sharpImg.Metadata.VerticalResolution);
+                        //    sharpImg.Metadata.HorizontalResolution = sharpImg.Metadata.HorizontalResolution * scale;
+                        //    sharpImg.Metadata.VerticalResolution = sharpImg.Metadata.VerticalResolution * scale;
+                        //}
+
                         // there is some real issues wit the preprocessing here
 
                         var path = Path.GetTempFileName() + ".jpg";
