@@ -37,7 +37,8 @@ public class DicomPixelAnonymiserTests
         var dt = new DataTable();
         dt.Columns.Add("Pat");
         dt.Columns.Add("dicomFile");
-        dt.Rows.Add(["1111111111", "C:\\temp\\dicoms\\002_with_ann.dcm\\dicom-00002.dcm"]);
+        dt.Rows.Add(["1111111111", "C:\\temp\\dicoms\\002_with_ann.dcm\\dicom-00005.dcm"]);
+        //dt.Rows.Add(["1111111111", "C:\\temp\\dicoms\\002_with_ann.dcm\\dicom-00002.dcm"]);
         //dt.Rows.Add(["1111111111", "C:\\temp\\dicoms\\002_with_ann.dcm\\dicom-00003.dcm"]);
         //dt.Rows.Add(["1111111111", "C:\\temp\\dicoms\\002_with_ann.dcm\\dicom-00004.dcm"]);
         //dt.Rows.Add(["1111111111", "C:\\Users\\jfriel001\\Downloads\\I290.dcm"]);
