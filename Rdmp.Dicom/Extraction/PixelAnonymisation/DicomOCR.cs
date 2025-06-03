@@ -116,11 +116,10 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
                 for (var frameIndex = 0; frameIndex < pixelData.NumberOfFrames; frameIndex++)
                 {
                     var frame = pixelData.GetFrame(frameIndex);
-                    bool isSensitive = false;
+                    bool isSensitive = false; //todo something with this
                     List<DicomRectangle> rectangles = [];
                     Pix img;
                     var frameImg = new DicomImage(dicomDataset, frameIndex);
-                    double scale = 1.0;
                     var path = Path.GetTempFileName() + ".jpg";
                     using (IImage renderedImage = frameImg.RenderImage())
                     {
@@ -140,7 +139,7 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
                     }
                     foreach (var result in results)
                     {
-                        if (result.Confidence > 0.0F && !IgnoreText(result.FoundText))
+                        if (result.Confidence > 0.04F && !IgnoreText(result.FoundText))// todo check confidence
                         {
                             var dicomRectangle = new DicomRectangle()
                             {
