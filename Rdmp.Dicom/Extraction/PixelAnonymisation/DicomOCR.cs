@@ -4,9 +4,13 @@ using FellowOakDicom.Imaging.Render;
 using FellowOakDicom.Serialization;
 using NPOI.HPSF;
 using NPOI.OpenXmlFormats.Wordprocessing;
+using NPOI.SS.Formula.Functions;
 using Python.Runtime;
+using Rdmp.Core.Icons.IconProvision;
+using Rdmp.Core.ReusableLibraryCode.Progress;
 using Rdmp.Core.Validation;
 using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Drawing;
 using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Processing.Processors.Normalization;
 using System;
@@ -27,6 +31,7 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
 
         private string _tesseractLocation;
         private string _language;
+        private IDataLoadEventListener _listener;
 
         public string OCREngine { get; set; }
         public string NLPEngine { get; set; }
@@ -34,10 +39,11 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
         public bool USRegions { get; set; }
         public bool ExceptUSRegions { get; set; }
 
-        public DicomOCR(string tesseractLocation, string language)
+        public DicomOCR(string tesseractLocation, string language, IDataLoadEventListener listener)
         {
             _tesseractLocation = tesseractLocation;
             _language = language;
+            _listener = listener;
             Runtime.PythonDLL = "C:\\Users\\jfriel001\\AppData\\Local\\Programs\\Python\\Python313\\Python313.dll";
             PythonEngine.Initialize();
         }
@@ -105,36 +111,48 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
         /// </summary>
         /// <param name="dicomDataset"></param>
         /// <returns></returns>
-        public List<Tuple<int, List<DicomRectangle>>> ProcessDicomFile(DicomDataset dicomDataset,string fileName)
+        public List<Tuple<int, List<DicomRectangle>>> ProcessDicomFile(DicomDataset dicomDataset, string fileName)
         {
             new DicomSetupBuilder().RegisterServices(s => s.AddFellowOakDicom().AddImageManager<ImageSharpImageManager>()).Build();
-
             List<Tuple<int, List<DicomRectangle>>> foundRectangles = [];
             using (var engine = new TesseractEngine(_tesseractLocation, _language, EngineMode.Default))
             {
                 var pixelData = DicomPixelData.Create(dicomDataset);
-
 
                 for (var frameIndex = 0; frameIndex < pixelData.NumberOfFrames; frameIndex++)
                 {
                     var frame = pixelData.GetFrame(frameIndex);
                     bool isSensitive = false; //todo something with this
                     List<DicomRectangle> rectangles = [];
-                    Pix img;
                     var frameImg = new DicomImage(dicomDataset, frameIndex);
-                    var path = Path.GetTempFileName() + ".jpg";
-                    using (IImage renderedImage = frameImg.RenderImage())
+                    var path = System.IO.Path.GetTempFileName() + ".jpg";
+                    try
                     {
-                        SixLabors.ImageSharp.Image sharpImg = renderedImage.AsSharpImage();
-
-                        sharpImg.SaveAsJpeg(path);
-                        img = Pix.LoadFromFile(path);
+                        Pix img = Pix.LoadFromMemory(frame.Data);
+                        img.Save(path);
+                    }
+                    catch (Exception e)
+                    {
+                        try
+                        {
+                            using (var renderedImage = frameImg.RenderImage())
+                            {
+                                var sharpImage = renderedImage.AsSharpImage();
+                                sharpImage.SaveAsJpeg(path);
+                            }
+                        }
+                        catch (Exception e2)
+                        {
+                            //too large and notsupported
+                            _listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning, $"Unable to Process file {fileName}"));
+                            return foundRectangles;
+                        }
                     }
                     List<OCRResult> results = [];
                     using (Py.GIL())
                     {
-                        dynamic np = Py.Import("sys");
                         dynamic easyocr = Py.Import("easyocr");
+                        dynamic np = Py.Import("numpy");
                         dynamic reader = easyocr.Reader(new List<string>() { "en" }, gpu: false, verbose: false);
                         PyTuple[] result = (PyTuple[])reader.readtext(path);
                         results = result.Select(res => new OCRResult(res)).ToList();

@@ -85,7 +85,7 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
             _putter ??= (IPutDicomFilesInExtractionDirectories)ObjectConstructor.Construct(PutterType);
             _destinationDirectory = new DirectoryInfo(Path.Combine(_extractCommand.GetExtractionDirectory().FullName, "Images"));
             var releaseIdentifierColumn = _extractCommand.QueryBuilder.SelectColumns.Select(c => c.IColumn).Single(c => c.IsExtractionIdentifier);
-            var ocr = new DicomOCR(TesseractDataFolder,Language);
+            var ocr = new DicomOCR(TesseractDataFolder,Language,listener);
             var redact = new DicomRedact();
             foreach (DataRow processRow in toProcess.Rows)
             {
@@ -108,7 +108,7 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
                     //newPath = _putter.PredictOutputPath(_destinationDirectory, releaseId, ds.getSt);
                     newPath = "";
                 }
-                var recrangles = ocr.ProcessDicomFile(ds);
+                var recrangles = ocr.ProcessDicomFile(ds,file);
                 redact.Redact(ds,file,recrangles);
                 //dicom_ocr
                 //dicom_redact
