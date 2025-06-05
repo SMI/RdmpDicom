@@ -1,6 +1,8 @@
 ﻿using FellowOakDicom;
 using FellowOakDicom.Imaging;
 using FellowOakDicom.Imaging.Render;
+using FellowOakDicom.Serialization;
+using NPOI.HPSF;
 using NPOI.OpenXmlFormats.Wordprocessing;
 using Python.Runtime;
 using Rdmp.Core.Validation;
@@ -103,7 +105,7 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
         /// </summary>
         /// <param name="dicomDataset"></param>
         /// <returns></returns>
-        public List<Tuple<int, List<DicomRectangle>>> ProcessDicomFile(DicomDataset dicomDataset)
+        public List<Tuple<int, List<DicomRectangle>>> ProcessDicomFile(DicomDataset dicomDataset,string fileName)
         {
             new DicomSetupBuilder().RegisterServices(s => s.AddFellowOakDicom().AddImageManager<ImageSharpImageManager>()).Build();
 
