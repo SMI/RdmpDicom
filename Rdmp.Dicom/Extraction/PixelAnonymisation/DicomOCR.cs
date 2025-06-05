@@ -21,7 +21,6 @@ using System.Dynamic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using Tesseract;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace Rdmp.Dicom.Extraction.PixelAnonymisation
@@ -113,7 +112,8 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
                 var path = System.IO.Path.GetTempFileName() + ".jpg";
                 try
                 {
-                    Pix img = Pix.LoadFromMemory(frame.Data);
+                    var stream = new MemoryStream(frame.Data);
+                    var img = System.Drawing.Image.FromStream(stream);
                     img.Save(path);
                 }
                 catch (Exception e)
