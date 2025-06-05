@@ -15,6 +15,7 @@ using System.IO;
 using Rdmp.Core.Repositories.Construction;
 using FellowOakDicom;
 using Rdmp.Dicom.Extraction.FoDicomBased;
+using Amazon.S3.Model;
 
 namespace Rdmp.Dicom.Extraction.PixelAnonymisation
 {
@@ -43,13 +44,14 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
 
         public int FileFetchRetryTimeout { get; set; }
 
-        [DemandsInitialization("Location of the tessdata folder", DefaultValue = "C:\\temp\\tessdata")]
-
-        public string TesseractDataFolder{ get; set; }
-
-        [DemandsInitialization("Expected text language ",DefaultValue ="eng")]
+        [DemandsInitialization("Expected text language ", DefaultValue = "eng")]
         public string Language { get; set; }
 
+        [DemandsInitialization("Use GPU", DefaultValue = false)]
+        public bool UseGPU { get; set; }
+
+        [DemandsInitialization("Location of python DLL or .so")]
+        public string PythonLocation { get; set; }
 
         private IExtractDatasetCommand _extractCommand;
         private IPutDicomFilesInExtractionDirectories _putter;
@@ -61,6 +63,8 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
 
         public void Check(ICheckNotifier notifier)
         {
+            //check python is set up etc
+            //todo
         }
 
         public void Dispose(IDataLoadEventListener listener, Exception pipelineFailureExceptionIfAny)
@@ -75,7 +79,6 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
 
         public DataTable ProcessPipelineData(DataTable toProcess, IDataLoadEventListener listener, GracefulCancellationToken cancellationToken)
         {
-            //Things we ignore, Lookups, SupportingSql etc
             if (_extractCommand == null)
             {
                 listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information, "Ignoring non dataset command "));
@@ -85,7 +88,7 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
             _putter ??= (IPutDicomFilesInExtractionDirectories)ObjectConstructor.Construct(PutterType);
             _destinationDirectory = new DirectoryInfo(Path.Combine(_extractCommand.GetExtractionDirectory().FullName, "Images"));
             var releaseIdentifierColumn = _extractCommand.QueryBuilder.SelectColumns.Select(c => c.IColumn).Single(c => c.IsExtractionIdentifier);
-            var ocr = new DicomOCR(TesseractDataFolder,Language,listener);
+            var ocr = new DicomOCR(Language, UseGPU, PythonLocation, listener);
             var redact = new DicomRedact();
             foreach (DataRow processRow in toProcess.Rows)
             {
@@ -104,16 +107,10 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
                 }
                 else
                 {
-                    //TODO if the file has already been exported
-                    //newPath = _putter.PredictOutputPath(_destinationDirectory, releaseId, ds.getSt);
-                    newPath = "";
+                    newPath = processRow[RelativeArchiveColumnName].ToString();
                 }
-                var recrangles = ocr.ProcessDicomFile(ds,file);
-                redact.Redact(ds,file,recrangles);
-                //dicom_ocr
-                //dicom_redact
-
-
+                var recrangles = ocr.ProcessDicomFile(ds, file);
+                redact.Redact(ds, file, recrangles);
             }
             return toProcess;
         }

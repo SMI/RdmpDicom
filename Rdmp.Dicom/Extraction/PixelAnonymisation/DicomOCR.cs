@@ -28,9 +28,8 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
 {
     class DicomOCR
     {
-
-        private string _tesseractLocation;
         private string _language;
+        private bool _useGPU;
         private IDataLoadEventListener _listener;
 
         public string OCREngine { get; set; }
@@ -39,26 +38,15 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
         public bool USRegions { get; set; }
         public bool ExceptUSRegions { get; set; }
 
-        public DicomOCR(string tesseractLocation, string language, IDataLoadEventListener listener)
+        public DicomOCR(string language, bool useGPU, string pythonDLL,  IDataLoadEventListener listener)
         {
-            _tesseractLocation = tesseractLocation;
             _language = language;
+            _useGPU = useGPU;
             _listener = listener;
-            Runtime.PythonDLL = "C:\\Users\\jfriel001\\AppData\\Local\\Programs\\Python\\Python313\\Python313.dll";
+            Runtime.PythonDLL = pythonDLL;// "C:\\Users\\jfriel001\\AppData\\Local\\Programs\\Python\\Python313\\Python313.dll";
             PythonEngine.Initialize();
-        }
+            new DicomSetupBuilder().RegisterServices(s => s.AddFellowOakDicom().AddImageManager<ImageSharpImageManager>()).Build();
 
-
-        private bool IsScannedForm(IPixelData pixelData)
-        {
-            //todo
-            return false;
-        }
-
-        private bool CheckForPII(string text)
-        {
-            //TODO
-            return false;
         }
 
         private bool IgnoreText(string foundText)
@@ -113,68 +101,65 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
         /// <returns></returns>
         public List<Tuple<int, List<DicomRectangle>>> ProcessDicomFile(DicomDataset dicomDataset, string fileName)
         {
-            new DicomSetupBuilder().RegisterServices(s => s.AddFellowOakDicom().AddImageManager<ImageSharpImageManager>()).Build();
             List<Tuple<int, List<DicomRectangle>>> foundRectangles = [];
-            using (var engine = new TesseractEngine(_tesseractLocation, _language, EngineMode.Default))
-            {
-                var pixelData = DicomPixelData.Create(dicomDataset);
+            var pixelData = DicomPixelData.Create(dicomDataset);
 
-                for (var frameIndex = 0; frameIndex < pixelData.NumberOfFrames; frameIndex++)
+            for (var frameIndex = 0; frameIndex < pixelData.NumberOfFrames; frameIndex++)
+            {
+                var frame = pixelData.GetFrame(frameIndex);
+                List<DicomRectangle> rectangles = [];
+                //convert frame to image
+                var frameImg = new DicomImage(dicomDataset, frameIndex);
+                var path = System.IO.Path.GetTempFileName() + ".jpg";
+                try
                 {
-                    var frame = pixelData.GetFrame(frameIndex);
-                    bool isSensitive = false; //todo something with this
-                    List<DicomRectangle> rectangles = [];
-                    var frameImg = new DicomImage(dicomDataset, frameIndex);
-                    var path = System.IO.Path.GetTempFileName() + ".jpg";
+                    Pix img = Pix.LoadFromMemory(frame.Data);
+                    img.Save(path);
+                }
+                catch (Exception e)
+                {
                     try
                     {
-                        Pix img = Pix.LoadFromMemory(frame.Data);
-                        img.Save(path);
-                    }
-                    catch (Exception e)
-                    {
-                        try
+                        using (var renderedImage = frameImg.RenderImage(frameIndex))
                         {
-                            using (var renderedImage = frameImg.RenderImage())
-                            {
-                                var sharpImage = renderedImage.AsSharpImage();
-                                sharpImage.SaveAsJpeg(path);
-                            }
-                        }
-                        catch (Exception e2)
-                        {
-                            //too large and notsupported
-                            _listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning, $"Unable to Process file {fileName}"));
-                            return foundRectangles;
+                            var sharpImage = renderedImage.AsSharpImage();
+                            sharpImage.SaveAsJpeg(path);
                         }
                     }
-                    List<OCRResult> results = [];
-                    using (Py.GIL())
+                    catch (Exception e2)
                     {
-                        dynamic easyocr = Py.Import("easyocr");
-                        dynamic np = Py.Import("numpy");
-                        dynamic reader = easyocr.Reader(new List<string>() { "en" }, gpu: false, verbose: false);
-                        PyTuple[] result = (PyTuple[])reader.readtext(path);
-                        results = result.Select(res => new OCRResult(res)).ToList();
-                    }
-                    foreach (var result in results)
-                    {
-                        if (result.Confidence > 0.04F && !IgnoreText(result.FoundText))// todo check confidence
-                        {
-                            var dicomRectangle = new DicomRectangle()
-                            {
-                                text = result.FoundText,
-                                rectangle = new Rect(result.X, result.Y, result.Width, result.Height),
-                                confidence = result.Confidence
-                            };
-                            rectangles.Add(dicomRectangle);
-                        }
-                    }
-                    if (rectangles.Count > 0)
-                    {
-                        foundRectangles.Add(new Tuple<int, List<DicomRectangle>>(frameIndex, rectangles));
+                        //too large and not supported
+                        _listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning, $"Unable to Process file {fileName}",e2));
+                        return foundRectangles;
                     }
                 }
+                //get OCR results
+                List<OCRResult> results = [];
+                using (Py.GIL())
+                {
+                    dynamic easyocr = Py.Import("easyocr");
+                    dynamic reader = easyocr.Reader(new List<string>() { _language }, gpu: _useGPU, verbose: false);
+                    PyTuple[] result = (PyTuple[])reader.readtext(path);
+                    results = result.Select(res => new OCRResult(res)).ToList();
+                }
+                foreach (var result in results)
+                {
+                    if (result.Confidence > 0.0F && !IgnoreText(result.FoundText))// todo check confidence
+                    {
+                        var dicomRectangle = new DicomRectangle()
+                        {
+                            text = result.FoundText,
+                            rectangle = new Rect(result.X, result.Y, result.Width, result.Height),
+                            confidence = result.Confidence
+                        };
+                        rectangles.Add(dicomRectangle);
+                    }
+                }
+                if (rectangles.Count > 0)
+                {
+                    foundRectangles.Add(new Tuple<int, List<DicomRectangle>>(frameIndex, rectangles));
+                }
+
             }
             return foundRectangles;
         }

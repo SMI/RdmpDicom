@@ -26,7 +26,7 @@ public class DicomRedact
 
     public DicomRedact() { }
 
-    public void Redact(DicomDataset dicomDataset, string dicomFileLocation, List<Tuple<int, List<DicomRectangle>>> redactions)
+    public void Redact(DicomDataset dicomDataset, string dicomFileLocation, List<Tuple<int, List<DicomRectangle>>> redactions,string outputLocation)
     {
         using (Py.GIL())
         {
@@ -48,14 +48,6 @@ public class DicomRedact
                 dynamic pixel_data = ds.pixel_array;
 
                 dynamic bit_mask = np.array(0xffff << bitsStored).astype(np.uint16);
-
-                //List<string> RGBPhotometrics = ["MONOCHROME1", "MONOCHROME2", "PALETTE COLOR", "RGB"];
-                //if (!RGBPhotometrics.Contains(photometric.ToString()))
-                //{
-                //    //# Typically one of HSV,ARGB,CMYK,YBR_FULL,YBR_FULL_422,YBR_PARTIAL_422,YBR_PARTIAL_420,YBR_ICT,YBR_RCT
-                //    pixel_data = pydicom.pixel_data_handlers.convert_color_space(ds.pixel_array, MapPhotometric(photometric.ToString()), "RGB", true);
-                //    ds.PhotometricInterpretation = "RGB";
-                //}
 
                 dynamic bit_mask_arr = np.array(new List<PyObject>() { bit_mask }, dtype: pixel_data.dtype);
                 foreach (var redaction in frameRedactions)
@@ -98,28 +90,8 @@ public class DicomRedact
                 }
                 pydicom.pixels.set_pixel_data(ds, pixel_data, "RGB", bitsStored);
             }
-            //ds.file_meta.TransferSyntaxUID = dicomDataset.InternalTransferSyntax.ToString();
-            //if (BitConverter.IsLittleEndian)
-            //{
-            //    ds.file_meta.TransferSyntaxUID = pydicom.uid.ExplicitVRLittleEndian;
-            //}
-            //else
-            //{
-            //    ds.file_meta.TransferSyntaxUID = pydicom.uid.ExplicitVRBigEndian;
-            //}
-            ds.save_as("C:\\temp\\output.dcm");
-        }
-    }
 
-    private string MapPhotometric(string photometric)
-    {
-        // Typically one of HSV,ARGB,CMYK,YBR_FULL,YBR_FULL_422,YBR_PARTIAL_422,YBR_PARTIAL_420,YBR_ICT,YBR_RCT
-        switch (photometric)
-        {
-            case "YBR Full":
-                return "YBR_FULL";
-            default:
-                return photometric;
+            ds.save_as($"{outputLocation}{Path.DirectorySeparatorChar}{dicomFileLocation.Split(Path.DirectorySeparatorChar).Last()}");
         }
     }
 }
