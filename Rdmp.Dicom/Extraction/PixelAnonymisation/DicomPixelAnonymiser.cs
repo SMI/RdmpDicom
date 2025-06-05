@@ -110,7 +110,7 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
                     newPath = processRow[RelativeArchiveColumnName].ToString();
                 }
                 var recrangles = ocr.ProcessDicomFile(ds, file);
-                redact.Redact(ds, file, recrangles);
+                redact.Redact(ds, file, recrangles,newPath);
             }
             return toProcess;
         }

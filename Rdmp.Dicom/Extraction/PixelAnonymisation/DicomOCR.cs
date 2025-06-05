@@ -118,6 +118,8 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
                 }
                 catch (Exception e)
                 {
+                    _listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning, $"Unable to Process file {fileName} from memory", e));
+
                     try
                     {
                         using (var renderedImage = frameImg.RenderImage(frameIndex))
@@ -129,7 +131,7 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
                     catch (Exception e2)
                     {
                         //too large and not supported
-                        _listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning, $"Unable to Process file {fileName}",e2));
+                        _listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning, $"Unable to Process file {fileName}", e2));
                         return foundRectangles;
                     }
                 }
