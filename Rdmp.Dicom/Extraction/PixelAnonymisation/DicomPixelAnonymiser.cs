@@ -16,6 +16,7 @@ using Rdmp.Core.Repositories.Construction;
 using FellowOakDicom;
 using Rdmp.Dicom.Extraction.FoDicomBased;
 using Amazon.S3.Model;
+using System.Collections;
 
 namespace Rdmp.Dicom.Extraction.PixelAnonymisation
 {
@@ -99,7 +100,27 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
                 string newPath;
                 if (!ImagesAlreadyInDestination)
                 {
-                    newPath = _putter.WriteOutDataset(_destinationDirectory, releaseId, ds);
+                    string studyUid = null;
+                    try
+                    {
+                        studyUid = ds.GetSingleValue<string>(DicomTag.StudyInstanceUID);
+                    }
+                    catch (Exception) { }
+                    string seriesUid = null;
+                    try
+                    {
+                        seriesUid = ds.GetSingleValue<string>(DicomTag.SeriesInstanceUID);
+                    }
+                    catch (Exception) { }
+                    string sopUid = null;
+                    try
+                    {
+                        sopUid = ds.GetSingleValue<string>(DicomTag.SOPInstanceUID);
+                    }
+                    catch (Exception) { }
+
+                    newPath = _putter.PredictOutputPath(_destinationDirectory, releaseId, studyUid, seriesUid, sopUid);
+                    //newPath = _putter.WriteOutDataset(_destinationDirectory, releaseId, ds);
                     if (processRow != null)
                     {
                         processRow[RelativeArchiveColumnName] = newPath;
@@ -113,7 +134,8 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
                 {
                     var recrangles = ocr.ProcessDicomFile(ds, file);
                     redact.Redact(ds, file, recrangles, newPath);
-                }catch(Exception e)
+                }
+                catch (Exception e)
                 {
                     listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Error, e.Message));
                 }
