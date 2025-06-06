@@ -17,6 +17,7 @@ using FellowOakDicom;
 using Rdmp.Dicom.Extraction.FoDicomBased;
 using Amazon.S3.Model;
 using System.Collections;
+using Python.Runtime;
 
 namespace Rdmp.Dicom.Extraction.PixelAnonymisation
 {
@@ -80,6 +81,7 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
 
         public DataTable ProcessPipelineData(DataTable toProcess, IDataLoadEventListener listener, GracefulCancellationToken cancellationToken)
         {
+            Runtime.PythonDLL = PythonLocation;// "C:\\Users\\jfriel001\\AppData\\Local\\Programs\\Python\\Python313\\Python313.dll";
             if (_extractCommand == null)
             {
                 listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information, "Ignoring non dataset command "));
@@ -120,7 +122,6 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
                     catch (Exception) { }
 
                     newPath = _putter.PredictOutputPath(_destinationDirectory, releaseId, studyUid, seriesUid, sopUid);
-                    //newPath = _putter.WriteOutDataset(_destinationDirectory, releaseId, ds);
                     if (processRow != null)
                     {
                         processRow[RelativeArchiveColumnName] = newPath;

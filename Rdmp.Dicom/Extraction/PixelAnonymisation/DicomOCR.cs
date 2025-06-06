@@ -42,7 +42,6 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
             _language = language;
             _useGPU = useGPU;
             _listener = listener;
-            Runtime.PythonDLL = pythonDLL;// "C:\\Users\\jfriel001\\AppData\\Local\\Programs\\Python\\Python313\\Python313.dll";
             PythonEngine.Initialize();
             new DicomSetupBuilder().RegisterServices(s => s.AddFellowOakDicom().AddImageManager<ImageSharpImageManager>()).Build();
 
