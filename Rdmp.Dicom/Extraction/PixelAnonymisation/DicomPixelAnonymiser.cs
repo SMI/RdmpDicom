@@ -81,7 +81,6 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
 
         public DataTable ProcessPipelineData(DataTable toProcess, IDataLoadEventListener listener, GracefulCancellationToken cancellationToken)
         {
-            Runtime.PythonDLL = PythonLocation;// "C:\\Users\\jfriel001\\AppData\\Local\\Programs\\Python\\Python313\\Python313.dll";
             if (_extractCommand == null)
             {
                 listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information, "Ignoring non dataset command "));
@@ -91,60 +90,58 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
             _putter ??= (IPutDicomFilesInExtractionDirectories)ObjectConstructor.Construct(PutterType);
             _destinationDirectory = new DirectoryInfo(Path.Combine(_extractCommand.GetExtractionDirectory().FullName, "Images"));
             var releaseIdentifierColumn = _extractCommand.QueryBuilder.SelectColumns.Select(c => c.IColumn).Single(c => c.IsExtractionIdentifier);
-            var ocr = new DicomOCR(Language, UseGPU, PythonLocation, listener);
-            var redact = new DicomRedact();
-            foreach (DataRow processRow in toProcess.Rows)
+            Runtime.PythonDLL = PythonLocation;
+            PythonEngine.Initialize();
+            using (Py.GIL())
             {
-                var file = (string)processRow[RelativeArchiveColumnName];
-                var releaseId = processRow[releaseIdentifierColumn.GetRuntimeName()].ToString();
-                var dicomFile = new AmbiguousFilePath(ArchiveRootIfAny, file).GetDataset(FileFetchRetryLimit, FileFetchRetryTimeout, listener);
-                DicomDataset ds = dicomFile.First().Item2.Dataset;
-                string newPath;
-                if (!ImagesAlreadyInDestination)
+                var ocr = new DicomOCR(Language, UseGPU, PythonLocation, listener);
+                var redact = new DicomRedact();
+                foreach (DataRow processRow in toProcess.Rows)
                 {
-                    string studyUid = null;
-                    try
+                    var file = (string)processRow[RelativeArchiveColumnName];
+                    var releaseId = processRow[releaseIdentifierColumn.GetRuntimeName()].ToString();
+                    var dicomFile = new AmbiguousFilePath(ArchiveRootIfAny, file).GetDataset(FileFetchRetryLimit, FileFetchRetryTimeout, listener);
+                    DicomDataset ds = dicomFile.First().Item2.Dataset;
+                    string newPath;
+                    if (!ImagesAlreadyInDestination)
                     {
-                        studyUid = ds.GetSingleValue<string>(DicomTag.StudyInstanceUID);
-                    }
-                    catch (Exception) { }
-                    string seriesUid = null;
-                    try
-                    {
-                        seriesUid = ds.GetSingleValue<string>(DicomTag.SeriesInstanceUID);
-                    }
-                    catch (Exception) { }
-                    string sopUid = null;
-                    try
-                    {
-                        sopUid = ds.GetSingleValue<string>(DicomTag.SOPInstanceUID);
-                    }
-                    catch (Exception) { }
+                        string studyUid = null;
+                        try
+                        {
+                            studyUid = ds.GetSingleValue<string>(DicomTag.StudyInstanceUID);
+                        }
+                        catch (Exception) { }
+                        string seriesUid = null;
+                        try
+                        {
+                            seriesUid = ds.GetSingleValue<string>(DicomTag.SeriesInstanceUID);
+                        }
+                        catch (Exception) { }
+                        string sopUid = null;
+                        try
+                        {
+                            sopUid = ds.GetSingleValue<string>(DicomTag.SOPInstanceUID);
+                        }
+                        catch (Exception) { }
 
-                    newPath = _putter.PredictOutputPath(_destinationDirectory, releaseId, studyUid, seriesUid, sopUid);
-                    if (processRow != null)
-                    {
-                        processRow[RelativeArchiveColumnName] = newPath;
+                        newPath = _putter.PredictOutputPath(_destinationDirectory, releaseId, studyUid, seriesUid, sopUid);
+                        if (processRow != null)
+                        {
+                            processRow[RelativeArchiveColumnName] = newPath;
+                        }
                     }
+                    else
+                    {
+                        newPath = processRow[RelativeArchiveColumnName].ToString();
+                    }
+                    if (newPath is null)
+                    {
+                        listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning, $"Unable to generate output path for {file}"));
+                        continue;
+                    }
+                    var recrangles = ocr.ProcessDicomFile(ds, file);
+                    redact.Redact(ds, file, recrangles, newPath);
                 }
-                else
-                {
-                    newPath = processRow[RelativeArchiveColumnName].ToString();
-                }
-                if(newPath is null)
-                {
-                    listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning, $"Unable to generate output path for {file}"));
-                    continue;
-                }
-                //try
-                //{
-                var recrangles = ocr.ProcessDicomFile(ds, file);
-                redact.Redact(ds, file, recrangles, newPath);
-                //}
-                //catch (Exception e)
-                //{
-                //    listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Error, e.Message));
-                //}
             }
             return toProcess;
         }

@@ -1,27 +1,12 @@
 ﻿using FellowOakDicom;
 using FellowOakDicom.Imaging;
-using FellowOakDicom.Imaging.Render;
-using FellowOakDicom.Serialization;
-using NPOI.HPSF;
-using NPOI.OpenXmlFormats.Wordprocessing;
-using NPOI.SS.Formula.Functions;
 using Python.Runtime;
-using Rdmp.Core.Icons.IconProvision;
 using Rdmp.Core.ReusableLibraryCode.Progress;
-using Rdmp.Core.Validation;
 using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Drawing;
-using SixLabors.ImageSharp.Processing;
-using SixLabors.ImageSharp.Processing.Processors.Normalization;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Drawing;
-using System.Dynamic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Rdmp.Dicom.Extraction.PixelAnonymisation
 {
@@ -30,6 +15,7 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
         private string _language;
         private bool _useGPU;
         private IDataLoadEventListener _listener;
+        private dynamic reader;
 
         public string OCREngine { get; set; }
         public string NLPEngine { get; set; }
@@ -37,14 +23,15 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
         public bool USRegions { get; set; }
         public bool ExceptUSRegions { get; set; }
 
-        public DicomOCR(string language, bool useGPU, string pythonDLL,  IDataLoadEventListener listener)
+
+        public DicomOCR(string language, bool useGPU, string pythonDLL, IDataLoadEventListener listener)
         {
             _language = language;
             _useGPU = useGPU;
             _listener = listener;
-            PythonEngine.Initialize();
             new DicomSetupBuilder().RegisterServices(s => s.AddFellowOakDicom().AddImageManager<ImageSharpImageManager>()).Build();
-
+            dynamic easyocr = Py.Import("easyocr");
+            reader = easyocr.Reader(new List<string>() { _language }, gpu: _useGPU, verbose: false);
         }
 
         private bool IgnoreText(string foundText)
@@ -134,15 +121,10 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
                         return foundRectangles;
                     }
                 }
-                //get OCR results
-                List<OCRResult> results = [];
-                using (Py.GIL())
-                {
-                    dynamic easyocr = Py.Import("easyocr");
-                    dynamic reader = easyocr.Reader(new List<string>() { _language }, gpu: _useGPU, verbose: false);
-                    PyTuple[] result = (PyTuple[])reader.readtext(path);
-                    results = result.Select(res => new OCRResult(res)).ToList();
-                }
+
+                PyTuple[] ocrResult = (PyTuple[])reader.readtext(path);
+                List<OCRResult> results = ocrResult.Select(res => new OCRResult(res)).ToList();
+
                 foreach (var result in results)
                 {
                     if (result.Confidence > 0.0F && !IgnoreText(result.FoundText))// todo check confidence
