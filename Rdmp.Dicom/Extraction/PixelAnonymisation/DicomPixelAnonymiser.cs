@@ -44,7 +44,7 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
 
         public int FileFetchRetryTimeout { get; set; }
 
-        [DemandsInitialization("Expected text language ", DefaultValue = "eng")]
+        [DemandsInitialization("Expected text language ", DefaultValue = "en")]
         public string Language { get; set; }
 
         [DemandsInitialization("Use GPU", DefaultValue = false)]
@@ -109,8 +109,14 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
                 {
                     newPath = processRow[RelativeArchiveColumnName].ToString();
                 }
-                var recrangles = ocr.ProcessDicomFile(ds, file);
-                redact.Redact(ds, file, recrangles,newPath);
+                try
+                {
+                    var recrangles = ocr.ProcessDicomFile(ds, file);
+                    redact.Redact(ds, file, recrangles, newPath);
+                }catch(Exception e)
+                {
+                    listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Error, e.Message));
+                }
             }
             return toProcess;
         }
