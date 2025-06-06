@@ -91,7 +91,7 @@ public class DicomRedact
                 pydicom.pixels.set_pixel_data(ds, pixel_data, "RGB", bitsStored);
             }
 
-            ds.save_as($"{outputLocation}{Path.DirectorySeparatorChar}{dicomFileLocation.Split(Path.DirectorySeparatorChar).Last()}");
+            ds.save_as($"{outputLocation}");
         }
     }
 }
