@@ -130,15 +130,20 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
                 {
                     newPath = processRow[RelativeArchiveColumnName].ToString();
                 }
-                try
+                if(newPath is null)
                 {
-                    var recrangles = ocr.ProcessDicomFile(ds, file);
-                    redact.Redact(ds, file, recrangles, newPath);
+                    listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning, $"Unable to generate output path for {file}"));
+                    continue;
                 }
-                catch (Exception e)
-                {
-                    listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Error, e.Message));
-                }
+                //try
+                //{
+                var recrangles = ocr.ProcessDicomFile(ds, file);
+                redact.Redact(ds, file, recrangles, newPath);
+                //}
+                //catch (Exception e)
+                //{
+                //    listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Error, e.Message));
+                //}
             }
             return toProcess;
         }
