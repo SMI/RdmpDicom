@@ -84,9 +84,10 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
         /// </summary>
         /// <param name="dicomDataset"></param>
         /// <returns></returns>
-        public List<Tuple<int, List<DicomRectangle>>> ProcessDicomFile(DicomDataset dicomDataset, string fileName)
+        public (List<Tuple<int, List<DicomRectangle>>>,List<Tuple<string,string>>) ProcessDicomFile(DicomDataset dicomDataset, string fileName)
         {
             List<Tuple<int, List<DicomRectangle>>> foundRectangles = [];
+            List<Tuple<string, string>> errors = [];
             var pixelData = DicomPixelData.Create(dicomDataset);
 
             for (var frameIndex = 0; frameIndex < pixelData.NumberOfFrames; frameIndex++)
@@ -95,11 +96,11 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
                 List<DicomRectangle> rectangles = [];
                 //convert frame to image
                 var frameImg = new DicomImage(dicomDataset, frameIndex);
-                var path = System.IO.Path.GetTempFileName() + ".jpg";
+                var path = Path.GetTempFileName() + ".jpg";
                 try
                 {
                     var stream = new MemoryStream(frame.Data);
-                    var img = System.Drawing.Image.FromStream(stream);
+                    var img = System.Drawing.Image.FromStream(stream);//think about non-windows
                     img.Save(path);
                 }
                 catch (Exception e)
@@ -118,7 +119,8 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
                     {
                         //too large and not supported
                         _listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning, $"Unable to Process file {fileName}", e2));
-                        return foundRectangles;
+                        errors.Add(new Tuple<string,string>(fileName, "Unable to Process file for pixel anonymisation"));
+                        return (foundRectangles,errors);
                     }
                 }
 
@@ -137,6 +139,10 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
                         };
                         rectangles.Add(dicomRectangle);
                     }
+                    else
+                    {
+                        errors.Add(new Tuple<string, string>(fileName,$"Did not redact '{result.FoundText}' with confidence {result.Confidence}"));
+                    }
                 }
                 if (rectangles.Count > 0)
                 {
@@ -144,7 +150,7 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
                 }
 
             }
-            return foundRectangles;
+            return (foundRectangles,errors);
         }
     }
 }

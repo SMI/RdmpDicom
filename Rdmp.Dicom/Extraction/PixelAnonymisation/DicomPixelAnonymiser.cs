@@ -79,6 +79,7 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
 
         }
 
+
         public DataTable ProcessPipelineData(DataTable toProcess, IDataLoadEventListener listener, GracefulCancellationToken cancellationToken)
         {
             if (_extractCommand == null)
@@ -90,6 +91,14 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
             _putter ??= (IPutDicomFilesInExtractionDirectories)ObjectConstructor.Construct(PutterType);
             _destinationDirectory = new DirectoryInfo(Path.Combine(_extractCommand.GetExtractionDirectory().FullName, "Images"));
             var releaseIdentifierColumn = _extractCommand.QueryBuilder.SelectColumns.Select(c => c.IColumn).Single(c => c.IsExtractionIdentifier);
+            using (StreamWriter w = File.AppendText($"{_destinationDirectory}{Path.DirectorySeparatorChar}pixelAnonymisationErrors.csv"))
+            {
+                w.WriteLine("fileName,error");
+            }
+            using (StreamWriter w = File.AppendText($"{_destinationDirectory}{Path.DirectorySeparatorChar}redactions.csv"))
+            {
+                w.WriteLine("fileName,frame,text,confidence,x,y,width,height");
+            }
             Runtime.PythonDLL = PythonLocation;
             PythonEngine.Initialize();
             using (Py.GIL())
@@ -139,8 +148,27 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
                         listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning, $"Unable to generate output path for {file}"));
                         continue;
                     }
-                    var recrangles = ocr.ProcessDicomFile(ds, file);
-                    redact.Redact(ds, file, recrangles, newPath);
+
+                    (var rectangles, var errors) = ocr.ProcessDicomFile(ds, file);
+                    using (StreamWriter w = File.AppendText($"{_destinationDirectory}{Path.DirectorySeparatorChar}pixelAnonymisationErrors.csv"))
+                    {
+                        foreach (var error in errors)
+                        {
+                            w.WriteLine(error.Item1, error.Item2);
+                        }
+                    }
+                    using (StreamWriter w = File.AppendText($"{_destinationDirectory}{Path.DirectorySeparatorChar}redactions.csv"))
+                    {
+                        foreach (var rect in rectangles)
+                        {
+                            foreach (var redaction in rect.Item2)
+                            {
+                                w.WriteLine($"{file},{rect.Item1},{redaction.text},{redaction.confidence},{redaction.rectangle.X1},{redaction.rectangle.Y1},{redaction.rectangle.Width},{redaction.rectangle.Height}");
+
+                            }
+                        }
+                    }
+                    redact.Redact(ds, file, rectangles, newPath);
                 }
             }
             return toProcess;
