@@ -89,42 +89,45 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
             List<Tuple<int, List<DicomRectangle>>> foundRectangles = [];
             List<Tuple<string, string>> errors = [];
             var pixelData = DicomPixelData.Create(dicomDataset);
-
+            dynamic pydicom = Py.Import("pydicom");
+            dynamic np = Py.Import("numpy");
+            dynamic ds = pydicom.dcmread(fileName);
             for (var frameIndex = 0; frameIndex < pixelData.NumberOfFrames; frameIndex++)
             {
-                var frame = pixelData.GetFrame(frameIndex);
+                //var frame = pixelData.GetFrame(frameIndex);
                 List<DicomRectangle> rectangles = [];
-                //convert frame to image
-                var frameImg = new DicomImage(dicomDataset, frameIndex);
-                var path = Path.GetTempFileName() + ".jpg";
-                try
-                {
-                    var stream = new MemoryStream(frame.Data);
-                    var img = System.Drawing.Image.FromStream(stream);//think about non-windows
-                    img.Save(path);
-                }
-                catch (Exception e)
-                {
-                    _listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning, $"Unable to Process file {fileName} from memory", e));
+                ////convert frame to image
+                //var frameImg = new DicomImage(dicomDataset, frameIndex);
+                //var path = Path.GetTempFileName() + ".jpg";
+                //try
+                //{
+                //    var stream = new MemoryStream(frame.Data);
+                //    var img = System.Drawing.Image.FromStream(stream);//think about non-windows
+                //    img.Save(path);
+                //}
+                //catch (Exception e)
+                //{
+                //    _listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning, $"Unable to Process file {fileName} from memory", e));
 
-                    try
-                    {
-                        using (var renderedImage = frameImg.RenderImage(frameIndex))
-                        {
-                            var sharpImage = renderedImage.AsSharpImage();
-                            sharpImage.SaveAsJpeg(path);
-                        }
-                    }
-                    catch (Exception e2)
-                    {
-                        //too large and not supported
-                        _listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning, $"Unable to Process file {fileName}", e2));
-                        errors.Add(new Tuple<string,string>(fileName, "Unable to Process file for pixel anonymisation"));
-                        return (foundRectangles,errors);
-                    }
-                }
+                //    try
+                //    {
+                //        using (var renderedImage = frameImg.RenderImage(frameIndex))
+                //        {
+                //            var sharpImage = renderedImage.AsSharpImage();
+                //            sharpImage.SaveAsJpeg(path);
+                //        }
+                //    }
+                //    catch (Exception e2)
+                //    {
+                //        //too large and not supported
+                //        _listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning, $"Unable to Process file {fileName}", e2));
+                //        errors.Add(new Tuple<string,string>(fileName, "Unable to Process file for pixel anonymisation"));
+                //        return (foundRectangles,errors);
+                //    }
+                //}
+                dynamic arr = pydicom.pixels.pixel_array(ds, index: frameIndex);
 
-                PyTuple[] ocrResult = (PyTuple[])reader.readtext(path);
+                PyTuple[] ocrResult = (PyTuple[])reader.readtext(arr);
                 List<OCRResult> results = ocrResult.Select(res => new OCRResult(res)).ToList();
 
                 foreach (var result in results)

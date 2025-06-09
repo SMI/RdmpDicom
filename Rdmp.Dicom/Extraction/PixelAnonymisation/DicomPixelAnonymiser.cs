@@ -171,6 +171,7 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
                     redact.Redact(ds, file, rectangles, newPath);
                 }
             }
+            //PythonEngine.Shutdown();
             return toProcess;
         }
     }

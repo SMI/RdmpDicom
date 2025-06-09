@@ -72,6 +72,7 @@ public class DicomRedact
                     }
                 }
             }
+            //    Python.Runtime.PythonException : An ndarray with 'RGB' data must have 3 or 4 dimensions, not 2
             pydicom.pixels.set_pixel_data(ds, pixel_data, "RGB", bitsStored);
         }
 
