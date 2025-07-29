@@ -23,6 +23,8 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
         public bool USRegions { get; set; }
         public bool ExceptUSRegions { get; set; }
 
+        private DicomFormChecker _formChecker = new();
+
 
         public DicomOCR(string language, bool useGPU, string pythonDLL, IDataLoadEventListener listener)
         {
@@ -84,7 +86,7 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
         /// </summary>
         /// <param name="dicomDataset"></param>
         /// <returns></returns>
-        public (List<Tuple<int, List<DicomRectangle>>>,List<Tuple<string,string>>) ProcessDicomFile(DicomDataset dicomDataset, string fileName)
+        public (List<Tuple<int, List<DicomRectangle>>>, List<Tuple<string, string>>) ProcessDicomFile(DicomDataset dicomDataset, string fileName, bool removeForms)
         {
             List<Tuple<int, List<DicomRectangle>>> foundRectangles = [];
             List<Tuple<string, string>> errors = [];
@@ -94,58 +96,43 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
             dynamic ds = pydicom.dcmread(fileName);
             for (var frameIndex = 0; frameIndex < pixelData.NumberOfFrames; frameIndex++)
             {
-                //var frame = pixelData.GetFrame(frameIndex);
                 List<DicomRectangle> rectangles = [];
-                ////convert frame to image
-                //var frameImg = new DicomImage(dicomDataset, frameIndex);
-                //var path = Path.GetTempFileName() + ".jpg";
-                //try
-                //{
-                //    var stream = new MemoryStream(frame.Data);
-                //    var img = System.Drawing.Image.FromStream(stream);//think about non-windows
-                //    img.Save(path);
-                //}
-                //catch (Exception e)
-                //{
-                //    _listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning, $"Unable to Process file {fileName} from memory", e));
-
-                //    try
-                //    {
-                //        using (var renderedImage = frameImg.RenderImage(frameIndex))
-                //        {
-                //            var sharpImage = renderedImage.AsSharpImage();
-                //            sharpImage.SaveAsJpeg(path);
-                //        }
-                //    }
-                //    catch (Exception e2)
-                //    {
-                //        //too large and not supported
-                //        _listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Warning, $"Unable to Process file {fileName}", e2));
-                //        errors.Add(new Tuple<string,string>(fileName, "Unable to Process file for pixel anonymisation"));
-                //        return (foundRectangles,errors);
-                //    }
-                //}
                 dynamic arr = pydicom.pixels.pixel_array(ds, index: frameIndex);
 
-                PyTuple[] ocrResult = (PyTuple[])reader.readtext(arr);
-                List<OCRResult> results = ocrResult.Select(res => new OCRResult(res)).ToList();
-
-                foreach (var result in results)
+               
+                else
                 {
-                    if (result.Confidence > 0.0F && !IgnoreText(result.FoundText))// todo check confidence
+
+                    PyTuple[] ocrResult = (PyTuple[])reader.readtext(arr);
+                    List<OCRResult> results = ocrResult.Select(res => new OCRResult(res)).ToList();
+
+                    foreach (var result in results)
                     {
-                        var dicomRectangle = new DicomRectangle()
+                        if (result.Confidence > 0.0F && !IgnoreText(result.FoundText))// todo check confidence
                         {
-                            text = result.FoundText,
-                            rectangle = new Rect(result.X, result.Y, result.Width, result.Height),
-                            confidence = result.Confidence
-                        };
-                        rectangles.Add(dicomRectangle);
+                            var dicomRectangle = new DicomRectangle()
+                            {
+                                text = result.FoundText,
+                                rectangle = new Rect(result.X, result.Y, result.Width, result.Height),
+                                confidence = result.Confidence
+                            };
+                            rectangles.Add(dicomRectangle);
+                        }
+                        else
+                        {
+                            errors.Add(new Tuple<string, string>(fileName, $"Did not redact '{result.FoundText}' with confidence {result.Confidence}"));
+                        }
                     }
-                    else
+                }
+                if (removeForms && _formChecker.IsForm(rectangles))
+                {
+                    var dicomRectangle = new DicomRectangle()
                     {
-                        errors.Add(new Tuple<string, string>(fileName,$"Did not redact '{result.FoundText}' with confidence {result.Confidence}"));
-                    }
+                        text = "SUSPECTED FORM",
+                        rectangle = new Rect(0, 0, (int)arr.shape[1], (int)arr.shape[0]),
+                        confidence = 100
+                    };
+                    rectangles = [dicomRectangle];
                 }
                 if (rectangles.Count > 0)
                 {
@@ -153,7 +140,7 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
                 }
 
             }
-            return (foundRectangles,errors);
+            return (foundRectangles, errors);
         }
     }
 }

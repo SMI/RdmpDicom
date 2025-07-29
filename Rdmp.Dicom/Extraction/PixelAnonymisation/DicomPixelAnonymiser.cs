@@ -38,6 +38,10 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
         [DemandsInitialization("Does a previous Extraction step extract the images? i.e. FODicomAnonymiser", Mandatory = false, DefaultValue = false)]
         public bool ImagesAlreadyInDestination { get; set; }
 
+        [DemandsInitialization("Remove suspected forms that appear as a DICOM frame", Mandatory = false, DefaultValue = false)]
+        public bool RemoveForms { get; set; }
+
+
         [DemandsInitialization("How many tries to allow for fetching the file. This setting may be useful on network drives or oversubscribed resources", DefaultValue = 0)]
 
         public int FileFetchRetryLimit { get; set; }
@@ -90,6 +94,7 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
 
             _putter ??= (IPutDicomFilesInExtractionDirectories)ObjectConstructor.Construct(PutterType);
             _destinationDirectory = new DirectoryInfo(Path.Combine(_extractCommand.GetExtractionDirectory().FullName, "Images"));
+            int rectanglesCount = 0;
             var releaseIdentifierColumn = _extractCommand.QueryBuilder.SelectColumns.Select(c => c.IColumn).Single(c => c.IsExtractionIdentifier);
             using (StreamWriter w = File.AppendText($"{_destinationDirectory}{Path.DirectorySeparatorChar}pixelAnonymisationErrors.csv"))
             {
@@ -149,7 +154,7 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
                         continue;
                     }
 
-                    (var rectangles, var errors) = ocr.ProcessDicomFile(ds, file);
+                    (var rectangles, var errors) = ocr.ProcessDicomFile(ds, file, RemoveForms);
                     using (StreamWriter w = File.AppendText($"{_destinationDirectory}{Path.DirectorySeparatorChar}pixelAnonymisationErrors.csv"))
                     {
                         foreach (var error in errors)
@@ -168,9 +173,15 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
                             }
                         }
                     }
+                    rectanglesCount += rectangles.Count;
                     redact.Redact(ds, file, rectangles, newPath);
                 }
             }
+            if (rectanglesCount > 0)
+            {
+                listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information, $"Found {rectanglesCount} redactions."));
+            }
+
             //PythonEngine.Shutdown();
             return toProcess;
         }
