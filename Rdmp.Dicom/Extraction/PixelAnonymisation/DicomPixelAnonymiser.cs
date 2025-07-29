@@ -105,8 +105,12 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
             {
                 w.WriteLine("fileName,frame,text,confidence,x,y,width,height");
             }
-            Runtime.PythonDLL = @"C:\\Users\\jfriel001\\AppData\\Local\\Programs\\Python\\Python313\\Python313.dll";//PythonLocation;
-            PythonEngine.Initialize();
+            if (!PythonEngine.IsInitialized)
+            {
+                Runtime.PythonDLL = PythonLocation;
+
+                PythonEngine.Initialize();
+            }
             using (Py.GIL())
             {
                 var ocr = new DicomOCR(Language, UseGPU, PythonLocation, listener);
@@ -183,7 +187,7 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
                 listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information, $"Found {rectanglesCount} redactions."));
             }
 
-            //PythonEngine.Shutdown();
+            //    PythonEngine.Shutdown();
             return toProcess;
         }
     }
