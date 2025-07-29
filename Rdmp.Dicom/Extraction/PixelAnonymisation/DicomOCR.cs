@@ -99,31 +99,30 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
                 List<DicomRectangle> rectangles = [];
                 dynamic arr = pydicom.pixels.pixel_array(ds, index: frameIndex);
 
-               
-                else
+
+
+
+                PyTuple[] ocrResult = (PyTuple[])reader.readtext(arr);
+                List<OCRResult> results = ocrResult.Select(res => new OCRResult(res)).ToList();
+
+                foreach (var result in results)
                 {
-
-                    PyTuple[] ocrResult = (PyTuple[])reader.readtext(arr);
-                    List<OCRResult> results = ocrResult.Select(res => new OCRResult(res)).ToList();
-
-                    foreach (var result in results)
+                    if (result.Confidence > 0.0F && !IgnoreText(result.FoundText))// todo check confidence
                     {
-                        if (result.Confidence > 0.0F && !IgnoreText(result.FoundText))// todo check confidence
+                        var dicomRectangle = new DicomRectangle()
                         {
-                            var dicomRectangle = new DicomRectangle()
-                            {
-                                text = result.FoundText,
-                                rectangle = new Rect(result.X, result.Y, result.Width, result.Height),
-                                confidence = result.Confidence
-                            };
-                            rectangles.Add(dicomRectangle);
-                        }
-                        else
-                        {
-                            errors.Add(new Tuple<string, string>(fileName, $"Did not redact '{result.FoundText}' with confidence {result.Confidence}"));
-                        }
+                            text = result.FoundText,
+                            rectangle = new Rect(result.X, result.Y, result.Width, result.Height),
+                            confidence = result.Confidence
+                        };
+                        rectangles.Add(dicomRectangle);
+                    }
+                    else
+                    {
+                        errors.Add(new Tuple<string, string>(fileName, $"Did not redact '{result.FoundText}' with confidence {result.Confidence}"));
                     }
                 }
+
                 if (removeForms && _formChecker.IsForm(rectangles))
                 {
                     var dicomRectangle = new DicomRectangle()
