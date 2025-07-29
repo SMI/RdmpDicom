@@ -97,13 +97,19 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
             _destinationDirectory = new DirectoryInfo(Path.Combine(_extractCommand.GetExtractionDirectory().FullName, "Images"));
             int rectanglesCount = 0;
             var releaseIdentifierColumn = _extractCommand.QueryBuilder.SelectColumns.Select(c => c.IColumn).Single(c => c.IsExtractionIdentifier);
-            using (StreamWriter w = File.AppendText($"{_destinationDirectory}{Path.DirectorySeparatorChar}pixelAnonymisationErrors.csv"))
+            if (!File.Exists($"{_destinationDirectory}{Path.DirectorySeparatorChar}pixelAnonymisationErrors.csv"))
             {
-                w.WriteLine("fileName,error");
+                using (StreamWriter w = File.AppendText($"{_destinationDirectory}{Path.DirectorySeparatorChar}pixelAnonymisationErrors.csv"))
+                {
+                    w.WriteLine("fileName,error");
+                }
             }
-            using (StreamWriter w = File.AppendText($"{_destinationDirectory}{Path.DirectorySeparatorChar}redactions.csv"))
+            if (!File.Exists($"{_destinationDirectory}{Path.DirectorySeparatorChar}redactions.csv"))
             {
-                w.WriteLine("fileName,frame,text,confidence,x,y,width,height");
+                using (StreamWriter w = File.AppendText($"{_destinationDirectory}{Path.DirectorySeparatorChar}redactions.csv"))
+                {
+                    w.WriteLine("fileName,frame,text,confidence,x,y,width,height");
+                }
             }
             if (!PythonEngine.IsInitialized)
             {
