@@ -69,6 +69,7 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
 
         public void Check(ICheckNotifier notifier)
         {
+            Runtime.PythonDLL = PythonLocation;
             //check python is set up etc
             //todo
         }
@@ -104,7 +105,7 @@ namespace Rdmp.Dicom.Extraction.PixelAnonymisation
             {
                 w.WriteLine("fileName,frame,text,confidence,x,y,width,height");
             }
-            Runtime.PythonDLL = PythonLocation;
+            Runtime.PythonDLL = @"C:\\Users\\jfriel001\\AppData\\Local\\Programs\\Python\\Python313\\Python313.dll";//PythonLocation;
             PythonEngine.Initialize();
             using (Py.GIL())
             {
