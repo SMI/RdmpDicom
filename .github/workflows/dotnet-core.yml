@@ -17,7 +17,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: HicServices/RDMP
-          ref: v9.0.0-rc1
+          ref: v9.0.1
           path: RDMP
       - uses: actions/setup-dotnet@v4
         with:
@@ -44,8 +44,8 @@ jobs:
         run: |
           dotnet test -c Release
           wget https://raw.githubusercontent.com/SMI/DicomTypeTranslation/main/Templates/CT.it
-          dotnet publish Rdmp.Dicom/Rdmp.Dicom.csproj -o p/main -c Release --self-contained false -nologo
-          dotnet publish Rdmp.Dicom.UI/Rdmp.Dicom.UI.csproj -o p/windows -c Release --self-contained false -nologo
+          dotnet publish Rdmp.Dicom/Rdmp.Dicom.csproj -o p/main -c Debug --self-contained false -nologo
+          dotnet publish Rdmp.Dicom.UI/Rdmp.Dicom.UI.csproj -o p/windows -c Debug --self-contained false -nologo
           cat > plugin.nuspec <<EOP
           <?xml version="1.0" encoding="utf-8"?>
           <package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
