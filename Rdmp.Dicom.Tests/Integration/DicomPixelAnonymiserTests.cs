@@ -19,7 +19,7 @@ namespace Rdmp.Dicom.Tests.Integration;
 public class DicomPixelAnonymiserTests
 {
 
-    [Test]
+    //[Test]
     //public void TestPixelAnonymiser()
     //{
     //    var anonymiser = new DicomPixelAnonymiser();
