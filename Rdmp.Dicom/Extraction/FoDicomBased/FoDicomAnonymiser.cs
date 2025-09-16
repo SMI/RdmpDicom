@@ -316,20 +316,6 @@ public partial class FoDicomAnonymiser : IPluginDataFlowComponent<DataTable>, IP
             if (skipAnon)
                 RemovePatientNameEtc(profile);
 
-
-            //tag for testing
-            //var privTag = new DicomTag(0x00f1, 0x0010, "MY_PRIVATE_CREATOR");
-            //DicomDictionary.Default.Add(new DicomDictionaryEntry(privTag, "My private tag", "privateTag1", DicomVM.VM_1, false, DicomVR.CS));
-            //dicomFile.Dataset.AddOrUpdate(privTag, "TESTING");
-
-            // profile manipulation
-            //var tags = new List<string>()
-            //{
-            //    "0008,0020",
-            //    "0008,0030",
-            //    "0040,0555",
-            //    "00F1,0010"
-            //};
             if (_tagsToKeep is not null && _tagsToKeep.Any())
             {
                 foreach (var tag in _tagsToKeep)
@@ -343,7 +329,6 @@ public partial class FoDicomAnonymiser : IPluginDataFlowComponent<DataTable>, IP
 
                 }
             }
-            //profile.Add(new Regex("[0-9A-F]{3}[13579BDF],[0-9A-F]{4}"), SecurityProfileActions.X);
 
             listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information, profile.ToString()));
             var anonymiser = new DicomAnonymizer(profile);
