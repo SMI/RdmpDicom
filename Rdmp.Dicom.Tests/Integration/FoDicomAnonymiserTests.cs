@@ -1,34 +1,35 @@
-﻿using FellowOakDicom;
-using Rdmp.Core.MapsDirectlyToDatabaseTable.Versioning;
+﻿using FAnsi.Discovery;
+using FAnsi.Discovery.QuerySyntax;
+using FellowOakDicom;
+using FellowOakDicom.Imaging;
 using NUnit.Framework;
 using Rdmp.Core.Curation.Data;
 using Rdmp.Core.Curation.Data.Spontaneous;
 using Rdmp.Core.DataExport.Data;
+using Rdmp.Core.DataExport.DataExtraction;
 using Rdmp.Core.DataExport.DataExtraction.Commands;
+using Rdmp.Core.DataExport.DataExtraction.UserPicks;
+using Rdmp.Core.DataExport.DataRelease.Audit;
+using Rdmp.Core.Logging.PastEvents;
+using Rdmp.Core.MapsDirectlyToDatabaseTable;
+using Rdmp.Core.MapsDirectlyToDatabaseTable.Revertable;
+using Rdmp.Core.MapsDirectlyToDatabaseTable.Versioning;
+using Rdmp.Core.Providers;
 using Rdmp.Core.QueryBuilding;
+using Rdmp.Core.QueryBuilding.Parameters;
+using Rdmp.Core.Repositories;
 using Rdmp.Core.Repositories.Construction;
-using Rdmp.Dicom.Extraction.FoDicomBased;
-using Rdmp.Dicom.Extraction.FoDicomBased.DirectoryDecisions;
+using Rdmp.Core.ReusableLibraryCode;
 using Rdmp.Core.ReusableLibraryCode.Checks;
 using Rdmp.Core.ReusableLibraryCode.Progress;
+using Rdmp.Dicom.Extraction.FoDicomBased;
+using Rdmp.Dicom.Extraction.FoDicomBased.DirectoryDecisions;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.IO;
 using System.Linq;
-using FAnsi.Discovery;
-using FAnsi.Discovery.QuerySyntax;
-using Rdmp.Core.DataExport.DataExtraction;
-using Rdmp.Core.DataExport.DataExtraction.UserPicks;
-using Rdmp.Core.DataExport.DataRelease.Audit;
-using Rdmp.Core.Logging.PastEvents;
-using Rdmp.Core.MapsDirectlyToDatabaseTable;
-using Rdmp.Core.MapsDirectlyToDatabaseTable.Revertable;
-using Rdmp.Core.Providers;
-using Rdmp.Core.QueryBuilding.Parameters;
-using Rdmp.Core.Repositories;
-using Rdmp.Core.ReusableLibraryCode;
 using Tests.Common;
 using DatabaseType = FAnsi.DatabaseType;
 using IContainer = Rdmp.Core.Curation.Data.IContainer;
@@ -419,6 +420,86 @@ public class FoDicomAnonymiserTests : DatabaseTests
         // no warnings after it has been created
         Assert.DoesNotThrow(() => anon.Check(ThrowImmediatelyCheckNotifier.QuietPicky));
 
+    }
+    [TestCase(true)]
+    [TestCase(false)]
+    public void TestTagsToKeepArgument(bool keepTags)
+    {
+
+        var dataset = new DicomDataset(DicomTransferSyntax.JPEGProcess1);
+
+        dataset.Add(DicomTag.Columns, (ushort)1);
+        dataset.Add(DicomTag.Rows, (ushort)1);
+        dataset.Add(DicomTag.BitsAllocated, (ushort)8);
+        dataset.Add(DicomTag.LossyImageCompression, "01");
+        dataset.Add(DicomTag.LossyImageCompressionMethod, "ISO_10918_1");
+        dataset.Add(DicomTag.PhotometricInterpretation, PhotometricInterpretation.YbrFull422.Value);
+        dataset.Add(DicomTag.SOPClassUID, DicomUID.MultiFrameTrueColorSecondaryCaptureImageStorage);
+        dataset.Add(DicomTag.SOPInstanceUID, "1.2.840.10008.5.1.4.1.1.2.202009290000000001");
+        dataset.Add(DicomTag.PatientName, "John");
+
+        var pixelData = DicomPixelData.Create(dataset, true);
+        pixelData.BitsStored = 8;
+        pixelData.SamplesPerPixel = 3;
+        pixelData.HighBit = 7;
+        pixelData.PixelRepresentation = PixelRepresentation.Unsigned;
+        pixelData.PlanarConfiguration = PlanarConfiguration.Interleaved;
+
+
+        var path = Path.GetTempFileName() + ".dcm";
+        new DicomFile(dataset).Save(path);
+
+        var uidMapDb = GetCleanedServer(DatabaseType.MicrosoftSQLServer, "TESTUIDMapp");
+
+        MasterDatabaseScriptExecutor e = new(uidMapDb);
+        var patcher = new SMIDatabasePatcher();
+        e.CreateAndPatchDatabase(patcher, new AcceptAllCheckNotifier());
+
+        var eds = new ExternalDatabaseServer(CatalogueRepository, "eds", patcher);
+        eds.SetProperties(uidMapDb);
+
+        var anonymiser = new FoDicomAnonymiser();
+
+        IExtractCommand cmd = MockExtractionCommand();
+
+        using var dt = new DataTable();
+        dt.Columns.Add("Filepath");
+        dt.Columns.Add("SOPInstanceUID");
+        dt.Columns.Add("SeriesInstanceUID");
+        dt.Columns.Add("StudyInstanceUID");
+        dt.Columns.Add("Pat");
+        //note we don't have series
+
+        var fi = new FileInfo(path);
+        dt.Rows.Add(fi.Name, "123.4.4", "123.4.5", "123.4.6", "Hank");
+
+
+        //give the mock to anonymiser
+        anonymiser.PreInitialize(cmd, ThrowImmediatelyDataLoadEventListener.Quiet);
+
+        anonymiser.PutterType = typeof(PutInRoot);
+        anonymiser.ArchiveRootIfAny = Path.GetTempPath();
+        anonymiser.RelativeArchiveColumnName = "Filepath";
+        anonymiser.UIDMappingServer = eds;
+        if (keepTags)
+        {
+            anonymiser.DicomTagsToKeep = "0010,0010";
+        }
+
+        using var anoDt = anonymiser.ProcessPipelineData(dt, ThrowImmediatelyDataLoadEventListener.Quiet, new());
+
+        Assert.That(anoDt.Rows, Has.Count.EqualTo(1));
+        var df = DicomFile.Open(anoDt.Rows[0].ItemArray[0].ToString());
+        var name = df.Dataset.GetString(DicomTag.PatientName);
+        if (keepTags)
+        {
+            Assert.That(name, Is.EqualTo("John"));
+
+        }
+        else
+        {
+            Assert.That(name, Is.EqualTo(String.Empty));
+        }
     }
 
     [TestCase(typeof(PutInReleaseIdentifierSubfolders))]

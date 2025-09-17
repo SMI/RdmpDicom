@@ -69,6 +69,9 @@ public partial class FoDicomAnonymiser : IPluginDataFlowComponent<DataTable>, IP
 
     public int FileFetchRetryTimeout { get; set; }
 
+    [DemandsInitialization("A | separated list of DICOM group,element pairs to NOT anonymize e.g. 0008,0020|0008,0030")]
+    public string DicomTagsToKeep { get; set; }
+
     private IPutDicomFilesInExtractionDirectories _putter;
 
     private int _anonymisedImagesCount = 0;
@@ -82,6 +85,7 @@ public partial class FoDicomAnonymiser : IPluginDataFlowComponent<DataTable>, IP
     private IMappingRepository _uidSubstitutionLookup;
     private DirectoryInfo _destinationDirectory;
     private DicomTag[] _deleteTags;
+    private List<string> _tagsToKeep;
 
     private bool initialized;
 
@@ -258,6 +262,10 @@ public partial class FoDicomAnonymiser : IPluginDataFlowComponent<DataTable>, IP
         _destinationDirectory = destinationDirectory;
 
         _deleteTags = GetDeleteTags().ToArray();
+        if (DicomTagsToKeep is not null)
+        {
+            _tagsToKeep = DicomTagsToKeep.Split('|').ToList();
+        }
 
         initialized = true;
     }
@@ -299,18 +307,31 @@ public partial class FoDicomAnonymiser : IPluginDataFlowComponent<DataTable>, IP
             if (RetainDates && !skipAnon)
                 flags |= SecurityProfileOptions.RetainLongFullDates;
 
-            var profile = SecurityProfile.LoadProfile(null, flags);
+            var profile = SecurityProfile.LoadProfile(null,flags);
 
 
             // I know we said skip anonymisation but still remove this stuff cmon
             if (skipAnon)
                 RemovePatientNameEtc(profile);
 
+            if (_tagsToKeep is not null && _tagsToKeep.Any())
+            {
+                foreach (var tag in _tagsToKeep)
+                {
+                    var k = profile.Keys.Where(k => k.ToString() == tag).FirstOrDefault();
+                    if (k is not null)
+                    {
+                        profile.Remove(k);
+                        profile.Add(new Regex(tag), SecurityProfileActions.K);
+                    }
+
+                }
+            }
+
             var anonymiser = new DicomAnonymizer(profile);
 
 
             ds = anonymiser.Anonymize(dicomFile.Dataset);
-
         }
         catch (Exception e)
         {
@@ -466,4 +487,5 @@ public partial class FoDicomAnonymiser : IPluginDataFlowComponent<DataTable>, IP
 
     [GeneratedRegex("0010,.*", RegexOptions.CultureInvariant)]
     private static partial Regex PatientLevelRegex();
+
 }
