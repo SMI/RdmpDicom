@@ -328,7 +328,6 @@ public partial class FoDicomAnonymiser : IPluginDataFlowComponent<DataTable>, IP
                 }
             }
 
-            listener.OnNotify(this, new NotifyEventArgs(ProgressEventType.Information, profile.ToString()));
             var anonymiser = new DicomAnonymizer(profile);
 
 
