@@ -130,7 +130,7 @@ public class FoDicomAnonymiserTests : DatabaseTests
         IExtractCommand cmd = MockExtractionCommand();
 
         //give the mock to anonymiser
-        anonymiser.PreInitialize(cmd, ThrowImmediatelyDataLoadEventListener.Quiet);
+        anonymiser.PreInitialize(null,cmd, ThrowImmediatelyDataLoadEventListener.Quiet);
 
         anonymiser.PutterType = putterType;
         anonymiser.ArchiveRootIfAny = TestContext.CurrentContext.WorkDirectory;
@@ -283,7 +283,7 @@ public class FoDicomAnonymiserTests : DatabaseTests
         IExtractCommand cmd = MockExtractionCommand();
 
         //give the mock to anonymiser
-        anonymiser.PreInitialize(cmd, ThrowImmediatelyDataLoadEventListener.Quiet);
+        anonymiser.PreInitialize(null,cmd, ThrowImmediatelyDataLoadEventListener.Quiet);
 
         anonymiser.PutterType = typeof(PutInRoot);
         anonymiser.ArchiveRootIfAny = TestContext.CurrentContext.WorkDirectory;
@@ -475,7 +475,7 @@ public class FoDicomAnonymiserTests : DatabaseTests
 
 
         //give the mock to anonymiser
-        anonymiser.PreInitialize(cmd, ThrowImmediatelyDataLoadEventListener.Quiet);
+        anonymiser.PreInitialize(null,cmd, ThrowImmediatelyDataLoadEventListener.Quiet);
 
         anonymiser.PutterType = typeof(PutInRoot);
         anonymiser.ArchiveRootIfAny = Path.GetTempPath();
@@ -573,7 +573,7 @@ public class FoDicomAnonymiserTests : DatabaseTests
             IExtractCommand cmd = MockExtractionCommand();
 
             //give the mock to anonymiser
-            anonymiser.PreInitialize(cmd, ThrowImmediatelyDataLoadEventListener.Quiet);
+            anonymiser.PreInitialize(null,cmd, ThrowImmediatelyDataLoadEventListener.Quiet);
 
             anonymiser.PutterType = putterType;
             anonymiser.ArchiveRootIfAny = TestContext.CurrentContext.WorkDirectory;
@@ -752,7 +752,7 @@ internal class DummyExtractionConfiguration : IExtractionConfiguration
     }
 
     /// <inheritdoc />
-    public bool ShouldBeReadOnly(out string reason)
+    public bool ShouldBeReadOnly(string context, out string reason)
     {
         reason = null;
         return false;
@@ -883,6 +883,7 @@ internal class DummyExtractionConfiguration : IExtractionConfiguration
         reason = null;
         return false;
     }
+
 }
 internal class DummyProject : IProject
 {
