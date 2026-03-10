@@ -1,10 +1,11 @@
-using System.Data;
-using System.Diagnostics;
 using FellowOakDicom;
-using Rdmp.Core.ReusableLibraryCode.Progress;
-using Rdmp.Dicom.PipelineComponents.DicomSources.Worklists;
+using Rdmp.Core.CommandExecution;
 using Rdmp.Core.DataFlowPipeline;
 using Rdmp.Core.DataFlowPipeline.Requirements;
+using Rdmp.Core.ReusableLibraryCode.Progress;
+using Rdmp.Dicom.PipelineComponents.DicomSources.Worklists;
+using System.Data;
+using System.Diagnostics;
 
 namespace Rdmp.Dicom.PipelineComponents.DicomSources;
 
@@ -14,7 +15,7 @@ public class DicomDatasetCollectionSource : DicomSource, IPipelineRequirement<ID
 
     private const int BatchSize = 50000;
 
-    public void PreInitialize(IDicomWorklist value, IDataLoadEventListener listener)
+    public void PreInitialize(IBasicActivateItems activator, IDicomWorklist value, IDataLoadEventListener listener)
     {
         _datasetListWorklist = value as IDicomDatasetWorklist;
 
