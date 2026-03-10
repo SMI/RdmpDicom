@@ -44,7 +44,7 @@ namespace Rdmp.Dicom.Tests.Integration
             var tagExtractor = new DicomTagToCSV();
             IExtractCommand cmd = MockExtractionCommand();
             //give the mock to anonymiser
-            tagExtractor.PreInitialize(cmd, ThrowImmediatelyDataLoadEventListener.Quiet);
+            tagExtractor.PreInitialize(null,cmd, ThrowImmediatelyDataLoadEventListener.Quiet);
             tagExtractor.ArchiveRootIfAny = TestContext.CurrentContext.WorkDirectory;
             tagExtractor.RelativeArchiveColumnName = "Filepath";
 

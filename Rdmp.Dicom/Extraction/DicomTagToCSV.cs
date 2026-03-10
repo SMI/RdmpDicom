@@ -1,6 +1,7 @@
 ﻿using CsvHelper;
 using CsvHelper.Configuration;
 using FellowOakDicom;
+using Rdmp.Core.CommandExecution;
 using Rdmp.Core.Curation.Data;
 using Rdmp.Core.DataExport.DataExtraction.Commands;
 using Rdmp.Core.DataFlowPipeline;
@@ -129,7 +130,7 @@ namespace Rdmp.Dicom.Extraction
                     yield return new Entry(id, tag, e.Get<string>(i));
             }
         }
-        public void PreInitialize(IExtractCommand value, IDataLoadEventListener listener)
+        public void PreInitialize(IBasicActivateItems activator, IExtractCommand value, IDataLoadEventListener listener)
         {
             _extractCommand = value as IExtractDatasetCommand;
         }

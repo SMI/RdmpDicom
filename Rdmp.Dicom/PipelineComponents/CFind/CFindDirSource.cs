@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Xml;
 using FAnsi.Discovery;
+using Rdmp.Core.CommandExecution;
 using Rdmp.Core.Curation.Data;
 using Rdmp.Core.DataFlowPipeline;
 using Rdmp.Core.DataFlowPipeline.Requirements;
@@ -161,7 +162,7 @@ public class CFindDirSource : IPluginDataFlowSource<DataTable>, IPipelineRequire
         }
     }
 
-    public void PreInitialize(FlatFileToLoad value, IDataLoadEventListener listener)
+    public void PreInitialize(IBasicActivateItems activator, FlatFileToLoad value, IDataLoadEventListener listener)
     {
         _file = value;
     }

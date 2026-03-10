@@ -1,4 +1,15 @@
-﻿using System;
+﻿using FAnsi.Discovery;
+using FellowOakDicom;
+using LibArchive.Net;
+using Rdmp.Core.CommandExecution;
+using Rdmp.Core.Curation.Data;
+using Rdmp.Core.DataFlowPipeline;
+using Rdmp.Core.DataFlowPipeline.Requirements;
+using Rdmp.Core.ReusableLibraryCode.Progress;
+using Rdmp.Dicom.Extraction.FoDicomBased;
+using Rdmp.Dicom.PACS;
+using Rdmp.Dicom.PipelineComponents.DicomSources.Worklists;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
@@ -6,16 +17,6 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using FellowOakDicom;
-using FAnsi.Discovery;
-using LibArchive.Net;
-using Rdmp.Core.ReusableLibraryCode.Progress;
-using Rdmp.Dicom.PipelineComponents.DicomSources.Worklists;
-using Rdmp.Core.Curation.Data;
-using Rdmp.Core.DataFlowPipeline.Requirements;
-using Rdmp.Core.DataFlowPipeline;
-using Rdmp.Dicom.Extraction.FoDicomBased;
-using Rdmp.Dicom.PACS;
 
 namespace Rdmp.Dicom.PipelineComponents.DicomSources;
 
@@ -261,7 +262,7 @@ public class DicomFileCollectionSource : DicomSource, IPipelineRequirement<IDico
         }
     }
 
-    public void PreInitialize(IDicomWorklist value, IDataLoadEventListener listener)
+    public void PreInitialize(IBasicActivateItems activator, IDicomWorklist value, IDataLoadEventListener listener)
     {
         if (value == null)
         {

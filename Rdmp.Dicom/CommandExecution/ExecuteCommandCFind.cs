@@ -58,8 +58,8 @@ class ExecuteCommandCFind : BasicCommandExecution, ICacheFetchRequestProvider
         };
 
         //Initialize it
-        _source.PreInitialize(BasicActivator.RepositoryLocator.CatalogueRepository, ThrowImmediatelyDataLoadEventListener.Quiet);
-        _source.PreInitialize(this, ThrowImmediatelyDataLoadEventListener.Quiet);
+        _source.PreInitialize(BasicActivator,BasicActivator.RepositoryLocator.CatalogueRepository, ThrowImmediatelyDataLoadEventListener.Quiet);
+        _source.PreInitialize(BasicActivator,this, ThrowImmediatelyDataLoadEventListener.Quiet);
 
     }
 

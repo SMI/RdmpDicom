@@ -24,7 +24,7 @@ public class CFindDirSourceTests
 
         Assert.DoesNotThrow(() => source.Check(ThrowImmediatelyCheckNotifier.Quiet));
 
-        source.PreInitialize(new(new(inventory)), ThrowImmediatelyDataLoadEventListener.Quiet);
+        source.PreInitialize(null,new(new(inventory)), ThrowImmediatelyDataLoadEventListener.Quiet);
 
         var dt = source.GetChunk(ThrowImmediatelyDataLoadEventListener.Quiet, new());
 
@@ -74,7 +74,7 @@ someAE	XA\SR	Fluoroscopy upper limb Lt	0102030405	TEXT	1.2.3.4.70	20200416
 
         Assert.DoesNotThrow(() => source.Check(ThrowImmediatelyCheckNotifier.Quiet));
 
-        source.PreInitialize(new(new(inventory)), ThrowImmediatelyDataLoadEventListener.Quiet);
+        source.PreInitialize(null,new(new(inventory)), ThrowImmediatelyDataLoadEventListener.Quiet);
 
         var dt = source.GetChunk(ThrowImmediatelyDataLoadEventListener.Quiet, new());
 

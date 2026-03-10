@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Rdmp.Core.QueryBuilding;
+using Rdmp.Core.CommandExecution;
 
 namespace Rdmp.Dicom.Extraction.FoDicomBased;
 
@@ -424,7 +425,7 @@ public partial class FoDicomAnonymiser : IPluginDataFlowComponent<DataTable>, IP
 
     }
 
-    public void PreInitialize(IExtractCommand value, IDataLoadEventListener listener)
+    public void PreInitialize(IBasicActivateItems activator, IExtractCommand value, IDataLoadEventListener listener)
     {
         _extractCommand = value as IExtractDatasetCommand;
     }
