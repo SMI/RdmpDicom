@@ -50,9 +50,9 @@ class TestProcessBasedCacheSource : UnitTests
         lmd.LocationOfCacheDirectory = loadDir.Cache.FullName;
         lmd.SaveToDatabase();
 
-        source.PreInitialize(new CacheFetchRequestProvider(cp), ThrowImmediatelyDataLoadEventListener.Quiet);
-        source.PreInitialize(cp.CatalogueRepository, ThrowImmediatelyDataLoadEventListener.Quiet);
-        source.PreInitialize(new PermissionWindow(cp.CatalogueRepository), ThrowImmediatelyDataLoadEventListener.Quiet);
+        source.PreInitialize(null,new CacheFetchRequestProvider(cp), ThrowImmediatelyDataLoadEventListener.Quiet);
+        source.PreInitialize(null,cp.CatalogueRepository, ThrowImmediatelyDataLoadEventListener.Quiet);
+        source.PreInitialize(null,new PermissionWindow(cp.CatalogueRepository), ThrowImmediatelyDataLoadEventListener.Quiet);
 
         var toMem = new ToMemoryDataLoadEventListener(true);
         var fork = new ForkDataLoadEventListener(toMem, ThrowImmediatelyDataLoadEventListener.Quiet);

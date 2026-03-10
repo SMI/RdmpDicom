@@ -58,7 +58,7 @@ public sealed class DicomSourceUnitTests
 
         var f = Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestData/IM-0001-0013.dcm");
 
-        source.PreInitialize(new FlatFileToLoadDicomFileWorklist(new(new(f))), ThrowImmediatelyDataLoadEventListener.Quiet);
+        source.PreInitialize(null,new FlatFileToLoadDicomFileWorklist(new(new(f))), ThrowImmediatelyDataLoadEventListener.Quiet);
         var result = source.GetChunk(ThrowImmediatelyDataLoadEventListener.Quiet, new());
 
         Assert.Multiple(() =>
@@ -84,7 +84,7 @@ public sealed class DicomSourceUnitTests
         var fileCount = Directory.GetFiles(dir, "*.dcm").Length;
 
         var source = new DicomFileCollectionSource { FilenameField = "RelativeFileArchiveURI" };
-        source.PreInitialize(new FlatFileToLoadDicomFileWorklist(new(new(zip))), ThrowImmediatelyDataLoadEventListener.Quiet);
+        source.PreInitialize(null,new FlatFileToLoadDicomFileWorklist(new(new(zip))), ThrowImmediatelyDataLoadEventListener.Quiet);
         var toMemory = new ToMemoryDataLoadEventListener(true);
         var result = source.GetChunk(toMemory, new());
 
@@ -107,7 +107,7 @@ public sealed class DicomSourceUnitTests
         File.WriteAllText(controlFile.FullName, file1.FullName + Environment.NewLine + file2.FullName);
 
         var source = new DicomFileCollectionSource { FilenameField = "RelativeFileArchiveURI" };
-        source.PreInitialize(new FlatFileToLoadDicomFileWorklist(new(controlFile)), ThrowImmediatelyDataLoadEventListener.Quiet);
+        source.PreInitialize(null,new FlatFileToLoadDicomFileWorklist(new(controlFile)), ThrowImmediatelyDataLoadEventListener.Quiet);
 
         var toMemory = new ToMemoryDataLoadEventListener(true);
         var result = source.GetChunk(toMemory, new());
@@ -206,7 +206,7 @@ public sealed class DicomSourceUnitTests
         {
             FilenameField = "Filename"
         };
-        source.PreInitialize(new ExplicitListDicomDatasetWorklist([ds], "test.dcm"), ThrowImmediatelyDataLoadEventListener.Quiet);
+        source.PreInitialize(null,new ExplicitListDicomDatasetWorklist([ds], "test.dcm"), ThrowImmediatelyDataLoadEventListener.Quiet);
         using var dt = source.GetChunk(ThrowImmediatelyDataLoadEventListener.Quiet, new GracefulCancellationToken());
         Assert.That(dt.Rows.Count, Is.EqualTo(1));
         Assert.That(dt.Rows[0].ItemArray.Any(static i => i?.ToString()?.Contains("Dermatofibroma")==true));
