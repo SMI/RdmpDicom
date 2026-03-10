@@ -102,7 +102,7 @@ This Grouping will be used to extract the Modality code when deciding which tabl
 
             var tli = Job.DataLoadInfo.CreateTableLoadInfo("", tblName, new[] {new DataSource("AutoRoutingAttacher")}, 0);
 
-            dest.PreInitialize(tli, Job);
+            dest.PreInitialize(null,tli, Job);
 
             _uploaders.Add(t.GetRuntimeName(LoadStage.AdjustRaw,Job.Configuration.DatabaseNamer), Tuple.Create(dest,tli));
         }
