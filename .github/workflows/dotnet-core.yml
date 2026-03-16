@@ -12,9 +12,9 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout RdmpDicom source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Checkout RDMP source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: HicServices/RDMP
           ref: develop
